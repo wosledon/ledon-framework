@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Ledon.Core/Ledon.Core.csproj" />
+    <Project Path="src/Ledon.Module/Ledon.Module.csproj" />
+  </Folder>
+</Solution>
