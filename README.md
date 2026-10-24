@@ -34,6 +34,7 @@ app.Run();
 | 实时推送                               | `Ledon.SignalR`               | `AddLedonSignalR()`                                 | Hub 自动发现 + 约定路径映射                |
 | 弹性策略                               | `Ledon.Resilience`            | `AddLedonResilience()`                               | 重试/超时/熔断，接管全部 HttpClient              |
 | 强类型配置                             | `Ledon.Configuration`         | `AddLedonOptions<T>(config)`                         | 绑定 + 启动校验                                  |
+| Nacos 配置中心                         | `Ledon.Configuration.Nacos`   | `Configuration.AddLedonNacos()`                      | 远程配置 + 热更新                                |
 | FluentValidation                      | `Ledon.FluentValidation`      | `AddLedonFluentValidation()`                         | 验证器自动发现 + 统一 400                        |
 | 多租户                                 | `Ledon.MultiTenancy`          | `AddLedonMultiTenancy()`                             | 租户解析 + 后台穿透                              |
 | 测试基建                               | `Ledon.Testing`               | `LedonWebTestHost`                                   | 一行搭 TestServer + 生命周期断言                 |
@@ -292,6 +293,9 @@ src/Ledon.Security/     认证授权（JWT / API Key / 权限策略）
 src/Ledon.Observability OpenTelemetry + 健康检查
 src/Ledon.Resilience/   弹性策略（重试/超时/熔断）
 src/Ledon.Configuration/ 强类型配置约定
+src/Ledon.Configuration.Nacos/ Nacos 配置中心接入
+src/Ledon.Aspire/        云原生服务默认值（Aspire）
+src/Ledon.SignalR/       SignalR Hub 自动发现
 src/Ledon.MultiTenancy/ 多租户
 src/Ledon.Testing/      集成测试基建
 src/Ledon.Serilog/       Serilog 结构化日志集成

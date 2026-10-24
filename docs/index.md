@@ -40,6 +40,6 @@ app.Run();
 
 ## 能力包
 
-模块系统（`Ledon.Module`）、Web（`Ledon.Web`）、数据（`Ledon.Data`）、缓存（`Ledon.Caching`）、队列与发件箱（`Ledon.Queues`）、RabbitMQ 传输（`Ledon.Queues.RabbitMQ`）、定时任务（`Ledon.Scheduling`）、认证授权（`Ledon.Security`）、可观测性（`Ledon.Observability`）、结构化日志（`Ledon.Serilog`）、弹性策略（`Ledon.Resilience`）、配置（`Ledon.Configuration`）、多租户（`Ledon.MultiTenancy`）、测试基建（`Ledon.Testing`）。
+模块系统（`Ledon.Module`）、Web（`Ledon.Web`）、数据（`Ledon.Data`）、缓存（`Ledon.Caching`）、队列与发件箱（`Ledon.Queues`）、RabbitMQ 传输（`Ledon.Queues.RabbitMQ`）、定时任务（`Ledon.Scheduling`）、认证授权（`Ledon.Security`）、可观测性（`Ledon.Observability`）、结构化日志（`Ledon.Serilog`）、弹性策略（`Ledon.Resilience`）、配置（`Ledon.Configuration`）、Nacos 配置中心（`Ledon.Configuration.Nacos`）、多租户（`Ledon.MultiTenancy`）、测试基建（`Ledon.Testing`）、云原生默认值（`Ledon.Aspire`）、实时推送（`Ledon.SignalR`）。
 
 详见 [README](https://github.com/wosledon/ledon-framework) 的能力矩阵。

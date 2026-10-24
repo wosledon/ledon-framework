@@ -27,6 +27,22 @@ public class SmtpOptions
 
 `ModuleContext.Configuration` 暴露宿主配置（任意节、任意键），适合模块读取**共享配置**；`AddLedonOptions<T>` 适合模块**自己的强类型选项**（带校验契约）。两者可混用。
 
+## 配置中心（Nacos）
+
+要把配置托管到 Nacos（多环境集中管理 + 变更热更新）时装 `Ledon.Configuration.Nacos`：
+
+```csharp
+builder.Configuration.AddLedonNacos(o =>
+{
+    o.ServerAddresses = ["http://localhost:8848"];   // 多地址按序故障转移
+    o.DataIds = ["myapp", "myapp-database"];         // 多配置按序合并
+});
+```
+
+- properties（`key=value`）与 JSON（嵌套拍平为 `a:b:c`）均可解析；
+- 默认 30s 轮询检测变更并热重载；`AddLedonOptions<T>` 照常绑定（含启动校验）；
+- 开启鉴权时配 `o.UserName`/`o.Password`（401 自动重登）。
+
 ## 密钥
 
 签名密钥、连接字符串等机密从环境变量/密钥管理注入（`OTEL_EXPORTER_OTLP_ENDPOINT` 等标准变量自动生效），切勿提交进 appsettings.json。
