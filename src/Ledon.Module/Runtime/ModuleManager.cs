@@ -1,5 +1,6 @@
 using System.Runtime.ExceptionServices;
 using Ledon.Module.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Ledon.Module.Runtime;
 
@@ -45,6 +46,10 @@ public sealed class ModuleManager : IModuleManager
 
         try
         {
+            // 前置任务：先于任何模块初始化（如数据库建库/迁移），失败则整体中止
+            foreach (var task in services.GetServices<ILedonPreInitialization>())
+                await task.ExecuteAsync(cancellationToken);
+
             foreach (var descriptor in _modules)
             {
                 cancellationToken.ThrowIfCancellationRequested();
