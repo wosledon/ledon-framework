@@ -28,9 +28,12 @@ public class ModuleSystemTests
         services.AddLedon();
         await using var provider = services.BuildServiceProvider();
 
-        // 约定自动注入：IName ↔ Name、自注册
+        // 约定自动注入：IName ↔ Name 生效
         Assert.IsType<TestUserService>(provider.GetRequiredService<ITestUserService>());
-        Assert.NotNull(provider.GetRequiredService<PlainService>());
+
+        // 无接口类（DTO 类）不会被自动注册——防止把 MVC 动作参数类型注入 DI
+        // 而破坏 [ApiController] 的隐式 [FromBody] 推断（详见 ConventionScanner 注释）
+        Assert.Throws<InvalidOperationException>(() => provider.GetRequiredService<PlainService>());
 
         await provider.InitializeModulesAsync();
 
@@ -213,6 +216,7 @@ public class ModuleSystemTests
     public void ScanAssembly_manual_still_works()
     {
         var services = new ServiceCollection();
+        services.AddSingleton<Recorder>();   // 测试自有的基础设施服务，显式注册
         services.ScanAssembly(typeof(ModuleSystemTests).Assembly);
         services.ScanAssembly(typeof(ModuleSystemTests).Assembly); // TryAdd 幂等
 
@@ -220,7 +224,9 @@ public class ModuleSystemTests
 
         Assert.IsType<TestUserService>(provider.GetRequiredService<ITestUserService>());
         Assert.Single(provider.GetServices<ITestUserService>());
-        Assert.NotNull(provider.GetRequiredService<PlainService>());
+
+        // 无接口类不再自注册（防 [ApiController] 推断失效）
+        Assert.Throws<InvalidOperationException>(() => provider.GetRequiredService<PlainService>());
         Assert.Contains(provider.GetServices<IEventHandler<GreetEvent>>(), handler => handler is GreetHandler);
     }
 }

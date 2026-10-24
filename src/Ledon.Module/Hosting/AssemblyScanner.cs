@@ -15,15 +15,21 @@ internal static class AssemblyScanner
     private static readonly string[] FrameworkPrefixes =
     [
         "System", "mscorlib", "netstandard", "Microsoft.Extensions", "Microsoft.AspNetCore",
-        "Microsoft.NETCore", "Microsoft.WindowsDesktop", "xunit", "testhost", "testplatform",
-        "coverlet", "NuGet", "Humanizer", "ICSharpCode", "Newtonsoft", "Serilog", "NLog",
+        "Microsoft.NETCore", "Microsoft.WindowsDesktop", "Microsoft.EntityFrameworkCore",
+        "Microsoft.Data", "Microsoft.IdentityModel", "Microsoft.OpenApi", "Microsoft.TestPlatform",
+        "Microsoft.VisualStudio", "Microsoft.Win32", "Microsoft.Net", "SQLitePCLRaw", "xunit",
+        "testhost", "testplatform", "coverlet", "NuGet", "Humanizer", "ICSharpCode", "Newtonsoft",
+        "Serilog", "NLog",
     ];
 
-    private static readonly string ModuleAssemblyName =
-        typeof(IModule).Assembly.GetName().Name!;
-
-    private static readonly string CoreAssemblyName =
-        typeof(Ledon.Core.Events.IEventBus).Assembly.GetName().Name!;
+    /// <summary>框架自身的程序集（按名精确排除——用户模块即使叫 Ledon.Xxx 也不受影响）。</summary>
+    private static readonly HashSet<string> FrameworkAssemblyNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        typeof(IModule).Assembly.GetName().Name!,   // Ledon.Module
+        typeof(Ledon.Core.Events.IEventBus).Assembly.GetName().Name!,   // Ledon.Core
+        "Ledon.Web",
+        "Ledon.Data",
+    };
 
     /// <summary>汇总最终扫描集：自动发现（可选）+ 显式指定的程序集。</summary>
     public static IReadOnlyList<Assembly> ResolveAssemblies(LedonOptions options)
@@ -103,8 +109,8 @@ internal static class AssemblyScanner
         if (string.IsNullOrEmpty(name))
             return false;
 
-        // 框架自身（模块系统与 Core 基元）不扫
-        if (name == ModuleAssemblyName || name == CoreAssemblyName)
+        // 框架自身（模块系统、Core 基元与各功能包）不扫
+        if (FrameworkAssemblyNames.Contains(name))
             return false;
 
         return !FrameworkPrefixes.Any(prefix =>

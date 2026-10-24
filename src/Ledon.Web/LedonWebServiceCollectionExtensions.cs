@@ -1,5 +1,6 @@
 using Ledon;
 using Ledon.Module;
+using Ledon.Module.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,18 +19,30 @@ public static class LedonWebServiceCollectionExtensions
 {
     public static WebApplicationBuilder AddLedonWeb(
         this WebApplicationBuilder builder,
-        Action<LedonWebOptions>? configure = null)
+        Action<LedonWebOptions>? configure = null) =>
+        builder.AddLedonWeb(configure, null);
+
+    /// <param name="configure">Web 功能开关（控制器/OpenAPI）。</param>
+    /// <param name="configureModules">转发给模块系统的逃生门配置（默认自动发现）。</param>
+    public static WebApplicationBuilder AddLedonWeb(
+        this WebApplicationBuilder builder,
+        Action<LedonWebOptions>? configure,
+        Action<LedonOptions>? configureModules)
     {
         ArgumentNullException.ThrowIfNull(builder);
 
         // 模块系统零配置接入（自动发现/注入/生命周期）
-        builder.Services.AddLedon();
+        builder.Services.AddLedon(configureModules);
 
         var options = new LedonWebOptions();
         configure?.Invoke(options);
         builder.Services.TryAddSingleton(options);
 
         var assemblies = LedonAssemblies.Scan();
+
+        // OpenAPI 按需开启（先于 MVC 注册）
+        if (options.UseOpenApi)
+            builder.Services.AddOpenApi();
 
         // 控制器自动发现：业务程序集挂为 MVC ApplicationPart
         if (options.UseControllers)
@@ -49,10 +62,6 @@ public static class LedonWebServiceCollectionExtensions
                 builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(IEndpoint), type));
             }
         }
-
-        // OpenAPI 按需开启
-        if (options.UseOpenApi)
-            builder.Services.AddOpenApi();
 
         return builder;
     }

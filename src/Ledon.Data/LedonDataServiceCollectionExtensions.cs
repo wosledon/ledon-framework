@@ -45,6 +45,7 @@ public static class LedonDataServiceCollectionExtensions
 
     private static bool IsDbContext(Type type) =>
         type is { IsClass: true, IsAbstract: false }
+        && type != typeof(DbContext)
         && typeof(DbContext).IsAssignableFrom(type);
 
     /// <summary>

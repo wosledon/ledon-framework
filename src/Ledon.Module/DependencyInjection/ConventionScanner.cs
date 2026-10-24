@@ -10,10 +10,11 @@ namespace Ledon.Module;
 /// 每个具体类依次应用以下规则（全部使用 <c>TryAdd</c>，已手动注册的不会被覆盖）：
 /// <list type="number">
 ///   <item>存在与类同名的接口（<c>IName</c> ↔ <c>Name</c>，忽略泛型 arity）→ 注册这些接口，使用指定生命周期；</item>
-///   <item>实现了 <see cref="IEventHandler{TEvent}"/> → 以瞬时生命周期注册这些处理器接口（保证每次发布新建实例）；</item>
-///   <item>两条规则都没命中 → 注册类自身，使用指定生命周期。</item>
+///   <item>实现了 <see cref="IEventHandler{TEvent}"/> → 以瞬时生命周期注册这些处理器接口（保证每次发布新建实例）。</item>
 /// </list>
-/// 可重复调用（幂等）。
+/// 没有接口的类（DTO、控制器、端点等）**不会**被自动注册——这不仅是减少噪音：
+/// 把 MVC 动作参数类型注册进容器会让 <c>[ApiController]</c> 的隐式 <c>[FromBody]</c> 推断失效
+/// （实测：注册即退化为查询字符串绑定）。此类类型请显式注册。
 /// </summary>
 public static class ConventionScanner
 {
@@ -45,9 +46,6 @@ public static class ConventionScanner
 
             foreach (var handlerInterface in handlerInterfaces)
                 services.TryAdd(new ServiceDescriptor(handlerInterface, type, ServiceLifetime.Transient));
-
-            if (serviceInterfaces.Count == 0 && handlerInterfaces.Count == 0)
-                services.TryAdd(new ServiceDescriptor(type, type, lifetime));
         }
 
         return services;
