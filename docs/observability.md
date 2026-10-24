@@ -49,6 +49,17 @@ builder.Services.AddLedonObservability(o =>
 
 三位一体：trace（请求/模块/事件/队列/定时任务）+ metrics（ASP.NET/HttpClient/Runtime）+ logs（含作用域）。
 
+## Prometheus 抓取
+
+k8s 生态用拉取模式时，开启 Prometheus 导出器并映射端点：
+
+```csharp
+builder.Services.AddLedonObservability(o => o.UsePrometheusExporter = true);
+app.MapLedonPrometheus();   // GET /metrics
+```
+
+与 OTLP 推送可同时开（同一指标两路出口）。依赖 OTel 官方的 Prometheus 导出器包（长期 beta，生产广泛使用）。
+
 ## 健康检查
 
 ```csharp

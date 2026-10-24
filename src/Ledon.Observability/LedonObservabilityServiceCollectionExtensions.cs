@@ -67,6 +67,10 @@ public static class LedonObservabilityServiceCollectionExtensions
 
                 if (options.OtlpEndpoint is null)
                     metrics.AddOtlpExporter();
+
+                // Prometheus 拉取模式：配合 app.MapLedonPrometheus() 暴露 /metrics
+                if (options.UsePrometheusExporter)
+                    metrics.AddPrometheusExporter();
             });
         }
 

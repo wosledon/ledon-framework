@@ -22,6 +22,12 @@ public sealed class LedonObservabilityOptions
     /// </summary>
     public bool EnableLogs { get; set; } = true;
 
+    /// <summary>
+    /// 启用 Prometheus 拉取导出器（默认关）：配合 <c>app.MapLedonPrometheus()</c> 暴露 /metrics，
+    /// 供 Prometheus 抓取（k8s 标准）。与 OTLP 推送可同时开。
+    /// </summary>
+    public bool UsePrometheusExporter { get; set; }
+
     /// <summary>OTLP 导出端点（如 http://localhost:4317）；null 时走环境变量。</summary>
     public Uri? OtlpEndpoint { get; set; }
 

@@ -248,6 +248,29 @@ public class FeaturePackagesTests : IDisposable
         await app.StopAsync();
     }
 
+    [Fact]
+    public async Task Prometheus_scraping_endpoint_serves_metrics()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonObservability(o =>
+        {
+            o.ServiceName = "ledon-tests";
+            o.UsePrometheusExporter = true;
+        });
+
+        var app = builder.Build();
+        app.MapLedonPrometheus();
+        await app.StartAsync();
+
+        var response = await app.GetTestClient().GetAsync("/metrics");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/plain", response.Content.Headers.ContentType?.MediaType);
+
+        await app.StopAsync();
+    }
+
     // ---------- 程序集扫描（允许列表） ----------
 
     [Fact]

@@ -19,4 +19,6 @@ app.MapLedonReadiness();   // /health/ready 聚合全部检查
 
 日志（ILogger）默认也经 OTLP 导出，含日志作用域（关联 ID 等）——trace/metrics/logs 三位一体；`o.EnableLogs = false` 可关。
 
+`o.UsePrometheusExporter = true` + `app.MapLedonPrometheus()` 暴露 /metrics（Prometheus 拉取）。
+
 完整文档：<https://github.com/wosledon/ledon-framework>
