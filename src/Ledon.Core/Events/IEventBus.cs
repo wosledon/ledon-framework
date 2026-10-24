@@ -10,4 +10,11 @@ public interface IEventBus
     /// </summary>
     Task PublishAsync<TEvent>(TEvent @event, CancellationToken cancellationToken = default)
         where TEvent : notnull;
+
+    /// <summary>
+    /// 动态分发（编译期不知道事件类型时用，如领域事件拦截器）：
+    /// 内部按运行时类型解析 <see cref="IEventHandler{TEvent}"/> 后转发到
+    /// <see cref="PublishAsync{TEvent}"/>——语义（顺序、错误策略）完全一致。
+    /// </summary>
+    Task PublishDynamicAsync(object @event, CancellationToken cancellationToken = default);
 }

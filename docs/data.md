@@ -12,8 +12,74 @@ public class TodoDbContext : DbContext, ILedonDbContext { /* ... */ }
 builder.Services.AddLedonData(o => o.AutoMigrate = false);   // 自己管理 schema 时关闭
 ```
 
-## 审计字段与软删除
+## 领域事件（保存后自动分发）
 
+实体实现 `IHasDomainEvents`（或继承 `Entity`），`SaveChangesAsync` 成功后事件经 `IEventBus` 自动分发：
+
+```csharp
+public class Widget : Entity
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+
+    public void Create(string name)
+    {
+        Name = name;
+        AddDomainEvent(new WidgetCreated(name));
+    }
+}
+
+// 处理器照常写（约定自动发现注入）
+public class WidgetCreatedHandler : IEventHandler<WidgetCreated> { /* ... */ }
+```
+
+- 事件在**数据提交后**分发（处理器能看到已提交的数据）；
+- 分发失败只记日志不重滚（数据已提交）；需要可靠投递用发件箱；
+- 关闭：`AddLedonData(o => o.DispatchDomainEvents = false)`。
+
+## 查询：规约 / 分页 / 动态排序
+
+```csharp
+// 1) 规约：把"查什么"封装成可复用对象
+public class CheapWidgetsSpec : Specification<Widget>
+{
+    public CheapWidgetsSpec()
+    {
+        Where(w => w.Price <= 20);
+        OrderBy(w => w.Price);
+        Include(w => w.Tags);
+    }
+}
+
+var cheap = await db.Widgets.ApplySpecification(new CheapWidgetsSpec()).ToListAsync(ct);
+
+// 2) 分页（自动算总数）
+var page = await db.Widgets.OrderBy(w => w.Name).ToPagedResultAsync(page: 1, pageSize: 20, ct);
+// page.Items / page.TotalCount / page.TotalPages / HasNext...
+
+// 3) 动态排序（API 的 ?sort= 参数；无效字段名退化为默认排序，不 500）
+var sorted = db.Widgets.ApplyOrdering("Price desc", w => w.Name);
+```
+
+## 通用仓储（可选）
+
+框架不强制仓储层；想要时按实体自动注册：
+
+```csharp
+builder.Services.AddLedonData(o => o.UseRepositories = true);
+
+public class WidgetService(IRepository<Widget> widgets)
+{
+    public Task<Widget?> GetAsync(int id) => widgets.GetByIdAsync(id);
+    public Task<IReadOnlyList<Widget>> CheapAsync() =>
+        widgets.ListAsync(new CheapWidgetsSpec());
+    public async Task CreateAsync(Widget w) { await widgets.AddAsync(w); await widgets.SaveChangesAsync(); }
+}
+```
+
+仓储与 DbContext 可混用（同一作用域、同一变更追踪）——复杂查询直接注入 DbContext 即可。
+
+## 审计字段与软删除
 实现标记接口即约定生效（`AddLedonData(o => o.EnableAuditing = true)` 后自动填充时间戳/操作人）：
 
 ```csharp

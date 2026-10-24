@@ -61,5 +61,18 @@ internal sealed class EventHub : IEventBus
         if (firstFailure is not null)
             ExceptionDispatchInfo.Throw(firstFailure);
     }
+
+    /// <summary>动态分发：按运行时类型转发到泛型发布（语义一致）。</summary>
+    public Task PublishDynamicAsync(object @event, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(@event);
+
+        var eventType = @event.GetType();
+        var publish = typeof(EventHub)
+            .GetMethod(nameof(PublishAsync))!
+            .MakeGenericMethod(eventType);
+
+        return (Task)publish.Invoke(this, [@event, cancellationToken])!;
+    }
 }
 

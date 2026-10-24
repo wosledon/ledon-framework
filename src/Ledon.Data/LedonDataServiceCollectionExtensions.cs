@@ -50,10 +50,22 @@ public static class LedonDataServiceCollectionExtensions
         // 经 IDbContextOptionsConfiguration<> 接入全部已注册的 DbContext
         // （用户自己 AddDbContext 配连接串也生效；EF 不会自动发现 DI 里的拦截器）
         services.TryAddSingleton<LedonAuditInterceptor>();
-        services.TryAdd(new ServiceDescriptor(
+
+        // 领域事件分发（SaveChanges 成功后经 IEventBus 分发 IHasDomainEvents 实体上的事件）。
+        // 关闭时注册 null 占位（非泛型重载），让同一个 OptionsConfiguration 的条件注入保持简单
+        if (options.DispatchDomainEvents)
+            services.TryAddSingleton<DomainEventsDispatcherInterceptor>();
+        else
+            services.TryAdd(ServiceDescriptor.Singleton(
+                typeof(DomainEventsDispatcherInterceptor), _ => null!));
+
+        services.TryAdd(ServiceDescriptor.Singleton(
             typeof(IDbContextOptionsConfiguration<>),
-            typeof(LedonAuditOptionsConfiguration<>),
-            ServiceLifetime.Singleton));
+            typeof(LedonAuditOptionsConfiguration<>)));
+
+        // 通用仓储（按实体注册 IRepository<T>）
+        if (options.UseRepositories)
+            services.AddLedonRepositories();
 
         // 建库/迁移是前置任务：先于任何模块初始化执行，模块里可安全使用数据库
         services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(ILedonPreInitialization), typeof(DbInitializer)));

@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
+using Microsoft.Extensions.DependencyInjection;
+
 namespace Ledon.Data;
 
 /// <summary>
@@ -11,13 +13,18 @@ namespace Ledon.Data;
 /// </summary>
 internal sealed class LedonAuditOptionsConfiguration<TContext>(
     LedonDataOptions options,
-    LedonAuditInterceptor interceptor) : IDbContextOptionsConfiguration<TContext>
+    LedonAuditInterceptor interceptor,
+    DomainEventsDispatcherInterceptor? domainEventsDispatcher = null) : IDbContextOptionsConfiguration<TContext>
     where TContext : DbContext
 {
     public void Configure(IServiceProvider serviceProvider, DbContextOptionsBuilder optionsBuilder)
     {
         // 审计：时间戳/操作人自动填充 + 软删除转换
         optionsBuilder.AddInterceptors(interceptor);
+
+        // 领域事件分发（SaveChanges 成功后经 IEventBus）
+        if (options.DispatchDomainEvents && domainEventsDispatcher is not null)
+            optionsBuilder.AddInterceptors(domainEventsDispatcher);
 
         // 连接弹性：瞬断重试（提供程序需带 EnableRetryOnFailure 扩展）
         if (options.EnableRetryOnFailure)

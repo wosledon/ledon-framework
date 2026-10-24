@@ -7,6 +7,7 @@ class Ledon.AssemblyExtensions
   System.Type GetType()
 interface Ledon.Core.Events.IEventBus
   System.Threading.Tasks.Task PublishAsync[TEvent](TEvent, System.Threading.CancellationToken)
+  System.Threading.Tasks.Task PublishDynamicAsync(System.Object, System.Threading.CancellationToken)
 interface Ledon.Core.Events.IEventHandler`1
   System.Threading.Tasks.Task HandleAsync(TEvent, System.Threading.CancellationToken)
 
