@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using Ledon.Module.Abstractions;
+using Ledon.Module.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -52,12 +54,19 @@ public sealed class ModuleManager : IModuleManager
             LogDiagnostics(services);
 
             // 前置任务：先于任何模块初始化（如数据库建库/迁移），失败则整体中止
-            foreach (var task in services.GetServices<ILedonPreInitialization>())
-                await task.ExecuteAsync(cancellationToken);
+            using (LedonActivity.Modules.StartActivity("PreInitialization"))
+            {
+                foreach (var task in services.GetServices<ILedonPreInitialization>())
+                    await task.ExecuteAsync(cancellationToken);
+            }
 
             foreach (var descriptor in _modules)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
+                using var activity = LedonActivity.Modules.StartActivity("Module.Initialize");
+                activity?.SetTag("module.name", descriptor.Name);
+                activity?.SetTag("module.dependencies", string.Join(", ", descriptor.Dependencies.Select(d => d.Name)));
 
                 try
                 {
@@ -66,6 +75,7 @@ public sealed class ModuleManager : IModuleManager
                 catch
                 {
                     descriptor.State = ModuleState.Failed;
+                    activity?.SetStatus(ActivityStatusCode.Error);
                     throw;
                 }
 
@@ -112,6 +122,9 @@ public sealed class ModuleManager : IModuleManager
             if (descriptor.State != ModuleState.Initialized)
                 continue;
 
+            using var activity = LedonActivity.Modules.StartActivity("Module.Shutdown");
+            activity?.SetTag("module.name", descriptor.Name);
+
             try
             {
                 await ShutdownCoreAsync(descriptor, services, cancellationToken);
@@ -120,6 +133,7 @@ public sealed class ModuleManager : IModuleManager
             catch (Exception ex)
             {
                 descriptor.State = ModuleState.Failed;
+                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
                 errors.Add(new LedonModuleException($"模块 {descriptor.Name} 关闭失败。", ex));
             }
         }

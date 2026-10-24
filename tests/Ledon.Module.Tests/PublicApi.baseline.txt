@@ -47,6 +47,7 @@ class Ledon.Module.Abstractions.ModuleContext
   .ctor(ModuleDescriptor, IServiceProvider)
   Boolean Equals(System.Object)
   Int32 GetHashCode()
+  System.Diagnostics.Activity StartActivity(System.String)
   System.String ToString()
   System.Type GetType()
   P Configuration : IConfiguration
@@ -92,6 +93,18 @@ class Ledon.Module.Dependency.ModuleGraph
   System.Collections.Generic.IReadOnlyList`1[Ledon.Module.Abstractions.ModuleDescriptor] Build(System.Collections.Generic.IEnumerable`1[System.Type])
   System.String ToString()
   System.Type GetType()
+class Ledon.Module.Diagnostics.LedonActivity
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  System.String ToString()
+  System.Type GetType()
+  P Events : ActivitySource
+  P Modules : ActivitySource
+  P Queues : ActivitySource
+  F EventSourceName : String
+  F ModuleSourceName : String
+  F QueueSourceName : String
+  F RootSourceName : String
 class Ledon.Module.Hosting.LedonOptions
   .ctor()
   Boolean Equals(System.Object)

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Ledon.Core.Events;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,4 +43,11 @@ public sealed class ModuleContext
 
     /// <summary>事件总线：发布事件即被（已自动接线的）处理器消费，发布方无需知道谁在处理。</summary>
     public IEventBus Events => _services.GetRequiredService<IEventBus>();
+
+    /// <summary>
+    /// 以当前模块名开始一个自定义 span（挂在框架链路源的模块源下），
+    /// 用于把模块内的关键工作纳入同一棵链路树。未接入 OpenTelemetry 时返回 null（无开销）。
+    /// </summary>
+    public Activity? StartActivity(string name) =>
+        Diagnostics.LedonActivity.Modules.StartActivity($"{Module.Name}.{name}");
 }

@@ -18,4 +18,10 @@ public sealed class LedonObservabilityOptions
 
     /// <summary>OTLP 导出端点（如 http://localhost:4317）；null 时走环境变量。</summary>
     public Uri? OtlpEndpoint { get; set; }
+
+    /// <summary>
+    /// 额外使用控制台导出器（默认关）——开发/排障时把 span 与指标直接打到控制台，
+    /// 无需 Jaeger/Tempo 等基础设施即可看到框架内部链路。
+    /// </summary>
+    public bool UseConsoleExporter { get; set; }
 }

@@ -14,6 +14,7 @@
         <ProjectReference Include="..\..\src\Ledon.Caching\Ledon.Caching.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Data\Ledon.Data.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Module\Ledon.Module.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Observability\Ledon.Observability.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Queues\Ledon.Queues.csproj" />
     </ItemGroup>
 

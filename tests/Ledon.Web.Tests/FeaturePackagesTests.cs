@@ -168,7 +168,7 @@ public class FeaturePackagesTests : IDisposable
     // ---------- 可观测性 ----------
 
     [Fact]
-    public async Task Health_checks_are_auto_discovered_and_served()
+    public async Task Health_checks_are_auto_discovered_and_aggregated()
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
@@ -178,9 +178,33 @@ public class FeaturePackagesTests : IDisposable
         app.MapLedonHealthChecks();
         await app.StartAsync();
 
+        // 两个检查（一个健康、一个故障）都被自动发现：聚合结果为 Unhealthy。
+        // 若 BrokenHealthCheck 没被发现，这里会是 200——聚合结果反过来证明发现生效。
         var response = await app.GetTestClient().GetAsync("/health");
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal("Healthy", await response.Content.ReadAsStringAsync());
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        Assert.Equal("Unhealthy", await response.Content.ReadAsStringAsync());
+
+        await app.StopAsync();
+    }
+
+    [Fact]
+    public async Task Health_liveness_and_readiness_are_separated()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonHealthChecks();
+
+        var app = builder.Build();
+        app.MapLedonLiveness();
+        app.MapLedonReadiness();
+        await app.StartAsync();
+        var client = app.GetTestClient();
+
+        // 存活：进程在跑即 200（有故障检查也不影响——用于重启判断）
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/health/live")).StatusCode);
+
+        // 就绪：依赖检查不过则 503（BrokenHealthCheck 被自动发现）——用于摘流判断
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, (await client.GetAsync("/health/ready")).StatusCode);
 
         await app.StopAsync();
     }

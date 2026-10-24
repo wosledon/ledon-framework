@@ -1,9 +1,11 @@
 using Ledon.Caching;
 using Ledon.Data;
 using Ledon.Module;
+using Ledon.Observability;
 using Ledon.Queues;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 // 第二消费者：非 Web 的工作进程 + 多程序集布局。
 // 业务模块在独立程序集（Ledon.Sample.Users / Ledon.Sample.Notifications），
@@ -16,6 +18,14 @@ builder.Services.AddLedon();          // 模块系统（零配置，跨程序集
 builder.Services.AddLedonQueues();    // 后台队列（按需）
 builder.Services.AddLedonCaching();   // 缓存（按需）
 builder.Services.AddLedonData();      // 数据访问（按需，自动建库）
+
+// 可观测性（按需）：OpenTelemetry 链路/指标 + 控制台导出（开发排障用），
+// 框架自身的模块生命周期/事件/队列 span 会自动进入链路树
+builder.Services.AddLedonObservability(o =>
+{
+    o.ServiceName = "ledon-worker";
+    o.UseConsoleExporter = true;
+});
 
 using var host = builder.Build();
 

@@ -40,6 +40,15 @@ public class SampleHealthCheck : IHealthCheck
         Task.FromResult(HealthCheckResult.Healthy());
 }
 
+/// <summary>故障夹具：被自动发现后让聚合结果变 Unhealthy——用于验证存活/就绪分离。</summary>
+public class BrokenHealthCheck : IHealthCheck
+{
+    public Task<HealthCheckResult> CheckHealthAsync(
+        HealthCheckContext context,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(HealthCheckResult.Unhealthy("演示故障"));
+}
+
 // ---------- 端点（自动发现 + 自动映射） ----------
 
 /// <summary>空模块：钩子全用默认实现，供只需一个模块在场的场景使用。</summary>

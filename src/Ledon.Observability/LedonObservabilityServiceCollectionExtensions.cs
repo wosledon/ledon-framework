@@ -1,3 +1,4 @@
+using Ledon.Module.Diagnostics;
 using Ledon.Observability;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
@@ -10,7 +11,9 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// <summary>
 /// 可观测性入口扩展。日常用法一行：
 /// <code>builder.Services.AddLedonObservability(o =&gt; o.OtlpEndpoint = new Uri("http://localhost:4317"));</code>
-/// 自动接入 ASP.NET Core / HttpClient 插桩与运行时指标；不配端点则读 OTEL_EXPORTER_OTLP_ENDPOINT。
+/// 自动接入 ASP.NET Core / HttpClient / 运行时插桩与框架自身源
+/// （<see cref="LedonActivity.RootSourceName"/>：模块生命周期 / 事件发布 / 队列处理的 span）；
+/// 不配 OTLP 端点则读 OTEL_EXPORTER_OTLP_ENDPOINT 环境变量。
 /// </summary>
 public static class LedonObservabilityServiceCollectionExtensions
 {
@@ -33,8 +36,13 @@ public static class LedonObservabilityServiceCollectionExtensions
             builder.WithTracing(tracing =>
             {
                 tracing
+                    .AddSource(LedonActivity.RootSourceName)
+                    .AddSource($"{LedonActivity.RootSourceName}.*")
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation();
+
+                if (options.UseConsoleExporter)
+                    tracing.AddConsoleExporter();
 
                 if (options.OtlpEndpoint is null)
                     tracing.AddOtlpExporter();
@@ -46,9 +54,14 @@ public static class LedonObservabilityServiceCollectionExtensions
             builder.WithMetrics(metrics =>
             {
                 metrics
+                    .AddMeter(LedonActivity.RootSourceName)
+                    .AddMeter($"{LedonActivity.RootSourceName}.*")
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation();
+
+                if (options.UseConsoleExporter)
+                    metrics.AddConsoleExporter();
 
                 if (options.OtlpEndpoint is null)
                     metrics.AddOtlpExporter();

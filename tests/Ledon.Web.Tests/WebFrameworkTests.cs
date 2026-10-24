@@ -106,6 +106,24 @@ public class WebFrameworkTests : IDisposable
         Assert.Equal("体验 Ledon", todos[0].Title);
     }
 
+    [Fact]
+    public async Task Correlation_id_is_generated_when_absent_and_echoed_when_present()
+    {
+        var client = await StartServerAsync();
+
+        // 未带关联 ID：响应头里生成一个（非空）
+        var generated = await client.GetAsync("/hello");
+        Assert.True(generated.Headers.TryGetValues("X-Correlation-Id", out var generatedValues));
+        Assert.False(string.IsNullOrWhiteSpace(generatedValues.First()));
+
+        // 带上游关联 ID：原样回显（跨服务串链）
+        var request = new HttpRequestMessage(HttpMethod.Get, "/hello");
+        request.Headers.Add("X-Correlation-Id", "upstream-trace-123");
+        var echoed = await client.SendAsync(request);
+
+        Assert.Equal("upstream-trace-123", echoed.Headers.GetValues("X-Correlation-Id").First());
+    }
+
     public void Dispose()
     {
         _client?.Dispose();

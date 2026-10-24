@@ -49,6 +49,9 @@ public static class LedonServiceCollectionExtensions
         // 阶段一：在宿主 BuildServiceProvider 之前按拓扑序执行各模块的服务注册
         foreach (var descriptor in descriptors)
         {
+            using var activity = Diagnostics.LedonActivity.Modules.StartActivity("Module.ConfigureServices");
+            activity?.SetTag("module.name", descriptor.Name);
+
             try
             {
                 descriptor.Instance!.ConfigureServices(services);
@@ -57,6 +60,7 @@ public static class LedonServiceCollectionExtensions
             catch (Exception ex)
             {
                 descriptor.State = ModuleState.Failed;
+                activity?.SetStatus(System.Diagnostics.ActivityStatusCode.Error, ex.Message);
                 throw new LedonModuleException($"模块 {descriptor.Name} 的 ConfigureServices 执行失败。", ex);
             }
         }

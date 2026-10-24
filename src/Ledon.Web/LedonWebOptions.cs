@@ -11,4 +11,7 @@ public sealed class LedonWebOptions
 
     /// <summary>OpenAPI 文档路径。</summary>
     public string OpenApiPath { get; set; } = "/openapi/v1.json";
+
+    /// <summary>关联 ID（X-Correlation-Id，贯穿请求头/响应头/日志作用域），默认开。</summary>
+    public bool UseCorrelationId { get; set; } = true;
 }

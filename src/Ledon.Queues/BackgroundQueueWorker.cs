@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Threading.Channels;
+using Ledon.Module.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -31,6 +33,9 @@ internal sealed class BackgroundQueueWorker : BackgroundService
         {
             await using var scope = _services.CreateAsyncScope();
 
+            // 每个后台任务一个 span：队列里的"黑盒执行"变得可观测
+            using var activity = LedonActivity.Queues.StartActivity("Queue.Process");
+
             try
             {
                 await item.Execute(scope.ServiceProvider, stoppingToken);
@@ -41,6 +46,7 @@ internal sealed class BackgroundQueueWorker : BackgroundService
             }
             catch (Exception ex)
             {
+                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
                 _logger.LogError(ex, "后台任务执行失败（已跳过，不影响后续任务）");
             }
         }
