@@ -5,6 +5,7 @@ using Ledon.Module;
 using Ledon.Module.Abstractions;
 using Ledon.Queues;
 using Ledon.Scheduling;
+using Ledon.Security;
 using Ledon.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -283,6 +284,22 @@ public class TodosController(TodoDbContext db) : ControllerBase
         await db.SaveChangesAsync(cancellationToken);
         return item;
     }
+}
+
+// ---------- 认证端点夹具 ----------
+
+/// <summary>测试用登录校验：alice/password 通过（带 secure.read 权限），其余拒绝。</summary>
+public class TestUserValidator : ILedonUserValidator
+{
+    public Task<LedonUser?> ValidateAsync(string userName, string password, CancellationToken cancellationToken = default) =>
+        Task.FromResult(userName == "alice" && password == "password"
+            ? new LedonUser("u1", "alice", ["secure.read"])
+            : null);
+
+    public Task<LedonUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(userId == "u1"
+            ? new LedonUser("u1", "alice", ["secure.read"])
+            : null);
 }
 
 // ---------- 数据（ILedonDbContext 自动注册 + 前置自动建库） ----------

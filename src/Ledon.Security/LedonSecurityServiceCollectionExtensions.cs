@@ -1,4 +1,6 @@
 using System.Text;
+using Ledon;
+using Ledon.Module;
 using Ledon.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -37,6 +39,17 @@ public static class LedonSecurityServiceCollectionExtensions
         // 刷新令牌（TryAdd：多实例部署可替换为共享存储实现后自行注册）
         services.TryAddSingleton<IRefreshTokenStore, InMemoryRefreshTokenStore>();
         services.TryAddSingleton<IRefreshTokenService, RefreshTokenService>();
+
+        // 登录校验实现自动发现（实现 ILedonUserValidator 即被 /auth/login 端点使用；手动注册优先）
+        foreach (var assembly in LedonAssemblies.Scan())
+        {
+            foreach (var type in assembly.GetLoadableTypes()
+                .Where(type => type is { IsClass: true, IsAbstract: false }
+                    && typeof(ILedonUserValidator).IsAssignableFrom(type)))
+            {
+                services.TryAdd(ServiceDescriptor.Scoped(typeof(ILedonUserValidator), type));
+            }
+        }
 
         var authentication = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 

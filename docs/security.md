@@ -67,6 +67,34 @@ if (newRefresh is null) { /* 刷新失败：重新登录 */ }
 - **重放保护**：已吊销的令牌被再次使用（重放）时，该用户全部令牌作废——请引导客户端重新登录；
 - 默认进程内存储；多实例部署替换为共享存储：实现 `IRefreshTokenStore`（如 Redis）并注册，框架的 TryAdd 注册让位于手动注册。
 
+## 登录/刷新端点
+
+不想自己写登录接口时，框架提供标准端点（实现 `ILedonUserValidator` 即被自动发现）：
+
+```csharp
+public class DbUserValidator(MyDbContext db) : ILedonUserValidator
+{
+    public async Task<LedonUser?> ValidateAsync(string userName, string password, CancellationToken ct = default)
+    {
+        var user = await db.Users.SingleOrDefaultAsync(u => u.Name == userName, ct);
+        return user is not null && BCrypt.Verify(password, user.PasswordHash)
+            ? new LedonUser(user.Id, user.Name, user.Permissions)
+            : null;
+    }
+
+    // 刷新时按 ID 重建身份（不实现则 /auth/refresh 返回 501 提示）
+    public Task<LedonUser?> FindByIdAsync(string userId, CancellationToken ct = default) => /* ... */;
+}
+```
+
+```csharp
+app.MapLedonAuthEndpoints();
+// POST /auth/login    { userName, password }   → 200 { accessToken, refreshToken, expiresInSeconds } | 401
+// POST /auth/refresh  { refreshToken }          → 200 { accessToken, refreshToken, expiresInSeconds } | 401
+```
+
+登录成功返回双令牌；`/auth/refresh` 轮换刷新令牌并重新签发访问令牌。需要完整 OIDC/授权服务器（第三方客户端、授权码流）时接 OpenIddict——框架的 `IJwtTokenGenerator`/`IRefreshTokenService` 可作为其令牌签发积木。
+
 ## 边界
 
 - 访问令牌本身无吊销列表（JWT 无状态特性）——需要踢人下线时缩短 `o.Jwt.Expiration` + 轮换刷新令牌（吊销刷新令牌即切断续期）；

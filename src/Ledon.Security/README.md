@@ -21,4 +21,6 @@ var next = await refreshService.RotateAsync(oldRefresh);    // 轮换（旧的�
 
 刷新令牌为随机不透明串，服务端只存 SHA-256 哈希；检测到重放时吊销该用户全部令牌。默认进程内存储，多实例部署可替换 `IRefreshTokenStore`。
 
+`app.MapLedonAuthEndpoints()` 提供标准登录/刷新端点（实现 `ILedonUserValidator` 自动发现）。
+
 完整文档：<https://github.com/wosledon/ledon-framework>

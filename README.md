@@ -189,7 +189,7 @@ builder.Services.AddLedonSecurity(o => o.Jwt.SigningKey = Configuration["Jwt:Key
 var token = provider.GetRequiredService<IJwtTokenGenerator>().Generate("u1", "alice", ["users.read"]);
 ```
 
-访问令牌过期后用 `IRefreshTokenService` 轮换（哈希存储 + 重放保护），详见[认证授权文档](docs/security.md)。
+访问令牌过期后用 `IRefreshTokenService` 轮换（哈希存储 + 重放保护），详见[认证授权文档](docs/security.md)。不想自己写登录接口时 `app.MapLedonAuthEndpoints()` 提供标准 /auth/login、/auth/refresh 端点。
 
 ## 可观测性
 
