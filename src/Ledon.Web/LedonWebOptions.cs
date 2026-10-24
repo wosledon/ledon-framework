@@ -21,6 +21,18 @@ public sealed class LedonWebOptions
     /// <summary>Scalar UI 路径，默认 /scalar。</summary>
     public string ScalarPath { get; set; } = "/scalar";
 
+    /// <summary>
+    /// Data Protection 密钥环的 Redis 连接串（默认空 = 不用 Redis）。
+    /// 多实例部署配它：cookie/防伪令牌的加密码环共享，任意实例都能解密另一个实例签发的数据
+    /// （不配则各实例本地密钥环，负载均衡后会出现间歇性 400/登录态丢失）。
+    /// </summary>
+    public string? DataProtectionRedisConnectionString { get; set; }
+
+    /// <summary>
+    /// Data Protection 应用标识（多实例/多服务共享码环时必须一致），默认取入口程序集名。
+    /// </summary>
+    public string? DataProtectionApplicationName { get; set; }
+
     /// <summary>关联 ID（X-Correlation-Id，贯穿请求头/响应头/日志作用域），默认开。</summary>
     public bool UseCorrelationId { get; set; } = true;
 

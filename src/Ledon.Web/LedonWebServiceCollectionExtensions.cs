@@ -5,10 +5,13 @@ using Ledon.Module;
 using Ledon.Module.Hosting;
 using Ledon.Web.ApiConventions;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using StackExchange.Redis;
+using System.Reflection;
 
 namespace Ledon.Web;
 
@@ -47,6 +50,31 @@ public static class LedonWebServiceCollectionExtensions
         var options = new LedonWebOptions();
         configure?.Invoke(options);
         builder.Services.TryAddSingleton(options);
+
+        // Data Protection 密钥环持久化到 Redis（多实例共享码环：cookie/防伪令牌跨实例可解密）
+        if (!string.IsNullOrWhiteSpace(options.DataProtectionRedisConnectionString))
+        {
+            var applicationName = options.DataProtectionApplicationName
+                ?? Assembly.GetEntryAssembly()?.GetName().Name
+                ?? "ledon-app";
+
+            builder.Services.AddDataProtection();
+
+            // Configure 必须在 AddDataProtection 之后注册：DP 自带的 setup 会把
+            // ApplicationDiscriminator 默认置为内容根路径，后注册的 Configure 才生效
+            builder.Services.Configure<DataProtectionOptions>(
+                dataProtection => dataProtection.ApplicationDiscriminator = applicationName);
+
+            // AbortOnConnectFail=false + 惰性建连：Redis 短暂不在线不阻塞启动（后台重连），
+            // 码环首次读写密钥时才真正连接；holder 随容器释放
+            var redis = ConfigurationOptions.Parse(options.DataProtectionRedisConnectionString);
+            redis.AbortOnConnectFail = false;
+
+            var keyRing = new RedisKeyRingHolder(redis);
+            builder.Services.AddSingleton(keyRing);
+            builder.Services.AddDataProtection()
+                .PersistKeysToStackExchangeRedis(() => keyRing.Database, "DataProtection-Keys");
+        }
 
         var assemblies = LedonAssemblies.Scan();
 
@@ -99,8 +127,7 @@ public static class LedonWebServiceCollectionExtensions
         }
 
         // 跨域（CORS）：按配置的来源注册默认策略（空来源 = 允许任意，仅建议开发环境）
-        if (options.UseCors)
-        {
+        if (options.UseCors)        {
             builder.Services.AddCors(cors =>
             {
                 if (options.CorsOrigins.Length > 0)

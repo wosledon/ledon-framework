@@ -51,6 +51,16 @@ builder.AddLedonWeb(o =>
 
 管线顺序：路由 → CORS → 认证授权 → 端点。预检（OPTIONS）自动应答。
 
+## 多实例：Data Protection 码环
+
+cookie/防伪令牌的加密码环持久化到 Redis（不配则各实例本地码环，负载均衡后间歇 400/登录态丢失）：
+
+```csharp
+builder.AddLedonWeb(o => o.DataProtectionRedisConnectionString = "localhost:6379");
+```
+
+惰性连接 + AbortOnConnectFail=false：Redis 短暂不在线不阻塞启动。
+
 ## API 文档 UI
 
 OpenAPI 只有 JSON 文档；要可视化调试界面开 Scalar UI：

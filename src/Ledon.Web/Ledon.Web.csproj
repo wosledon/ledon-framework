@@ -18,7 +18,9 @@
         <PackageReference Include="Asp.Versioning.Http" />
         <PackageReference Include="Asp.Versioning.Mvc" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" />
         <PackageReference Include="Scalar.AspNetCore" />
+        <PackageReference Include="StackExchange.Redis" />
     </ItemGroup>
 
 </Project>

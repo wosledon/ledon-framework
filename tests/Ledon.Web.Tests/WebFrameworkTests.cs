@@ -6,9 +6,12 @@ using Ledon.Module.Hosting;
 using Ledon.Web;
 using Ledon.Web.Tests.Fixtures;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace Ledon.Web.Tests;
 
@@ -282,6 +285,39 @@ public class WebFrameworkTests : IDisposable
 
         Assert.Throws<InvalidOperationException>(
             () => builder.AddLedonWeb(o => o.UseScalarUi = true));
+    }
+
+    // ---------- Data Protection 密钥环 ----------
+
+    [Fact]
+    public void Data_protection_key_ring_persists_to_redis_when_configured()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.AddLedonWeb(o =>
+        {
+            o.DataProtectionRedisConnectionString = "localhost:6379";
+            o.DataProtectionApplicationName = "test-app";
+        });
+
+        var app = builder.Build();
+
+        // 应用标识写入 DataProtectionOptions（Redis 码环在首次使用时才连接，登记不触网）
+        var options = app.Services.GetRequiredService<IOptions<DataProtectionOptions>>().Value;
+        Assert.Equal("test-app", options.ApplicationDiscriminator);
+    }
+
+    [Fact]
+    public void Data_protection_application_name_defaults_to_entry_assembly()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.AddLedonWeb(o => o.DataProtectionRedisConnectionString = "localhost:6379");
+
+        var app = builder.Build();
+
+        var options = app.Services.GetRequiredService<IOptions<DataProtectionOptions>>().Value;
+        Assert.False(string.IsNullOrWhiteSpace(options.ApplicationDiscriminator));
     }
 
     public void Dispose()

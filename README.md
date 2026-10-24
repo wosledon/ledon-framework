@@ -130,6 +130,16 @@ builder.AddLedonWeb(o =>
 });
 ```
 
+## 多实例部署：Data Protection 码环
+
+多实例部署把 cookie/防伪令牌的加密码环持久化到 Redis（不配则各实例本地码环，负载均衡后会出现间歇性 400/登录态丢失）：
+
+```csharp
+builder.AddLedonWeb(o => o.DataProtectionRedisConnectionString = "localhost:6379");
+```
+
+应用标识默认取入口程序集名（多服务共享码环时用 `o.DataProtectionApplicationName` 对齐）。连接惰性建立 + `AbortOnConnectFail=false`——Redis 短暂不在线不阻塞启动。
+
 ## 数据访问
 
 实现 `ILedonDbContext` 即被自动注册，并在启动时（**先于任何模块初始化**）自动建库/迁移；发件箱继承 `OutboxDbContext`。自己管理 schema 时 `AddLedonData(o => o.AutoMigrate = false)`。
