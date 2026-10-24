@@ -15,5 +15,6 @@ public interface IIntegrationEventTransport
     /// 投递标识（发件箱消息 Id）：传输应把它写进 broker 消息属性（如 RabbitMQ MessageId），
     /// 消费侧据此做收件箱去重；无消息源标识时传 null。
     /// </param>
+    /// <param name="cancellationToken">取消令牌。</param>
     Task PublishAsync(IIntegrationEvent @event, string? messageId, CancellationToken cancellationToken = default);
 }

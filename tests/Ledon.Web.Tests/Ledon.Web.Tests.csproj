@@ -18,6 +18,8 @@
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+        <!-- gRPC 测试夹具：用真实 protoc 生成代码验证服务发现与映射 -->
+        <PackageReference Include="Grpc.Tools" />
         <!-- OpenIddict.Validation.SystemNetHttp 传递引入 Polly v7（与 Ledon.Resilience 的 Polly.Core v8 同名类型冲突）：
              加别名隔离，默认查找只看 Polly.Core；polly7 别名保留给传递依赖本身。 -->
         <PackageReference Include="Polly" Aliases="polly7" />
@@ -33,6 +35,8 @@
         <ProjectReference Include="..\..\src\Ledon.Caching\Ledon.Caching.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Queues\Ledon.Queues.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Queues.RabbitMQ\Ledon.Queues.RabbitMQ.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Queues.Kafka\Ledon.Queues.Kafka.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Grpc\Ledon.Grpc.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Serilog\Ledon.Serilog.csproj" />
         <ProjectReference Include="..\..\src\Ledon.FluentValidation\Ledon.FluentValidation.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Aspire\Ledon.Aspire.csproj" />
@@ -47,6 +51,11 @@
         <ProjectReference Include="..\..\src\Ledon.Configuration\Ledon.Configuration.csproj" />
         <ProjectReference Include="..\..\src\Ledon.MultiTenancy\Ledon.MultiTenancy.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Testing\Ledon.Testing.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- gRPC 测试夹具：真实 protoc 生成代码（验证服务发现与约定映射） -->
+        <Protobuf Include="Protos\testgreeter.proto" GrpcServices="Server,Client" />
     </ItemGroup>
 
 </Project>

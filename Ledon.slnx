@@ -19,10 +19,12 @@
     <Project Path="src/Ledon.Core/Ledon.Core.csproj" />
     <Project Path="src/Ledon.Data/Ledon.Data.csproj" />
     <Project Path="src/Ledon.FluentValidation/Ledon.FluentValidation.csproj" />
+    <Project Path="src/Ledon.Grpc/Ledon.Grpc.csproj" />
     <Project Path="src/Ledon.Module/Ledon.Module.csproj" />
     <Project Path="src/Ledon.MultiTenancy/Ledon.MultiTenancy.csproj" />
     <Project Path="src/Ledon.Observability/Ledon.Observability.csproj" />
     <Project Path="src/Ledon.OpenIddict/Ledon.OpenIddict.csproj" />
+    <Project Path="src/Ledon.Queues.Kafka/Ledon.Queues.Kafka.csproj" />
     <Project Path="src/Ledon.Queues.RabbitMQ/Ledon.Queues.RabbitMQ.csproj" />
     <Project Path="src/Ledon.Queues/Ledon.Queues.csproj" />
     <Project Path="src/Ledon.Resilience/Ledon.Resilience.csproj" />

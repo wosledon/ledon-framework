@@ -6,7 +6,7 @@ namespace Ledon.Queues;
 /// 集成事件 → 本地 handler 的反射分发：发件箱调度器（进程内投递）与
 /// broker 消费侧（<c>Ledon.Queues.RabbitMQ</c>）共用同一套分发逻辑。
 /// 自写 broker 消费侧时也可直接复用。
-/// 注册了 <see cref="IInboxStore"/> 且传入 <paramref name="messageId"/> 时，按消息标识去重
+/// 注册了 <see cref="IInboxStore"/> 且调用带 <c>messageId</c> 的重载时，按消息标识去重
 /// （至少一次投递 + 恰好一次处理）；未注册存储时保持原语义。
 /// </summary>
 public static class IntegrationEventDispatcher

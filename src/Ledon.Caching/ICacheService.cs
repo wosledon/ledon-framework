@@ -16,6 +16,9 @@ public interface ICacheService
     Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default);
 
     /// <summary>写入缓存。<paramref name="expiration"/> 为 null 时使用默认过期时间。</summary>
+    /// <param name="key">缓存键。</param>
+    /// <param name="value">缓存值。</param>
+    /// <param name="expiration">绝对过期时间；null 用默认值。</param>
     /// <param name="slidingExpiration">滑动过期（一段时间未访问即失效）；与绝对过期可同时使用。</param>
     void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? slidingExpiration = null);
 

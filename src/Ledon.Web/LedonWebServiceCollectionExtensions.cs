@@ -289,8 +289,10 @@ public static class LedonWebServiceCollectionExtensions
     }
 
     /// <summary>确保 Bearer 安全方案在场（幂等）。</summary>
-    private static void EnsureBearerScheme(Microsoft.OpenApi.OpenApiDocument document)
+    private static void EnsureBearerScheme(Microsoft.OpenApi.OpenApiDocument? document)
     {
+        ArgumentNullException.ThrowIfNull(document);
+
         document.Components ??= new Microsoft.OpenApi.OpenApiComponents();
 
         document.Components.SecuritySchemes ??=

@@ -38,6 +38,7 @@ public static class LedonSignalRServiceCollectionExtensions
     public static IServiceCollection AddLedonSignalR(this IServiceCollection services) =>
         services.AddLedonSignalR(null);
 
+    /// <param name="services">服务集合。</param>
     /// <param name="configure">SignalR 配置（如多实例 backplane 的 Redis 连接串）。</param>
     public static IServiceCollection AddLedonSignalR(
         this IServiceCollection services,
@@ -55,7 +56,7 @@ public static class LedonSignalRServiceCollectionExtensions
         {
             signalR.AddStackExchangeRedis(
                 options.RedisConnectionString!,
-                redis => redis.Configuration.ChannelPrefix = options.RedisChannelPrefix);
+                redis => redis.Configuration.ChannelPrefix = StackExchange.Redis.RedisChannel.Literal(options.RedisChannelPrefix));
         }
 
         // Hub 自动发现（沿用框架的允许列表扫描）
