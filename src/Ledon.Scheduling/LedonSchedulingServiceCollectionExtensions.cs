@@ -23,6 +23,10 @@ public static class LedonSchedulingServiceCollectionExtensions
         configure?.Invoke(options);
         services.TryAddSingleton(options);
 
+        // 执行历史（运维排障 / 手动重放确认）与手动触发
+        services.TryAddSingleton<IScheduledTaskExecutionHistory>(new ScheduledTaskExecutionHistory());
+        services.TryAddSingleton<ISchedulerInvoker, SchedulerInvoker>();
+
         // 多实例部署：领导权选举（仅领导实例执行定时任务）
         if (options.LeaderElection == SchedulerLeaderElection.Redis)
         {

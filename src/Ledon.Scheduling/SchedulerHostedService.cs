@@ -117,6 +117,7 @@ internal sealed class SchedulerHostedService : BackgroundService
     private async Task RunLoopAsync(IScheduledTask task, CancellationToken stoppingToken)
     {
         var name = task.GetType().Name;
+        var history = _services.GetService<IScheduledTaskExecutionHistory>();
 
         // 6 段（含秒）与 5 段都要支持：Cronos 默认只解析 5 段，6 段需显式 IncludeSeconds
         var fields = task.CronExpression.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
@@ -145,22 +146,25 @@ internal sealed class SchedulerHostedService : BackgroundService
 
             var delay = next.Value - now;
             if (delay > TimeSpan.Zero)
-                await Task.Delay(delay, stoppingToken);
+                await Task.Delay(delay, stoppingToken).ConfigureAwait(false);
 
             if (stoppingToken.IsCancellationRequested)
                 return;
 
             lastTrigger = next.Value;
-
             await using var scope = _services.CreateAsyncScope();
 
             using var activity = LedonActivity.Modules.StartActivity($"ScheduledTask.{name}");
             activity?.SetTag("task.name", name);
             activity?.SetTag("task.cron", task.CronExpression);
 
+            var started = DateTimeOffset.UtcNow;
             try
             {
-                await task.ExecuteAsync(stoppingToken);
+                await task.ExecuteAsync(stoppingToken).ConfigureAwait(false);
+                SchedulerMetrics.TaskExecutions.Add(1,
+                    new KeyValuePair<string, object?>("task", name),
+                    new KeyValuePair<string, object?>("status", "success"));
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
@@ -170,6 +174,34 @@ internal sealed class SchedulerHostedService : BackgroundService
             {
                 activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
                 _logger.LogError(ex, "定时任务 {Task} 执行失败（已跳过本次触发）", name);
+                SchedulerMetrics.TaskExecutions.Add(1,
+                    new KeyValuePair<string, object?>("task", name),
+                    new KeyValuePair<string, object?>("status", "failed"));
+            }
+            finally
+            {
+                history?.Record(new ScheduledTaskExecution
+                {
+                    TaskName = name,
+                    StartedAt = started,
+                    Duration = DateTimeOffset.UtcNow - started,
+                    Success = activity?.Status != ActivityStatusCode.Error,
+                    Error = activity?.StatusDescription,
+                    Manual = false,
+                });
+            }
+
+            // 执行耗时跨过了下一个触发点（默认模式）：记一次错过（不补跑）
+            if (!_options.CatchUpMissedTriggers)
+            {
+                var upcoming = cron.GetNextOccurrence(lastTrigger.Value, _options.TimeZone);
+                if (upcoming is { } triggerPoint && triggerPoint < DateTimeOffset.UtcNow)
+                {
+                    SchedulerMetrics.MissedTriggers.Add(1, new KeyValuePair<string, object?>("task", name));
+                    _logger.LogWarning(
+                        "定时任务 {Task} 本次执行耗时跨过触发点 {Trigger:HH:mm:ss}（已跳过；需要补跑请开启 CatchUpMissedTriggers）",
+                        name, triggerPoint);
+                }
             }
         }
     }

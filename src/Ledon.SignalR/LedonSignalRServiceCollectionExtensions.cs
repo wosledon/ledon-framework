@@ -8,22 +8,55 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
+/// <summary>SignalR 配置。</summary>
+public sealed class LedonSignalROptions
+{
+    /// <summary>
+    /// Redis 连接串（多实例部署）。配置后自动挂 Redis backplane：
+    /// 发往任一实例的消息经 Redis 广播给所有实例的客户端（不配则只有本实例的连接能收到）。
+    /// </summary>
+    public string? RedisConnectionString { get; set; }
+
+    /// <summary>backplane 的 Redis 频道前缀（多套 SignalR 应用共享 Redis 时区分），默认 ledon:signalr:。</summary>
+    public string RedisChannelPrefix { get; set; } = "ledon:signalr:";
+}
+
 /// <summary>
-/// SignalR 集成：Hub 自动发现 + 按约定路径映射（/hubs/{hub 名去 Hub 后缀，kebab-case}）。
+/// SignalR 集成：Hub 自动发现 + 按约定路径映射（/hubs/{hub 名去 Hub 后缀，kebab-case）。
 /// <code>
 /// builder.Services.AddLedonSignalR();
 /// app.MapLedonSignalRHubs();   // ChatHub → /hubs/chat
+///
+/// // 多实例部署：挂 Redis backplane（跨实例广播）
+/// builder.Services.AddLedonSignalR(o =&gt; o.RedisConnectionString = "localhost:6379");
 /// </code>
 /// Hub 类照常写在业务程序集里（依赖注入、授权特性、模块事件均可用）。
 /// </summary>
 public static class LedonSignalRServiceCollectionExtensions
 {
     /// <summary>注册 SignalR 并发现被扫描程序集中的 <see cref="Hub"/> 子类。</summary>
-    public static IServiceCollection AddLedonSignalR(this IServiceCollection services)
+    public static IServiceCollection AddLedonSignalR(this IServiceCollection services) =>
+        services.AddLedonSignalR(null);
+
+    /// <param name="configure">SignalR 配置（如多实例 backplane 的 Redis 连接串）。</param>
+    public static IServiceCollection AddLedonSignalR(
+        this IServiceCollection services,
+        Action<LedonSignalROptions>? configure)
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddSignalR();
+        var options = new LedonSignalROptions();
+        configure?.Invoke(options);
+
+        var signalR = services.AddSignalR();
+
+        // 多实例部署：Redis backplane（跨实例广播；连接惰性建立，Redis 短暂不在线不阻塞启动）
+        if (!string.IsNullOrWhiteSpace(options.RedisConnectionString))
+        {
+            signalR.AddStackExchangeRedis(
+                options.RedisConnectionString!,
+                redis => redis.Configuration.ChannelPrefix = options.RedisChannelPrefix);
+        }
 
         // Hub 自动发现（沿用框架的允许列表扫描）
         var hubs = LedonAssemblies.Scan()

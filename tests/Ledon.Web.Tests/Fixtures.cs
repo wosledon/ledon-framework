@@ -174,6 +174,29 @@ public class EverySecondTask : IScheduledTask
 }
 
 /// <summary>
+/// 手动触发专用任务：cron 设在遥远的未来（不自动触发），只经 ISchedulerInvoker 执行。
+/// </summary>
+public class ManualTriggerTask : IScheduledTask
+{
+    private int _invocations;
+
+    public string CronExpression => "0 0 1 1 *";   // 每年 1 月 1 日：测试窗口内不会自动触发
+
+    public int Invocations => Volatile.Read(ref _invocations);
+
+    public Task Executed => _executed.Task;
+
+    private readonly TaskCompletionSource _executed = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    public Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        Interlocked.Increment(ref _invocations);
+        _executed.TrySetResult();
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>
 /// 慢任务：首次执行阻塞在闸门上（时长 6s，跨过一个 4s 周期的触发点），
 /// 用于验证默认丢弃与补跑（CatchUpMissedTriggers）两种 misfire 语义。
 /// 后续执行立即完成并发出 <see cref="SecondRun"/> 信号。

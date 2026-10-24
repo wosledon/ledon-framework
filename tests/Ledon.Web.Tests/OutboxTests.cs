@@ -228,7 +228,8 @@ public class OutboxTests : IDisposable
 
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
-        builder.Services.AddLedonOutbox(options => options.PollingInterval = TimeSpan.FromMilliseconds(50));
+        // 轮询间隔拉长：避免调度器在断言窗口内把消息投递掉（本用例测的是死信查询/重放，不是投递）
+        builder.Services.AddLedonOutbox(options => options.PollingInterval = TimeSpan.FromSeconds(30));
         builder.Services.AddDbContext<TestOutboxDbContext>(options =>
             options.UseSqlite($"Data Source={dbPath}"));
 

@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- 打包（仅 src/ 项目引用） -->
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="10.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.11.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <!-- 调度领导权选举（Redis 锁） -->
