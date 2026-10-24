@@ -153,7 +153,7 @@ public class CleanupTask : IScheduledTask
 }
 ```
 
-执行天然串行；耗时跨过触发点默认丢弃，`o.CatchUpMissedTriggers = true` 可补跑。
+执行天然串行；耗时跨过触发点默认丢弃，`o.CatchUpMissedTriggers = true` 可补跑；多实例部署开 `o.LeaderElection = SchedulerLeaderElection.Redis` 仅领导实例执行。
 
 ## 认证授权
 

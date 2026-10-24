@@ -6,6 +6,8 @@
     <ItemGroup>
         <!-- 打包（仅 src/ 项目引用） -->
         <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+        <!-- 调度领导权选举（Redis 锁） -->
+        <PackageVersion Include="StackExchange.Redis" Version="2.7.27" />
         <!-- 框架运行期 -->
         <PackageVersion Include="Cronos" Version="0.13.0" />
         <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />

@@ -23,6 +23,16 @@ public static class LedonSchedulingServiceCollectionExtensions
         configure?.Invoke(options);
         services.TryAddSingleton(options);
 
+        // 多实例部署：领导权选举（仅领导实例执行定时任务）
+        if (options.LeaderElection == SchedulerLeaderElection.Redis)
+        {
+            if (string.IsNullOrWhiteSpace(options.RedisConnectionString))
+                throw new InvalidOperationException(
+                    "AddLedonScheduling: LeaderElection = Redis 时必须配置 RedisConnectionString");
+
+            services.TryAddSingleton<ISchedulerLock, RedisSchedulerLock>();
+        }
+
         // 任务自动发现（沿用框架的允许列表扫描）
         foreach (var assembly in LedonAssemblies.Scan())
         {

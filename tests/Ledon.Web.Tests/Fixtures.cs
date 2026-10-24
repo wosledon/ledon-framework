@@ -178,6 +178,21 @@ public class SlowTask : IScheduledTask
     }
 }
 
+/// <summary>测试用领导权锁：固定授予/拒绝（验证多实例门控逻辑，不依赖真实 Redis）。</summary>
+public sealed class FakeSchedulerLock(bool granted) : ISchedulerLock
+{
+    public Task<bool> AcquireAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(granted);
+
+    public Task<bool> RenewAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(granted);
+
+    public Task ReleaseAsync(CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+}
+
 // ---------- 发件箱（Outbox）夹具 ----------
 
 /// <summary>测试用发件箱 DbContext（Sqlite 文件在测试中配置）。</summary>

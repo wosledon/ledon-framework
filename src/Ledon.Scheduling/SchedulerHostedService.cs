@@ -32,6 +32,77 @@ internal sealed class SchedulerHostedService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        var leaderLock = _services.GetService<ISchedulerLock>();
+        if (leaderLock is null)
+        {
+            // 未配置领导权选举（默认）：单实例语义，直接调度
+            await RunAllAsync(stoppingToken);
+            return;
+        }
+
+        // 多实例部署：竞选循环——持有锁才调度，掉锁让出后重新竞选
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            if (!await leaderLock.AcquireAsync(stoppingToken))
+            {
+                _logger.LogDebug("调度领导权被其它实例持有，{Retry} 后重试", _options.LeaderLockExpiry / 3);
+                await Task.Delay(_options.LeaderLockExpiry / 3, stoppingToken);
+                continue;
+            }
+
+            _logger.LogInformation("本实例获得调度领导权（多实例部署下仅领导实例执行定时任务）");
+
+            // 领导期：续约循环 + 任务循环共享取消令牌，续约失败即整体退出
+            using var leadership = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+            var renew = Task.Run(async () =>
+            {
+                while (!leadership.IsCancellationRequested && !stoppingToken.IsCancellationRequested)
+                {
+                    await Task.Delay(_options.LeaderLockExpiry / 3, stoppingToken);
+
+                    try
+                    {
+                        if (await leaderLock.RenewAsync(stoppingToken))
+                            continue;
+                    }
+                    catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
+                    {
+                        _logger.LogWarning(ex, "调度领导权续约异常，让出领导权");
+                    }
+
+                    _logger.LogWarning("调度领导权续约失败（锁已被其它实例拿走），停止本实例的任务循环");
+                    await leadership.CancelAsync();
+                    return;
+                }
+            }, stoppingToken);
+
+            try
+            {
+                await RunAllAsync(leadership.Token);
+            }
+            catch (OperationCanceledException) when (leadership.IsCancellationRequested && !stoppingToken.IsCancellationRequested)
+            {
+                // 领导权丢失：任务循环已退出，回到竞选循环
+            }
+            finally
+            {
+                await leaderLock.ReleaseAsync(stoppingToken);
+                await leadership.CancelAsync();
+
+                // 续约循环可能因宿主持停而取消——吞掉，不影响关停流程
+                try
+                {
+                    await renew;
+                }
+                catch (OperationCanceledException)
+                {
+                }
+            }
+        }
+    }
+
+    private async Task RunAllAsync(CancellationToken cancellationToken)
+    {
         // 立即解析一次任务清单（此时容器已构建，模块已注册）
         var tasks = _services.GetServices<IScheduledTask>().ToList();
         if (tasks.Count == 0)
@@ -40,7 +111,7 @@ internal sealed class SchedulerHostedService : BackgroundService
         _logger.LogInformation("调度器启动：{Count} 个定时任务", tasks.Count);
 
         // 每个任务一个独立循环（按各自 cron 驱动）
-        await Task.WhenAll(tasks.Select(task => RunLoopAsync(task, stoppingToken)));
+        await Task.WhenAll(tasks.Select(task => RunLoopAsync(task, cancellationToken)));
     }
 
     private async Task RunLoopAsync(IScheduledTask task, CancellationToken stoppingToken)

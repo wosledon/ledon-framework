@@ -353,6 +353,48 @@ public class FeaturePackagesTests : IDisposable
         await app.StopAsync();
     }
 
+    // ---------- 领导权选举（多实例部署） ----------
+
+    [Fact]
+    public async Task Scheduled_task_does_not_run_without_leadership()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        // 领导权被其它实例持有：本实例不执行任何定时任务
+        builder.Services.AddSingleton<ISchedulerLock>(new FakeSchedulerLock(granted: false));
+        builder.Services.AddLedonScheduling();
+
+        var app = builder.Build();
+        await app.StartAsync();
+
+        var task = app.Services.GetServices<IScheduledTask>().OfType<EverySecondTask>().Single();
+
+        // 非领导实例：2 秒内不可能触发（正常持有领导权时 1 秒内即触发）
+        await Assert.ThrowsAsync<TimeoutException>(
+            () => task.Fired.WaitAsync(TimeSpan.FromSeconds(2)));
+
+        await app.StopAsync();
+    }
+
+    [Fact]
+    public async Task Scheduled_task_runs_with_leadership()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddSingleton<ISchedulerLock>(new FakeSchedulerLock(granted: true));
+        builder.Services.AddLedonScheduling();
+
+        var app = builder.Build();
+        await app.StartAsync();
+
+        var task = app.Services.GetServices<IScheduledTask>().OfType<EverySecondTask>().Single();
+
+        // 持有领导权：按 cron 正常触发
+        await task.Fired.WaitAsync(TimeSpan.FromSeconds(5));
+
+        await app.StopAsync();
+    }
+
     public void Dispose()
     {
         _client?.Dispose();

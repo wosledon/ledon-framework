@@ -40,6 +40,24 @@ builder.Services.AddLedonScheduling(o => o.CatchUpMissedTriggers = true);
 
 执行时间短于触发间隔时两种设置无差异。补跑适合"绝不能错过"的周期语义，但注意补跑期间新触发会继续积压、执行时间叠加——任务长期超时本身就是需要告警的问题。
 
+## 多实例部署：领导权选举
+
+默认每个实例独立执行全部定时任务（单实例语义）。多实例部署下避免重复执行，开启领导权选举：
+
+```csharp
+builder.Services.AddLedonScheduling(o =>
+{
+    o.LeaderElection = SchedulerLeaderElection.Redis;   // 仅领导实例执行
+    o.RedisConnectionString = "localhost:6379";
+});
+```
+
+- 基于 Redis 锁（SET NX PX）：抢到锁的实例成为领导，TTL 默认 30s、每 1/3 周期续约；
+- **掉锁自动让出**：续约失败（网络分区/Redis 故障）时本实例停止任务循环，回到竞选；
+- 领导权转移期间触发点不补跑（与默认 misfire 策略一致）；
+- 自建锁（etcd、数据库、K8s Lease 等）可实现 `ISchedulerLock` 注册替换；
+- 未配置时零开销（不注册锁即单实例语义）。
+
 ## 长周期语义
 
 到点判断基于 `Task.Delay` 到下一个发生时刻，宿主机休眠/挂起错过的时间点**不会补偿触发**（无 misfire 回补）。对"绝不能错过"的周期语义，用外部调度器（系统 cron / K8s CronJob）触发 HTTP 端点更稳妥。
