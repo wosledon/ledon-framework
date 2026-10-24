@@ -66,6 +66,45 @@ public class FeaturePackagesTests : IDisposable
     }
 
     [Fact]
+    public async Task Cache_single_flight_survives_one_callers_cancellation()
+    {
+        var services = new ServiceCollection();
+        services.AddLedonCaching();
+        await using var provider = services.BuildServiceProvider();
+        var cache = provider.GetRequiredService<ICacheService>();
+
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var calls = 0;
+
+        Task<string> Factory(CancellationToken ct)
+        {
+            Interlocked.Increment(ref calls);
+            started.TrySetResult();
+            // 遵守传入令牌：旧实现把第一个调用者的令牌绑到共享回源上，
+            // 调用方 1 取消会导致这里整体取消，调用方 2 也跟着失败
+            return release.Task.ContinueWith(_ => "value", ct);
+        }
+
+        using var cts = new CancellationTokenSource();
+
+        // 调用方 1 发起回源并等待
+        var caller1 = cache.GetOrCreateAsync("k", Factory, cancellationToken: cts.Token);
+        await started.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+        // 调用方 1 取消：只应影响它自己，不能杀掉共享回源
+        await cts.CancelAsync();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await caller1);
+
+        // 调用方 2 仍能共享同一次回源并拿到结果
+        var caller2 = cache.GetOrCreateAsync("k", Factory);
+        release.TrySetResult();
+
+        Assert.Equal("value", await caller2);
+        Assert.Equal(1, calls);
+    }
+
+    [Fact]
     public void Cache_key_prefix_isolates_instances()
     {
         var services = new ServiceCollection();

@@ -53,16 +53,21 @@ internal sealed class MemoryCacheService : ICacheService
             return cached is T hit ? hit : default;
 
         // single-flight：并发未命中共享同一个回源 Task（无锁，不会锁住异步）
-        var task = (Task<T>)_inFlight.GetOrAdd(fullKey, _ => factory(cancellationToken));
+        // 回源使用 CancellationToken.None——共享任务不绑定任何单个调用者，
+        // 否则一个调用者取消会杀掉其他所有等待者的回源；
+        // 每个调用者通过 WaitAsync 观察自己的取消令牌。
+        var task = (Task<T>)_inFlight.GetOrAdd(fullKey, _ => factory(CancellationToken.None));
 
         T value;
         try
         {
-            value = await task;
+            value = await task.WaitAsync(cancellationToken);
         }
         finally
         {
-            _inFlight.TryRemove(fullKey, out _);
+            // 任务完成后才移除在途记录；调用者取消但任务仍在跑时保留，让后来者继续共享
+            if (task.IsCompleted)
+                _inFlight.TryRemove(fullKey, out _);
         }
 
         SetCore(fullKey, value, expiration);
