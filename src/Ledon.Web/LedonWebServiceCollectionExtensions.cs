@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Threading.RateLimiting;
 using Asp.Versioning;
 using Asp.Versioning.Routing;
 using Ledon;
@@ -6,12 +8,15 @@ using Ledon.Module.Hosting;
 using Ledon.Web.ApiConventions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using StackExchange.Redis;
-using System.Reflection;
 
 namespace Ledon.Web;
 
@@ -85,7 +90,53 @@ public static class LedonWebServiceCollectionExtensions
 
         // OpenAPI 按需开启（先于 MVC 注册）
         if (options.UseOpenApi)
-            builder.Services.AddOpenApi();
+        {
+            builder.Services.AddOpenApi(openApi =>
+            {
+                // 文档元数据：标题/描述（Scalar/Swagger UI 展示）
+                openApi.AddDocumentTransformer((document, context, cancellationToken) =>
+                {
+                    document.Info.Title = options.OpenApiTitle ?? "Ledon API";
+                    if (!string.IsNullOrWhiteSpace(options.OpenApiDescription))
+                        document.Info.Description = options.OpenApiDescription;
+
+                    return Task.CompletedTask;
+                });
+
+                // 安全方案：检测到认证包（Ledon.Security）在场时提供 Bearer 方案，
+                // 带 [Authorize] 元数据的端点自动带上安全要求（文档 UI 的 Authorize 按钮）
+                if (SecurityRegistered(builder.Services))
+                {
+                    openApi.AddDocumentTransformer((document, context, cancellationToken) =>
+                    {
+                        EnsureBearerScheme(document);
+                        return Task.CompletedTask;
+                    });
+
+                    // 操作级变换：document.Components 可能在 schema 生成阶段被重建，
+                    // 方案在操作变换里按需补齐（幂等），安全要求引用同一 document 才能序列化为 {"Bearer": []}
+                    openApi.AddOperationTransformer((operation, context, cancellationToken) =>
+                    {
+                        var document = context.Document;
+                        EnsureBearerScheme(document);
+
+                        var requiresAuth = context.Description.ActionDescriptor?.EndpointMetadata
+                            .Any(metadata => metadata is Microsoft.AspNetCore.Authorization.IAuthorizeData) == true;
+
+                        if (!requiresAuth)
+                            return Task.CompletedTask;
+
+                        operation.Security ??= [];
+                        operation.Security.Add(new Microsoft.OpenApi.OpenApiSecurityRequirement
+                        {
+                            [new Microsoft.OpenApi.OpenApiSecuritySchemeReference("Bearer", document, null)] = [],
+                        });
+
+                        return Task.CompletedTask;
+                    });
+                }
+            });
+        }
 
         // 控制器自动发现：业务程序集挂为 MVC ApplicationPart
         if (options.UseControllers)
@@ -147,6 +198,82 @@ public static class LedonWebServiceCollectionExtensions
             });
         }
 
+        // 限流（固定窗口）：分区键 = X-Api-Key（有则按调用方）或客户端 IP；超限 429 ProblemDetails
+        if (options.UseRateLimiting)
+        {
+            builder.Services.AddRateLimiter(limiter =>
+            {
+                limiter.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                limiter.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+                {
+                    var partition = httpContext.Request.Headers.TryGetValue(RateLimiting.ApiKeyHeaderName, out var apiKey)
+                        && !string.IsNullOrWhiteSpace(apiKey)
+                            ? $"apikey:{apiKey}"
+                            : $"ip:{httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown"}";
+
+                    return RateLimitPartition.GetFixedWindowLimiter(partition, _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = options.RateLimitPermitLimit,
+                        Window = TimeSpan.FromSeconds(options.RateLimitWindowSeconds),
+                        QueueLimit = 0,
+                    });
+                });
+
+                limiter.OnRejected = async (context, cancellationToken) =>
+                {
+                    var problemDetails = context.HttpContext.RequestServices
+                        .GetService<IProblemDetailsService>();
+
+                    var problem = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status429TooManyRequests,
+                        Title = "请求过于频繁",
+                        Detail = $"限流：窗口 {options.RateLimitWindowSeconds} 秒内最多 {options.RateLimitPermitLimit} 次请求",
+                        Instance = $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}",
+                    };
+
+                    if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+                        problem.Extensions["retryAfter"] = retryAfter.TotalSeconds;
+
+                    if (problemDetails is not null)
+                    {
+                        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                        await problemDetails.TryWriteAsync(new ProblemDetailsContext
+                        {
+                            HttpContext = context.HttpContext,
+                            ProblemDetails = problem,
+                        });
+                        return;
+                    }
+
+                    context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                    await context.HttpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
+                };
+            });
+        }
+
+        // 响应压缩（Brotli 优先、Gzip 兜底；HTTPS 也启用）
+        if (options.UseResponseCompression)
+        {
+            builder.Services.AddResponseCompression(compression =>
+            {
+                compression.EnableForHttps = true;
+                compression.Providers.Add<BrotliCompressionProvider>();
+                compression.Providers.Add<GzipCompressionProvider>();
+            });
+        }
+
+        // 请求超时（默认 30s，超时 504）
+        if (options.UseRequestTimeouts)
+        {
+            builder.Services.AddRequestTimeouts(timeouts =>
+                timeouts.DefaultPolicy = new RequestTimeoutPolicy
+                {
+                    Timeout = TimeSpan.FromSeconds(options.RequestTimeoutSeconds),
+                    TimeoutStatusCode = 504,
+                });
+        }
+
         // 端点自动注册：IEndpoint 实现类进容器（单例，启动时统一映射一次）
         foreach (var assembly in assemblies)
         {
@@ -160,4 +287,30 @@ public static class LedonWebServiceCollectionExtensions
 
         return builder;
     }
+
+    /// <summary>确保 Bearer 安全方案在场（幂等）。</summary>
+    private static void EnsureBearerScheme(Microsoft.OpenApi.OpenApiDocument document)
+    {
+        document.Components ??= new Microsoft.OpenApi.OpenApiComponents();
+
+        document.Components.SecuritySchemes ??=
+            new Dictionary<string, Microsoft.OpenApi.IOpenApiSecurityScheme>();
+
+        document.Components.SecuritySchemes["Bearer"] = new Microsoft.OpenApi.OpenApiSecurityScheme
+        {
+            Type = Microsoft.OpenApi.SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = Microsoft.OpenApi.ParameterLocation.Header,
+            Name = "Authorization",
+            Description = "JWT 访问令牌：Authorization: Bearer {token}",
+        };
+    }
+
+    /// <summary>
+    /// 认证包（Ledon.Security）是否在场：按实现类型所在程序集名检测。
+    /// 不能用 <c>IAuthenticationSchemeProvider</c> 判据——MVC/授权自身也会注册它（误报）。
+    /// </summary>
+    private static bool SecurityRegistered(IServiceCollection services) =>
+        services.Any(descriptor => descriptor.ImplementationType?.Assembly.GetName().Name == "Ledon.Security");
 }

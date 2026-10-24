@@ -31,7 +31,7 @@ internal static class AssemblyScanner
 {
     /// <summary>
     /// 框架自身的程序集名。引用它们不等于业务程序集，需显式排除。
-    /// 新增功能包时在此登记（测试会守住这一点）。
+    /// 新增功能包时在此登记（测试会守住这一点：测试程序集引用的全部 Ledon.* 都不得进扫描集）。
     /// </summary>
     private static readonly HashSet<string> FrameworkAssemblyNames = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -41,7 +41,23 @@ internal static class AssemblyScanner
         "Ledon.Data",
         "Ledon.Caching",
         "Ledon.Queues",
+        "Ledon.Queues.RabbitMQ",
+        "Ledon.Queues.Kafka",
         "Ledon.Observability",
+        "Ledon.Security",
+        "Ledon.Scheduling",
+        "Ledon.Resilience",
+        "Ledon.SignalR",
+        "Ledon.Serilog",
+        "Ledon.FluentValidation",
+        "Ledon.MultiTenancy",
+        "Ledon.Configuration",
+        "Ledon.Configuration.Nacos",
+        "Ledon.Configuration.Apollo",
+        "Ledon.Aspire",
+        "Ledon.OpenIddict",
+        "Ledon.Testing",
+        "Ledon.Grpc",
     };
 
     public static AssemblyScanResult ResolveAssemblies(LedonOptions options)

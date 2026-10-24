@@ -24,6 +24,10 @@ public static class LedonWebApplicationExtensions
         if (options.UseProblemDetails)
             app.UseExceptionHandler();
 
+        // 响应压缩：在路由/端点之前（响应体经压缩写出）
+        if (options.UseResponseCompression)
+            app.UseResponseCompression();
+
         app.UseRouting();
 
         // 幂等：路由之后、端点之前（按最终路径缓存响应）
@@ -34,6 +38,10 @@ public static class LedonWebApplicationExtensions
         if (options.UseCors)
             app.UseCors(options.CorsPolicyName);
 
+        // 限流：路由之后、认证之前——超限请求尽早拒绝，不消耗认证/业务资源
+        if (options.UseRateLimiting)
+            app.UseRateLimiter();
+
         // 认证授权：检测到任何认证方案（如 Ledon.Security 注册的）时自动接线，
         // 未配置认证时为零开销跳过——不用记"还要加 UseAuthentication"
         if (app.Services.GetService<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>() is not null)
@@ -41,6 +49,10 @@ public static class LedonWebApplicationExtensions
             app.UseAuthentication();
             app.UseAuthorization();
         }
+
+        // 请求超时：端点执行阶段生效（超时 504）
+        if (options.UseRequestTimeouts)
+            app.UseRequestTimeouts();
 
         foreach (var endpoint in app.Services.GetServices<IEndpoint>())
             endpoint.Map(app);

@@ -342,6 +342,19 @@ public class FeaturePackagesTests : IDisposable
         Assert.DoesNotContain(typeof(Ledon.Queues.IBackgroundQueue).Assembly.GetName().Name!, names);
         Assert.DoesNotContain(typeof(Ledon.Observability.LedonObservabilityOptions).Assembly.GetName().Name!, names);
 
+        // 不变量：测试程序集直接引用的每个框架包（Ledon.*）都不得进扫描集。
+        // 漏登记某个包时，它的同名接口类会被约定注入误注册（曾漏 Ledon.Security：
+        // ICurrentUser/JwtTokenGenerator 在未调用 AddLedonSecurity 时也被注册）
+        var frameworkPackages = typeof(FeaturePackagesTests).Assembly.GetReferencedAssemblies()
+            .Select(reference => reference.Name!)
+            .Where(name => name.StartsWith("Ledon.", StringComparison.Ordinal)
+                && name != typeof(FeaturePackagesTests).Assembly.GetName().Name)
+            .ToArray();
+
+        Assert.NotEmpty(frameworkPackages);
+        foreach (var package in frameworkPackages)
+            Assert.DoesNotContain(package, names);
+
         // EF Core 等基础设施不扫
         Assert.DoesNotContain(typeof(Microsoft.EntityFrameworkCore.DbContext).Assembly.GetName().Name!, names);
     }

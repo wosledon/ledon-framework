@@ -4,8 +4,10 @@ using Ledon.Module;
 using Ledon.Observability;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -120,4 +122,21 @@ public static class LedonHealthCheckEndpointExtensions
     /// <summary>就绪探针：全部注册的检查都通过才 200（供流量开关判断）。</summary>
     public static WebApplication MapLedonReadiness(this WebApplication app, string pattern = "/health/ready") =>
         app.MapLedonHealthChecks(pattern, _ => true);
+
+    /// <summary>
+    /// 启动探针：宿主启动完成（含模块初始化）后 200，之前 503。
+    /// 供容器/编排系统区分"还在启动"与"启动失败"——启动慢的应用不会被探针误杀。
+    /// </summary>
+    public static WebApplication MapLedonStartup(this WebApplication app, string pattern = "/health/startup")
+    {
+        ArgumentNullException.ThrowIfNull(app);
+
+        app.MapGet(pattern, (IHostApplicationLifetime lifetime) =>
+            lifetime.ApplicationStarted.IsCancellationRequested
+                ? Results.Ok(new { status = "started" })
+                : Results.StatusCode(StatusCodes.Status503ServiceUnavailable))
+            .AllowAnonymous();
+
+        return app;
+    }
 }

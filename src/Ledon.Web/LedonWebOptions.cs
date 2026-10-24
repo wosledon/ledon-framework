@@ -77,4 +77,31 @@ public sealed class LedonWebOptions
 
     /// <summary>允许的跨域来源（精确匹配协议+主机+端口，如 https://app.example.com）。</summary>
     public string[] CorsOrigins { get; set; } = [];
+
+    /// <summary>
+    /// 限流中间件（默认关）：固定窗口限流。分区键优先取 <c>X-Api-Key</c> 请求头
+    /// （服务间调用按调用方限流），否则按客户端 IP。超限返回 429 ProblemDetails。
+    /// </summary>
+    public bool UseRateLimiting { get; set; }
+
+    /// <summary>限流窗口内允许的请求数，默认 100。</summary>
+    public int RateLimitPermitLimit { get; set; } = 100;
+
+    /// <summary>限流窗口长度（秒），默认 60。</summary>
+    public int RateLimitWindowSeconds { get; set; } = 60;
+
+    /// <summary>响应压缩（默认关）：Brotli/Gzip（HTTPS 也启用），大响应体收益明显。</summary>
+    public bool UseResponseCompression { get; set; }
+
+    /// <summary>请求超时（默认关）：超过 <see cref="RequestTimeoutSeconds"/> 未响应的请求返回 504。</summary>
+    public bool UseRequestTimeouts { get; set; }
+
+    /// <summary>请求超时时间（秒），默认 30。</summary>
+    public int RequestTimeoutSeconds { get; set; } = 30;
+
+    /// <summary>OpenAPI 文档标题，默认 "Ledon API"。</summary>
+    public string? OpenApiTitle { get; set; } = "Ledon API";
+
+    /// <summary>OpenAPI 文档描述（可选）。</summary>
+    public string? OpenApiDescription { get; set; }
 }
