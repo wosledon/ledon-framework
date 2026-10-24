@@ -57,6 +57,13 @@ builder.Services.AddSingleton<IIntegrationEventTransport>(new MyRabbitMqTranspor
 
 现成实现：`Ledon.Queues.RabbitMQ` 包（`AddLedonRabbitMqTransport()`，含发布与订阅消费两侧）。
 
+```csharp
+builder.Services.AddLedonRabbitMqTransport(o =>
+    o.ConnectionString = "amqp://user:pass@localhost:5672");
+```
+
+发布方与消费方装同一个包：发布侧由发件箱自动投递；消费侧自动订阅本服务队列（默认 `{交换机}.{服务名}`，多实例竞争消费）并派发到进程内 handler——消费方代码零改动。单条处理失败不确认，broker 重新投递（至少一次）。
+
 传输失败由发件箱记录重试（至少一次语义不变）；投递成功才标记已处理。
 
 ## 怎么选

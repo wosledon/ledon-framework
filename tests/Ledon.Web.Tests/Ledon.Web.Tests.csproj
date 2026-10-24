@@ -29,6 +29,7 @@
         <ProjectReference Include="..\..\src\Ledon.Data\Ledon.Data.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Caching\Ledon.Caching.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Queues\Ledon.Queues.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Queues.RabbitMQ\Ledon.Queues.RabbitMQ.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Observability\Ledon.Observability.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Security\Ledon.Security.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Scheduling\Ledon.Scheduling.csproj" />

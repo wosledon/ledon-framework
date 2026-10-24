@@ -1,4 +1,5 @@
 using Ledon.Queues;
+using Ledon.Queues.RabbitMQ;
 using Ledon.Web.Tests.Fixtures;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -115,6 +116,48 @@ public class OutboxTests : IDisposable
         var orderPlaced = Assert.IsType<OrderPlaced>(published[0]);
         Assert.Equal("order-t1", orderPlaced.OrderId);
         Assert.False(OutboxSignal.Delivered, "注册传输后进程内 handler 不应被调用");
+    }
+
+    // ---------- RabbitMQ 端到端（需 broker；设置 LEDON_TEST_RABBITMQ_URL 后启用） ----------
+
+    [Fact]
+    public async Task RabbitMQ_transport_delivers_event_to_local_handler()
+    {
+        var url = Environment.GetEnvironmentVariable("LEDON_TEST_RABBITMQ_URL");
+        if (url is null)
+            return;   // 无 broker 环境：跳过（CI/本地默认不含 RabbitMQ）
+
+        OutboxSignal.Delivered = false;
+
+        var dbPath = Path.Combine(AppContext.BaseDirectory, $"outbox-rabbit-{Guid.NewGuid():N}.db");
+
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonOutbox(options => options.PollingInterval = TimeSpan.FromMilliseconds(100));
+        builder.Services.AddDbContext<TestOutboxDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath}"));
+        builder.Services.AddLedonRabbitMqTransport(o => o.ConnectionString = url);
+
+        var app = builder.Build();
+        _app = app;
+        await app.StartAsync();
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+            await db.Database.EnsureCreatedAsync();
+
+            var store = scope.ServiceProvider.GetRequiredService<IOutboxStore>();
+            store.Add(new OrderPlaced("order-rabbit"));
+            await db.SaveChangesAsync();
+        }
+
+        // 全链路：Outbox → RabbitMQ → 消费侧 → 进程内 handler
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+        while (!OutboxSignal.Delivered && DateTime.UtcNow < deadline)
+            await Task.Delay(100);
+
+        Assert.True(OutboxSignal.Delivered, "事件未经 RabbitMQ 送达进程内 handler（检查 LEDON_TEST_RABBITMQ_URL）");
     }
 
     public void Dispose()

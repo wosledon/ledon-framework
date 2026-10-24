@@ -87,8 +87,10 @@ internal sealed class OutboxDispatcher : BackgroundService
         var eventType = Type.GetType(message.Type)
             ?? throw new InvalidOperationException($"无法加载事件类型 {message.Type}");
 
-        var @event = (IIntegrationEvent?)(JsonSerializer.Deserialize(message.Payload, eventType, SerializerOptions)
-            ?? throw new InvalidOperationException($"事件 {message.Type} 载荷反序列化为 null"));
+        var boxed = JsonSerializer.Deserialize(message.Payload, eventType, SerializerOptions)
+            ?? throw new InvalidOperationException($"事件 {message.Type} 载荷反序列化为 null");
+
+        var @event = (IIntegrationEvent)boxed;
 
         // 注册了传输（消息中间件）：投给 broker，由消费侧派发——跨服务解耦
         var transport = services.GetService<IIntegrationEventTransport>();
@@ -98,19 +100,6 @@ internal sealed class OutboxDispatcher : BackgroundService
             return;
         }
 
-        var handlerType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
-        var enumerableType = typeof(IEnumerable<>).MakeGenericType(handlerType);
-
-        var handlers = (System.Collections.IEnumerable?)services.GetService(enumerableType);
-        if (handlers is null)
-            return;
-
-        var method = handlerType.GetMethod(nameof(IIntegrationEventHandler<IIntegrationEvent>.HandleAsync))!;
-
-        foreach (var handler in handlers)
-        {
-            var task = (Task)method.Invoke(handler, [@event, cancellationToken])!;
-            await task;
-        }
+        await IntegrationEventDispatcher.DispatchAsync(services, @event, cancellationToken);
     }
 }

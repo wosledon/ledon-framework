@@ -8,6 +8,8 @@
         <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
         <!-- 调度领导权选举（Redis 锁） -->
         <PackageVersion Include="StackExchange.Redis" Version="2.7.27" />
+        <!-- 消息中间件（按需引入） -->
+        <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
         <!-- 框架运行期 -->
         <PackageVersion Include="Cronos" Version="0.13.0" />
         <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />

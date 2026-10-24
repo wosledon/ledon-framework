@@ -26,6 +26,7 @@ app.Run();
 | 数据访问（EF Core + 发件箱）           | `Ledon.Data` / `Ledon.Queues` | `AddLedonData()` / `AddLedonOutbox()`                | 自动注册 + 前置自动建库 + 至少一次投递           |
 | 缓存                                   | `Ledon.Caching`               | `AddLedonCaching()` / `AddLedonDistributedCaching()` | 内存（single-flight）/ 分布式（Redis）           |
 | 后台任务                               | `Ledon.Queues`                | `AddLedonQueues()`                                   | Channel 有界 + 多 worker                         |
+| 消息中间件传输                         | `Ledon.Queues.RabbitMQ`       | `AddLedonRabbitMqTransport()`                        | 发件箱 ↔ RabbitMQ，跨服务投递                   |
 | 定时任务                               | `Ledon.Scheduling`            | `AddLedonScheduling()`                               | cron 驱动（5/6 段）                              |
 | 认证授权                               | `Ledon.Security`              | `AddLedonSecurity()`                                 | JWT + API Key + 权限策略                         |
 | 可观测性                               | `Ledon.Observability`         | `AddLedonObservability()`                            | OTel 链路/指标（含框架自身 span）+ 健康检查      |
