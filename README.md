@@ -402,6 +402,10 @@ var invoker = provider.GetRequiredService<ISchedulerInvoker>();
 await invoker.InvokeAsync<ReconcileTask>(ct);   // 等不到 cron 立即重跑
 ```
 
+## 许可证
+
+[MIT](LICENSE) © wosledon
+
 ## 设计边界（v1 明确不做）
 
 - 运行时动态加载 / 插件热插拔（当前为静态引用；发现环节已与加载方式解耦，后续可扩展）
