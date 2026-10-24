@@ -29,7 +29,8 @@ app.Run();
 | 消息中间件传输                         | `Ledon.Queues.RabbitMQ`       | `AddLedonRabbitMqTransport()`                        | 发件箱 ↔ RabbitMQ，跨服务投递                   |
 | 定时任务                               | `Ledon.Scheduling`            | `AddLedonScheduling()`                               | cron 驱动（5/6 段）                              |
 | 认证授权                               | `Ledon.Security`              | `AddLedonSecurity()`                                 | JWT + API Key + 权限策略                         |
-| 可观测性                               | `Ledon.Observability`         | `AddLedonObservability()`                            | OTel 链路/指标（含框架自身 span）+ 健康检查      |
+| 可观测性                               | `Ledon.Observability`         | `AddLedonObservability()`                            | OTel 链路/指标/日志 + 健康检查 + Prometheus |
+| 结构化日志                             | `Ledon.Serilog`               | `builder.AddLedonSerilog()`                          | Serilog + TraceId/SpanId 富化              |
 | 弹性策略                               | `Ledon.Resilience`            | `AddLedonResilience()`                               | 重试/超时/熔断，接管全部 HttpClient              |
 | 强类型配置                             | `Ledon.Configuration`         | `AddLedonOptions<T>(config)`                         | 绑定 + 启动校验                                  |
 | 多租户                                 | `Ledon.MultiTenancy`          | `AddLedonMultiTenancy()`                             | 租户解析 + 后台穿透                              |
@@ -260,6 +261,8 @@ src/Ledon.Resilience/   弹性策略（重试/超时/熔断）
 src/Ledon.Configuration/ 强类型配置约定
 src/Ledon.MultiTenancy/ 多租户
 src/Ledon.Testing/      集成测试基建
+src/Ledon.Serilog/       Serilog 结构化日志集成
+src/Ledon.Queues.RabbitMQ/ RabbitMQ 传输（发件箱 ↔ broker）
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
 tests/                  xunit 测试（34+ 用例，顺序断言 + 变异验证）

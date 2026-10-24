@@ -60,6 +60,20 @@ app.MapLedonPrometheus();   // GET /metrics
 
 与 OTLP 推送可同时开（同一指标两路出口）。依赖 OTel 官方的 Prometheus 导出器包（长期 beta，生产广泛使用）。
 
+## 结构化日志（Serilog）
+
+需要 Serilog 的 sink 生态（文件/Seq/ELK……）与结构化查询时装 `Ledon.Serilog`：
+
+```csharp
+builder.AddLedonSerilog();
+```
+
+- 有 `Serilog` 配置节时按配置装载（sink/级别/富化全在 appsettings.json）；没配时控制台默认 sink；
+- 自动富化 `FromLogContext` + 当前 Activity 的 `TraceId`/`SpanId`——日志与链路在后端按同一 TraceId 互跳；
+- `configure` 回调可追加/覆盖任何配置：`builder.AddLedonSerilog(c => c.MinimumLevel.Verbose())`。
+
+与上面的 OTLP 日志导出互补：Serilog 管结构化输出与 sink 生态，OTel 管与 trace/metrics 同资源同端点。两者可同时用（Serilog 作 sink、OTel 作关联）。
+
 ## 健康检查
 
 ```csharp

@@ -12,6 +12,8 @@
         <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
         <!-- Prometheus 抓取端点（OTel 官方该包长期 beta，生产广泛使用） -->
         <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.20.1-beta.1" />
+        <!-- 结构化日志（按需引入） -->
+        <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
         <!-- 框架运行期 -->
         <PackageVersion Include="Cronos" Version="0.13.0" />
         <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />
