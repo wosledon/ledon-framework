@@ -15,13 +15,18 @@ public sealed class ModuleManager : IModuleManager
 {
     private readonly List<ModuleDescriptor> _modules;
     private readonly ModuleDiagnostics _diagnostics;
+    private readonly bool _parallelInitialization;
     private IServiceProvider? _services;
     private bool _initialized;
 
-    internal ModuleManager(IReadOnlyList<ModuleDescriptor> modules, ModuleDiagnostics diagnostics)
+    internal ModuleManager(
+        IReadOnlyList<ModuleDescriptor> modules,
+        ModuleDiagnostics diagnostics,
+        bool parallelInitialization = false)
     {
         _modules = modules as List<ModuleDescriptor> ?? modules.ToList();
         _diagnostics = diagnostics;
+        _parallelInitialization = parallelInitialization;
     }
 
     public IReadOnlyList<ModuleDescriptor> Modules => _modules;
@@ -60,27 +65,25 @@ public sealed class ModuleManager : IModuleManager
                     await task.ExecuteAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            foreach (var descriptor in _modules)
+            // 依赖分层：同一层的模块互不依赖，可并行初始化（ParallelInitialization 开启时）；
+            // 层与层之间保持拓扑序，被依赖者仍先初始化
+            foreach (var level in DependencyLevels())
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                using var activity = LedonActivity.Modules.StartActivity("Module.Initialize");
-                activity?.SetTag("module.name", descriptor.Name);
-                activity?.SetTag("module.dependencies", string.Join(", ", descriptor.Dependencies.Select(d => d.Name)));
+                if (level.Count == 1 || !_parallelInitialization)
+                {
+                    foreach (var descriptor in level)
+                        await InitializeOneAsync(descriptor, services, initialized, cancellationToken).ConfigureAwait(false);
 
-                try
-                {
-                    await descriptor.Instance!.OnInitializedAsync(new ModuleContext(descriptor, services), cancellationToken).ConfigureAwait(false);
-                }
-                catch
-                {
-                    descriptor.State = ModuleState.Failed;
-                    activity?.SetStatus(ActivityStatusCode.Error);
-                    throw;
+                    continue;
                 }
 
-                descriptor.State = ModuleState.Initialized;
-                initialized.Add(descriptor);
+                // Task.WhenAll 会等全部任务结束（即使其中一个失败）后再抛出首个异常，
+                // 因此这里能拿到完整的 initialized 集合用于回滚
+                await Task.WhenAll(level
+                    .Select(descriptor => InitializeOneAsync(descriptor, services, initialized, cancellationToken)))
+                    .ConfigureAwait(false);
             }
         }
         catch
@@ -104,6 +107,76 @@ public sealed class ModuleManager : IModuleManager
         }
 
         _initialized = true;
+    }
+
+    private async Task InitializeOneAsync(
+        ModuleDescriptor descriptor,
+        IServiceProvider services,
+        List<ModuleDescriptor> initialized,
+        CancellationToken cancellationToken)
+    {
+        using var activity = LedonActivity.Modules.StartActivity("Module.Initialize");
+        activity?.SetTag("module.name", descriptor.Name);
+        activity?.SetTag("module.dependencies", string.Join(", ", descriptor.Dependencies.Select(d => d.Name)));
+
+        try
+        {
+            await descriptor.Instance!.OnInitializedAsync(new ModuleContext(descriptor, services), cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            descriptor.State = ModuleState.Failed;
+            activity?.SetStatus(ActivityStatusCode.Error);
+            throw;
+        }
+
+        descriptor.State = ModuleState.Initialized;
+
+        lock (initialized)
+            initialized.Add(descriptor);
+    }
+
+    /// <summary>
+    /// 按依赖深度分层（层号 = 依赖链最长路径）：第 0 层无依赖，第 n 层只依赖更浅的层。
+    /// 结果保持 <see cref="_modules"/> 内的相对顺序（拓扑序），并行执行时同层顺序不保证。
+    /// </summary>
+    private List<List<ModuleDescriptor>> DependencyLevels()
+    {
+        // Dependencies 里是模块 Type，先建 Type → 描述符映射
+        var byType = _modules.ToDictionary(descriptor => descriptor.ModuleType);
+        var levels = new Dictionary<ModuleDescriptor, int>(_modules.Count);
+
+        int LevelOf(ModuleDescriptor descriptor)
+        {
+            if (levels.TryGetValue(descriptor, out var level))
+                return level;
+
+            var depth = 0;
+            foreach (var dependency in descriptor.Dependencies)
+            {
+                if (!byType.TryGetValue(dependency, out var dependencyDescriptor))
+                    continue;   // 依赖图构建时已校验存在，防御性跳过
+
+                var dependencyLevel = LevelOf(dependencyDescriptor) + 1;
+                if (dependencyLevel > depth)
+                    depth = dependencyLevel;
+            }
+
+            levels[descriptor] = depth;
+            return depth;
+        }
+
+        var groups = new List<List<ModuleDescriptor>>();
+        foreach (var descriptor in _modules)
+        {
+            var level = LevelOf(descriptor);
+            while (groups.Count <= level)
+                groups.Add([]);
+
+            groups[level].Add(descriptor);
+        }
+
+        return groups;
     }
 
     public async Task ShutdownAsync(CancellationToken cancellationToken = default)

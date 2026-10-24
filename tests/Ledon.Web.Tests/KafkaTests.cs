@@ -1,3 +1,5 @@
+using System.Text;
+using Confluent.Kafka;
 using Ledon.Queues;
 using Ledon.Queues.Kafka;
 using Ledon.Web.Tests.Fixtures;
@@ -77,6 +79,76 @@ public class KafkaTests : IDisposable
 
         Assert.Throws<InvalidOperationException>(
             () => services.AddLedonKafkaTransport(o => o.BootstrapServers = ""));
+    }
+
+    // ---------- 死信路由 ----------
+
+    [Fact]
+    public void Dead_letter_topic_is_original_topic_plus_suffix()
+    {
+        Assert.Equal(
+            "ledon.MyApp.OrderPlaced.dlq",
+            KafkaDeadLetterRouter.DeadLetterTopicFor("ledon.MyApp.OrderPlaced", ".dlq"));
+    }
+
+    [Fact]
+    public void Dead_letter_triggers_only_after_max_attempts()
+    {
+        Assert.False(KafkaDeadLetterRouter.ShouldDeadLetter(3, 5));
+        Assert.False(KafkaDeadLetterRouter.ShouldDeadLetter(4, 5));
+        Assert.True(KafkaDeadLetterRouter.ShouldDeadLetter(5, 5));
+        Assert.True(KafkaDeadLetterRouter.ShouldDeadLetter(9, 5));
+
+        // 上限设为 0/负值 = 不启用死信（无限重投）
+        Assert.False(KafkaDeadLetterRouter.ShouldDeadLetter(100, 0));
+        Assert.False(KafkaDeadLetterRouter.ShouldDeadLetter(100, -1));
+    }
+
+    [Fact]
+    public void Dead_letter_message_preserves_payload_and_headers_and_adds_diagnostics()
+    {
+        var original = new Message<string, string>
+        {
+            Key = "order-1",
+            Value = "{\"orderId\":\"order-1\"}",
+            Headers = new Headers
+            {
+                { KafkaEventCodec.EventTypeHeader, Encoding.UTF8.GetBytes("MyApp.OrderPlaced") },
+            },
+        };
+
+        var dead = KafkaDeadLetterRouter.BuildDeadLetterMessage(original, attempts: 5, reason: "handler boom");
+
+        Assert.Equal("order-1", dead.Key);
+        Assert.Equal("{\"orderId\":\"order-1\"}", dead.Value);
+
+        string? Header(string key) => dead.Headers
+            .FirstOrDefault(header => header.Key == key) is { } found
+                ? Encoding.UTF8.GetString(found.GetValueBytes())
+                : null;
+
+        Assert.Equal("MyApp.OrderPlaced", Header(KafkaEventCodec.EventTypeHeader));   // 原始头保留
+        Assert.Equal("5", Header(KafkaDeadLetterRouter.DeliveryAttemptsHeader));
+        Assert.Equal("handler boom", Header(KafkaDeadLetterRouter.DeadLetterReasonHeader));
+        Assert.NotNull(Header(KafkaDeadLetterRouter.DeadLetterAtHeader));
+    }
+
+    [Fact]
+    public void Kafka_transport_registers_broker_health_check()
+    {
+        var services = new ServiceCollection();
+        services.AddLedonKafkaTransport(o => o.BootstrapServers = "localhost:9092");
+
+        using var provider = services.BuildServiceProvider();
+
+        // 健康检查登记在 HealthCheckServiceOptions（就绪探针聚合它）
+        var registrations = provider.GetRequiredService<
+            Microsoft.Extensions.Options.IOptions<Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckServiceOptions>>()
+            .Value.Registrations;
+
+        Assert.Contains(registrations, registration =>
+            registration.Name == "kafka"
+            && registration.Factory is not null);
     }
 
     // ---------- broker 端到端（需 Kafka；设置 LEDON_TEST_KAFKA_BOOTSTRAP 后启用） ----------

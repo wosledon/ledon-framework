@@ -93,6 +93,8 @@ app.MapLedonReadiness();   // /health/ready 聚合全部检查（摘流判断）
 | ---------- | --------------------------- | --------------------------------------------- |
 | `database` | `AddLedonData()` 自动登记   | 全部 `ILedonDbContext` 执行 `CanConnectAsync` |
 | `redis`    | 配了连接串才登记            | PING 探测                                     |
+| `kafka`    | `AddLedonKafkaTransport()`  | AdminClient 取集群元数据                      |
+| `rabbitmq` | `AddLedonRabbitMqTransport()` | 连接状态 + 开临时通道验证                   |
 
 ```csharp
 builder.Services.AddLedonHealthChecks(o => o.RedisConnectionString = "localhost:6379");

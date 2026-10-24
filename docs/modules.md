@@ -55,3 +55,15 @@ await context.Events.PublishAsync(new UserCreated("alice"));
 ```csharp
 using var span = ctx.StartActivity("加载配置");   // 挂入框架链路树
 ```
+
+## 并行初始化（可选）
+
+模块多、初始化含 IO 等待时，同一依赖层（互不依赖）的模块可并发初始化：
+
+```csharp
+builder.Services.AddLedon(o => o.ParallelInitialization = true);
+```
+
+- 层与层之间仍保持拓扑序（被依赖者先初始化），只有同层并行；
+- 同层模块的初始化顺序不再确定（日志/诊断顺序会变）——模块间有隐式依赖时用 `[DependsOn]` 显式声明；
+- 失败回滚语义不变：已初始化的模块（含并行层中已完成的）按逆序关闭，原始异常原样抛出。

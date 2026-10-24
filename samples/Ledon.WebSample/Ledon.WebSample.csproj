@@ -18,10 +18,20 @@
         <ProjectReference Include="..\..\src\Ledon.Caching\Ledon.Caching.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Queues\Ledon.Queues.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Observability\Ledon.Observability.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Scheduling\Ledon.Scheduling.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.SignalR\Ledon.SignalR.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Grpc\Ledon.Grpc.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Grpc.Net.Client" />
+    <!-- 示例里的 gRPC 服务代码由 protoc 生成（与真实项目一致） -->
+    <PackageReference Include="Grpc.Tools" />
+    </ItemGroup>
+
+    <ItemGroup>
+    <Protobuf Include="Protos\demo.proto" GrpcServices="Server,Client" />
     </ItemGroup>
 
 </Project>

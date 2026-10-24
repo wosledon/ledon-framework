@@ -137,6 +137,7 @@ class Ledon.Module.Hosting.LedonOptions
   System.Type GetType()
   P DefaultServiceLifetime : ServiceLifetime
   P Events : EventOptions
+  P ParallelInitialization : Boolean
 class Ledon.Module.LedonAssemblies
   Boolean Equals(System.Object)
   Int32 GetHashCode()

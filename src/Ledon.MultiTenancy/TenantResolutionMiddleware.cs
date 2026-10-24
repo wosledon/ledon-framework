@@ -45,7 +45,11 @@ internal sealed class TenantResolutionMiddleware
             context.Items[TenantContext.ItemKey] = tenantId;
         }
 
-        await _next(context).ConfigureAwait(false);
+        // 环境租户随请求管线流动：查询过滤（ApplyTenantFilters）等取当前租户的场景依赖它
+        using (TenantContext.SetAmbient(tenantId))
+        {
+            await _next(context).ConfigureAwait(false);
+        }
     }
 
     /// <summary>从 Host 取子域名作为租户标识；apex 域名/无关域名返回 null（单租户）。</summary>

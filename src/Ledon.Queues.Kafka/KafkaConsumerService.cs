@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 using Confluent.Kafka;
 using Ledon.Module;
@@ -18,15 +19,21 @@ internal sealed class KafkaConsumerService : BackgroundService
 {
     private readonly IServiceProvider _services;
     private readonly KafkaOptions _options;
+    private readonly IProducer<string, string> _producer;
     private readonly ILogger<KafkaConsumerService> _logger;
+
+    /// <summary>进程内投递尝试计数（键 = 主题/分区/偏移量）。重启后重置——死信上限是"尽力而为"的护栏。</summary>
+    private readonly ConcurrentDictionary<string, int> _attempts = new();
 
     public KafkaConsumerService(
         IServiceProvider services,
         KafkaOptions options,
+        IProducer<string, string> producer,
         ILogger<KafkaConsumerService> logger)
     {
         _services = services;
         _options = options;
+        _producer = producer;
         _logger = logger;
     }
 
@@ -83,15 +90,52 @@ internal sealed class KafkaConsumerService : BackgroundService
             }
             catch (Exception ex)
             {
+                var attempts = _attempts.AddOrUpdate(
+                    AttemptKey(result), 1, (_, count) => count + 1);
+
+                if (KafkaDeadLetterRouter.ShouldDeadLetter(attempts, _options.MaxDeliveryAttempts))
+                {
+                    // 毒消息：转入死信主题并提交偏移量——不再阻塞分区重投
+                    await DeadLetterAsync(result, attempts, ex, stoppingToken).ConfigureAwait(false);
+                    _attempts.TryRemove(AttemptKey(result), out _);
+
+                    if (!_options.EnableAutoCommit)
+                        consumer.Commit(result);
+
+                    continue;
+                }
+
                 // 不提交偏移量：broker 重新投递（至少一次语义）
-                var failedType = HeaderValue(result.Message.Headers ?? new Headers(), KafkaEventCodec.EventTypeHeader);
-                _logger.LogWarning(ex, "集成事件 {Type} 消费失败（等待重新投递）", failedType ?? result.Topic);
+                _logger.LogWarning(ex,
+                    "集成事件消费失败（第 {Attempt}/{Max} 次，等待重新投递）: {Topic}[{Partition}]@{Offset}",
+                    attempts, _options.MaxDeliveryAttempts, result.Topic, result.Partition, result.Offset);
                 continue;
             }
 
             if (!_options.EnableAutoCommit)
                 consumer.Commit(result);
         }
+    }
+
+    private static string AttemptKey(ConsumeResult<string, string> result) =>
+        $"{result.Topic}/{result.Partition.Value}/{result.Offset.Value}";
+
+    private async Task DeadLetterAsync(
+        ConsumeResult<string, string> result,
+        int attempts,
+        Exception error,
+        CancellationToken cancellationToken)
+    {
+        var deadLetterTopic = KafkaDeadLetterRouter.DeadLetterTopicFor(result.Topic, _options.DeadLetterTopicSuffix);
+
+        _logger.LogError(error,
+            "集成事件消费失败达 {Attempts} 次上限，转入死信主题 {DeadLetterTopic}（原消息保留，可重置消费组偏移量重放）",
+            attempts, deadLetterTopic);
+
+        var message = KafkaDeadLetterRouter.BuildDeadLetterMessage(
+            result.Message, attempts, error.Message);
+
+        await _producer.ProduceAsync(deadLetterTopic, message, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task HandleAsync(ConsumeResult<string, string> result, CancellationToken cancellationToken)

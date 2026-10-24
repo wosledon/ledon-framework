@@ -14,4 +14,9 @@
         <ProjectReference Include="..\Ledon.Module\Ledon.Module.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <!-- 查询过滤助手（ApplyTenantFilters）需要 EF Core 的 ModelBuilder -->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    </ItemGroup>
+
 </Project>

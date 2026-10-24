@@ -32,6 +32,15 @@ public sealed class KafkaOptions
 
     /// <summary>额外订阅的主题（发现机制之外手动指定），默认空。</summary>
     public List<string> ExtraTopics { get; set; } = [];
+
+    /// <summary>
+    /// 单条消息的最大投递尝试次数（默认 5）。超过后进入死信主题（<c>{主题}{DeadLetterTopicSuffix}</c>），
+    /// 不再阻塞分区重投；重置消费组偏移量可重放。设为 0 或负值表示不启用死信（无限重投）。
+    /// </summary>
+    public int MaxDeliveryAttempts { get; set; } = 5;
+
+    /// <summary>死信主题后缀，默认 <c>.dlq</c>（如 <c>ledon.MyApp.OrderPlaced.dlq</c>）。</summary>
+    public string DeadLetterTopicSuffix { get; set; } = ".dlq";
 }
 
 /// <summary>无已提交偏移量时的消费起点。</summary>

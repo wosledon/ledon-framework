@@ -57,6 +57,31 @@ db.Orders.Where(o => o.TenantId == tenant.TenantId);
 
 理由：隐式全局过滤会让"跨租户统计"这类需求变得困难，且容易在 join 场景产生意外遗漏。约定显式，隔离责任在数据层清晰可见。
 
+### 需要全局过滤时：ApplyTenantFilters
+
+实体实现 `IMultiTenant`（`TenantId` 属性），并在 `OnModelCreating` 里**显式**启用过滤（与软删除过滤同一风格）：
+
+```csharp
+public class Order : IMultiTenant
+{
+    public int Id { get; set; }
+    public string TenantId { get; set; } = string.Empty;
+}
+
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+{
+    // 每请求/每作用域设置当前租户（Web 中间件解析后写入；后台任务 SetAmbient 穿透后写入）
+    public string? CurrentTenantId { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+        modelBuilder.ApplyTenantFilters(this, context => context.CurrentTenantId);
+}
+```
+
+- 过滤表达式引用**上下文实例成员**（EF 文档的查询过滤模式），EF 每次查询按当前上下文实例重新求值；
+- **不要**传闭包捕获 DbContext 字段的 `Func`——EF 按上下文类型缓存模型与编译后的查询计划，Func 结果会被首个查询固化；
+- 无租户上下文时默认不过滤（宿主/后台穿透视角可见全部行，单租户应用不受影响）；`filterWhenNoTenant: true` 则改为过滤为空（严格隔离）。
+
 ## 边界
 
 路由值解析（`/tenants/{tenantId}/...`）未内置，可在 `TenantResolutionMiddleware` 基础上自行扩展。后台任务的环境租户靠入队时捕获，**不会**随每次队列派发重新解析——跨租户复用的 worker 进程需显式 `SetAmbient`。

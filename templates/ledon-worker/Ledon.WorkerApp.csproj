@@ -8,6 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- 按需引入：用到的包才引用。常用补充：Ledon.Data（EF Core+发件箱）/
+             Ledon.Security（认证授权）/ Ledon.Observability（可观测性）/ Ledon.Grpc（服务间通信） -->
         <PackageReference Include="Ledon.Module" Version="0.1.0" />
         <PackageReference Include="Ledon.Queues" Version="0.1.0" />
         <PackageReference Include="Ledon.Scheduling" Version="0.1.0" />

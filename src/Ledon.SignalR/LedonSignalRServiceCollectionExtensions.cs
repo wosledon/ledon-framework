@@ -9,6 +9,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// 自动发现的 Hub 类型集合（类型化注册：避免与其它功能包的 <c>Type[]</c> 注册互相覆盖）。
+/// </summary>
+public sealed class DiscoveredHubs(IReadOnlyList<Type> hubs)
+{
+    /// <summary>已发现的 Hub 实现类型（按类型全名排序）。</summary>
+    public IReadOnlyList<Type> Hubs { get; } = hubs;
+}
+
 /// <summary>SignalR 配置。</summary>
 public sealed class LedonSignalROptions
 {
@@ -75,7 +84,7 @@ public static class LedonSignalRServiceCollectionExtensions
             .OrderBy(type => type.FullName, StringComparer.Ordinal)
             .ToArray();
 
-        services.AddSingleton(hubs);   // Type[] 供 MapLedonSignalRHubs 映射
+        services.AddSingleton(new DiscoveredHubs(hubs));   // 供 MapLedonSignalRHubs 映射
 
         return services;
     }
@@ -90,8 +99,8 @@ public static class LedonSignalRServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(endpoints);
 
-        var hubs = endpoints.ServiceProvider.GetService<Type[]>() ?? [];
-        if (hubs.Length == 0)
+        var hubs = endpoints.ServiceProvider.GetService<DiscoveredHubs>()?.Hubs ?? [];
+        if (hubs.Count == 0)
             return endpoints;
 
         // MapHub 只有泛型重载——发现的 Hub 类型是运行时的，需反射调用

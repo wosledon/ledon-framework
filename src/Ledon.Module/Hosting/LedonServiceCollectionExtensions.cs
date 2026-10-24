@@ -48,7 +48,7 @@ public static class LedonServiceCollectionExtensions
         foreach (var assembly in discovery.Assemblies)
             services.ScanAssembly(assembly, options.DefaultServiceLifetime, registrations);
 
-        var manager = new ModuleManager(descriptors, new ModuleDiagnostics(discovery, registrations));
+        var manager = new ModuleManager(descriptors, new ModuleDiagnostics(discovery, registrations), options.ParallelInitialization);
 
         // 阶段一：在宿主 BuildServiceProvider 之前按拓扑序执行各模块的服务注册
         foreach (var descriptor in descriptors)

@@ -36,8 +36,8 @@ public static class LedonGrpcServiceCollectionExtensions
 
         services.AddGrpc();
 
-        var serviceTypes = GrpcServiceDiscovery.Discover().ToArray();   // Type[] 注册（MapLedonGrpcServices 按 Type[] 解析）
-        services.AddSingleton(serviceTypes);
+        var serviceTypes = GrpcServiceDiscovery.Discover().ToArray();   // 供 MapLedonGrpcServices 映射
+        services.AddSingleton(new DiscoveredGrpcServices(serviceTypes));
 
         return services;
     }
@@ -71,6 +71,15 @@ public static class LedonGrpcServiceCollectionExtensions
     }
 }
 
+/// <summary>
+/// 自动发现的 gRPC 服务实现类型集合（类型化注册：避免与其它功能包的 <c>Type[]</c> 注册互相覆盖）。
+/// </summary>
+public sealed class DiscoveredGrpcServices(IReadOnlyList<Type> services)
+{
+    /// <summary>已发现的 gRPC 服务实现类型（按类型全名排序）。</summary>
+    public IReadOnlyList<Type> Services { get; } = services;
+}
+
 /// <summary>gRPC 端点映射扩展。</summary>
 public static class LedonGrpcEndpointExtensions
 {
@@ -88,8 +97,8 @@ public static class LedonGrpcEndpointExtensions
     {
         ArgumentNullException.ThrowIfNull(endpoints);
 
-        var serviceTypes = endpoints.ServiceProvider.GetService<Type[]>() ?? [];
-        if (serviceTypes.Length == 0)
+        var serviceTypes = endpoints.ServiceProvider.GetService<DiscoveredGrpcServices>()?.Services ?? [];
+        if (serviceTypes.Count == 0)
             return endpoints;
 
         var mapService = typeof(GrpcEndpointRouteBuilderExtensions)

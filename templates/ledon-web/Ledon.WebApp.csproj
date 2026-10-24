@@ -8,7 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <!-- 按需引入：用到的包才引用 -->
+        <!-- 按需引入：用到的包才引用。常用补充：
+             Ledon.Caching（缓存）/ Ledon.Queues（后台队列+发件箱）/ Ledon.Scheduling（定时任务）/
+             Ledon.Security（认证授权）/ Ledon.Observability（可观测性）/ Ledon.SignalR（实时推送）/
+             Ledon.Grpc（服务间通信）/ Ledon.FluentValidation（验证器自动发现） -->
         <PackageReference Include="Ledon.Web" Version="0.1.0" />
         <PackageReference Include="Ledon.Data" Version="0.1.0" />
     </ItemGroup>

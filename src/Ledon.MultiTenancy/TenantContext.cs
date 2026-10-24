@@ -23,6 +23,12 @@ public sealed class TenantContext : ITenantContext
         return new AmbientScope(previous);
     }
 
+    /// <summary>
+    /// 当前异步上下文的环境租户（后台任务穿透 + Web 请求经中间件设置）。
+    /// 查询过滤等"不能闭包捕获 DbContext 实例"的场景（EF 模型缓存）用它取当前租户。
+    /// </summary>
+    public static string? AmbientTenantId => Ambient.Value;
+
     public string? TenantId =>
         _accessor.HttpContext?.Items[ItemKey] as string
         ?? Ambient.Value;

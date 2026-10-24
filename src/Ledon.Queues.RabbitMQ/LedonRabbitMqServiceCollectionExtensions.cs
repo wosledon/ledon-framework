@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Ledon.Queues;
 using Ledon.Queues.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using global::RabbitMQ.Client;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -45,6 +46,10 @@ public static class LedonRabbitMqServiceCollectionExtensions
 
         services.AddSingleton<IIntegrationEventTransport, RabbitMqIntegrationEventTransport>();
         services.AddHostedService<RabbitMqConsumerService>();
+
+        // broker 连通性健康检查（就绪探针用；未接健康检查端点时是惰性登记，无副作用）
+        services.TryAddSingleton<RabbitMqHealthCheck>();
+        services.AddHealthChecks().AddCheck<RabbitMqHealthCheck>("rabbitmq");
 
         return services;
     }

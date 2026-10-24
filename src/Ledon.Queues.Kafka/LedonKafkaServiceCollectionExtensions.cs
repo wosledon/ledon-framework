@@ -2,6 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using Confluent.Kafka;
 using Ledon.Queues;
 using Ledon.Queues.Kafka;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -43,6 +45,10 @@ public static class LedonKafkaServiceCollectionExtensions
 
         services.AddSingleton<IIntegrationEventTransport, KafkaIntegrationEventTransport>();
         services.AddHostedService<KafkaConsumerService>();
+
+        // broker 连通性健康检查（就绪探针用；未接健康检查端点时是惰性登记，无副作用）
+        services.TryAddSingleton<KafkaHealthCheck>();
+        services.AddHealthChecks().AddCheck<KafkaHealthCheck>("kafka");
 
         return services;
     }

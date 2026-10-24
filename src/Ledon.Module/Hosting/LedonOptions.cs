@@ -27,6 +27,14 @@ public sealed class LedonOptions
     /// <summary>事件总线行为（处理器错误策略），默认失败即停。</summary>
     public EventOptions Events { get; } = new();
 
+    /// <summary>
+    /// 并行初始化（默认关）：开启后同一依赖层（互不依赖）的模块并发执行
+    /// <c>OnInitializedAsync</c>，层与层之间仍保持拓扑序——模块多、初始化含 IO 等待时
+    /// 启动时间明显缩短。注意：同层模块的初始化顺序不再确定（日志/诊断顺序会变），
+    /// 模块间若有未声明的隐式依赖请用 <c>[DependsOn]</c> 显式声明。
+    /// </summary>
+    public bool ParallelInitialization { get; set; }
+
     /// <summary>追加一个要扫描的模块程序集（与自动发现叠加生效）。</summary>
     public LedonOptions AddAssembly(Assembly assembly)
     {

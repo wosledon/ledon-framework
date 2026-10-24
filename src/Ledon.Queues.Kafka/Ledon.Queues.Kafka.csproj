@@ -12,6 +12,8 @@
 
     <ItemGroup>
         <PackageReference Include="Confluent.Kafka" />
+        <!-- broker 连通性健康检查（AddLedonKafkaTransport 自动登记） -->
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
     </ItemGroup>
 
 </Project>

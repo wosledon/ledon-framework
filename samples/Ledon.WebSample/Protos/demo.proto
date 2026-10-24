@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option csharp_namespace = "Ledon.WebSample.Grpc";
+
+package ledon.demo;
+
+// 示例 gRPC 服务：验证 Ledon.Grpc 的自动发现与约定映射。
+service Demo {
+  rpc Ping (PingRequest) returns (PingReply);
+}
+
+message PingRequest {
+  string message = 1;
+}
+
+message PingReply {
+  string reply = 1;
+}

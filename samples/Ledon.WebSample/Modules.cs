@@ -1,6 +1,8 @@
 using Ledon.Core.Events;
 using Ledon.Module;
 using Ledon.Module.Abstractions;
+using Ledon.Scheduling;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace Ledon.WebSample;
@@ -40,4 +42,33 @@ public class AppStartedHandler : IEventHandler<AppStarted>
         _logger.LogInformation("收到 AppStarted 事件（发布方不知道谁在处理）");
         return Task.CompletedTask;
     }
+}
+
+/// <summary>定时任务：实现 IScheduledTask 即按 cron 自动执行（每秒一次，示例窗口内能观察到）。</summary>
+public class DemoTickTask : IScheduledTask
+{
+    private int _ticks;
+
+    public string CronExpression => "*/1 * * * * *";
+
+    public int Ticks => Volatile.Read(ref _ticks);
+
+    public Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        Interlocked.Increment(ref _ticks);
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>SignalR Hub：自动发现并映射到 /hubs/demo。</summary>
+public class DemoHub : Hub
+{
+    public Task Echo(string message) => Clients.Caller.SendAsync("Echo", message);
+}
+
+/// <summary>gRPC 服务实现：继承 protoc 生成的 Demo.DemoBase，经 AddLedonGrpc 自动映射。</summary>
+public class DemoGrpcService : Grpc.Demo.DemoBase
+{
+    public override Task<Grpc.PingReply> Ping(Grpc.PingRequest request, global::Grpc.Core.ServerCallContext context) =>
+        Task.FromResult(new Grpc.PingReply { Reply = $"pong: {request.Message}" });
 }
