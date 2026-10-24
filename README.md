@@ -119,6 +119,7 @@ public class TodosController(TodoDbContext db) : ControllerBase
 | `UseApiVersioning`   | ❌    | URL 段 `api/v{version}/...`                   |
 | `UseCors`            | ❌    | 跨域：按 `CorsOrigins` 白名单放行             |
 | `UseScalarUi`        | ❌    | Scalar API 文档 UI（需同时开 UseOpenApi）     |
+| `UseIdempotency`     | ❌    | `Idempotency-Key` 幂等（需 IDistributedCache）|
 
 前后端分离（SPA）场景开跨域：
 

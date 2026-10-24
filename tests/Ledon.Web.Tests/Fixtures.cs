@@ -83,6 +83,21 @@ public class HelloEndpoint : IEndpoint
         => builder.MapGet("/hello", () => "world");
 }
 
+/// <summary>幂等测试计数端点：每次执行自增并返回计数值（验证同 Key 只执行一次）。</summary>
+public class CountEndpoint : IEndpoint
+{
+    private static int _count;
+
+    /// <summary>重置计数（测试间隔离）。</summary>
+    public static void Reset() => _count = 0;
+
+    public void Map(IEndpointRouteBuilder builder) =>
+        builder.MapPost("/count", () => new CountResponse(Interlocked.Increment(ref _count)));
+}
+
+/// <summary>计数端点响应。</summary>
+public sealed record CountResponse(int Count);
+
 // ---------- 控制器（ApplicationPart 自动发现） ----------
 
 [ApiController]

@@ -26,6 +26,10 @@ public static class LedonWebApplicationExtensions
 
         app.UseRouting();
 
+        // 幂等：路由之后、端点之前（按最终路径缓存响应）
+        if (options.UseIdempotency)
+            app.UseMiddleware<IdempotencyMiddleware>();
+
         // 跨域：必须在路由之后、认证授权之前（端点元数据上的 [EnableCors] 才能生效）
         if (options.UseCors)
             app.UseCors(options.CorsPolicyName);

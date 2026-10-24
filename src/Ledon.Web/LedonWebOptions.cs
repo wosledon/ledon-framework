@@ -33,6 +33,16 @@ public sealed class LedonWebOptions
     /// </summary>
     public string? DataProtectionApplicationName { get; set; }
 
+    /// <summary>
+    /// 幂等中间件（默认关）：带 <c>Idempotency-Key</c> 请求头的变更请求按
+    /// (方法+路径+Key) 缓存响应——重放返回缓存、并发同 Key 只执行一次、只缓存 2xx。
+    /// 需要 IDistributedCache 在场（<c>AddDistributedMemoryCache</c> 或 <c>AddLedonDistributedCaching</c>）。
+    /// </summary>
+    public bool UseIdempotency { get; set; }
+
+    /// <summary>幂等响应缓存时长，默认 24 小时。</summary>
+    public TimeSpan IdempotencyKeyTtl { get; set; } = TimeSpan.FromHours(24);
+
     /// <summary>关联 ID（X-Correlation-Id，贯穿请求头/响应头/日志作用域），默认开。</summary>
     public bool UseCorrelationId { get; set; } = true;
 

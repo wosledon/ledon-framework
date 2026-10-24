@@ -61,6 +61,19 @@ builder.AddLedonWeb(o => o.DataProtectionRedisConnectionString = "localhost:6379
 
 惰性连接 + AbortOnConnectFail=false：Redis 短暂不在线不阻塞启动。
 
+## 幂等请求
+
+带 `Idempotency-Key` 请求头的变更请求（POST/PUT/PATCH）自动幂等——重放返回缓存响应、并发同 Key 只执行一次（需 `IDistributedCache` 在场）：
+
+```csharp
+builder.AddLedonWeb(o => o.UseIdempotency = true);
+builder.Services.AddLedonDistributedCaching(o => o.RedisConnectionString = "localhost:6379");
+```
+
+- 缓存键 = (方法 + 路径 + Key)，响应带 `Idempotency-Replayed: true` 头表示重放；
+- 只缓存 2xx——失败不占键，客户端可带同 Key 重试；
+- 进程内单飞；跨实例去重靠共享 `IDistributedCache`（Redis 时多实例生效）。
+
 ## API 文档 UI
 
 OpenAPI 只有 JSON 文档；要可视化调试界面开 Scalar UI：
