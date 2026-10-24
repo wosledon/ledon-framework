@@ -1,7 +1,9 @@
 using Ledon.Module.Diagnostics;
 using Ledon.Observability;
+using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -66,6 +68,25 @@ public static class LedonObservabilityServiceCollectionExtensions
                 if (options.OtlpEndpoint is null)
                     metrics.AddOtlpExporter();
             });
+        }
+
+        if (options.EnableLogs)
+        {
+            services.AddLogging(logging => logging.AddOpenTelemetry(openTelemetry =>
+            {
+                openTelemetry.IncludeFormattedMessage = true;
+                openTelemetry.IncludeScopes = true;   // 关联 ID 等日志作用域随日志导出
+
+                if (options.UseConsoleExporter)
+                    openTelemetry.AddConsoleExporter();
+
+                // 日志经 ILoggingBuilder 注册（不在 OTel builder 上），端点需单独配置：
+                // 显式端点优先，否则走 OTEL_EXPORTER_OTLP_ENDPOINT
+                if (options.OtlpEndpoint is not null)
+                    openTelemetry.AddOtlpExporter(exporter => exporter.Endpoint = options.OtlpEndpoint);
+                else
+                    openTelemetry.AddOtlpExporter();
+            }));
         }
 
         // 显式端点：统一在 builder 上配置（同时覆盖 trace 与 metric）

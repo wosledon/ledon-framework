@@ -36,6 +36,19 @@ public async Task OnInitializedAsync(ModuleContext ctx, CancellationToken ct = d
 
 `UseLedonWeb()` 默认开启：`X-Correlation-Id` 贯穿请求头 → 响应头 → 日志作用域 → ProblemDetails（未携带则自动生成，携带则原样回显）。跨服务调用时透传上游 ID 即可串全链。
 
+## 日志导出
+
+`AddLedonObservability()` 默认把 ILogger 日志也经 OTLP 导出（含日志作用域——关联 ID、租户等 scope 值随日志一起到达后端），与链路/指标共用同一端点与资源：
+
+```csharp
+builder.Services.AddLedonObservability(o =>
+{
+    o.EnableLogs = false;   // 不需要日志导出时关掉（默认开）
+});
+```
+
+三位一体：trace（请求/模块/事件/队列/定时任务）+ metrics（ASP.NET/HttpClient/Runtime）+ logs（含作用域）。
+
 ## 健康检查
 
 ```csharp

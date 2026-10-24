@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Ledon.Web.Tests;
 
@@ -220,6 +221,31 @@ public class FeaturePackagesTests : IDisposable
 
         var response = await client.GetAsync("/");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode); // 无端点，仅验证管线可用
+    }
+
+    [Fact]
+    public async Task Observability_logs_export_does_not_block_host_lifecycle()
+    {
+        // 开启日志导出（含控制台导出器）：宿主启停与日志写入不应抛任何异常
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonObservability(o =>
+        {
+            o.ServiceName = "ledon-tests";
+            o.UseConsoleExporter = true;   // span/指标/日志全部走控制台
+        });
+
+        var app = builder.Build();
+        await app.StartAsync();
+
+        var logger = app.Services.GetRequiredService<ILogger<FeaturePackagesTests>>();
+        logger.LogInformation("可观测性日志导出冒烟（含作用域）");
+        using (logger.BeginScope("scope-{Id}", Guid.NewGuid()))
+        {
+            logger.LogWarning("带作用域的日志");
+        }
+
+        await app.StopAsync();
     }
 
     // ---------- 程序集扫描（允许列表） ----------

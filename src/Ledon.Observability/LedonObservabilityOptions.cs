@@ -16,6 +16,12 @@ public sealed class LedonObservabilityOptions
     /// <summary>启用指标，默认开。</summary>
     public bool EnableMetrics { get; set; } = true;
 
+    /// <summary>
+    /// 启用日志导出（默认开）：ILogger 日志经 OTLP 导出（含日志作用域，如关联 ID），
+    /// 与链路/指标共用同一端点与资源。不需要日志导出时可关掉减轻出口压力。
+    /// </summary>
+    public bool EnableLogs { get; set; } = true;
+
     /// <summary>OTLP 导出端点（如 http://localhost:4317）；null 时走环境变量。</summary>
     public Uri? OtlpEndpoint { get; set; }
 

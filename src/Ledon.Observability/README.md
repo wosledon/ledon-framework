@@ -17,4 +17,6 @@ app.MapLedonReadiness();   // /health/ready 聚合全部检查
 
 模块生命周期、事件发布、队列处理、定时任务执行全部自动产出 span；模块内可发自定义 span：`using var span = ctx.StartActivity("加载配置");`。
 
+日志（ILogger）默认也经 OTLP 导出，含日志作用域（关联 ID 等）——trace/metrics/logs 三位一体；`o.EnableLogs = false` 可关。
+
 完整文档：<https://github.com/wosledon/ledon-framework>
