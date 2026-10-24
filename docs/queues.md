@@ -46,6 +46,19 @@ public class OrderPlacedHandler : IIntegrationEventHandler<OrderPlaced>
 - 单条失败不阻塞后续消息；超过重试上限**搁置**，留待人工处理（监控搁置表即可发现毒消息）；
 - 处理器自动发现、自动注入，与进程内事件（`IEventHandler<T>`）写法一致。
 
+## 消息中间件传输
+
+注册 `IIntegrationEventTransport` 后，发件箱把消息投给传输（broker）而非进程内 handler——消费方（另一个服务/进程）订阅 broker 后在自己的容器里派发给本地 handler：
+
+```csharp
+// 发布方：注册传输即可，OutboxDispatcher 自动改走 broker
+builder.Services.AddSingleton<IIntegrationEventTransport>(new MyRabbitMqTransport(...));
+```
+
+现成实现：`Ledon.Queues.RabbitMQ` 包（`AddLedonRabbitMqTransport()`，含发布与订阅消费两侧）。
+
+传输失败由发件箱记录重试（至少一次语义不变）；投递成功才标记已处理。
+
 ## 怎么选
 
 | 需求                       | 选择         |

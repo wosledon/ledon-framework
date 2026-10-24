@@ -24,4 +24,6 @@ await db.SaveChangesAsync();   // 调度器随后投递并标记
 
 发件箱至少一次语义：单条失败记重试不阻塞后续，超限搁置留待人工处理。
 
+注册 `IIntegrationEventTransport` 后事件改投消息中间件（broker）而非进程内 handler——现成实现见 `Ledon.Queues.RabbitMQ` 包。
+
 完整文档：<https://github.com/wosledon/ledon-framework>

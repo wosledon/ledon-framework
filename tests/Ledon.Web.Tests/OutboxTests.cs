@@ -64,6 +64,59 @@ public class OutboxTests : IDisposable
         Assert.Null(message.Error);
     }
 
+    [Fact]
+    public async Task Outbox_publishes_via_transport_when_registered()
+    {
+        OutboxSignal.Delivered = false;
+
+        var dbPath = Path.Combine(AppContext.BaseDirectory, $"outbox-transport-{Guid.NewGuid():N}.db");
+        var transport = new RecordingTransport();
+
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonOutbox(options => options.PollingInterval = TimeSpan.FromMilliseconds(50));
+        builder.Services.AddDbContext<TestOutboxDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath}"));
+        builder.Services.AddSingleton<IIntegrationEventTransport>(transport);
+
+        var app = builder.Build();
+        _app = app;
+        await app.StartAsync();
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+            await db.Database.EnsureCreatedAsync();
+
+            var store = scope.ServiceProvider.GetRequiredService<IOutboxStore>();
+            store.Add(new OrderPlaced("order-t1"));
+            await db.SaveChangesAsync();
+        }
+
+        // 轮询等待标记完成
+        OutboxMessage? message = null;
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (DateTime.UtcNow < deadline)
+        {
+            await using var scope = app.Services.CreateAsyncScope();
+            var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+            message = await db.OutboxMessages.FirstOrDefaultAsync();
+            if (message?.ProcessedAt is not null)
+                break;
+
+            await Task.Delay(50);
+        }
+
+        // 注册了传输：事件走 broker，进程内 handler 不再被调用（跨服务语义）
+        Assert.NotNull(message);
+        Assert.NotNull(message.ProcessedAt);
+        var published = transport.Published;
+        Assert.True(published.Count >= 1, "事件未通过传输投递");
+        var orderPlaced = Assert.IsType<OrderPlaced>(published[0]);
+        Assert.Equal("order-t1", orderPlaced.OrderId);
+        Assert.False(OutboxSignal.Delivered, "注册传输后进程内 handler 不应被调用");
+    }
+
     public void Dispose()
     {
         if (_app is not null)

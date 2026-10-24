@@ -215,6 +215,26 @@ public class OrderPlacedHandler : IIntegrationEventHandler<OrderPlaced>
     }
 }
 
+/// <summary>测试用传输：记录投递的事件（验证 dispatcher 注册传输后走 broker 而非进程内 handler）。</summary>
+public sealed class RecordingTransport : IIntegrationEventTransport
+{
+    private readonly List<IIntegrationEvent> _published = [];
+    private readonly object _gate = new();
+
+    public IReadOnlyList<IIntegrationEvent> Published
+    {
+        get { lock (_gate) return _published.ToArray(); }
+    }
+
+    public Task PublishAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default)
+    {
+        lock (_gate)
+            _published.Add(@event);
+
+        return Task.CompletedTask;
+    }
+}
+
 // ---------- 认证授权夹具 ----------
 
 /// <summary>受保护端点：JWT 或 API Key 任一方式认证；permission 端点要求 secure.read 权限。</summary>

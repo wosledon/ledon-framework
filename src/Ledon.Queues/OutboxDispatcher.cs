@@ -12,6 +12,7 @@ namespace Ledon.Queues;
 /// <summary>
 /// 发件箱调度器：按轮询间隔把待投递消息投给集成事件处理器（至少一次语义）。
 /// 单条失败只记重试，不阻塞后续消息；超重试上限的消息搁置（保留现场可人工处理）。
+/// 注册了 <see cref="IIntegrationEventTransport"/> 时投给传输（消息中间件）而非进程内 handler。
 /// </summary>
 internal sealed class OutboxDispatcher : BackgroundService
 {
@@ -86,8 +87,16 @@ internal sealed class OutboxDispatcher : BackgroundService
         var eventType = Type.GetType(message.Type)
             ?? throw new InvalidOperationException($"无法加载事件类型 {message.Type}");
 
-        var @event = JsonSerializer.Deserialize(message.Payload, eventType, SerializerOptions)
-            ?? throw new InvalidOperationException($"事件 {message.Type} 载荷反序列化为 null");
+        var @event = (IIntegrationEvent?)(JsonSerializer.Deserialize(message.Payload, eventType, SerializerOptions)
+            ?? throw new InvalidOperationException($"事件 {message.Type} 载荷反序列化为 null"));
+
+        // 注册了传输（消息中间件）：投给 broker，由消费侧派发——跨服务解耦
+        var transport = services.GetService<IIntegrationEventTransport>();
+        if (transport is not null)
+        {
+            await transport.PublishAsync(@event, cancellationToken);
+            return;
+        }
 
         var handlerType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
         var enumerableType = typeof(IEnumerable<>).MakeGenericType(handlerType);
