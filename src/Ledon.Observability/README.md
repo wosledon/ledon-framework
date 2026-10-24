@@ -21,4 +21,6 @@ app.MapLedonReadiness();   // /health/ready 聚合全部检查
 
 `o.UsePrometheusExporter = true` + `app.MapLedonPrometheus()` 暴露 /metrics（Prometheus 拉取）。
 
+依赖检查开箱即用：`database` 检查由 `AddLedonData` 自动登记（全部 DbContext CanConnectAsync）；`redis` 检查配连接串才登记——`AddLedonHealthChecks(o => o.RedisConnectionString = "...")`。
+
 完整文档：<https://github.com/wosledon/ledon-framework>

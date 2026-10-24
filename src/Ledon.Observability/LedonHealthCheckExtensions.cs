@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using StackExchange.Redis;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -23,7 +24,29 @@ public static class LedonHealthCheckServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        return services.AddLedonHealthChecks(null);
+    }
+
+    /// <param name="configure">健康检查参数（如 Redis 连接串）。</param>
+    public static IServiceCollection AddLedonHealthChecks(
+        this IServiceCollection services,
+        Action<LedonHealthCheckOptions>? configure)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        var options = new LedonHealthCheckOptions();
+        configure?.Invoke(options);
+
         var healthChecks = services.AddHealthChecks();
+
+        // Redis 连通性（配了连接串才登记）
+        if (!string.IsNullOrWhiteSpace(options.RedisConnectionString))
+        {
+            healthChecks.AddCheck<RedisHealthCheck>("redis");
+
+            services.TryAddSingleton<IConnectionMultiplexer>(_ =>
+                ConnectionMultiplexer.Connect(options.RedisConnectionString!));
+        }
 
         // AddCheck<T> 只有泛型重载——发现的检查类型是运行时的，需反射调用
         var addCheck = typeof(HealthChecksBuilderAddCheckExtensions)

@@ -40,6 +40,10 @@ public static class LedonDataServiceCollectionExtensions
         // 建库/迁移是前置任务：先于任何模块初始化执行，模块里可安全使用数据库
         services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(ILedonPreInitialization), typeof(DbInitializer)));
 
+        // 数据库连通性健康检查（就绪探针用）：未接健康检查端点时是惰性登记，无副作用
+        services.TryAddSingleton<LedonDbContextHealthCheck>();
+        services.AddHealthChecks().AddCheck<LedonDbContextHealthCheck>("database");
+
         return services;
     }
 

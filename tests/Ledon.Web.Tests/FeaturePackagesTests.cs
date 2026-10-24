@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Ledon.Caching;
+using Ledon.Data;
 using Ledon.Module;
 using Ledon.Observability;
 using Ledon.Queues;
@@ -11,8 +12,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Ledon.Web.Tests;
 
@@ -208,6 +211,53 @@ public class FeaturePackagesTests : IDisposable
 
         // 就绪：依赖检查不过则 503（BrokenHealthCheck 被自动发现）——用于摘流判断
         Assert.Equal(HttpStatusCode.ServiceUnavailable, (await client.GetAsync("/health/ready")).StatusCode);
+
+        await app.StopAsync();
+    }
+
+    // ---------- 依赖健康检查 ----------
+
+    [Fact]
+    public async Task Database_health_check_is_registered_by_data_layer()
+    {
+        // AddLedonData 自动登记 database 检查；DbInitializer 已建库 → 条目 Healthy
+        // （BrokenHealthCheck 会让整体 Unhealthy，但 database 条目本身必须健康——直查 report）
+        TodoDbPath.Value = Path.Combine(AppContext.BaseDirectory, $"ledon-health-{Guid.NewGuid():N}.db");
+
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.AddLedonWeb();
+        builder.Services.AddLedonData();
+        builder.Services.AddLedonHealthChecks();
+
+        var app = builder.Build();
+        app.UseLedonWeb();
+        await app.StartAsync();
+
+        var report = await app.Services.GetRequiredService<HealthCheckService>().CheckHealthAsync();
+
+        var database = report.Entries.FirstOrDefault(entry => entry.Key == "database");
+        Assert.NotEqual(default, database);
+        Assert.Equal(HealthStatus.Healthy, database.Value.Status);
+
+        await app.StopAsync();
+    }
+
+    [Fact]
+    public async Task Redis_health_check_is_registered_when_connection_string_configured()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonHealthChecks(o => o.RedisConnectionString = "localhost:6379");
+
+        var app = builder.Build();
+        await app.StartAsync();
+
+        // 只验证登记（不真连 Redis：连接在检查执行时才建立）
+        var registrations = app.Services
+            .GetRequiredService<IOptions<HealthCheckServiceOptions>>().Value.Registrations;
+
+        Assert.Contains(registrations, registration => registration.Name == "redis");
 
         await app.StopAsync();
     }

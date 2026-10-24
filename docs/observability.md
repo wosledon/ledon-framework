@@ -85,6 +85,21 @@ app.MapLedonReadiness();   // /health/ready 聚合全部检查（摘流判断）
 
 实现 `IHealthCheck` 即被自动发现并聚合。存活/就绪分离：就绪探针失败时存活仍为 200，避免编排系统（K8s）误杀进程。
 
+## 依赖健康检查
+
+开箱即用的依赖检查（与自动发现的 `IHealthCheck` 汇入同一聚合）：
+
+| 检查       | 来源                        | 行为                                          |
+| ---------- | --------------------------- | --------------------------------------------- |
+| `database` | `AddLedonData()` 自动登记   | 全部 `ILedonDbContext` 执行 `CanConnectAsync` |
+| `redis`    | 配了连接串才登记            | PING 探测                                     |
+
+```csharp
+builder.Services.AddLedonHealthChecks(o => o.RedisConnectionString = "localhost:6379");
+```
+
+数据库挂了 → `/health/ready` 503（摘流），`/health/live` 仍 200（不重启）。Redis 不配连接串就不登记——没装 Redis 的应用不会因此就绪失败。
+
 ## 接入现有体系
 
 OTLP 端点指向任意兼容后端（Jaeger / Tempo / Grafana Cloud / 阿里云 ARMS……）。开发环境无基础设施时开 `UseConsoleExporter` 直接看 span。
