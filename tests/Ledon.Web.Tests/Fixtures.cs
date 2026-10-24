@@ -7,7 +7,38 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+
 namespace Ledon.Web.Tests.Fixtures;
+
+// ---------- 功能包测试夹具 ----------
+
+/// <summary>测试自有的运行时记录器（显式注册，验证队列任务在独立作用域内可解析服务）。</summary>
+public sealed class Recorder
+{
+    private readonly List<string> _entries = [];
+
+    public void Add(string entry)
+    {
+        lock (_entries)
+            _entries.Add(entry);
+    }
+
+    public string[] Snapshot()
+    {
+        lock (_entries)
+            return _entries.ToArray();
+    }
+}
+
+/// <summary>健康检查夹具：被 AddLedonHealthChecks 自动发现。</summary>
+public class SampleHealthCheck : IHealthCheck
+{
+    public Task<HealthCheckResult> CheckHealthAsync(
+        HealthCheckContext context,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(HealthCheckResult.Healthy());
+}
 
 // ---------- 端点（自动发现 + 自动映射） ----------
 
