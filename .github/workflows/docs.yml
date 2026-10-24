@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0   # docfx 的 git 相关信息需要完整历史
 
       - name: 安装 .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
