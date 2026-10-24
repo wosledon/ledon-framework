@@ -1,0 +1,20 @@
+<Project>
+
+    <!-- src/ 专属构建设置：先继承仓库根 Directory.Build.props（打包元数据/NoWarn/IsPackable 等） -->
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
+
+    <PropertyGroup>
+        <!-- 源码链接：NuGet 消费者可步进框架源码、崩溃堆栈可符号化（SourceLink 需完整 git 历史/CI 检出） -->
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <DeterministicSourcePaths>true</DeterministicSourcePaths>
+        <!-- 随包发布符号（snupkg），调试体验与官方包一致 -->
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- PrivateAssets=all：SourceLink 不流向框架的消费方 -->
+        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+    </ItemGroup>
+
+</Project>

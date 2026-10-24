@@ -23,18 +23,28 @@ jobs:
       - name: 还原
         run: dotnet restore
 
-      - name: 构建
-        run: dotnet build --configuration Release --no-restore
+      - name: 构建（Release，警告即错误）
+        run: dotnet build --configuration Release --no-restore -p:TreatWarningsAsErrors=true
 
-      - name: 测试
-        run: dotnet test --configuration Release --no-build --logger trx --results-directory TestResults
+      - name: 测试（含覆盖率收集）
+        run: >
+          dotnet test --configuration Release --no-build
+          --logger trx --results-directory TestResults
+          --collect:"XPlat Code Coverage"
 
       - name: 上传测试结果
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: TestResults
+          path: |
+            TestResults/**/*.trx
+            TestResults/**/coverage.cobertura.xml
+
+      - name: 构建文档站（docfx 验证）
+        run: |
+          dotnet tool restore
+          dotnet docfx docfx.json
 
   pack:
     needs: build-test

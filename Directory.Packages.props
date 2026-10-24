@@ -4,6 +4,8 @@
         <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
     </PropertyGroup>
     <ItemGroup>
+        <!-- 打包（仅 src/ 项目引用） -->
+        <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
         <!-- 框架运行期 -->
         <PackageVersion Include="Cronos" Version="0.13.0" />
         <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />

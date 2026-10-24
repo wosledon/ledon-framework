@@ -480,3 +480,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# docfx 生成物（文档站构建产物，由 CI/本地按需重新生成）
+/api/
+/_site/
