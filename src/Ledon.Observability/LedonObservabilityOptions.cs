@@ -1,0 +1,21 @@
+namespace Ledon.Observability;
+
+/// <summary>可观测性默认参数。未指定 OTLP 端点时读取标准 OTEL_EXPORTER_OTLP_ENDPOINT 环境变量。</summary>
+public sealed class LedonObservabilityOptions
+{
+    /// <summary>服务名（链路/指标资源标识），默认取入口程序集名。</summary>
+    public string ServiceName { get; set; } =
+        System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name ?? "ledon-app";
+
+    /// <summary>服务版本，默认 1.0.0。</summary>
+    public string ServiceVersion { get; set; } = "1.0.0";
+
+    /// <summary>启用链路追踪，默认开。</summary>
+    public bool EnableTracing { get; set; } = true;
+
+    /// <summary>启用指标，默认开。</summary>
+    public bool EnableMetrics { get; set; } = true;
+
+    /// <summary>OTLP 导出端点（如 http://localhost:4317）；null 时走环境变量。</summary>
+    public Uri? OtlpEndpoint { get; set; }
+}
