@@ -4,6 +4,7 @@ using Ledon.Caching;
 using Ledon.Module;
 using Ledon.Observability;
 using Ledon.Queues;
+using Ledon.Scheduling;
 using Ledon.Web.Tests.Fixtures;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -276,6 +277,26 @@ public class FeaturePackagesTests : IDisposable
         Assert.Equal("created", created!.Name);
         Assert.True(cacheB.TryGet<Payload>("new", out var shared));
         Assert.Equal("created", shared!.Name);
+    }
+
+    // ---------- 定时任务 ----------
+
+    [Fact]
+    public async Task Scheduled_task_fires_on_cron_schedule()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonScheduling();
+
+        var app = builder.Build();
+        await app.StartAsync();
+
+        // EverySecondTask 被自动发现并注册，宿主启动后按 cron 每秒触发
+        var task = app.Services.GetServices<IScheduledTask>().OfType<EverySecondTask>().Single();
+
+        await task.Fired.WaitAsync(TimeSpan.FromSeconds(5));
+
+        await app.StopAsync();
     }
 
     public void Dispose()

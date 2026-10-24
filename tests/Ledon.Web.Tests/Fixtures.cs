@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Ledon.Data;
 using Ledon.Module;
 using Ledon.Module.Abstractions;
+using Ledon.Scheduling;
 using Ledon.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -121,6 +122,24 @@ public class VersionedController : ControllerBase
 {
     [HttpGet]
     public string Get() => "v1";
+}
+
+// ---------- 定时任务夹具 ----------
+
+/// <summary>每秒触发一次（6 段 cron：秒 分 时 日 月 周）。</summary>
+public class EverySecondTask : IScheduledTask
+{
+    private readonly TaskCompletionSource _fired = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    public string CronExpression => "*/1 * * * * *";
+
+    public Task Fired => _fired.Task;
+
+    public Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        _fired.TrySetResult();
+        return Task.CompletedTask;
+    }
 }
 
 // ---------- 认证授权夹具 ----------
