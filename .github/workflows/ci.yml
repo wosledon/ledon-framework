@@ -40,15 +40,17 @@ jobs:
         if: always()
         shell: bash
         run: |
-          file=$(ls TestResults/*/coverage.cobertura.xml 2>/dev/null | head -1)
+          file=$(ls TestResults/*/coverage.cobertura.xml 2>/dev/null | head -1 || true)
           if [ -z "$file" ]; then echo "未找到覆盖率报告"; exit 0; fi
-          rate=$(grep -o 'line-rate="[0-9.]*"' "$file" | head -1 | cut -d'"' -f2)
-          pct=$(awk "BEGIN {printf \"%.1f\", ${rate:-0} * 100}")
+          # 不用 grep|head（pipefail 下 EPIPE 会让步骤失败）；awk 单进程读文件
+          rate=$(awk -F'"' '/line-rate=/ {print $2; exit}' "$file")
+          pct=$(awk -v r="${rate:-0}" 'BEGIN {printf "%.1f", r * 100}')
           echo "行覆盖率：${pct}%"
           echo "### 测试覆盖率：行 ${pct}%" >> "$GITHUB_STEP_SUMMARY"
-          if awk "BEGIN {exit !(${rate:-0} < 0.5)}"; then
+          if awk -v r="${rate:-0}" 'BEGIN {exit !(r < 0.5)}'; then
             echo "::warning::行覆盖率 ${pct}% 低于 50%"
           fi
+          exit 0
 
       - name: 上传测试结果
         if: always()
