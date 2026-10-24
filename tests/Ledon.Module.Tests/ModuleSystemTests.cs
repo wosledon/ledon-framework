@@ -38,8 +38,9 @@ public class ModuleSystemTests
         await provider.InitializeModulesAsync();
 
         var manager = provider.GetRequiredService<IModuleManager>();
+        // 顺序 = 程序集名排序（Ledon.Module.Tests < Ledon.TestModules）+ 拓扑序（User 依赖 Data 排最后）
         Assert.Equal(
-            new[] { "DataModule", "PublisherModule", "UserModule" },
+            new[] { "DataModule", "PublisherModule", "ExternalModule", "UserModule" },
             manager.Modules.Select(module => module.Name).ToArray());
         Assert.Equal(
             new[]

@@ -1,5 +1,6 @@
 using System.Reflection;
 using Ledon.Module.Abstractions;
+using Microsoft.Extensions.DependencyModel;
 
 namespace Ledon.Module.Hosting;
 
@@ -11,16 +12,20 @@ internal sealed class AssemblyScanResult(
     /// <summary>纳入扫描的业务程序集（按名称排序，结果确定）。</summary>
     public IReadOnlyList<Assembly> Assemblies { get; } = assemblies;
 
-    /// <summary>已加载但未纳入的程序集名（诊断信息：未引用框架）。</summary>
+    /// <summary>已评估但未纳入的程序集名（诊断信息）。</summary>
     public IReadOnlyList<string> SkippedAssemblies { get; } = skippedAssemblies;
 }
 
 /// <summary>
-/// 程序集扫描器（允许列表，非黑名单）。
-/// 规则：一个程序集被扫描，当且仅当它直接引用了框架程序集（Ledon.* 功能包）——
-/// 即"引用框架 = 选择加入"，基础设施（EF、xUnit、TestPlatform……）不引用框架，天然被排除。
-/// 来源两个通道合并：入口程序集引用闭包（覆盖引用了但尚未加载的）+ 已加载程序集（覆盖宿主入口
-/// 不可用的场景，如 VSTest）。结果按程序集名排序，保证跨宿主确定性。
+/// 程序集扫描器（允许列表）。
+/// 规则：一个程序集被扫描，当且仅当它**直接引用框架程序集**（Ledon.* 功能包）——
+/// 「引用框架 = 选择加入」，基础设施（EF Core、xUnit、TestPlatform……）不引用框架，天然排除。
+/// 候选来源两个通道合并：
+/// A. 应用的依赖上下文（deps.json）——记录全部声明的依赖，与代码是否使用无关，
+///    覆盖"项目引用了模块程序集但代码没直接用其类型"的场景（编译器会删掉未被使用的程序集引用，
+///    运行库也不会加载它们，仅靠引用图/已加载集合会双双错过）；
+/// B. 当前已加载程序集——覆盖入口不可用的宿主（如 VSTest 测试宿主）。
+/// 两个通道都过同一套允许列表与框架排除，结果按程序集名排序保证确定性。
 /// </summary>
 internal static class AssemblyScanner
 {
@@ -42,32 +47,62 @@ internal static class AssemblyScanner
     public static AssemblyScanResult ResolveAssemblies(LedonOptions options)
     {
         var candidates = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
-
-        // 通道 A：入口程序集引用闭包 BFS（覆盖"引用了但尚未加载"）
-        if (Assembly.GetEntryAssembly() is { } entry)
-        {
-            foreach (var assembly in WalkReferences(entry))
-                candidates[assembly.GetName().Name!] = assembly;
-        }
-
-        // 通道 B：已加载程序集（覆盖入口不可用/不引用业务的宿主，如 VSTest 测试宿主）
         var skipped = new List<string>();
-        foreach (var loaded in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            if (loaded.IsDynamic)
-                continue;
 
-            var name = loaded.GetName().Name;
+        void Consider(Assembly assembly)
+        {
+            var name = assembly.GetName().Name;
             if (string.IsNullOrEmpty(name))
-                continue;
+                return;
+
+            if (candidates.ContainsKey(name))
+                return;
 
             if (FrameworkAssemblyNames.Contains(name))
-                continue;
+            {
+                skipped.Add(name);
+                return;
+            }
 
-            if (ReferencesFramework(loaded))
-                candidates[name] = loaded;
+            if (ReferencesFramework(assembly))
+                candidates[name] = assembly;
             else
                 skipped.Add(name);
+        }
+
+        // 通道 A：默认依赖上下文（应用 deps.json）——覆盖"引用了但未加载"的程序集
+        foreach (var assembly in GetDependencyContextAssemblies(DependencyContext.Default))
+            Consider(assembly);
+
+        // 通道 B：已加载程序集——覆盖入口不可用的宿主（VSTest 等）
+        foreach (var loaded in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (!loaded.IsDynamic)
+                Consider(loaded);
+        }
+
+        // 通道 C：已加载且引用框架的程序集的依赖上下文——覆盖默认上下文指向
+        // 宿主入口（而非应用）的场景，如 VSTest（GetEntryAssembly() 是 testhost）
+        foreach (var loaded in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (loaded.IsDynamic || !ReferencesFramework(loaded))
+                continue;
+
+            DependencyContext? context;
+            try
+            {
+                context = DependencyContext.Load(loaded);
+            }
+            catch
+            {
+                continue;
+            }
+
+            if (context is null)
+                continue;
+
+            foreach (var assembly in GetDependencyContextAssemblies(context))
+                Consider(assembly);
         }
 
         // 显式追加（逃生门）：无条件纳入
@@ -85,33 +120,37 @@ internal static class AssemblyScanner
         return new AssemblyScanResult(ordered, skipped);
     }
 
-    /// <summary>入口程序集的引用闭包（含入口自身）。</summary>
-    private static IEnumerable<Assembly> WalkReferences(Assembly entry)
+    /// <summary>
+    /// 从指定的依赖上下文枚举程序集。deps.json 记录全部声明的项目/包依赖，
+    /// 与代码是否使用无关——这是模块程序集不被漏掉的关键
+    /// （编译器会删掉未被使用的程序集引用，运行库也不会加载它们）。
+    /// </summary>
+    private static IEnumerable<Assembly> GetDependencyContextAssemblies(DependencyContext? context)
     {
-        var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var queue = new Queue<Assembly>();
-        queue.Enqueue(entry);
+        if (context is null)
+            yield break;
 
-        while (queue.Count > 0)
+        var names = context.RuntimeLibraries
+            .SelectMany(library => library.RuntimeAssemblyGroups)
+            .SelectMany(group => group.AssetPaths)
+            .Select(Path.GetFileNameWithoutExtension)
+            .Where(name => !string.IsNullOrEmpty(name))
+            .Distinct(StringComparer.Ordinal);
+
+        foreach (var name in names)
         {
-            var assembly = queue.Dequeue();
-            var name = assembly.GetName().Name;
-            if (string.IsNullOrEmpty(name) || !visited.Add(name))
+            Assembly assembly;
+            try
+            {
+                assembly = Assembly.Load(name!);
+            }
+            catch
+            {
+                // 无法加载（平台特定/不存在）跳过
                 continue;
+            }
 
             yield return assembly;
-
-            foreach (var reference in assembly.GetReferencedAssemblies())
-            {
-                try
-                {
-                    queue.Enqueue(Assembly.Load(reference));
-                }
-                catch
-                {
-                    // 无法加载的引用（如平台特定）跳过
-                }
-            }
         }
     }
 

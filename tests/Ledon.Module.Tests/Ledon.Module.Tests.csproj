@@ -26,6 +26,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Ledon.Module\Ledon.Module.csproj" />
+    <!-- 回归夹具：被引用但测试代码零使用（验证 deps.json 通道能发现"未使用"的模块程序集） -->
+    <ProjectReference Include="..\Fixtures\Ledon.TestModules\Ledon.TestModules.csproj" />
   </ItemGroup>
 
 </Project>

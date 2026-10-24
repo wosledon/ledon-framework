@@ -2,6 +2,12 @@
   <Folder Name="/samples/">
     <Project Path="samples/Ledon.Sample/Ledon.Sample.csproj" />
     <Project Path="samples/Ledon.WebSample/Ledon.WebSample.csproj" />
+    <Project Path="samples/Ledon.WorkerSample/Ledon.WorkerSample.csproj" />
+  </Folder>
+  <Folder Name="/samples/Modules/">
+    <Project Path="samples/Modules/Ledon.Sample.Contracts/Ledon.Sample.Contracts.csproj" />
+    <Project Path="samples/Modules/Ledon.Sample.Notifications/Ledon.Sample.Notifications.csproj" />
+    <Project Path="samples/Modules/Ledon.Sample.Users/Ledon.Sample.Users.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Ledon.Caching/Ledon.Caching.csproj" />
@@ -15,5 +21,8 @@
   <Folder Name="/tests/">
     <Project Path="tests/Ledon.Module.Tests/Ledon.Module.Tests.csproj" />
     <Project Path="tests/Ledon.Web.Tests/Ledon.Web.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Fixtures/">
+    <Project Path="tests/Fixtures/Ledon.TestModules/Ledon.TestModules.csproj" />
   </Folder>
 </Solution>

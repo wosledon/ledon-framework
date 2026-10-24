@@ -20,6 +20,7 @@ var tasks = new Dictionary<string, TaskDef>(StringComparer.OrdinalIgnoreCase)
     ["test"] = new("运行测试", "dotnet test Ledon.slnx"),
     ["sample"] = new("运行零配置示例（samples/Ledon.Sample）", "dotnet run --project samples/Ledon.Sample"),
     ["web"] = new("运行 Web 示例（samples/Ledon.WebSample）", "dotnet run --project samples/Ledon.WebSample"),
+    ["worker"] = new("运行多程序集工作进程示例（samples/Ledon.WorkerSample）", "dotnet run --project samples/Ledon.WorkerSample"),
     ["check"] = new("流水线：scan → build → test", Deps: ["scan", "build", "test"]),
 };
 

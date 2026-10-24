@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 通知模块只依赖契约程序集，不依赖用户模块——跨程序集零引用消费事件 -->
+    <ProjectReference Include="..\Ledon.Sample.Contracts\Ledon.Sample.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\src\Ledon.Module\Ledon.Module.csproj" />
+  </ItemGroup>
+
+</Project>
