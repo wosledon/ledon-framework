@@ -37,9 +37,10 @@ if (slnFiles.Count > 1)
 var sln = slnFiles[0];
 Console.WriteLine($"解决方案: {Path.GetRelativePath(root, sln)}");
 
-// 2. 递归扫描 csproj，排除 bin / obj 目录
+// 2. 递归扫描 csproj，排除 bin / obj 目录与 templates/（模板源不是解决方案成员）
 var projects = Directory.EnumerateFiles(root, "*.csproj", SearchOption.AllDirectories)
     .Where(p => !IsUnderBuildOutput(root, p))
+    .Where(p => !IsUnderDirectory(root, p, "templates"))
     .OrderBy(p => p, StringComparer.OrdinalIgnoreCase)
     .ToList();
 
@@ -98,6 +99,13 @@ static bool IsUnderBuildOutput(string root, string path)
     return segments.Any(s =>
         s.Equals("bin", StringComparison.OrdinalIgnoreCase) ||
         s.Equals("obj", StringComparison.OrdinalIgnoreCase));
+}
+
+static bool IsUnderDirectory(string root, string path, string dirName)
+{
+    var relative = Path.GetRelativePath(root, path);
+    var segments = relative.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+    return segments.Any(s => s.Equals(dirName, StringComparison.OrdinalIgnoreCase));
 }
 
 static (int ExitCode, string Output) RunDotnetSln(string workingDir, string slnFile, string projectFile)
