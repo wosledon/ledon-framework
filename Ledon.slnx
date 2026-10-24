@@ -25,6 +25,16 @@
     <Project Path="src/Ledon.Testing/Ledon.Testing.csproj" />
     <Project Path="src/Ledon.Web/Ledon.Web.csproj" />
   </Folder>
+  <Folder Name="/templates/" />
+  <Folder Name="/templates/ledon-module/">
+    <Project Path="templates/ledon-module/Ledon.MyModule.csproj" />
+  </Folder>
+  <Folder Name="/templates/ledon-web/">
+    <Project Path="templates/ledon-web/Ledon.WebApp.csproj" />
+  </Folder>
+  <Folder Name="/templates/ledon-worker/">
+    <Project Path="templates/ledon-worker/Ledon.WorkerApp.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Ledon.Module.Tests/Ledon.Module.Tests.csproj" />
     <Project Path="tests/Ledon.Web.Tests/Ledon.Web.Tests.csproj" />

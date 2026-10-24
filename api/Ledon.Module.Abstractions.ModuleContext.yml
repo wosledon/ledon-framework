@@ -1,0 +1,779 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Module.Abstractions.ModuleContext
+  commentId: T:Ledon.Module.Abstractions.ModuleContext
+  id: ModuleContext
+  parent: Ledon.Module.Abstractions
+  children:
+  - Ledon.Module.Abstractions.ModuleContext.#ctor(Ledon.Module.Abstractions.ModuleDescriptor,System.IServiceProvider)
+  - Ledon.Module.Abstractions.ModuleContext.Configuration
+  - Ledon.Module.Abstractions.ModuleContext.Events
+  - Ledon.Module.Abstractions.ModuleContext.Logger
+  - Ledon.Module.Abstractions.ModuleContext.Module
+  - Ledon.Module.Abstractions.ModuleContext.Services
+  - Ledon.Module.Abstractions.ModuleContext.StartActivity(System.String)
+  langs:
+  - csharp
+  - vb
+  name: ModuleContext
+  nameWithType: ModuleContext
+  fullName: Ledon.Module.Abstractions.ModuleContext
+  type: Class
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleContext.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: ModuleContext
+    path: src/Ledon.Module/Abstractions/ModuleContext.cs
+    startLine: 12
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 模块运行阶段（初始化/关闭）的执行上下文，始终持有已构建的服务容器。
+  example: []
+  syntax:
+    content: public sealed class ModuleContext
+    content.vb: Public NotInheritable Class ModuleContext
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Ledon.Module.Abstractions.ModuleContext.#ctor(Ledon.Module.Abstractions.ModuleDescriptor,System.IServiceProvider)
+  commentId: M:Ledon.Module.Abstractions.ModuleContext.#ctor(Ledon.Module.Abstractions.ModuleDescriptor,System.IServiceProvider)
+  id: '#ctor(Ledon.Module.Abstractions.ModuleDescriptor,System.IServiceProvider)'
+  parent: Ledon.Module.Abstractions.ModuleContext
+  langs:
+  - csharp
+  - vb
+  name: ModuleContext(ModuleDescriptor, IServiceProvider)
+  nameWithType: ModuleContext.ModuleContext(ModuleDescriptor, IServiceProvider)
+  fullName: Ledon.Module.Abstractions.ModuleContext.ModuleContext(Ledon.Module.Abstractions.ModuleDescriptor, System.IServiceProvider)
+  type: Constructor
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleContext.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: .ctor
+    path: src/Ledon.Module/Abstractions/ModuleContext.cs
+    startLine: 17
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  syntax:
+    content: public ModuleContext(ModuleDescriptor module, IServiceProvider services)
+    parameters:
+    - id: module
+      type: Ledon.Module.Abstractions.ModuleDescriptor
+    - id: services
+      type: System.IServiceProvider
+    content.vb: Public Sub New([module] As ModuleDescriptor, services As IServiceProvider)
+  overload: Ledon.Module.Abstractions.ModuleContext.#ctor*
+  nameWithType.vb: ModuleContext.New(ModuleDescriptor, IServiceProvider)
+  fullName.vb: Ledon.Module.Abstractions.ModuleContext.New(Ledon.Module.Abstractions.ModuleDescriptor, System.IServiceProvider)
+  name.vb: New(ModuleDescriptor, IServiceProvider)
+- uid: Ledon.Module.Abstractions.ModuleContext.Module
+  commentId: P:Ledon.Module.Abstractions.ModuleContext.Module
+  id: Module
+  parent: Ledon.Module.Abstractions.ModuleContext
+  langs:
+  - csharp
+  - vb
+  name: Module
+  nameWithType: ModuleContext.Module
+  fullName: Ledon.Module.Abstractions.ModuleContext.Module
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleContext.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Module
+    path: src/Ledon.Module/Abstractions/ModuleContext.cs
+    startLine: 24
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 当前正在执行钩子的模块描述。
+  example: []
+  syntax:
+    content: public ModuleDescriptor Module { get; }
+    parameters: []
+    return:
+      type: Ledon.Module.Abstractions.ModuleDescriptor
+    content.vb: Public ReadOnly Property [Module] As ModuleDescriptor
+  overload: Ledon.Module.Abstractions.ModuleContext.Module*
+- uid: Ledon.Module.Abstractions.ModuleContext.Services
+  commentId: P:Ledon.Module.Abstractions.ModuleContext.Services
+  id: Services
+  parent: Ledon.Module.Abstractions.ModuleContext
+  langs:
+  - csharp
+  - vb
+  name: Services
+  nameWithType: ModuleContext.Services
+  fullName: Ledon.Module.Abstractions.ModuleContext.Services
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleContext.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Services
+    path: src/Ledon.Module/Abstractions/ModuleContext.cs
+    startLine: 27
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 已构建的服务容器，可直接解析服务。
+  example: []
+  syntax:
+    content: public IServiceProvider Services { get; }
+    parameters: []
+    return:
+      type: System.IServiceProvider
+    content.vb: Public ReadOnly Property Services As IServiceProvider
+  overload: Ledon.Module.Abstractions.ModuleContext.Services*
+- uid: Ledon.Module.Abstractions.ModuleContext.Logger
+  commentId: P:Ledon.Module.Abstractions.ModuleContext.Logger
+  id: Logger
+  parent: Ledon.Module.Abstractions.ModuleContext
+  langs:
+  - csharp
+  - vb
+  name: Logger
+  nameWithType: ModuleContext.Logger
+  fullName: Ledon.Module.Abstractions.ModuleContext.Logger
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleContext.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Logger
+    path: src/Ledon.Module/Abstractions/ModuleContext.cs
+    startLine: 30
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 以模块名命名的 <xref href="Microsoft.Extensions.Logging.ILogger%601" data-throw-if-not-resolved="false"></xref>；未配置日志工厂时退化为 <code>NullLogger</code>。
+  example: []
+  syntax:
+    content: public ILogger Logger { get; }
+    parameters: []
+    return:
+      type: Microsoft.Extensions.Logging.ILogger
+    content.vb: Public ReadOnly Property Logger As ILogger
+  overload: Ledon.Module.Abstractions.ModuleContext.Logger*
+- uid: Ledon.Module.Abstractions.ModuleContext.Configuration
+  commentId: P:Ledon.Module.Abstractions.ModuleContext.Configuration
+  id: Configuration
+  parent: Ledon.Module.Abstractions.ModuleContext
+  langs:
+  - csharp
+  - vb
+  name: Configuration
+  nameWithType: ModuleContext.Configuration
+  fullName: Ledon.Module.Abstractions.ModuleContext.Configuration
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleContext.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Configuration
+    path: src/Ledon.Module/Abstractions/ModuleContext.cs
+    startLine: 41
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 宿主配置（若已注册 <code>IConfiguration</code>），否则为 null。
+  example: []
+  syntax:
+    content: public IConfiguration? Configuration { get; }
+    parameters: []
+    return:
+      type: Microsoft.Extensions.Configuration.IConfiguration
+    content.vb: Public ReadOnly Property Configuration As IConfiguration
+  overload: Ledon.Module.Abstractions.ModuleContext.Configuration*
+- uid: Ledon.Module.Abstractions.ModuleContext.Events
+  commentId: P:Ledon.Module.Abstractions.ModuleContext.Events
+  id: Events
+  parent: Ledon.Module.Abstractions.ModuleContext
+  langs:
+  - csharp
+  - vb
+  name: Events
+  nameWithType: ModuleContext.Events
+  fullName: Ledon.Module.Abstractions.ModuleContext.Events
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleContext.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Events
+    path: src/Ledon.Module/Abstractions/ModuleContext.cs
+    startLine: 44
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 事件总线：发布事件即被（已自动接线的）处理器消费，发布方无需知道谁在处理。
+  example: []
+  syntax:
+    content: public IEventBus Events { get; }
+    parameters: []
+    return:
+      type: Ledon.Core.Events.IEventBus
+    content.vb: Public ReadOnly Property Events As IEventBus
+  overload: Ledon.Module.Abstractions.ModuleContext.Events*
+- uid: Ledon.Module.Abstractions.ModuleContext.StartActivity(System.String)
+  commentId: M:Ledon.Module.Abstractions.ModuleContext.StartActivity(System.String)
+  id: StartActivity(System.String)
+  parent: Ledon.Module.Abstractions.ModuleContext
+  langs:
+  - csharp
+  - vb
+  name: StartActivity(string)
+  nameWithType: ModuleContext.StartActivity(string)
+  fullName: Ledon.Module.Abstractions.ModuleContext.StartActivity(string)
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleContext.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: StartActivity
+    path: src/Ledon.Module/Abstractions/ModuleContext.cs
+    startLine: 50
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: >-
+    以当前模块名开始一个自定义 span（挂在框架链路源的模块源下），
+
+    用于把模块内的关键工作纳入同一棵链路树。未接入 OpenTelemetry 时返回 null（无开销）。
+  example: []
+  syntax:
+    content: public Activity? StartActivity(string name)
+    parameters:
+    - id: name
+      type: System.String
+    return:
+      type: System.Diagnostics.Activity
+    content.vb: Public Function StartActivity(name As String) As Activity
+  overload: Ledon.Module.Abstractions.ModuleContext.StartActivity*
+  nameWithType.vb: ModuleContext.StartActivity(String)
+  fullName.vb: Ledon.Module.Abstractions.ModuleContext.StartActivity(String)
+  name.vb: StartActivity(String)
+references:
+- uid: Ledon.Module.Abstractions
+  commentId: N:Ledon.Module.Abstractions
+  href: Ledon.html
+  name: Ledon.Module.Abstractions
+  nameWithType: Ledon.Module.Abstractions
+  fullName: Ledon.Module.Abstractions
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Module
+    name: Module
+    href: Ledon.Module.html
+  - name: .
+  - uid: Ledon.Module.Abstractions
+    name: Abstractions
+    href: Ledon.Module.Abstractions.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Module
+    name: Module
+    href: Ledon.Module.html
+  - name: .
+  - uid: Ledon.Module.Abstractions
+    name: Abstractions
+    href: Ledon.Module.Abstractions.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Ledon.Module.Abstractions.ModuleContext.#ctor*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.#ctor
+  href: Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext__ctor_Ledon_Module_Abstractions_ModuleDescriptor_System_IServiceProvider_
+  name: ModuleContext
+  nameWithType: ModuleContext.ModuleContext
+  fullName: Ledon.Module.Abstractions.ModuleContext.ModuleContext
+  nameWithType.vb: ModuleContext.New
+  fullName.vb: Ledon.Module.Abstractions.ModuleContext.New
+  name.vb: New
+- uid: Ledon.Module.Abstractions.ModuleDescriptor
+  commentId: T:Ledon.Module.Abstractions.ModuleDescriptor
+  parent: Ledon.Module.Abstractions
+  href: Ledon.Module.Abstractions.ModuleDescriptor.html
+  name: ModuleDescriptor
+  nameWithType: ModuleDescriptor
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor
+- uid: System.IServiceProvider
+  commentId: T:System.IServiceProvider
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.iserviceprovider
+  name: IServiceProvider
+  nameWithType: IServiceProvider
+  fullName: System.IServiceProvider
+- uid: Ledon.Module.Abstractions.ModuleContext.Module*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.Module
+  href: Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Module
+  name: Module
+  nameWithType: ModuleContext.Module
+  fullName: Ledon.Module.Abstractions.ModuleContext.Module
+- uid: Ledon.Module.Abstractions.ModuleContext.Services*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.Services
+  href: Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Services
+  name: Services
+  nameWithType: ModuleContext.Services
+  fullName: Ledon.Module.Abstractions.ModuleContext.Services
+- uid: Microsoft.Extensions.Logging.ILogger`1
+  commentId: T:Microsoft.Extensions.Logging.ILogger`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  name: ILogger<TCategoryName>
+  nameWithType: ILogger<TCategoryName>
+  fullName: Microsoft.Extensions.Logging.ILogger<TCategoryName>
+  nameWithType.vb: ILogger(Of TCategoryName)
+  fullName.vb: Microsoft.Extensions.Logging.ILogger(Of TCategoryName)
+  name.vb: ILogger(Of TCategoryName)
+  spec.csharp:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: <
+  - name: TCategoryName
+  - name: '>'
+  spec.vb:
+  - uid: Microsoft.Extensions.Logging.ILogger`1
+    name: ILogger
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TCategoryName
+  - name: )
+- uid: Ledon.Module.Abstractions.ModuleContext.Logger*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.Logger
+  href: Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Logger
+  name: Logger
+  nameWithType: ModuleContext.Logger
+  fullName: Ledon.Module.Abstractions.ModuleContext.Logger
+- uid: Microsoft.Extensions.Logging.ILogger
+  commentId: T:Microsoft.Extensions.Logging.ILogger
+  parent: Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger
+  name: ILogger
+  nameWithType: ILogger
+  fullName: Microsoft.Extensions.Logging.ILogger
+- uid: Microsoft.Extensions.Logging
+  commentId: N:Microsoft.Extensions.Logging
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Logging
+  nameWithType: Microsoft.Extensions.Logging
+  fullName: Microsoft.Extensions.Logging
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Logging
+    name: Logging
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging
+- uid: Ledon.Module.Abstractions.ModuleContext.Configuration*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.Configuration
+  href: Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Configuration
+  name: Configuration
+  nameWithType: ModuleContext.Configuration
+  fullName: Ledon.Module.Abstractions.ModuleContext.Configuration
+- uid: Microsoft.Extensions.Configuration.IConfiguration
+  commentId: T:Microsoft.Extensions.Configuration.IConfiguration
+  parent: Microsoft.Extensions.Configuration
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.configuration.iconfiguration
+  name: IConfiguration
+  nameWithType: IConfiguration
+  fullName: Microsoft.Extensions.Configuration.IConfiguration
+- uid: Microsoft.Extensions.Configuration
+  commentId: N:Microsoft.Extensions.Configuration
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.Configuration
+  nameWithType: Microsoft.Extensions.Configuration
+  fullName: Microsoft.Extensions.Configuration
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Configuration
+    name: Configuration
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.configuration
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.Configuration
+    name: Configuration
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.configuration
+- uid: Ledon.Module.Abstractions.ModuleContext.Events*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.Events
+  href: Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Events
+  name: Events
+  nameWithType: ModuleContext.Events
+  fullName: Ledon.Module.Abstractions.ModuleContext.Events
+- uid: Ledon.Core.Events.IEventBus
+  commentId: T:Ledon.Core.Events.IEventBus
+  parent: Ledon.Core.Events
+  href: Ledon.Core.Events.IEventBus.html
+  name: IEventBus
+  nameWithType: IEventBus
+  fullName: Ledon.Core.Events.IEventBus
+- uid: Ledon.Core.Events
+  commentId: N:Ledon.Core.Events
+  href: Ledon.html
+  name: Ledon.Core.Events
+  nameWithType: Ledon.Core.Events
+  fullName: Ledon.Core.Events
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Core
+    name: Core
+    href: Ledon.Core.html
+  - name: .
+  - uid: Ledon.Core.Events
+    name: Events
+    href: Ledon.Core.Events.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Core
+    name: Core
+    href: Ledon.Core.html
+  - name: .
+  - uid: Ledon.Core.Events
+    name: Events
+    href: Ledon.Core.Events.html
+- uid: Ledon.Module.Abstractions.ModuleContext.StartActivity*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.StartActivity
+  href: Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_StartActivity_System_String_
+  name: StartActivity
+  nameWithType: ModuleContext.StartActivity
+  fullName: Ledon.Module.Abstractions.ModuleContext.StartActivity
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Diagnostics.Activity
+  commentId: T:System.Diagnostics.Activity
+  parent: System.Diagnostics
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.diagnostics.activity
+  name: Activity
+  nameWithType: Activity
+  fullName: System.Diagnostics.Activity
+- uid: System.Diagnostics
+  commentId: N:System.Diagnostics
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Diagnostics
+  nameWithType: System.Diagnostics
+  fullName: System.Diagnostics
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Diagnostics
+    name: Diagnostics
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.diagnostics
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Diagnostics
+    name: Diagnostics
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.diagnostics

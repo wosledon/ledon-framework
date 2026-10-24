@@ -1,0 +1,459 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Testing.ModuleAssertions
+  commentId: T:Ledon.Testing.ModuleAssertions
+  id: ModuleAssertions
+  parent: Ledon.Testing
+  children:
+  - Ledon.Testing.ModuleAssertions.ShouldBeInitialized(Ledon.Module.Abstractions.IModuleManager,System.String)
+  - Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder(Ledon.Module.Abstractions.IModuleManager,System.String[])
+  langs:
+  - csharp
+  - vb
+  name: ModuleAssertions
+  nameWithType: ModuleAssertions
+  fullName: Ledon.Testing.ModuleAssertions
+  type: Class
+  source:
+    remote:
+      path: src/Ledon.Testing/LedonWebTestHost.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: ModuleAssertions
+    path: src/Ledon.Testing/LedonWebTestHost.cs
+    startLine: 73
+  assemblies:
+  - Ledon.Testing
+  namespace: Ledon.Testing
+  summary: 模块生命周期断言助手（抛异常而非绑定具体测试框架，xunit/NUnit/MSTest 通用）。
+  example: []
+  syntax:
+    content: public static class ModuleAssertions
+    content.vb: Public Module ModuleAssertions
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.MemberwiseClone
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Ledon.Testing.ModuleAssertions.ShouldBeInitialized(Ledon.Module.Abstractions.IModuleManager,System.String)
+  commentId: M:Ledon.Testing.ModuleAssertions.ShouldBeInitialized(Ledon.Module.Abstractions.IModuleManager,System.String)
+  id: ShouldBeInitialized(Ledon.Module.Abstractions.IModuleManager,System.String)
+  isExtensionMethod: true
+  parent: Ledon.Testing.ModuleAssertions
+  langs:
+  - csharp
+  - vb
+  name: ShouldBeInitialized(IModuleManager, string)
+  nameWithType: ModuleAssertions.ShouldBeInitialized(IModuleManager, string)
+  fullName: Ledon.Testing.ModuleAssertions.ShouldBeInitialized(Ledon.Module.Abstractions.IModuleManager, string)
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Testing/LedonWebTestHost.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: ShouldBeInitialized
+    path: src/Ledon.Testing/LedonWebTestHost.cs
+    startLine: 76
+  assemblies:
+  - Ledon.Testing
+  namespace: Ledon.Testing
+  summary: 断言指定模块已初始化。
+  example: []
+  syntax:
+    content: public static void ShouldBeInitialized(this IModuleManager manager, string moduleName)
+    parameters:
+    - id: manager
+      type: Ledon.Module.Abstractions.IModuleManager
+    - id: moduleName
+      type: System.String
+    content.vb: Public Shared Sub ShouldBeInitialized(manager As IModuleManager, moduleName As String)
+  overload: Ledon.Testing.ModuleAssertions.ShouldBeInitialized*
+  nameWithType.vb: ModuleAssertions.ShouldBeInitialized(IModuleManager, String)
+  fullName.vb: Ledon.Testing.ModuleAssertions.ShouldBeInitialized(Ledon.Module.Abstractions.IModuleManager, String)
+  name.vb: ShouldBeInitialized(IModuleManager, String)
+- uid: Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder(Ledon.Module.Abstractions.IModuleManager,System.String[])
+  commentId: M:Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder(Ledon.Module.Abstractions.IModuleManager,System.String[])
+  id: ShouldBeInitializedInOrder(Ledon.Module.Abstractions.IModuleManager,System.String[])
+  isExtensionMethod: true
+  parent: Ledon.Testing.ModuleAssertions
+  langs:
+  - csharp
+  - vb
+  name: ShouldBeInitializedInOrder(IModuleManager, params string[])
+  nameWithType: ModuleAssertions.ShouldBeInitializedInOrder(IModuleManager, params string[])
+  fullName: Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder(Ledon.Module.Abstractions.IModuleManager, params string[])
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Testing/LedonWebTestHost.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: ShouldBeInitializedInOrder
+    path: src/Ledon.Testing/LedonWebTestHost.cs
+    startLine: 84
+  assemblies:
+  - Ledon.Testing
+  namespace: Ledon.Testing
+  summary: 断言模块初始化顺序（按传入顺序，被依赖者在前）。
+  example: []
+  syntax:
+    content: public static void ShouldBeInitializedInOrder(this IModuleManager manager, params string[] moduleNames)
+    parameters:
+    - id: manager
+      type: Ledon.Module.Abstractions.IModuleManager
+    - id: moduleNames
+      type: System.String[]
+    content.vb: Public Shared Sub ShouldBeInitializedInOrder(manager As IModuleManager, ParamArray moduleNames As String())
+  overload: Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder*
+  nameWithType.vb: ModuleAssertions.ShouldBeInitializedInOrder(IModuleManager, ParamArray String())
+  fullName.vb: Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder(Ledon.Module.Abstractions.IModuleManager, ParamArray String())
+  name.vb: ShouldBeInitializedInOrder(IModuleManager, ParamArray String())
+references:
+- uid: Ledon.Testing
+  commentId: N:Ledon.Testing
+  href: Ledon.html
+  name: Ledon.Testing
+  nameWithType: Ledon.Testing
+  fullName: Ledon.Testing
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Testing
+    name: Testing
+    href: Ledon.Testing.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Testing
+    name: Testing
+    href: Ledon.Testing.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.MemberwiseClone
+  commentId: M:System.Object.MemberwiseClone
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  name: MemberwiseClone()
+  nameWithType: object.MemberwiseClone()
+  fullName: object.MemberwiseClone()
+  nameWithType.vb: Object.MemberwiseClone()
+  fullName.vb: Object.MemberwiseClone()
+  spec.csharp:
+  - uid: System.Object.MemberwiseClone
+    name: MemberwiseClone
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.MemberwiseClone
+    name: MemberwiseClone
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Ledon.Testing.ModuleAssertions.ShouldBeInitialized*
+  commentId: Overload:Ledon.Testing.ModuleAssertions.ShouldBeInitialized
+  href: Ledon.Testing.ModuleAssertions.html#Ledon_Testing_ModuleAssertions_ShouldBeInitialized_Ledon_Module_Abstractions_IModuleManager_System_String_
+  name: ShouldBeInitialized
+  nameWithType: ModuleAssertions.ShouldBeInitialized
+  fullName: Ledon.Testing.ModuleAssertions.ShouldBeInitialized
+- uid: Ledon.Module.Abstractions.IModuleManager
+  commentId: T:Ledon.Module.Abstractions.IModuleManager
+  parent: Ledon.Module.Abstractions
+  href: Ledon.Module.Abstractions.IModuleManager.html
+  name: IModuleManager
+  nameWithType: IModuleManager
+  fullName: Ledon.Module.Abstractions.IModuleManager
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: Ledon.Module.Abstractions
+  commentId: N:Ledon.Module.Abstractions
+  href: Ledon.html
+  name: Ledon.Module.Abstractions
+  nameWithType: Ledon.Module.Abstractions
+  fullName: Ledon.Module.Abstractions
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Module
+    name: Module
+    href: Ledon.Module.html
+  - name: .
+  - uid: Ledon.Module.Abstractions
+    name: Abstractions
+    href: Ledon.Module.Abstractions.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Module
+    name: Module
+    href: Ledon.Module.html
+  - name: .
+  - uid: Ledon.Module.Abstractions
+    name: Abstractions
+    href: Ledon.Module.Abstractions.html
+- uid: Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder*
+  commentId: Overload:Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder
+  href: Ledon.Testing.ModuleAssertions.html#Ledon_Testing_ModuleAssertions_ShouldBeInitializedInOrder_Ledon_Module_Abstractions_IModuleManager_System_String___
+  name: ShouldBeInitializedInOrder
+  nameWithType: ModuleAssertions.ShouldBeInitializedInOrder
+  fullName: Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder
+- uid: System.String[]
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string[]
+  nameWithType: string[]
+  fullName: string[]
+  nameWithType.vb: String()
+  fullName.vb: String()
+  name.vb: String()
+  spec.csharp:
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '['
+  - name: ']'
+  spec.vb:
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: (
+  - name: )

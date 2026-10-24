@@ -1,0 +1,81 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Web.ApiConventions
+  commentId: N:Ledon.Web.ApiConventions
+  id: Ledon.Web.ApiConventions
+  children:
+  - Ledon.Web.ApiConventions.ApiResponse
+  - Ledon.Web.ApiConventions.ApiResponse`1
+  langs:
+  - csharp
+  - vb
+  name: Ledon.Web.ApiConventions
+  nameWithType: Ledon.Web.ApiConventions
+  fullName: Ledon.Web.ApiConventions
+  type: Namespace
+  assemblies:
+  - Ledon.Web
+references:
+- uid: Ledon.Web.ApiConventions.ApiResponse
+  commentId: T:Ledon.Web.ApiConventions.ApiResponse
+  parent: Ledon.Web.ApiConventions
+  href: Ledon.Web.ApiConventions.ApiResponse.html
+  name: ApiResponse
+  nameWithType: ApiResponse
+  fullName: Ledon.Web.ApiConventions.ApiResponse
+- uid: Ledon.Web.ApiConventions.ApiResponse`1
+  commentId: T:Ledon.Web.ApiConventions.ApiResponse`1
+  parent: Ledon.Web.ApiConventions
+  href: Ledon.Web.ApiConventions.ApiResponse-1.html
+  name: ApiResponse<T>
+  nameWithType: ApiResponse<T>
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>
+  nameWithType.vb: ApiResponse(Of T)
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T)
+  name.vb: ApiResponse(Of T)
+  spec.csharp:
+  - uid: Ledon.Web.ApiConventions.ApiResponse`1
+    name: ApiResponse
+    href: Ledon.Web.ApiConventions.ApiResponse-1.html
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: Ledon.Web.ApiConventions.ApiResponse`1
+    name: ApiResponse
+    href: Ledon.Web.ApiConventions.ApiResponse-1.html
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: Ledon.Web.ApiConventions
+  commentId: N:Ledon.Web.ApiConventions
+  href: Ledon.html
+  name: Ledon.Web.ApiConventions
+  nameWithType: Ledon.Web.ApiConventions
+  fullName: Ledon.Web.ApiConventions
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Web
+    name: Web
+    href: Ledon.Web.html
+  - name: .
+  - uid: Ledon.Web.ApiConventions
+    name: ApiConventions
+    href: Ledon.Web.ApiConventions.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Web
+    name: Web
+    href: Ledon.Web.html
+  - name: .
+  - uid: Ledon.Web.ApiConventions
+    name: ApiConventions
+    href: Ledon.Web.ApiConventions.html

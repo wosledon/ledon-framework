@@ -1,0 +1,377 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Security.ICurrentUser
+  commentId: T:Ledon.Security.ICurrentUser
+  id: ICurrentUser
+  parent: Ledon.Security
+  children:
+  - Ledon.Security.ICurrentUser.HasPermission(System.String)
+  - Ledon.Security.ICurrentUser.IsAuthenticated
+  - Ledon.Security.ICurrentUser.Permissions
+  - Ledon.Security.ICurrentUser.UserId
+  - Ledon.Security.ICurrentUser.UserName
+  langs:
+  - csharp
+  - vb
+  name: ICurrentUser
+  nameWithType: ICurrentUser
+  fullName: Ledon.Security.ICurrentUser
+  type: Interface
+  source:
+    remote:
+      path: src/Ledon.Security/CurrentUser.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: ICurrentUser
+    path: src/Ledon.Security/CurrentUser.cs
+    startLine: 6
+  assemblies:
+  - Ledon.Security
+  namespace: Ledon.Security
+  summary: 当前用户访问器（Web 请求上下文；非 Web 场景下为匿名）。
+  example: []
+  syntax:
+    content: public interface ICurrentUser
+    content.vb: Public Interface ICurrentUser
+- uid: Ledon.Security.ICurrentUser.IsAuthenticated
+  commentId: P:Ledon.Security.ICurrentUser.IsAuthenticated
+  id: IsAuthenticated
+  parent: Ledon.Security.ICurrentUser
+  langs:
+  - csharp
+  - vb
+  name: IsAuthenticated
+  nameWithType: ICurrentUser.IsAuthenticated
+  fullName: Ledon.Security.ICurrentUser.IsAuthenticated
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Security/CurrentUser.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: IsAuthenticated
+    path: src/Ledon.Security/CurrentUser.cs
+    startLine: 9
+  assemblies:
+  - Ledon.Security
+  namespace: Ledon.Security
+  summary: 是否已认证。
+  example: []
+  syntax:
+    content: bool IsAuthenticated { get; }
+    parameters: []
+    return:
+      type: System.Boolean
+    content.vb: ReadOnly Property IsAuthenticated As Boolean
+  overload: Ledon.Security.ICurrentUser.IsAuthenticated*
+- uid: Ledon.Security.ICurrentUser.UserId
+  commentId: P:Ledon.Security.ICurrentUser.UserId
+  id: UserId
+  parent: Ledon.Security.ICurrentUser
+  langs:
+  - csharp
+  - vb
+  name: UserId
+  nameWithType: ICurrentUser.UserId
+  fullName: Ledon.Security.ICurrentUser.UserId
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Security/CurrentUser.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: UserId
+    path: src/Ledon.Security/CurrentUser.cs
+    startLine: 12
+  assemblies:
+  - Ledon.Security
+  namespace: Ledon.Security
+  summary: 用户标识（nameidentifier claim），未认证为 null。
+  example: []
+  syntax:
+    content: string? UserId { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property UserId As String
+  overload: Ledon.Security.ICurrentUser.UserId*
+- uid: Ledon.Security.ICurrentUser.UserName
+  commentId: P:Ledon.Security.ICurrentUser.UserName
+  id: UserName
+  parent: Ledon.Security.ICurrentUser
+  langs:
+  - csharp
+  - vb
+  name: UserName
+  nameWithType: ICurrentUser.UserName
+  fullName: Ledon.Security.ICurrentUser.UserName
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Security/CurrentUser.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: UserName
+    path: src/Ledon.Security/CurrentUser.cs
+    startLine: 15
+  assemblies:
+  - Ledon.Security
+  namespace: Ledon.Security
+  summary: 用户名，未认证为 null。
+  example: []
+  syntax:
+    content: string? UserName { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: ReadOnly Property UserName As String
+  overload: Ledon.Security.ICurrentUser.UserName*
+- uid: Ledon.Security.ICurrentUser.HasPermission(System.String)
+  commentId: M:Ledon.Security.ICurrentUser.HasPermission(System.String)
+  id: HasPermission(System.String)
+  parent: Ledon.Security.ICurrentUser
+  langs:
+  - csharp
+  - vb
+  name: HasPermission(string)
+  nameWithType: ICurrentUser.HasPermission(string)
+  fullName: Ledon.Security.ICurrentUser.HasPermission(string)
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Security/CurrentUser.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: HasPermission
+    path: src/Ledon.Security/CurrentUser.cs
+    startLine: 18
+  assemblies:
+  - Ledon.Security
+  namespace: Ledon.Security
+  summary: 是否拥有指定权限。
+  example: []
+  syntax:
+    content: bool HasPermission(string permission)
+    parameters:
+    - id: permission
+      type: System.String
+    return:
+      type: System.Boolean
+    content.vb: Function HasPermission(permission As String) As Boolean
+  overload: Ledon.Security.ICurrentUser.HasPermission*
+  nameWithType.vb: ICurrentUser.HasPermission(String)
+  fullName.vb: Ledon.Security.ICurrentUser.HasPermission(String)
+  name.vb: HasPermission(String)
+- uid: Ledon.Security.ICurrentUser.Permissions
+  commentId: P:Ledon.Security.ICurrentUser.Permissions
+  id: Permissions
+  parent: Ledon.Security.ICurrentUser
+  langs:
+  - csharp
+  - vb
+  name: Permissions
+  nameWithType: ICurrentUser.Permissions
+  fullName: Ledon.Security.ICurrentUser.Permissions
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Security/CurrentUser.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Permissions
+    path: src/Ledon.Security/CurrentUser.cs
+    startLine: 21
+  assemblies:
+  - Ledon.Security
+  namespace: Ledon.Security
+  summary: 当前用户的全部权限。
+  example: []
+  syntax:
+    content: IReadOnlyList<string> Permissions { get; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.IReadOnlyList{System.String}
+    content.vb: ReadOnly Property Permissions As IReadOnlyList(Of String)
+  overload: Ledon.Security.ICurrentUser.Permissions*
+references:
+- uid: Ledon.Security
+  commentId: N:Ledon.Security
+  href: Ledon.html
+  name: Ledon.Security
+  nameWithType: Ledon.Security
+  fullName: Ledon.Security
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Security
+    name: Security
+    href: Ledon.Security.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Security
+    name: Security
+    href: Ledon.Security.html
+- uid: Ledon.Security.ICurrentUser.IsAuthenticated*
+  commentId: Overload:Ledon.Security.ICurrentUser.IsAuthenticated
+  href: Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_IsAuthenticated
+  name: IsAuthenticated
+  nameWithType: ICurrentUser.IsAuthenticated
+  fullName: Ledon.Security.ICurrentUser.IsAuthenticated
+- uid: System.Boolean
+  commentId: T:System.Boolean
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.boolean
+  name: bool
+  nameWithType: bool
+  fullName: bool
+  nameWithType.vb: Boolean
+  fullName.vb: Boolean
+  name.vb: Boolean
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Ledon.Security.ICurrentUser.UserId*
+  commentId: Overload:Ledon.Security.ICurrentUser.UserId
+  href: Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_UserId
+  name: UserId
+  nameWithType: ICurrentUser.UserId
+  fullName: Ledon.Security.ICurrentUser.UserId
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: Ledon.Security.ICurrentUser.UserName*
+  commentId: Overload:Ledon.Security.ICurrentUser.UserName
+  href: Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_UserName
+  name: UserName
+  nameWithType: ICurrentUser.UserName
+  fullName: Ledon.Security.ICurrentUser.UserName
+- uid: Ledon.Security.ICurrentUser.HasPermission*
+  commentId: Overload:Ledon.Security.ICurrentUser.HasPermission
+  href: Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_HasPermission_System_String_
+  name: HasPermission
+  nameWithType: ICurrentUser.HasPermission
+  fullName: Ledon.Security.ICurrentUser.HasPermission
+- uid: Ledon.Security.ICurrentUser.Permissions*
+  commentId: Overload:Ledon.Security.ICurrentUser.Permissions
+  href: Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_Permissions
+  name: Permissions
+  nameWithType: ICurrentUser.Permissions
+  fullName: Ledon.Security.ICurrentUser.Permissions
+- uid: System.Collections.Generic.IReadOnlyList{System.String}
+  commentId: T:System.Collections.Generic.IReadOnlyList{System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<string>
+  nameWithType: IReadOnlyList<string>
+  fullName: System.Collections.Generic.IReadOnlyList<string>
+  nameWithType.vb: IReadOnlyList(Of String)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of String)
+  name.vb: IReadOnlyList(Of String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic

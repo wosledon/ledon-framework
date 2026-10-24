@@ -1,0 +1,634 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Module.Hosting.LedonOptions
+  commentId: T:Ledon.Module.Hosting.LedonOptions
+  id: LedonOptions
+  parent: Ledon.Module.Hosting
+  children:
+  - Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+  - Ledon.Module.Hosting.LedonOptions.AddAssembly``1
+  - Ledon.Module.Hosting.LedonOptions.AddModule``1
+  - Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime
+  - Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery
+  langs:
+  - csharp
+  - vb
+  name: LedonOptions
+  nameWithType: LedonOptions
+  fullName: Ledon.Module.Hosting.LedonOptions
+  type: Class
+  source:
+    remote:
+      path: src/Ledon.Module/Hosting/LedonOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: LedonOptions
+    path: src/Ledon.Module/Hosting/LedonOptions.cs
+    startLine: 14
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Hosting
+  summary: >-
+    <code>AddLedon</code> 的配置。默认全自动（发现 + 注入），下面所有方法都是可选的逃生门：
+
+    <pre><code class="lang-csharp">builder.Services.AddLedon();                                        // 零配置，日常用法
+
+    builder.Services.AddLedon(o =&gt; o.DisableAutoDiscovery()             // 关闭全局扫描
+        .AddModule&lt;UserModule&gt;());                                  // 只注册显式列出的</code></pre>
+  example: []
+  syntax:
+    content: public sealed class LedonOptions
+    content.vb: Public NotInheritable Class LedonOptions
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime
+  commentId: P:Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime
+  id: DefaultServiceLifetime
+  parent: Ledon.Module.Hosting.LedonOptions
+  langs:
+  - csharp
+  - vb
+  name: DefaultServiceLifetime
+  nameWithType: LedonOptions.DefaultServiceLifetime
+  fullName: Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Module/Hosting/LedonOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: DefaultServiceLifetime
+    path: src/Ledon.Module/Hosting/LedonOptions.cs
+    startLine: 23
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Hosting
+  summary: 默认服务生命周期（约定注册未显式指定时使用），默认 <xref href="Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped" data-throw-if-not-resolved="false"></xref>。
+  example: []
+  syntax:
+    content: public ServiceLifetime DefaultServiceLifetime { get; set; }
+    parameters: []
+    return:
+      type: Microsoft.Extensions.DependencyInjection.ServiceLifetime
+    content.vb: Public Property DefaultServiceLifetime As ServiceLifetime
+  overload: Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime*
+- uid: Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+  commentId: M:Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+  id: AddAssembly(System.Reflection.Assembly)
+  parent: Ledon.Module.Hosting.LedonOptions
+  langs:
+  - csharp
+  - vb
+  name: AddAssembly(Assembly)
+  nameWithType: LedonOptions.AddAssembly(Assembly)
+  fullName: Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Module/Hosting/LedonOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: AddAssembly
+    path: src/Ledon.Module/Hosting/LedonOptions.cs
+    startLine: 26
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Hosting
+  summary: 追加一个要扫描的模块程序集（与自动发现叠加生效）。
+  example: []
+  syntax:
+    content: public LedonOptions AddAssembly(Assembly assembly)
+    parameters:
+    - id: assembly
+      type: System.Reflection.Assembly
+    return:
+      type: Ledon.Module.Hosting.LedonOptions
+    content.vb: Public Function AddAssembly(assembly As Assembly) As LedonOptions
+  overload: Ledon.Module.Hosting.LedonOptions.AddAssembly*
+- uid: Ledon.Module.Hosting.LedonOptions.AddAssembly``1
+  commentId: M:Ledon.Module.Hosting.LedonOptions.AddAssembly``1
+  id: AddAssembly``1
+  parent: Ledon.Module.Hosting.LedonOptions
+  langs:
+  - csharp
+  - vb
+  name: AddAssembly<TModule>()
+  nameWithType: LedonOptions.AddAssembly<TModule>()
+  fullName: Ledon.Module.Hosting.LedonOptions.AddAssembly<TModule>()
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Module/Hosting/LedonOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: AddAssembly
+    path: src/Ledon.Module/Hosting/LedonOptions.cs
+    startLine: 34
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Hosting
+  summary: 追加 <code class="typeparamref">TModule</code> 所在的程序集到扫描列表。
+  example: []
+  syntax:
+    content: 'public LedonOptions AddAssembly<TModule>() where TModule : IModule'
+    typeParameters:
+    - id: TModule
+    return:
+      type: Ledon.Module.Hosting.LedonOptions
+    content.vb: Public Function AddAssembly(Of TModule As IModule)() As LedonOptions
+  overload: Ledon.Module.Hosting.LedonOptions.AddAssembly*
+  nameWithType.vb: LedonOptions.AddAssembly(Of TModule)()
+  fullName.vb: Ledon.Module.Hosting.LedonOptions.AddAssembly(Of TModule)()
+  name.vb: AddAssembly(Of TModule)()
+- uid: Ledon.Module.Hosting.LedonOptions.AddModule``1
+  commentId: M:Ledon.Module.Hosting.LedonOptions.AddModule``1
+  id: AddModule``1
+  parent: Ledon.Module.Hosting.LedonOptions
+  langs:
+  - csharp
+  - vb
+  name: AddModule<TModule>()
+  nameWithType: LedonOptions.AddModule<TModule>()
+  fullName: Ledon.Module.Hosting.LedonOptions.AddModule<TModule>()
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Module/Hosting/LedonOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: AddModule
+    path: src/Ledon.Module/Hosting/LedonOptions.cs
+    startLine: 38
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Hosting
+  summary: 显式注册一个模块（与自动发现叠加；可注册带 <xref href="Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute" data-throw-if-not-resolved="false"></xref> 的类型）。
+  example: []
+  syntax:
+    content: 'public LedonOptions AddModule<TModule>() where TModule : IModule'
+    typeParameters:
+    - id: TModule
+    return:
+      type: Ledon.Module.Hosting.LedonOptions
+    content.vb: Public Function AddModule(Of TModule As IModule)() As LedonOptions
+  overload: Ledon.Module.Hosting.LedonOptions.AddModule*
+  nameWithType.vb: LedonOptions.AddModule(Of TModule)()
+  fullName.vb: Ledon.Module.Hosting.LedonOptions.AddModule(Of TModule)()
+  name.vb: AddModule(Of TModule)()
+- uid: Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery
+  commentId: M:Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery
+  id: DisableAutoDiscovery
+  parent: Ledon.Module.Hosting.LedonOptions
+  langs:
+  - csharp
+  - vb
+  name: DisableAutoDiscovery()
+  nameWithType: LedonOptions.DisableAutoDiscovery()
+  fullName: Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery()
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Module/Hosting/LedonOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: DisableAutoDiscovery
+    path: src/Ledon.Module/Hosting/LedonOptions.cs
+    startLine: 49
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Hosting
+  summary: >-
+    关闭"入口程序集及其引用"的自动扫描。此后只处理 <xref href="Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)" data-throw-if-not-resolved="false"></xref> /
+
+    <xref href="Ledon.Module.Hosting.LedonOptions.AddModule%60%601" data-throw-if-not-resolved="false"></xref> 显式指定的内容。
+  example: []
+  syntax:
+    content: public LedonOptions DisableAutoDiscovery()
+    return:
+      type: Ledon.Module.Hosting.LedonOptions
+    content.vb: Public Function DisableAutoDiscovery() As LedonOptions
+  overload: Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery*
+references:
+- uid: Ledon.Module.Hosting
+  commentId: N:Ledon.Module.Hosting
+  href: Ledon.html
+  name: Ledon.Module.Hosting
+  nameWithType: Ledon.Module.Hosting
+  fullName: Ledon.Module.Hosting
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Module
+    name: Module
+    href: Ledon.Module.html
+  - name: .
+  - uid: Ledon.Module.Hosting
+    name: Hosting
+    href: Ledon.Module.Hosting.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Module
+    name: Module
+    href: Ledon.Module.html
+  - name: .
+  - uid: Ledon.Module.Hosting
+    name: Hosting
+    href: Ledon.Module.Hosting.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped
+  commentId: F:Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.dependencyinjection.servicelifetime#microsoft-extensions-dependencyinjection-servicelifetime-scoped
+  name: Scoped
+  nameWithType: ServiceLifetime.Scoped
+  fullName: Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped
+- uid: Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime*
+  commentId: Overload:Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime
+  href: Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_DefaultServiceLifetime
+  name: DefaultServiceLifetime
+  nameWithType: LedonOptions.DefaultServiceLifetime
+  fullName: Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime
+- uid: Microsoft.Extensions.DependencyInjection.ServiceLifetime
+  commentId: T:Microsoft.Extensions.DependencyInjection.ServiceLifetime
+  parent: Microsoft.Extensions.DependencyInjection
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.dependencyinjection.servicelifetime
+  name: ServiceLifetime
+  nameWithType: ServiceLifetime
+  fullName: Microsoft.Extensions.DependencyInjection.ServiceLifetime
+- uid: Microsoft.Extensions.DependencyInjection
+  commentId: N:Microsoft.Extensions.DependencyInjection
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.DependencyInjection
+  nameWithType: Microsoft.Extensions.DependencyInjection
+  fullName: Microsoft.Extensions.DependencyInjection
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.DependencyInjection
+    name: DependencyInjection
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.dependencyinjection
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.DependencyInjection
+    name: DependencyInjection
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.dependencyinjection
+- uid: Ledon.Module.Hosting.LedonOptions.AddAssembly*
+  commentId: Overload:Ledon.Module.Hosting.LedonOptions.AddAssembly
+  href: Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddAssembly_System_Reflection_Assembly_
+  name: AddAssembly
+  nameWithType: LedonOptions.AddAssembly
+  fullName: Ledon.Module.Hosting.LedonOptions.AddAssembly
+- uid: System.Reflection.Assembly
+  commentId: T:System.Reflection.Assembly
+  parent: System.Reflection
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.reflection.assembly
+  name: Assembly
+  nameWithType: Assembly
+  fullName: System.Reflection.Assembly
+- uid: Ledon.Module.Hosting.LedonOptions
+  commentId: T:Ledon.Module.Hosting.LedonOptions
+  parent: Ledon.Module.Hosting
+  href: Ledon.Module.Hosting.LedonOptions.html
+  name: LedonOptions
+  nameWithType: LedonOptions
+  fullName: Ledon.Module.Hosting.LedonOptions
+- uid: System.Reflection
+  commentId: N:System.Reflection
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Reflection
+  nameWithType: System.Reflection
+  fullName: System.Reflection
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Reflection
+    name: Reflection
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.reflection
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Reflection
+    name: Reflection
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.reflection
+- uid: Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute
+  commentId: T:Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute
+  href: Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute.html
+  name: DisableAutoDiscoveryAttribute
+  nameWithType: DisableAutoDiscoveryAttribute
+  fullName: Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute
+- uid: Ledon.Module.Hosting.LedonOptions.AddModule*
+  commentId: Overload:Ledon.Module.Hosting.LedonOptions.AddModule
+  href: Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddModule__1
+  name: AddModule
+  nameWithType: LedonOptions.AddModule
+  fullName: Ledon.Module.Hosting.LedonOptions.AddModule
+- uid: Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+  commentId: M:Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+  isExternal: true
+  href: Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddAssembly_System_Reflection_Assembly_
+  name: AddAssembly(Assembly)
+  nameWithType: LedonOptions.AddAssembly(Assembly)
+  fullName: Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+  spec.csharp:
+  - uid: Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+    name: AddAssembly
+    href: Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddAssembly_System_Reflection_Assembly_
+  - name: (
+  - uid: System.Reflection.Assembly
+    name: Assembly
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.reflection.assembly
+  - name: )
+  spec.vb:
+  - uid: Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+    name: AddAssembly
+    href: Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddAssembly_System_Reflection_Assembly_
+  - name: (
+  - uid: System.Reflection.Assembly
+    name: Assembly
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.reflection.assembly
+  - name: )
+- uid: Ledon.Module.Hosting.LedonOptions.AddModule``1
+  commentId: M:Ledon.Module.Hosting.LedonOptions.AddModule``1
+  href: Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddModule__1
+  name: AddModule<TModule>()
+  nameWithType: LedonOptions.AddModule<TModule>()
+  fullName: Ledon.Module.Hosting.LedonOptions.AddModule<TModule>()
+  nameWithType.vb: LedonOptions.AddModule(Of TModule)()
+  fullName.vb: Ledon.Module.Hosting.LedonOptions.AddModule(Of TModule)()
+  name.vb: AddModule(Of TModule)()
+  spec.csharp:
+  - uid: Ledon.Module.Hosting.LedonOptions.AddModule``1
+    name: AddModule
+    href: Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddModule__1
+  - name: <
+  - name: TModule
+  - name: '>'
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: Ledon.Module.Hosting.LedonOptions.AddModule``1
+    name: AddModule
+    href: Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddModule__1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: TModule
+  - name: )
+  - name: (
+  - name: )
+- uid: Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery*
+  commentId: Overload:Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery
+  href: Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_DisableAutoDiscovery
+  name: DisableAutoDiscovery
+  nameWithType: LedonOptions.DisableAutoDiscovery
+  fullName: Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery

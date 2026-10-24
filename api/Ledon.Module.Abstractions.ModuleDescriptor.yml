@@ -1,0 +1,650 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Module.Abstractions.ModuleDescriptor
+  commentId: T:Ledon.Module.Abstractions.ModuleDescriptor
+  id: ModuleDescriptor
+  parent: Ledon.Module.Abstractions
+  children:
+  - Ledon.Module.Abstractions.ModuleDescriptor.Dependencies
+  - Ledon.Module.Abstractions.ModuleDescriptor.Instance
+  - Ledon.Module.Abstractions.ModuleDescriptor.ModuleType
+  - Ledon.Module.Abstractions.ModuleDescriptor.Name
+  - Ledon.Module.Abstractions.ModuleDescriptor.State
+  - Ledon.Module.Abstractions.ModuleDescriptor.ToString
+  langs:
+  - csharp
+  - vb
+  name: ModuleDescriptor
+  nameWithType: ModuleDescriptor
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor
+  type: Class
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: ModuleDescriptor
+    path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+    startLine: 24
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 模块的运行时描述：类型、依赖、实例与当前状态。由依赖图构建，顺序即初始化顺序。
+  example: []
+  syntax:
+    content: public sealed class ModuleDescriptor
+    content.vb: Public NotInheritable Class ModuleDescriptor
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Name
+  commentId: P:Ledon.Module.Abstractions.ModuleDescriptor.Name
+  id: Name
+  parent: Ledon.Module.Abstractions.ModuleDescriptor
+  langs:
+  - csharp
+  - vb
+  name: Name
+  nameWithType: ModuleDescriptor.Name
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Name
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Name
+    path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+    startLine: 34
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 模块类名（简名）。
+  example: []
+  syntax:
+    content: public string Name { get; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public ReadOnly Property Name As String
+  overload: Ledon.Module.Abstractions.ModuleDescriptor.Name*
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.ModuleType
+  commentId: P:Ledon.Module.Abstractions.ModuleDescriptor.ModuleType
+  id: ModuleType
+  parent: Ledon.Module.Abstractions.ModuleDescriptor
+  langs:
+  - csharp
+  - vb
+  name: ModuleType
+  nameWithType: ModuleDescriptor.ModuleType
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.ModuleType
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: ModuleType
+    path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+    startLine: 37
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 模块类型。
+  example: []
+  syntax:
+    content: public Type ModuleType { get; }
+    parameters: []
+    return:
+      type: System.Type
+    content.vb: Public ReadOnly Property ModuleType As Type
+  overload: Ledon.Module.Abstractions.ModuleDescriptor.ModuleType*
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Dependencies
+  commentId: P:Ledon.Module.Abstractions.ModuleDescriptor.Dependencies
+  id: Dependencies
+  parent: Ledon.Module.Abstractions.ModuleDescriptor
+  langs:
+  - csharp
+  - vb
+  name: Dependencies
+  nameWithType: ModuleDescriptor.Dependencies
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Dependencies
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Dependencies
+    path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+    startLine: 40
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 直接依赖的模块类型（来自 <xref href="Ledon.Module.Abstractions.DependsOnAttribute" data-throw-if-not-resolved="false"></xref>，已去重）。
+  example: []
+  syntax:
+    content: public IReadOnlyList<Type> Dependencies { get; }
+    parameters: []
+    return:
+      type: System.Collections.Generic.IReadOnlyList{System.Type}
+    content.vb: Public ReadOnly Property Dependencies As IReadOnlyList(Of Type)
+  overload: Ledon.Module.Abstractions.ModuleDescriptor.Dependencies*
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Instance
+  commentId: P:Ledon.Module.Abstractions.ModuleDescriptor.Instance
+  id: Instance
+  parent: Ledon.Module.Abstractions.ModuleDescriptor
+  langs:
+  - csharp
+  - vb
+  name: Instance
+  nameWithType: ModuleDescriptor.Instance
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Instance
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Instance
+    path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+    startLine: 43
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 模块实例，由框架在发现阶段创建。
+  example: []
+  syntax:
+    content: public IModule? Instance { get; }
+    parameters: []
+    return:
+      type: Ledon.Module.Abstractions.IModule
+    content.vb: Public Property Instance As IModule
+  overload: Ledon.Module.Abstractions.ModuleDescriptor.Instance*
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.State
+  commentId: P:Ledon.Module.Abstractions.ModuleDescriptor.State
+  id: State
+  parent: Ledon.Module.Abstractions.ModuleDescriptor
+  langs:
+  - csharp
+  - vb
+  name: State
+  nameWithType: ModuleDescriptor.State
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.State
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: State
+    path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+    startLine: 46
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: 当前生命周期状态。
+  example: []
+  syntax:
+    content: public ModuleState State { get; }
+    parameters: []
+    return:
+      type: Ledon.Module.Abstractions.ModuleState
+    content.vb: Public Property State As ModuleState
+  overload: Ledon.Module.Abstractions.ModuleDescriptor.State*
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.ToString
+  commentId: M:Ledon.Module.Abstractions.ModuleDescriptor.ToString
+  id: ToString
+  parent: Ledon.Module.Abstractions.ModuleDescriptor
+  langs:
+  - csharp
+  - vb
+  name: ToString()
+  nameWithType: ModuleDescriptor.ToString()
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.ToString()
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: ToString
+    path: src/Ledon.Module/Abstractions/ModuleDescriptor.cs
+    startLine: 48
+  assemblies:
+  - Ledon.Module
+  namespace: Ledon.Module.Abstractions
+  summary: Returns a string that represents the current object.
+  example: []
+  syntax:
+    content: public override string ToString()
+    return:
+      type: System.String
+      description: A string that represents the current object.
+    content.vb: Public Overrides Function ToString() As String
+  overridden: System.Object.ToString
+  overload: Ledon.Module.Abstractions.ModuleDescriptor.ToString*
+references:
+- uid: Ledon.Module.Abstractions
+  commentId: N:Ledon.Module.Abstractions
+  href: Ledon.html
+  name: Ledon.Module.Abstractions
+  nameWithType: Ledon.Module.Abstractions
+  fullName: Ledon.Module.Abstractions
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Module
+    name: Module
+    href: Ledon.Module.html
+  - name: .
+  - uid: Ledon.Module.Abstractions
+    name: Abstractions
+    href: Ledon.Module.Abstractions.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Module
+    name: Module
+    href: Ledon.Module.html
+  - name: .
+  - uid: Ledon.Module.Abstractions
+    name: Abstractions
+    href: Ledon.Module.Abstractions.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Name*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.Name
+  href: Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_Name
+  name: Name
+  nameWithType: ModuleDescriptor.Name
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Name
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.ModuleType*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.ModuleType
+  href: Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_ModuleType
+  name: ModuleType
+  nameWithType: ModuleDescriptor.ModuleType
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.ModuleType
+- uid: System.Type
+  commentId: T:System.Type
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.type
+  name: Type
+  nameWithType: Type
+  fullName: System.Type
+- uid: Ledon.Module.Abstractions.DependsOnAttribute
+  commentId: T:Ledon.Module.Abstractions.DependsOnAttribute
+  href: Ledon.Module.Abstractions.DependsOnAttribute.html
+  name: DependsOnAttribute
+  nameWithType: DependsOnAttribute
+  fullName: Ledon.Module.Abstractions.DependsOnAttribute
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Dependencies*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.Dependencies
+  href: Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_Dependencies
+  name: Dependencies
+  nameWithType: ModuleDescriptor.Dependencies
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Dependencies
+- uid: System.Collections.Generic.IReadOnlyList{System.Type}
+  commentId: T:System.Collections.Generic.IReadOnlyList{System.Type}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IReadOnlyList`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<Type>
+  nameWithType: IReadOnlyList<Type>
+  fullName: System.Collections.Generic.IReadOnlyList<System.Type>
+  nameWithType.vb: IReadOnlyList(Of Type)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of System.Type)
+  name.vb: IReadOnlyList(Of Type)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - uid: System.Type
+    name: Type
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.type
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.Type
+    name: Type
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.type
+  - name: )
+- uid: System.Collections.Generic.IReadOnlyList`1
+  commentId: T:System.Collections.Generic.IReadOnlyList`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  name: IReadOnlyList<T>
+  nameWithType: IReadOnlyList<T>
+  fullName: System.Collections.Generic.IReadOnlyList<T>
+  nameWithType.vb: IReadOnlyList(Of T)
+  fullName.vb: System.Collections.Generic.IReadOnlyList(Of T)
+  name.vb: IReadOnlyList(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IReadOnlyList`1
+    name: IReadOnlyList
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Instance*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.Instance
+  href: Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_Instance
+  name: Instance
+  nameWithType: ModuleDescriptor.Instance
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Instance
+- uid: Ledon.Module.Abstractions.IModule
+  commentId: T:Ledon.Module.Abstractions.IModule
+  parent: Ledon.Module.Abstractions
+  href: Ledon.Module.Abstractions.IModule.html
+  name: IModule
+  nameWithType: IModule
+  fullName: Ledon.Module.Abstractions.IModule
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.State*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.State
+  href: Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_State
+  name: State
+  nameWithType: ModuleDescriptor.State
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.State
+- uid: Ledon.Module.Abstractions.ModuleState
+  commentId: T:Ledon.Module.Abstractions.ModuleState
+  parent: Ledon.Module.Abstractions
+  href: Ledon.Module.Abstractions.ModuleState.html
+  name: ModuleState
+  nameWithType: ModuleState
+  fullName: Ledon.Module.Abstractions.ModuleState
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.ToString*
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.ToString
+  href: Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_ToString
+  name: ToString
+  nameWithType: ModuleDescriptor.ToString
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.ToString

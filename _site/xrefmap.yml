@@ -1,0 +1,2992 @@
+### YamlMime:XRefMap
+sorted: true
+references:
+- uid: Ledon
+  name: Ledon
+  href: api/Ledon.html
+  commentId: N:Ledon
+  fullName: Ledon
+  nameWithType: Ledon
+- uid: Ledon.AssemblyExtensions
+  name: AssemblyExtensions
+  href: api/Ledon.AssemblyExtensions.html
+  commentId: T:Ledon.AssemblyExtensions
+  fullName: Ledon.AssemblyExtensions
+  nameWithType: AssemblyExtensions
+- uid: Ledon.AssemblyExtensions.GetLoadableTypes(System.Reflection.Assembly)
+  name: GetLoadableTypes(Assembly)
+  href: api/Ledon.AssemblyExtensions.html#Ledon_AssemblyExtensions_GetLoadableTypes_System_Reflection_Assembly_
+  commentId: M:Ledon.AssemblyExtensions.GetLoadableTypes(System.Reflection.Assembly)
+  fullName: Ledon.AssemblyExtensions.GetLoadableTypes(System.Reflection.Assembly)
+  nameWithType: AssemblyExtensions.GetLoadableTypes(Assembly)
+- uid: Ledon.AssemblyExtensions.GetLoadableTypes*
+  name: GetLoadableTypes
+  href: api/Ledon.AssemblyExtensions.html#Ledon_AssemblyExtensions_GetLoadableTypes_
+  commentId: Overload:Ledon.AssemblyExtensions.GetLoadableTypes
+  isSpec: "True"
+  fullName: Ledon.AssemblyExtensions.GetLoadableTypes
+  nameWithType: AssemblyExtensions.GetLoadableTypes
+- uid: Ledon.Caching
+  name: Ledon.Caching
+  href: api/Ledon.Caching.html
+  commentId: N:Ledon.Caching
+  fullName: Ledon.Caching
+  nameWithType: Ledon.Caching
+- uid: Ledon.Caching.ICacheService
+  name: ICacheService
+  href: api/Ledon.Caching.ICacheService.html
+  commentId: T:Ledon.Caching.ICacheService
+  fullName: Ledon.Caching.ICacheService
+  nameWithType: ICacheService
+- uid: Ledon.Caching.ICacheService.GetAsync*
+  name: GetAsync
+  href: api/Ledon.Caching.ICacheService.html#Ledon_Caching_ICacheService_GetAsync_
+  commentId: Overload:Ledon.Caching.ICacheService.GetAsync
+  isSpec: "True"
+  fullName: Ledon.Caching.ICacheService.GetAsync
+  nameWithType: ICacheService.GetAsync
+- uid: Ledon.Caching.ICacheService.GetAsync``1(System.String,System.Threading.CancellationToken)
+  name: GetAsync<T>(string, CancellationToken)
+  href: api/Ledon.Caching.ICacheService.html#Ledon_Caching_ICacheService_GetAsync__1_System_String_System_Threading_CancellationToken_
+  commentId: M:Ledon.Caching.ICacheService.GetAsync``1(System.String,System.Threading.CancellationToken)
+  name.vb: GetAsync(Of T)(String, CancellationToken)
+  fullName: Ledon.Caching.ICacheService.GetAsync<T>(string, System.Threading.CancellationToken)
+  fullName.vb: Ledon.Caching.ICacheService.GetAsync(Of T)(String, System.Threading.CancellationToken)
+  nameWithType: ICacheService.GetAsync<T>(string, CancellationToken)
+  nameWithType.vb: ICacheService.GetAsync(Of T)(String, CancellationToken)
+- uid: Ledon.Caching.ICacheService.GetOrCreateAsync*
+  name: GetOrCreateAsync
+  href: api/Ledon.Caching.ICacheService.html#Ledon_Caching_ICacheService_GetOrCreateAsync_
+  commentId: Overload:Ledon.Caching.ICacheService.GetOrCreateAsync
+  isSpec: "True"
+  fullName: Ledon.Caching.ICacheService.GetOrCreateAsync
+  nameWithType: ICacheService.GetOrCreateAsync
+- uid: Ledon.Caching.ICacheService.GetOrCreateAsync``1(System.String,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Nullable{System.TimeSpan},System.Threading.CancellationToken)
+  name: GetOrCreateAsync<T>(string, Func<CancellationToken, Task<T>>, TimeSpan?, CancellationToken)
+  href: api/Ledon.Caching.ICacheService.html#Ledon_Caching_ICacheService_GetOrCreateAsync__1_System_String_System_Func_System_Threading_CancellationToken_System_Threading_Tasks_Task___0___System_Nullable_System_TimeSpan__System_Threading_CancellationToken_
+  commentId: M:Ledon.Caching.ICacheService.GetOrCreateAsync``1(System.String,System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.Nullable{System.TimeSpan},System.Threading.CancellationToken)
+  name.vb: GetOrCreateAsync(Of T)(String, Func(Of CancellationToken, Task(Of T)), TimeSpan?, CancellationToken)
+  fullName: Ledon.Caching.ICacheService.GetOrCreateAsync<T>(string, System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<T>>, System.TimeSpan?, System.Threading.CancellationToken)
+  fullName.vb: Ledon.Caching.ICacheService.GetOrCreateAsync(Of T)(String, System.Func(Of System.Threading.CancellationToken, System.Threading.Tasks.Task(Of T)), System.TimeSpan?, System.Threading.CancellationToken)
+  nameWithType: ICacheService.GetOrCreateAsync<T>(string, Func<CancellationToken, Task<T>>, TimeSpan?, CancellationToken)
+  nameWithType.vb: ICacheService.GetOrCreateAsync(Of T)(String, Func(Of CancellationToken, Task(Of T)), TimeSpan?, CancellationToken)
+- uid: Ledon.Caching.ICacheService.Remove(System.String)
+  name: Remove(string)
+  href: api/Ledon.Caching.ICacheService.html#Ledon_Caching_ICacheService_Remove_System_String_
+  commentId: M:Ledon.Caching.ICacheService.Remove(System.String)
+  name.vb: Remove(String)
+  fullName: Ledon.Caching.ICacheService.Remove(string)
+  fullName.vb: Ledon.Caching.ICacheService.Remove(String)
+  nameWithType: ICacheService.Remove(string)
+  nameWithType.vb: ICacheService.Remove(String)
+- uid: Ledon.Caching.ICacheService.Remove*
+  name: Remove
+  href: api/Ledon.Caching.ICacheService.html#Ledon_Caching_ICacheService_Remove_
+  commentId: Overload:Ledon.Caching.ICacheService.Remove
+  isSpec: "True"
+  fullName: Ledon.Caching.ICacheService.Remove
+  nameWithType: ICacheService.Remove
+- uid: Ledon.Caching.ICacheService.Set*
+  name: Set
+  href: api/Ledon.Caching.ICacheService.html#Ledon_Caching_ICacheService_Set_
+  commentId: Overload:Ledon.Caching.ICacheService.Set
+  isSpec: "True"
+  fullName: Ledon.Caching.ICacheService.Set
+  nameWithType: ICacheService.Set
+- uid: Ledon.Caching.ICacheService.Set``1(System.String,``0,System.Nullable{System.TimeSpan})
+  name: Set<T>(string, T, TimeSpan?)
+  href: api/Ledon.Caching.ICacheService.html#Ledon_Caching_ICacheService_Set__1_System_String___0_System_Nullable_System_TimeSpan__
+  commentId: M:Ledon.Caching.ICacheService.Set``1(System.String,``0,System.Nullable{System.TimeSpan})
+  name.vb: Set(Of T)(String, T, TimeSpan?)
+  fullName: Ledon.Caching.ICacheService.Set<T>(string, T, System.TimeSpan?)
+  fullName.vb: Ledon.Caching.ICacheService.Set(Of T)(String, T, System.TimeSpan?)
+  nameWithType: ICacheService.Set<T>(string, T, TimeSpan?)
+  nameWithType.vb: ICacheService.Set(Of T)(String, T, TimeSpan?)
+- uid: Ledon.Caching.ICacheService.TryGet*
+  name: TryGet
+  href: api/Ledon.Caching.ICacheService.html#Ledon_Caching_ICacheService_TryGet_
+  commentId: Overload:Ledon.Caching.ICacheService.TryGet
+  isSpec: "True"
+  fullName: Ledon.Caching.ICacheService.TryGet
+  nameWithType: ICacheService.TryGet
+- uid: Ledon.Caching.ICacheService.TryGet``1(System.String,``0@)
+  name: TryGet<T>(string, out T?)
+  href: api/Ledon.Caching.ICacheService.html#Ledon_Caching_ICacheService_TryGet__1_System_String___0__
+  commentId: M:Ledon.Caching.ICacheService.TryGet``1(System.String,``0@)
+  name.vb: TryGet(Of T)(String, T)
+  fullName: Ledon.Caching.ICacheService.TryGet<T>(string, out T?)
+  fullName.vb: Ledon.Caching.ICacheService.TryGet(Of T)(String, T)
+  nameWithType: ICacheService.TryGet<T>(string, out T?)
+  nameWithType.vb: ICacheService.TryGet(Of T)(String, T)
+- uid: Ledon.Caching.LedonCachingOptions
+  name: LedonCachingOptions
+  href: api/Ledon.Caching.LedonCachingOptions.html
+  commentId: T:Ledon.Caching.LedonCachingOptions
+  fullName: Ledon.Caching.LedonCachingOptions
+  nameWithType: LedonCachingOptions
+- uid: Ledon.Caching.LedonCachingOptions.DefaultExpiration
+  name: DefaultExpiration
+  href: api/Ledon.Caching.LedonCachingOptions.html#Ledon_Caching_LedonCachingOptions_DefaultExpiration
+  commentId: P:Ledon.Caching.LedonCachingOptions.DefaultExpiration
+  fullName: Ledon.Caching.LedonCachingOptions.DefaultExpiration
+  nameWithType: LedonCachingOptions.DefaultExpiration
+- uid: Ledon.Caching.LedonCachingOptions.DefaultExpiration*
+  name: DefaultExpiration
+  href: api/Ledon.Caching.LedonCachingOptions.html#Ledon_Caching_LedonCachingOptions_DefaultExpiration_
+  commentId: Overload:Ledon.Caching.LedonCachingOptions.DefaultExpiration
+  isSpec: "True"
+  fullName: Ledon.Caching.LedonCachingOptions.DefaultExpiration
+  nameWithType: LedonCachingOptions.DefaultExpiration
+- uid: Ledon.Caching.LedonCachingOptions.KeyPrefix
+  name: KeyPrefix
+  href: api/Ledon.Caching.LedonCachingOptions.html#Ledon_Caching_LedonCachingOptions_KeyPrefix
+  commentId: P:Ledon.Caching.LedonCachingOptions.KeyPrefix
+  fullName: Ledon.Caching.LedonCachingOptions.KeyPrefix
+  nameWithType: LedonCachingOptions.KeyPrefix
+- uid: Ledon.Caching.LedonCachingOptions.KeyPrefix*
+  name: KeyPrefix
+  href: api/Ledon.Caching.LedonCachingOptions.html#Ledon_Caching_LedonCachingOptions_KeyPrefix_
+  commentId: Overload:Ledon.Caching.LedonCachingOptions.KeyPrefix
+  isSpec: "True"
+  fullName: Ledon.Caching.LedonCachingOptions.KeyPrefix
+  nameWithType: LedonCachingOptions.KeyPrefix
+- uid: Ledon.Caching.LedonDistributedCachingOptions
+  name: LedonDistributedCachingOptions
+  href: api/Ledon.Caching.LedonDistributedCachingOptions.html
+  commentId: T:Ledon.Caching.LedonDistributedCachingOptions
+  fullName: Ledon.Caching.LedonDistributedCachingOptions
+  nameWithType: LedonDistributedCachingOptions
+- uid: Ledon.Caching.LedonDistributedCachingOptions.DefaultExpiration
+  name: DefaultExpiration
+  href: api/Ledon.Caching.LedonDistributedCachingOptions.html#Ledon_Caching_LedonDistributedCachingOptions_DefaultExpiration
+  commentId: P:Ledon.Caching.LedonDistributedCachingOptions.DefaultExpiration
+  fullName: Ledon.Caching.LedonDistributedCachingOptions.DefaultExpiration
+  nameWithType: LedonDistributedCachingOptions.DefaultExpiration
+- uid: Ledon.Caching.LedonDistributedCachingOptions.DefaultExpiration*
+  name: DefaultExpiration
+  href: api/Ledon.Caching.LedonDistributedCachingOptions.html#Ledon_Caching_LedonDistributedCachingOptions_DefaultExpiration_
+  commentId: Overload:Ledon.Caching.LedonDistributedCachingOptions.DefaultExpiration
+  isSpec: "True"
+  fullName: Ledon.Caching.LedonDistributedCachingOptions.DefaultExpiration
+  nameWithType: LedonDistributedCachingOptions.DefaultExpiration
+- uid: Ledon.Caching.LedonDistributedCachingOptions.KeyPrefix
+  name: KeyPrefix
+  href: api/Ledon.Caching.LedonDistributedCachingOptions.html#Ledon_Caching_LedonDistributedCachingOptions_KeyPrefix
+  commentId: P:Ledon.Caching.LedonDistributedCachingOptions.KeyPrefix
+  fullName: Ledon.Caching.LedonDistributedCachingOptions.KeyPrefix
+  nameWithType: LedonDistributedCachingOptions.KeyPrefix
+- uid: Ledon.Caching.LedonDistributedCachingOptions.KeyPrefix*
+  name: KeyPrefix
+  href: api/Ledon.Caching.LedonDistributedCachingOptions.html#Ledon_Caching_LedonDistributedCachingOptions_KeyPrefix_
+  commentId: Overload:Ledon.Caching.LedonDistributedCachingOptions.KeyPrefix
+  isSpec: "True"
+  fullName: Ledon.Caching.LedonDistributedCachingOptions.KeyPrefix
+  nameWithType: LedonDistributedCachingOptions.KeyPrefix
+- uid: Ledon.Caching.LedonDistributedCachingOptions.RedisConnectionString
+  name: RedisConnectionString
+  href: api/Ledon.Caching.LedonDistributedCachingOptions.html#Ledon_Caching_LedonDistributedCachingOptions_RedisConnectionString
+  commentId: P:Ledon.Caching.LedonDistributedCachingOptions.RedisConnectionString
+  fullName: Ledon.Caching.LedonDistributedCachingOptions.RedisConnectionString
+  nameWithType: LedonDistributedCachingOptions.RedisConnectionString
+- uid: Ledon.Caching.LedonDistributedCachingOptions.RedisConnectionString*
+  name: RedisConnectionString
+  href: api/Ledon.Caching.LedonDistributedCachingOptions.html#Ledon_Caching_LedonDistributedCachingOptions_RedisConnectionString_
+  commentId: Overload:Ledon.Caching.LedonDistributedCachingOptions.RedisConnectionString
+  isSpec: "True"
+  fullName: Ledon.Caching.LedonDistributedCachingOptions.RedisConnectionString
+  nameWithType: LedonDistributedCachingOptions.RedisConnectionString
+- uid: Ledon.Core.Events
+  name: Ledon.Core.Events
+  href: api/Ledon.Core.Events.html
+  commentId: N:Ledon.Core.Events
+  fullName: Ledon.Core.Events
+  nameWithType: Ledon.Core.Events
+- uid: Ledon.Core.Events.IEventBus
+  name: IEventBus
+  href: api/Ledon.Core.Events.IEventBus.html
+  commentId: T:Ledon.Core.Events.IEventBus
+  fullName: Ledon.Core.Events.IEventBus
+  nameWithType: IEventBus
+- uid: Ledon.Core.Events.IEventBus.PublishAsync*
+  name: PublishAsync
+  href: api/Ledon.Core.Events.IEventBus.html#Ledon_Core_Events_IEventBus_PublishAsync_
+  commentId: Overload:Ledon.Core.Events.IEventBus.PublishAsync
+  isSpec: "True"
+  fullName: Ledon.Core.Events.IEventBus.PublishAsync
+  nameWithType: IEventBus.PublishAsync
+- uid: Ledon.Core.Events.IEventBus.PublishAsync``1(``0,System.Threading.CancellationToken)
+  name: PublishAsync<TEvent>(TEvent, CancellationToken)
+  href: api/Ledon.Core.Events.IEventBus.html#Ledon_Core_Events_IEventBus_PublishAsync__1___0_System_Threading_CancellationToken_
+  commentId: M:Ledon.Core.Events.IEventBus.PublishAsync``1(``0,System.Threading.CancellationToken)
+  name.vb: PublishAsync(Of TEvent)(TEvent, CancellationToken)
+  fullName: Ledon.Core.Events.IEventBus.PublishAsync<TEvent>(TEvent, System.Threading.CancellationToken)
+  fullName.vb: Ledon.Core.Events.IEventBus.PublishAsync(Of TEvent)(TEvent, System.Threading.CancellationToken)
+  nameWithType: IEventBus.PublishAsync<TEvent>(TEvent, CancellationToken)
+  nameWithType.vb: IEventBus.PublishAsync(Of TEvent)(TEvent, CancellationToken)
+- uid: Ledon.Core.Events.IEventHandler`1
+  name: IEventHandler<TEvent>
+  href: api/Ledon.Core.Events.IEventHandler-1.html
+  commentId: T:Ledon.Core.Events.IEventHandler`1
+  name.vb: IEventHandler(Of TEvent)
+  fullName: Ledon.Core.Events.IEventHandler<TEvent>
+  fullName.vb: Ledon.Core.Events.IEventHandler(Of TEvent)
+  nameWithType: IEventHandler<TEvent>
+  nameWithType.vb: IEventHandler(Of TEvent)
+- uid: Ledon.Core.Events.IEventHandler`1.HandleAsync(`0,System.Threading.CancellationToken)
+  name: HandleAsync(TEvent, CancellationToken)
+  href: api/Ledon.Core.Events.IEventHandler-1.html#Ledon_Core_Events_IEventHandler_1_HandleAsync__0_System_Threading_CancellationToken_
+  commentId: M:Ledon.Core.Events.IEventHandler`1.HandleAsync(`0,System.Threading.CancellationToken)
+  fullName: Ledon.Core.Events.IEventHandler<TEvent>.HandleAsync(TEvent, System.Threading.CancellationToken)
+  fullName.vb: Ledon.Core.Events.IEventHandler(Of TEvent).HandleAsync(TEvent, System.Threading.CancellationToken)
+  nameWithType: IEventHandler<TEvent>.HandleAsync(TEvent, CancellationToken)
+  nameWithType.vb: IEventHandler(Of TEvent).HandleAsync(TEvent, CancellationToken)
+- uid: Ledon.Core.Events.IEventHandler`1.HandleAsync*
+  name: HandleAsync
+  href: api/Ledon.Core.Events.IEventHandler-1.html#Ledon_Core_Events_IEventHandler_1_HandleAsync_
+  commentId: Overload:Ledon.Core.Events.IEventHandler`1.HandleAsync
+  isSpec: "True"
+  fullName: Ledon.Core.Events.IEventHandler<TEvent>.HandleAsync
+  fullName.vb: Ledon.Core.Events.IEventHandler(Of TEvent).HandleAsync
+  nameWithType: IEventHandler<TEvent>.HandleAsync
+  nameWithType.vb: IEventHandler(Of TEvent).HandleAsync
+- uid: Ledon.Data
+  name: Ledon.Data
+  href: api/Ledon.Data.html
+  commentId: N:Ledon.Data
+  fullName: Ledon.Data
+  nameWithType: Ledon.Data
+- uid: Ledon.Data.ILedonDbContext
+  name: ILedonDbContext
+  href: api/Ledon.Data.ILedonDbContext.html
+  commentId: T:Ledon.Data.ILedonDbContext
+  fullName: Ledon.Data.ILedonDbContext
+  nameWithType: ILedonDbContext
+- uid: Ledon.Data.LedonDataOptions
+  name: LedonDataOptions
+  href: api/Ledon.Data.LedonDataOptions.html
+  commentId: T:Ledon.Data.LedonDataOptions
+  fullName: Ledon.Data.LedonDataOptions
+  nameWithType: LedonDataOptions
+- uid: Ledon.Data.LedonDataOptions.AutoMigrate
+  name: AutoMigrate
+  href: api/Ledon.Data.LedonDataOptions.html#Ledon_Data_LedonDataOptions_AutoMigrate
+  commentId: P:Ledon.Data.LedonDataOptions.AutoMigrate
+  fullName: Ledon.Data.LedonDataOptions.AutoMigrate
+  nameWithType: LedonDataOptions.AutoMigrate
+- uid: Ledon.Data.LedonDataOptions.AutoMigrate*
+  name: AutoMigrate
+  href: api/Ledon.Data.LedonDataOptions.html#Ledon_Data_LedonDataOptions_AutoMigrate_
+  commentId: Overload:Ledon.Data.LedonDataOptions.AutoMigrate
+  isSpec: "True"
+  fullName: Ledon.Data.LedonDataOptions.AutoMigrate
+  nameWithType: LedonDataOptions.AutoMigrate
+- uid: Ledon.Data.LedonDataServiceCollectionExtensions
+  name: LedonDataServiceCollectionExtensions
+  href: api/Ledon.Data.LedonDataServiceCollectionExtensions.html
+  commentId: T:Ledon.Data.LedonDataServiceCollectionExtensions
+  fullName: Ledon.Data.LedonDataServiceCollectionExtensions
+  nameWithType: LedonDataServiceCollectionExtensions
+- uid: Ledon.Data.LedonDataServiceCollectionExtensions.AddLedonData(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Data.LedonDataOptions})
+  name: AddLedonData(IServiceCollection, Action<LedonDataOptions>?)
+  href: api/Ledon.Data.LedonDataServiceCollectionExtensions.html#Ledon_Data_LedonDataServiceCollectionExtensions_AddLedonData_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_Data_LedonDataOptions__
+  commentId: M:Ledon.Data.LedonDataServiceCollectionExtensions.AddLedonData(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Data.LedonDataOptions})
+  name.vb: AddLedonData(IServiceCollection, Action(Of LedonDataOptions))
+  fullName: Ledon.Data.LedonDataServiceCollectionExtensions.AddLedonData(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.Data.LedonDataOptions>?)
+  fullName.vb: Ledon.Data.LedonDataServiceCollectionExtensions.AddLedonData(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.Data.LedonDataOptions))
+  nameWithType: LedonDataServiceCollectionExtensions.AddLedonData(IServiceCollection, Action<LedonDataOptions>?)
+  nameWithType.vb: LedonDataServiceCollectionExtensions.AddLedonData(IServiceCollection, Action(Of LedonDataOptions))
+- uid: Ledon.Data.LedonDataServiceCollectionExtensions.AddLedonData*
+  name: AddLedonData
+  href: api/Ledon.Data.LedonDataServiceCollectionExtensions.html#Ledon_Data_LedonDataServiceCollectionExtensions_AddLedonData_
+  commentId: Overload:Ledon.Data.LedonDataServiceCollectionExtensions.AddLedonData
+  isSpec: "True"
+  fullName: Ledon.Data.LedonDataServiceCollectionExtensions.AddLedonData
+  nameWithType: LedonDataServiceCollectionExtensions.AddLedonData
+- uid: Ledon.Module
+  name: Ledon.Module
+  href: api/Ledon.Module.html
+  commentId: N:Ledon.Module
+  fullName: Ledon.Module
+  nameWithType: Ledon.Module
+- uid: Ledon.Module.Abstractions
+  name: Ledon.Module.Abstractions
+  href: api/Ledon.Module.Abstractions.html
+  commentId: N:Ledon.Module.Abstractions
+  fullName: Ledon.Module.Abstractions
+  nameWithType: Ledon.Module.Abstractions
+- uid: Ledon.Module.Abstractions.DependsOnAttribute
+  name: DependsOnAttribute
+  href: api/Ledon.Module.Abstractions.DependsOnAttribute.html
+  commentId: T:Ledon.Module.Abstractions.DependsOnAttribute
+  fullName: Ledon.Module.Abstractions.DependsOnAttribute
+  nameWithType: DependsOnAttribute
+- uid: Ledon.Module.Abstractions.DependsOnAttribute.#ctor(System.Type[])
+  name: DependsOnAttribute(params Type[])
+  href: api/Ledon.Module.Abstractions.DependsOnAttribute.html#Ledon_Module_Abstractions_DependsOnAttribute__ctor_System_Type___
+  commentId: M:Ledon.Module.Abstractions.DependsOnAttribute.#ctor(System.Type[])
+  name.vb: New(ParamArray Type())
+  fullName: Ledon.Module.Abstractions.DependsOnAttribute.DependsOnAttribute(params System.Type[])
+  fullName.vb: Ledon.Module.Abstractions.DependsOnAttribute.New(ParamArray System.Type())
+  nameWithType: DependsOnAttribute.DependsOnAttribute(params Type[])
+  nameWithType.vb: DependsOnAttribute.New(ParamArray Type())
+- uid: Ledon.Module.Abstractions.DependsOnAttribute.#ctor*
+  name: DependsOnAttribute
+  href: api/Ledon.Module.Abstractions.DependsOnAttribute.html#Ledon_Module_Abstractions_DependsOnAttribute__ctor_
+  commentId: Overload:Ledon.Module.Abstractions.DependsOnAttribute.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: Ledon.Module.Abstractions.DependsOnAttribute.DependsOnAttribute
+  fullName.vb: Ledon.Module.Abstractions.DependsOnAttribute.New
+  nameWithType: DependsOnAttribute.DependsOnAttribute
+  nameWithType.vb: DependsOnAttribute.New
+- uid: Ledon.Module.Abstractions.DependsOnAttribute.ModuleTypes
+  name: ModuleTypes
+  href: api/Ledon.Module.Abstractions.DependsOnAttribute.html#Ledon_Module_Abstractions_DependsOnAttribute_ModuleTypes
+  commentId: P:Ledon.Module.Abstractions.DependsOnAttribute.ModuleTypes
+  fullName: Ledon.Module.Abstractions.DependsOnAttribute.ModuleTypes
+  nameWithType: DependsOnAttribute.ModuleTypes
+- uid: Ledon.Module.Abstractions.DependsOnAttribute.ModuleTypes*
+  name: ModuleTypes
+  href: api/Ledon.Module.Abstractions.DependsOnAttribute.html#Ledon_Module_Abstractions_DependsOnAttribute_ModuleTypes_
+  commentId: Overload:Ledon.Module.Abstractions.DependsOnAttribute.ModuleTypes
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.DependsOnAttribute.ModuleTypes
+  nameWithType: DependsOnAttribute.ModuleTypes
+- uid: Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute
+  name: DisableAutoDiscoveryAttribute
+  href: api/Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute.html
+  commentId: T:Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute
+  fullName: Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute
+  nameWithType: DisableAutoDiscoveryAttribute
+- uid: Ledon.Module.Abstractions.ILedonPreInitialization
+  name: ILedonPreInitialization
+  href: api/Ledon.Module.Abstractions.ILedonPreInitialization.html
+  commentId: T:Ledon.Module.Abstractions.ILedonPreInitialization
+  fullName: Ledon.Module.Abstractions.ILedonPreInitialization
+  nameWithType: ILedonPreInitialization
+- uid: Ledon.Module.Abstractions.ILedonPreInitialization.ExecuteAsync(System.Threading.CancellationToken)
+  name: ExecuteAsync(CancellationToken)
+  href: api/Ledon.Module.Abstractions.ILedonPreInitialization.html#Ledon_Module_Abstractions_ILedonPreInitialization_ExecuteAsync_System_Threading_CancellationToken_
+  commentId: M:Ledon.Module.Abstractions.ILedonPreInitialization.ExecuteAsync(System.Threading.CancellationToken)
+  fullName: Ledon.Module.Abstractions.ILedonPreInitialization.ExecuteAsync(System.Threading.CancellationToken)
+  nameWithType: ILedonPreInitialization.ExecuteAsync(CancellationToken)
+- uid: Ledon.Module.Abstractions.ILedonPreInitialization.ExecuteAsync*
+  name: ExecuteAsync
+  href: api/Ledon.Module.Abstractions.ILedonPreInitialization.html#Ledon_Module_Abstractions_ILedonPreInitialization_ExecuteAsync_
+  commentId: Overload:Ledon.Module.Abstractions.ILedonPreInitialization.ExecuteAsync
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ILedonPreInitialization.ExecuteAsync
+  nameWithType: ILedonPreInitialization.ExecuteAsync
+- uid: Ledon.Module.Abstractions.IModule
+  name: IModule
+  href: api/Ledon.Module.Abstractions.IModule.html
+  commentId: T:Ledon.Module.Abstractions.IModule
+  fullName: Ledon.Module.Abstractions.IModule
+  nameWithType: IModule
+- uid: Ledon.Module.Abstractions.IModule.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+  name: ConfigureServices(IServiceCollection)
+  href: api/Ledon.Module.Abstractions.IModule.html#Ledon_Module_Abstractions_IModule_ConfigureServices_Microsoft_Extensions_DependencyInjection_IServiceCollection_
+  commentId: M:Ledon.Module.Abstractions.IModule.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+  fullName: Ledon.Module.Abstractions.IModule.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+  nameWithType: IModule.ConfigureServices(IServiceCollection)
+- uid: Ledon.Module.Abstractions.IModule.ConfigureServices*
+  name: ConfigureServices
+  href: api/Ledon.Module.Abstractions.IModule.html#Ledon_Module_Abstractions_IModule_ConfigureServices_
+  commentId: Overload:Ledon.Module.Abstractions.IModule.ConfigureServices
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.IModule.ConfigureServices
+  nameWithType: IModule.ConfigureServices
+- uid: Ledon.Module.Abstractions.IModule.OnInitializedAsync(Ledon.Module.Abstractions.ModuleContext,System.Threading.CancellationToken)
+  name: OnInitializedAsync(ModuleContext, CancellationToken)
+  href: api/Ledon.Module.Abstractions.IModule.html#Ledon_Module_Abstractions_IModule_OnInitializedAsync_Ledon_Module_Abstractions_ModuleContext_System_Threading_CancellationToken_
+  commentId: M:Ledon.Module.Abstractions.IModule.OnInitializedAsync(Ledon.Module.Abstractions.ModuleContext,System.Threading.CancellationToken)
+  fullName: Ledon.Module.Abstractions.IModule.OnInitializedAsync(Ledon.Module.Abstractions.ModuleContext, System.Threading.CancellationToken)
+  nameWithType: IModule.OnInitializedAsync(ModuleContext, CancellationToken)
+- uid: Ledon.Module.Abstractions.IModule.OnInitializedAsync*
+  name: OnInitializedAsync
+  href: api/Ledon.Module.Abstractions.IModule.html#Ledon_Module_Abstractions_IModule_OnInitializedAsync_
+  commentId: Overload:Ledon.Module.Abstractions.IModule.OnInitializedAsync
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.IModule.OnInitializedAsync
+  nameWithType: IModule.OnInitializedAsync
+- uid: Ledon.Module.Abstractions.IModule.OnShutdownAsync(Ledon.Module.Abstractions.ModuleContext,System.Threading.CancellationToken)
+  name: OnShutdownAsync(ModuleContext, CancellationToken)
+  href: api/Ledon.Module.Abstractions.IModule.html#Ledon_Module_Abstractions_IModule_OnShutdownAsync_Ledon_Module_Abstractions_ModuleContext_System_Threading_CancellationToken_
+  commentId: M:Ledon.Module.Abstractions.IModule.OnShutdownAsync(Ledon.Module.Abstractions.ModuleContext,System.Threading.CancellationToken)
+  fullName: Ledon.Module.Abstractions.IModule.OnShutdownAsync(Ledon.Module.Abstractions.ModuleContext, System.Threading.CancellationToken)
+  nameWithType: IModule.OnShutdownAsync(ModuleContext, CancellationToken)
+- uid: Ledon.Module.Abstractions.IModule.OnShutdownAsync*
+  name: OnShutdownAsync
+  href: api/Ledon.Module.Abstractions.IModule.html#Ledon_Module_Abstractions_IModule_OnShutdownAsync_
+  commentId: Overload:Ledon.Module.Abstractions.IModule.OnShutdownAsync
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.IModule.OnShutdownAsync
+  nameWithType: IModule.OnShutdownAsync
+- uid: Ledon.Module.Abstractions.IModuleManager
+  name: IModuleManager
+  href: api/Ledon.Module.Abstractions.IModuleManager.html
+  commentId: T:Ledon.Module.Abstractions.IModuleManager
+  fullName: Ledon.Module.Abstractions.IModuleManager
+  nameWithType: IModuleManager
+- uid: Ledon.Module.Abstractions.IModuleManager.GetModule(System.Type)
+  name: GetModule(Type)
+  href: api/Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_GetModule_System_Type_
+  commentId: M:Ledon.Module.Abstractions.IModuleManager.GetModule(System.Type)
+  fullName: Ledon.Module.Abstractions.IModuleManager.GetModule(System.Type)
+  nameWithType: IModuleManager.GetModule(Type)
+- uid: Ledon.Module.Abstractions.IModuleManager.GetModule*
+  name: GetModule
+  href: api/Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_GetModule_
+  commentId: Overload:Ledon.Module.Abstractions.IModuleManager.GetModule
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.IModuleManager.GetModule
+  nameWithType: IModuleManager.GetModule
+- uid: Ledon.Module.Abstractions.IModuleManager.GetModule``1
+  name: GetModule<TModule>()
+  href: api/Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_GetModule__1
+  commentId: M:Ledon.Module.Abstractions.IModuleManager.GetModule``1
+  name.vb: GetModule(Of TModule)()
+  fullName: Ledon.Module.Abstractions.IModuleManager.GetModule<TModule>()
+  fullName.vb: Ledon.Module.Abstractions.IModuleManager.GetModule(Of TModule)()
+  nameWithType: IModuleManager.GetModule<TModule>()
+  nameWithType.vb: IModuleManager.GetModule(Of TModule)()
+- uid: Ledon.Module.Abstractions.IModuleManager.InitializeAsync(System.IServiceProvider,System.Threading.CancellationToken)
+  name: InitializeAsync(IServiceProvider, CancellationToken)
+  href: api/Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_InitializeAsync_System_IServiceProvider_System_Threading_CancellationToken_
+  commentId: M:Ledon.Module.Abstractions.IModuleManager.InitializeAsync(System.IServiceProvider,System.Threading.CancellationToken)
+  fullName: Ledon.Module.Abstractions.IModuleManager.InitializeAsync(System.IServiceProvider, System.Threading.CancellationToken)
+  nameWithType: IModuleManager.InitializeAsync(IServiceProvider, CancellationToken)
+- uid: Ledon.Module.Abstractions.IModuleManager.InitializeAsync*
+  name: InitializeAsync
+  href: api/Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_InitializeAsync_
+  commentId: Overload:Ledon.Module.Abstractions.IModuleManager.InitializeAsync
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.IModuleManager.InitializeAsync
+  nameWithType: IModuleManager.InitializeAsync
+- uid: Ledon.Module.Abstractions.IModuleManager.IsInitialized
+  name: IsInitialized
+  href: api/Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_IsInitialized
+  commentId: P:Ledon.Module.Abstractions.IModuleManager.IsInitialized
+  fullName: Ledon.Module.Abstractions.IModuleManager.IsInitialized
+  nameWithType: IModuleManager.IsInitialized
+- uid: Ledon.Module.Abstractions.IModuleManager.IsInitialized*
+  name: IsInitialized
+  href: api/Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_IsInitialized_
+  commentId: Overload:Ledon.Module.Abstractions.IModuleManager.IsInitialized
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.IModuleManager.IsInitialized
+  nameWithType: IModuleManager.IsInitialized
+- uid: Ledon.Module.Abstractions.IModuleManager.Modules
+  name: Modules
+  href: api/Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_Modules
+  commentId: P:Ledon.Module.Abstractions.IModuleManager.Modules
+  fullName: Ledon.Module.Abstractions.IModuleManager.Modules
+  nameWithType: IModuleManager.Modules
+- uid: Ledon.Module.Abstractions.IModuleManager.Modules*
+  name: Modules
+  href: api/Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_Modules_
+  commentId: Overload:Ledon.Module.Abstractions.IModuleManager.Modules
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.IModuleManager.Modules
+  nameWithType: IModuleManager.Modules
+- uid: Ledon.Module.Abstractions.IModuleManager.ShutdownAsync(System.Threading.CancellationToken)
+  name: ShutdownAsync(CancellationToken)
+  href: api/Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_ShutdownAsync_System_Threading_CancellationToken_
+  commentId: M:Ledon.Module.Abstractions.IModuleManager.ShutdownAsync(System.Threading.CancellationToken)
+  fullName: Ledon.Module.Abstractions.IModuleManager.ShutdownAsync(System.Threading.CancellationToken)
+  nameWithType: IModuleManager.ShutdownAsync(CancellationToken)
+- uid: Ledon.Module.Abstractions.IModuleManager.ShutdownAsync*
+  name: ShutdownAsync
+  href: api/Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_ShutdownAsync_
+  commentId: Overload:Ledon.Module.Abstractions.IModuleManager.ShutdownAsync
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.IModuleManager.ShutdownAsync
+  nameWithType: IModuleManager.ShutdownAsync
+- uid: Ledon.Module.Abstractions.ModuleContext
+  name: ModuleContext
+  href: api/Ledon.Module.Abstractions.ModuleContext.html
+  commentId: T:Ledon.Module.Abstractions.ModuleContext
+  fullName: Ledon.Module.Abstractions.ModuleContext
+  nameWithType: ModuleContext
+- uid: Ledon.Module.Abstractions.ModuleContext.#ctor(Ledon.Module.Abstractions.ModuleDescriptor,System.IServiceProvider)
+  name: ModuleContext(ModuleDescriptor, IServiceProvider)
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext__ctor_Ledon_Module_Abstractions_ModuleDescriptor_System_IServiceProvider_
+  commentId: M:Ledon.Module.Abstractions.ModuleContext.#ctor(Ledon.Module.Abstractions.ModuleDescriptor,System.IServiceProvider)
+  name.vb: New(ModuleDescriptor, IServiceProvider)
+  fullName: Ledon.Module.Abstractions.ModuleContext.ModuleContext(Ledon.Module.Abstractions.ModuleDescriptor, System.IServiceProvider)
+  fullName.vb: Ledon.Module.Abstractions.ModuleContext.New(Ledon.Module.Abstractions.ModuleDescriptor, System.IServiceProvider)
+  nameWithType: ModuleContext.ModuleContext(ModuleDescriptor, IServiceProvider)
+  nameWithType.vb: ModuleContext.New(ModuleDescriptor, IServiceProvider)
+- uid: Ledon.Module.Abstractions.ModuleContext.#ctor*
+  name: ModuleContext
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext__ctor_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: Ledon.Module.Abstractions.ModuleContext.ModuleContext
+  fullName.vb: Ledon.Module.Abstractions.ModuleContext.New
+  nameWithType: ModuleContext.ModuleContext
+  nameWithType.vb: ModuleContext.New
+- uid: Ledon.Module.Abstractions.ModuleContext.Configuration
+  name: Configuration
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Configuration
+  commentId: P:Ledon.Module.Abstractions.ModuleContext.Configuration
+  fullName: Ledon.Module.Abstractions.ModuleContext.Configuration
+  nameWithType: ModuleContext.Configuration
+- uid: Ledon.Module.Abstractions.ModuleContext.Configuration*
+  name: Configuration
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Configuration_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.Configuration
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleContext.Configuration
+  nameWithType: ModuleContext.Configuration
+- uid: Ledon.Module.Abstractions.ModuleContext.Events
+  name: Events
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Events
+  commentId: P:Ledon.Module.Abstractions.ModuleContext.Events
+  fullName: Ledon.Module.Abstractions.ModuleContext.Events
+  nameWithType: ModuleContext.Events
+- uid: Ledon.Module.Abstractions.ModuleContext.Events*
+  name: Events
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Events_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.Events
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleContext.Events
+  nameWithType: ModuleContext.Events
+- uid: Ledon.Module.Abstractions.ModuleContext.Logger
+  name: Logger
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Logger
+  commentId: P:Ledon.Module.Abstractions.ModuleContext.Logger
+  fullName: Ledon.Module.Abstractions.ModuleContext.Logger
+  nameWithType: ModuleContext.Logger
+- uid: Ledon.Module.Abstractions.ModuleContext.Logger*
+  name: Logger
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Logger_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.Logger
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleContext.Logger
+  nameWithType: ModuleContext.Logger
+- uid: Ledon.Module.Abstractions.ModuleContext.Module
+  name: Module
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Module
+  commentId: P:Ledon.Module.Abstractions.ModuleContext.Module
+  fullName: Ledon.Module.Abstractions.ModuleContext.Module
+  nameWithType: ModuleContext.Module
+- uid: Ledon.Module.Abstractions.ModuleContext.Module*
+  name: Module
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Module_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.Module
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleContext.Module
+  nameWithType: ModuleContext.Module
+- uid: Ledon.Module.Abstractions.ModuleContext.Services
+  name: Services
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Services
+  commentId: P:Ledon.Module.Abstractions.ModuleContext.Services
+  fullName: Ledon.Module.Abstractions.ModuleContext.Services
+  nameWithType: ModuleContext.Services
+- uid: Ledon.Module.Abstractions.ModuleContext.Services*
+  name: Services
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_Services_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.Services
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleContext.Services
+  nameWithType: ModuleContext.Services
+- uid: Ledon.Module.Abstractions.ModuleContext.StartActivity(System.String)
+  name: StartActivity(string)
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_StartActivity_System_String_
+  commentId: M:Ledon.Module.Abstractions.ModuleContext.StartActivity(System.String)
+  name.vb: StartActivity(String)
+  fullName: Ledon.Module.Abstractions.ModuleContext.StartActivity(string)
+  fullName.vb: Ledon.Module.Abstractions.ModuleContext.StartActivity(String)
+  nameWithType: ModuleContext.StartActivity(string)
+  nameWithType.vb: ModuleContext.StartActivity(String)
+- uid: Ledon.Module.Abstractions.ModuleContext.StartActivity*
+  name: StartActivity
+  href: api/Ledon.Module.Abstractions.ModuleContext.html#Ledon_Module_Abstractions_ModuleContext_StartActivity_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleContext.StartActivity
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleContext.StartActivity
+  nameWithType: ModuleContext.StartActivity
+- uid: Ledon.Module.Abstractions.ModuleDescriptor
+  name: ModuleDescriptor
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html
+  commentId: T:Ledon.Module.Abstractions.ModuleDescriptor
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor
+  nameWithType: ModuleDescriptor
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Dependencies
+  name: Dependencies
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_Dependencies
+  commentId: P:Ledon.Module.Abstractions.ModuleDescriptor.Dependencies
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Dependencies
+  nameWithType: ModuleDescriptor.Dependencies
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Dependencies*
+  name: Dependencies
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_Dependencies_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.Dependencies
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Dependencies
+  nameWithType: ModuleDescriptor.Dependencies
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Instance
+  name: Instance
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_Instance
+  commentId: P:Ledon.Module.Abstractions.ModuleDescriptor.Instance
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Instance
+  nameWithType: ModuleDescriptor.Instance
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Instance*
+  name: Instance
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_Instance_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.Instance
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Instance
+  nameWithType: ModuleDescriptor.Instance
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.ModuleType
+  name: ModuleType
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_ModuleType
+  commentId: P:Ledon.Module.Abstractions.ModuleDescriptor.ModuleType
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.ModuleType
+  nameWithType: ModuleDescriptor.ModuleType
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.ModuleType*
+  name: ModuleType
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_ModuleType_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.ModuleType
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.ModuleType
+  nameWithType: ModuleDescriptor.ModuleType
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Name
+  name: Name
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_Name
+  commentId: P:Ledon.Module.Abstractions.ModuleDescriptor.Name
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Name
+  nameWithType: ModuleDescriptor.Name
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.Name*
+  name: Name
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_Name_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.Name
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.Name
+  nameWithType: ModuleDescriptor.Name
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.State
+  name: State
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_State
+  commentId: P:Ledon.Module.Abstractions.ModuleDescriptor.State
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.State
+  nameWithType: ModuleDescriptor.State
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.State*
+  name: State
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_State_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.State
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.State
+  nameWithType: ModuleDescriptor.State
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.ToString
+  name: ToString()
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_ToString
+  commentId: M:Ledon.Module.Abstractions.ModuleDescriptor.ToString
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.ToString()
+  nameWithType: ModuleDescriptor.ToString()
+- uid: Ledon.Module.Abstractions.ModuleDescriptor.ToString*
+  name: ToString
+  href: api/Ledon.Module.Abstractions.ModuleDescriptor.html#Ledon_Module_Abstractions_ModuleDescriptor_ToString_
+  commentId: Overload:Ledon.Module.Abstractions.ModuleDescriptor.ToString
+  isSpec: "True"
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor.ToString
+  nameWithType: ModuleDescriptor.ToString
+- uid: Ledon.Module.Abstractions.ModuleState
+  name: ModuleState
+  href: api/Ledon.Module.Abstractions.ModuleState.html
+  commentId: T:Ledon.Module.Abstractions.ModuleState
+  fullName: Ledon.Module.Abstractions.ModuleState
+  nameWithType: ModuleState
+- uid: Ledon.Module.Abstractions.ModuleState.Discovered
+  name: Discovered
+  href: api/Ledon.Module.Abstractions.ModuleState.html#Ledon_Module_Abstractions_ModuleState_Discovered
+  commentId: F:Ledon.Module.Abstractions.ModuleState.Discovered
+  fullName: Ledon.Module.Abstractions.ModuleState.Discovered
+  nameWithType: ModuleState.Discovered
+- uid: Ledon.Module.Abstractions.ModuleState.Failed
+  name: Failed
+  href: api/Ledon.Module.Abstractions.ModuleState.html#Ledon_Module_Abstractions_ModuleState_Failed
+  commentId: F:Ledon.Module.Abstractions.ModuleState.Failed
+  fullName: Ledon.Module.Abstractions.ModuleState.Failed
+  nameWithType: ModuleState.Failed
+- uid: Ledon.Module.Abstractions.ModuleState.Initialized
+  name: Initialized
+  href: api/Ledon.Module.Abstractions.ModuleState.html#Ledon_Module_Abstractions_ModuleState_Initialized
+  commentId: F:Ledon.Module.Abstractions.ModuleState.Initialized
+  fullName: Ledon.Module.Abstractions.ModuleState.Initialized
+  nameWithType: ModuleState.Initialized
+- uid: Ledon.Module.Abstractions.ModuleState.Registered
+  name: Registered
+  href: api/Ledon.Module.Abstractions.ModuleState.html#Ledon_Module_Abstractions_ModuleState_Registered
+  commentId: F:Ledon.Module.Abstractions.ModuleState.Registered
+  fullName: Ledon.Module.Abstractions.ModuleState.Registered
+  nameWithType: ModuleState.Registered
+- uid: Ledon.Module.Abstractions.ModuleState.Shutdown
+  name: Shutdown
+  href: api/Ledon.Module.Abstractions.ModuleState.html#Ledon_Module_Abstractions_ModuleState_Shutdown
+  commentId: F:Ledon.Module.Abstractions.ModuleState.Shutdown
+  fullName: Ledon.Module.Abstractions.ModuleState.Shutdown
+  nameWithType: ModuleState.Shutdown
+- uid: Ledon.Module.ConventionScanner
+  name: ConventionScanner
+  href: api/Ledon.Module.ConventionScanner.html
+  commentId: T:Ledon.Module.ConventionScanner
+  fullName: Ledon.Module.ConventionScanner
+  nameWithType: ConventionScanner
+- uid: Ledon.Module.ConventionScanner.ScanAssembly(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Reflection.Assembly,Microsoft.Extensions.DependencyInjection.ServiceLifetime,System.Collections.Generic.ICollection{System.String})
+  name: ScanAssembly(IServiceCollection, Assembly, ServiceLifetime, ICollection<string>?)
+  href: api/Ledon.Module.ConventionScanner.html#Ledon_Module_ConventionScanner_ScanAssembly_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Reflection_Assembly_Microsoft_Extensions_DependencyInjection_ServiceLifetime_System_Collections_Generic_ICollection_System_String__
+  commentId: M:Ledon.Module.ConventionScanner.ScanAssembly(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Reflection.Assembly,Microsoft.Extensions.DependencyInjection.ServiceLifetime,System.Collections.Generic.ICollection{System.String})
+  name.vb: ScanAssembly(IServiceCollection, Assembly, ServiceLifetime, ICollection(Of String))
+  fullName: Ledon.Module.ConventionScanner.ScanAssembly(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Reflection.Assembly, Microsoft.Extensions.DependencyInjection.ServiceLifetime, System.Collections.Generic.ICollection<string>?)
+  fullName.vb: Ledon.Module.ConventionScanner.ScanAssembly(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Reflection.Assembly, Microsoft.Extensions.DependencyInjection.ServiceLifetime, System.Collections.Generic.ICollection(Of String))
+  nameWithType: ConventionScanner.ScanAssembly(IServiceCollection, Assembly, ServiceLifetime, ICollection<string>?)
+  nameWithType.vb: ConventionScanner.ScanAssembly(IServiceCollection, Assembly, ServiceLifetime, ICollection(Of String))
+- uid: Ledon.Module.ConventionScanner.ScanAssembly*
+  name: ScanAssembly
+  href: api/Ledon.Module.ConventionScanner.html#Ledon_Module_ConventionScanner_ScanAssembly_
+  commentId: Overload:Ledon.Module.ConventionScanner.ScanAssembly
+  isSpec: "True"
+  fullName: Ledon.Module.ConventionScanner.ScanAssembly
+  nameWithType: ConventionScanner.ScanAssembly
+- uid: Ledon.Module.Dependency
+  name: Ledon.Module.Dependency
+  href: api/Ledon.Module.Dependency.html
+  commentId: N:Ledon.Module.Dependency
+  fullName: Ledon.Module.Dependency
+  nameWithType: Ledon.Module.Dependency
+- uid: Ledon.Module.Dependency.ModuleGraph
+  name: ModuleGraph
+  href: api/Ledon.Module.Dependency.ModuleGraph.html
+  commentId: T:Ledon.Module.Dependency.ModuleGraph
+  fullName: Ledon.Module.Dependency.ModuleGraph
+  nameWithType: ModuleGraph
+- uid: Ledon.Module.Dependency.ModuleGraph.Build(System.Collections.Generic.IEnumerable{System.Type})
+  name: Build(IEnumerable<Type>)
+  href: api/Ledon.Module.Dependency.ModuleGraph.html#Ledon_Module_Dependency_ModuleGraph_Build_System_Collections_Generic_IEnumerable_System_Type__
+  commentId: M:Ledon.Module.Dependency.ModuleGraph.Build(System.Collections.Generic.IEnumerable{System.Type})
+  name.vb: Build(IEnumerable(Of Type))
+  fullName: Ledon.Module.Dependency.ModuleGraph.Build(System.Collections.Generic.IEnumerable<System.Type>)
+  fullName.vb: Ledon.Module.Dependency.ModuleGraph.Build(System.Collections.Generic.IEnumerable(Of System.Type))
+  nameWithType: ModuleGraph.Build(IEnumerable<Type>)
+  nameWithType.vb: ModuleGraph.Build(IEnumerable(Of Type))
+- uid: Ledon.Module.Dependency.ModuleGraph.Build*
+  name: Build
+  href: api/Ledon.Module.Dependency.ModuleGraph.html#Ledon_Module_Dependency_ModuleGraph_Build_
+  commentId: Overload:Ledon.Module.Dependency.ModuleGraph.Build
+  isSpec: "True"
+  fullName: Ledon.Module.Dependency.ModuleGraph.Build
+  nameWithType: ModuleGraph.Build
+- uid: Ledon.Module.Diagnostics
+  name: Ledon.Module.Diagnostics
+  href: api/Ledon.Module.Diagnostics.html
+  commentId: N:Ledon.Module.Diagnostics
+  fullName: Ledon.Module.Diagnostics
+  nameWithType: Ledon.Module.Diagnostics
+- uid: Ledon.Module.Diagnostics.LedonActivity
+  name: LedonActivity
+  href: api/Ledon.Module.Diagnostics.LedonActivity.html
+  commentId: T:Ledon.Module.Diagnostics.LedonActivity
+  fullName: Ledon.Module.Diagnostics.LedonActivity
+  nameWithType: LedonActivity
+- uid: Ledon.Module.Diagnostics.LedonActivity.EventSourceName
+  name: EventSourceName
+  href: api/Ledon.Module.Diagnostics.LedonActivity.html#Ledon_Module_Diagnostics_LedonActivity_EventSourceName
+  commentId: F:Ledon.Module.Diagnostics.LedonActivity.EventSourceName
+  fullName: Ledon.Module.Diagnostics.LedonActivity.EventSourceName
+  nameWithType: LedonActivity.EventSourceName
+- uid: Ledon.Module.Diagnostics.LedonActivity.Events
+  name: Events
+  href: api/Ledon.Module.Diagnostics.LedonActivity.html#Ledon_Module_Diagnostics_LedonActivity_Events
+  commentId: P:Ledon.Module.Diagnostics.LedonActivity.Events
+  fullName: Ledon.Module.Diagnostics.LedonActivity.Events
+  nameWithType: LedonActivity.Events
+- uid: Ledon.Module.Diagnostics.LedonActivity.Events*
+  name: Events
+  href: api/Ledon.Module.Diagnostics.LedonActivity.html#Ledon_Module_Diagnostics_LedonActivity_Events_
+  commentId: Overload:Ledon.Module.Diagnostics.LedonActivity.Events
+  isSpec: "True"
+  fullName: Ledon.Module.Diagnostics.LedonActivity.Events
+  nameWithType: LedonActivity.Events
+- uid: Ledon.Module.Diagnostics.LedonActivity.ModuleSourceName
+  name: ModuleSourceName
+  href: api/Ledon.Module.Diagnostics.LedonActivity.html#Ledon_Module_Diagnostics_LedonActivity_ModuleSourceName
+  commentId: F:Ledon.Module.Diagnostics.LedonActivity.ModuleSourceName
+  fullName: Ledon.Module.Diagnostics.LedonActivity.ModuleSourceName
+  nameWithType: LedonActivity.ModuleSourceName
+- uid: Ledon.Module.Diagnostics.LedonActivity.Modules
+  name: Modules
+  href: api/Ledon.Module.Diagnostics.LedonActivity.html#Ledon_Module_Diagnostics_LedonActivity_Modules
+  commentId: P:Ledon.Module.Diagnostics.LedonActivity.Modules
+  fullName: Ledon.Module.Diagnostics.LedonActivity.Modules
+  nameWithType: LedonActivity.Modules
+- uid: Ledon.Module.Diagnostics.LedonActivity.Modules*
+  name: Modules
+  href: api/Ledon.Module.Diagnostics.LedonActivity.html#Ledon_Module_Diagnostics_LedonActivity_Modules_
+  commentId: Overload:Ledon.Module.Diagnostics.LedonActivity.Modules
+  isSpec: "True"
+  fullName: Ledon.Module.Diagnostics.LedonActivity.Modules
+  nameWithType: LedonActivity.Modules
+- uid: Ledon.Module.Diagnostics.LedonActivity.QueueSourceName
+  name: QueueSourceName
+  href: api/Ledon.Module.Diagnostics.LedonActivity.html#Ledon_Module_Diagnostics_LedonActivity_QueueSourceName
+  commentId: F:Ledon.Module.Diagnostics.LedonActivity.QueueSourceName
+  fullName: Ledon.Module.Diagnostics.LedonActivity.QueueSourceName
+  nameWithType: LedonActivity.QueueSourceName
+- uid: Ledon.Module.Diagnostics.LedonActivity.Queues
+  name: Queues
+  href: api/Ledon.Module.Diagnostics.LedonActivity.html#Ledon_Module_Diagnostics_LedonActivity_Queues
+  commentId: P:Ledon.Module.Diagnostics.LedonActivity.Queues
+  fullName: Ledon.Module.Diagnostics.LedonActivity.Queues
+  nameWithType: LedonActivity.Queues
+- uid: Ledon.Module.Diagnostics.LedonActivity.Queues*
+  name: Queues
+  href: api/Ledon.Module.Diagnostics.LedonActivity.html#Ledon_Module_Diagnostics_LedonActivity_Queues_
+  commentId: Overload:Ledon.Module.Diagnostics.LedonActivity.Queues
+  isSpec: "True"
+  fullName: Ledon.Module.Diagnostics.LedonActivity.Queues
+  nameWithType: LedonActivity.Queues
+- uid: Ledon.Module.Diagnostics.LedonActivity.RootSourceName
+  name: RootSourceName
+  href: api/Ledon.Module.Diagnostics.LedonActivity.html#Ledon_Module_Diagnostics_LedonActivity_RootSourceName
+  commentId: F:Ledon.Module.Diagnostics.LedonActivity.RootSourceName
+  fullName: Ledon.Module.Diagnostics.LedonActivity.RootSourceName
+  nameWithType: LedonActivity.RootSourceName
+- uid: Ledon.Module.Hosting
+  name: Ledon.Module.Hosting
+  href: api/Ledon.Module.Hosting.html
+  commentId: N:Ledon.Module.Hosting
+  fullName: Ledon.Module.Hosting
+  nameWithType: Ledon.Module.Hosting
+- uid: Ledon.Module.Hosting.LedonOptions
+  name: LedonOptions
+  href: api/Ledon.Module.Hosting.LedonOptions.html
+  commentId: T:Ledon.Module.Hosting.LedonOptions
+  fullName: Ledon.Module.Hosting.LedonOptions
+  nameWithType: LedonOptions
+- uid: Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+  name: AddAssembly(Assembly)
+  href: api/Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddAssembly_System_Reflection_Assembly_
+  commentId: M:Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+  fullName: Ledon.Module.Hosting.LedonOptions.AddAssembly(System.Reflection.Assembly)
+  nameWithType: LedonOptions.AddAssembly(Assembly)
+- uid: Ledon.Module.Hosting.LedonOptions.AddAssembly*
+  name: AddAssembly
+  href: api/Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddAssembly_
+  commentId: Overload:Ledon.Module.Hosting.LedonOptions.AddAssembly
+  isSpec: "True"
+  fullName: Ledon.Module.Hosting.LedonOptions.AddAssembly
+  nameWithType: LedonOptions.AddAssembly
+- uid: Ledon.Module.Hosting.LedonOptions.AddAssembly``1
+  name: AddAssembly<TModule>()
+  href: api/Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddAssembly__1
+  commentId: M:Ledon.Module.Hosting.LedonOptions.AddAssembly``1
+  name.vb: AddAssembly(Of TModule)()
+  fullName: Ledon.Module.Hosting.LedonOptions.AddAssembly<TModule>()
+  fullName.vb: Ledon.Module.Hosting.LedonOptions.AddAssembly(Of TModule)()
+  nameWithType: LedonOptions.AddAssembly<TModule>()
+  nameWithType.vb: LedonOptions.AddAssembly(Of TModule)()
+- uid: Ledon.Module.Hosting.LedonOptions.AddModule*
+  name: AddModule
+  href: api/Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddModule_
+  commentId: Overload:Ledon.Module.Hosting.LedonOptions.AddModule
+  isSpec: "True"
+  fullName: Ledon.Module.Hosting.LedonOptions.AddModule
+  nameWithType: LedonOptions.AddModule
+- uid: Ledon.Module.Hosting.LedonOptions.AddModule``1
+  name: AddModule<TModule>()
+  href: api/Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_AddModule__1
+  commentId: M:Ledon.Module.Hosting.LedonOptions.AddModule``1
+  name.vb: AddModule(Of TModule)()
+  fullName: Ledon.Module.Hosting.LedonOptions.AddModule<TModule>()
+  fullName.vb: Ledon.Module.Hosting.LedonOptions.AddModule(Of TModule)()
+  nameWithType: LedonOptions.AddModule<TModule>()
+  nameWithType.vb: LedonOptions.AddModule(Of TModule)()
+- uid: Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime
+  name: DefaultServiceLifetime
+  href: api/Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_DefaultServiceLifetime
+  commentId: P:Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime
+  fullName: Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime
+  nameWithType: LedonOptions.DefaultServiceLifetime
+- uid: Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime*
+  name: DefaultServiceLifetime
+  href: api/Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_DefaultServiceLifetime_
+  commentId: Overload:Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime
+  isSpec: "True"
+  fullName: Ledon.Module.Hosting.LedonOptions.DefaultServiceLifetime
+  nameWithType: LedonOptions.DefaultServiceLifetime
+- uid: Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery
+  name: DisableAutoDiscovery()
+  href: api/Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_DisableAutoDiscovery
+  commentId: M:Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery
+  fullName: Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery()
+  nameWithType: LedonOptions.DisableAutoDiscovery()
+- uid: Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery*
+  name: DisableAutoDiscovery
+  href: api/Ledon.Module.Hosting.LedonOptions.html#Ledon_Module_Hosting_LedonOptions_DisableAutoDiscovery_
+  commentId: Overload:Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery
+  isSpec: "True"
+  fullName: Ledon.Module.Hosting.LedonOptions.DisableAutoDiscovery
+  nameWithType: LedonOptions.DisableAutoDiscovery
+- uid: Ledon.Module.LedonAssemblies
+  name: LedonAssemblies
+  href: api/Ledon.Module.LedonAssemblies.html
+  commentId: T:Ledon.Module.LedonAssemblies
+  fullName: Ledon.Module.LedonAssemblies
+  nameWithType: LedonAssemblies
+- uid: Ledon.Module.LedonAssemblies.Scan(System.Action{Ledon.Module.Hosting.LedonOptions})
+  name: Scan(Action<LedonOptions>?)
+  href: api/Ledon.Module.LedonAssemblies.html#Ledon_Module_LedonAssemblies_Scan_System_Action_Ledon_Module_Hosting_LedonOptions__
+  commentId: M:Ledon.Module.LedonAssemblies.Scan(System.Action{Ledon.Module.Hosting.LedonOptions})
+  name.vb: Scan(Action(Of LedonOptions))
+  fullName: Ledon.Module.LedonAssemblies.Scan(System.Action<Ledon.Module.Hosting.LedonOptions>?)
+  fullName.vb: Ledon.Module.LedonAssemblies.Scan(System.Action(Of Ledon.Module.Hosting.LedonOptions))
+  nameWithType: LedonAssemblies.Scan(Action<LedonOptions>?)
+  nameWithType.vb: LedonAssemblies.Scan(Action(Of LedonOptions))
+- uid: Ledon.Module.LedonAssemblies.Scan*
+  name: Scan
+  href: api/Ledon.Module.LedonAssemblies.html#Ledon_Module_LedonAssemblies_Scan_
+  commentId: Overload:Ledon.Module.LedonAssemblies.Scan
+  isSpec: "True"
+  fullName: Ledon.Module.LedonAssemblies.Scan
+  nameWithType: LedonAssemblies.Scan
+- uid: Ledon.Module.LedonModuleException
+  name: LedonModuleException
+  href: api/Ledon.Module.LedonModuleException.html
+  commentId: T:Ledon.Module.LedonModuleException
+  fullName: Ledon.Module.LedonModuleException
+  nameWithType: LedonModuleException
+- uid: Ledon.Module.LedonModuleException.#ctor(System.String)
+  name: LedonModuleException(string)
+  href: api/Ledon.Module.LedonModuleException.html#Ledon_Module_LedonModuleException__ctor_System_String_
+  commentId: M:Ledon.Module.LedonModuleException.#ctor(System.String)
+  name.vb: New(String)
+  fullName: Ledon.Module.LedonModuleException.LedonModuleException(string)
+  fullName.vb: Ledon.Module.LedonModuleException.New(String)
+  nameWithType: LedonModuleException.LedonModuleException(string)
+  nameWithType.vb: LedonModuleException.New(String)
+- uid: Ledon.Module.LedonModuleException.#ctor(System.String,System.Exception)
+  name: LedonModuleException(string, Exception)
+  href: api/Ledon.Module.LedonModuleException.html#Ledon_Module_LedonModuleException__ctor_System_String_System_Exception_
+  commentId: M:Ledon.Module.LedonModuleException.#ctor(System.String,System.Exception)
+  name.vb: New(String, Exception)
+  fullName: Ledon.Module.LedonModuleException.LedonModuleException(string, System.Exception)
+  fullName.vb: Ledon.Module.LedonModuleException.New(String, System.Exception)
+  nameWithType: LedonModuleException.LedonModuleException(string, Exception)
+  nameWithType.vb: LedonModuleException.New(String, Exception)
+- uid: Ledon.Module.LedonModuleException.#ctor*
+  name: LedonModuleException
+  href: api/Ledon.Module.LedonModuleException.html#Ledon_Module_LedonModuleException__ctor_
+  commentId: Overload:Ledon.Module.LedonModuleException.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: Ledon.Module.LedonModuleException.LedonModuleException
+  fullName.vb: Ledon.Module.LedonModuleException.New
+  nameWithType: LedonModuleException.LedonModuleException
+  nameWithType.vb: LedonModuleException.New
+- uid: Ledon.Module.LedonServiceCollectionExtensions
+  name: LedonServiceCollectionExtensions
+  href: api/Ledon.Module.LedonServiceCollectionExtensions.html
+  commentId: T:Ledon.Module.LedonServiceCollectionExtensions
+  fullName: Ledon.Module.LedonServiceCollectionExtensions
+  nameWithType: LedonServiceCollectionExtensions
+- uid: Ledon.Module.LedonServiceCollectionExtensions.AddLedon(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Module.Hosting.LedonOptions})
+  name: AddLedon(IServiceCollection, Action<LedonOptions>?)
+  href: api/Ledon.Module.LedonServiceCollectionExtensions.html#Ledon_Module_LedonServiceCollectionExtensions_AddLedon_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_Module_Hosting_LedonOptions__
+  commentId: M:Ledon.Module.LedonServiceCollectionExtensions.AddLedon(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Module.Hosting.LedonOptions})
+  name.vb: AddLedon(IServiceCollection, Action(Of LedonOptions))
+  fullName: Ledon.Module.LedonServiceCollectionExtensions.AddLedon(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.Module.Hosting.LedonOptions>?)
+  fullName.vb: Ledon.Module.LedonServiceCollectionExtensions.AddLedon(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.Module.Hosting.LedonOptions))
+  nameWithType: LedonServiceCollectionExtensions.AddLedon(IServiceCollection, Action<LedonOptions>?)
+  nameWithType.vb: LedonServiceCollectionExtensions.AddLedon(IServiceCollection, Action(Of LedonOptions))
+- uid: Ledon.Module.LedonServiceCollectionExtensions.AddLedon*
+  name: AddLedon
+  href: api/Ledon.Module.LedonServiceCollectionExtensions.html#Ledon_Module_LedonServiceCollectionExtensions_AddLedon_
+  commentId: Overload:Ledon.Module.LedonServiceCollectionExtensions.AddLedon
+  isSpec: "True"
+  fullName: Ledon.Module.LedonServiceCollectionExtensions.AddLedon
+  nameWithType: LedonServiceCollectionExtensions.AddLedon
+- uid: Ledon.Module.LedonServiceProviderExtensions
+  name: LedonServiceProviderExtensions
+  href: api/Ledon.Module.LedonServiceProviderExtensions.html
+  commentId: T:Ledon.Module.LedonServiceProviderExtensions
+  fullName: Ledon.Module.LedonServiceProviderExtensions
+  nameWithType: LedonServiceProviderExtensions
+- uid: Ledon.Module.LedonServiceProviderExtensions.InitializeModulesAsync(System.IServiceProvider,System.Threading.CancellationToken)
+  name: InitializeModulesAsync(IServiceProvider, CancellationToken)
+  href: api/Ledon.Module.LedonServiceProviderExtensions.html#Ledon_Module_LedonServiceProviderExtensions_InitializeModulesAsync_System_IServiceProvider_System_Threading_CancellationToken_
+  commentId: M:Ledon.Module.LedonServiceProviderExtensions.InitializeModulesAsync(System.IServiceProvider,System.Threading.CancellationToken)
+  fullName: Ledon.Module.LedonServiceProviderExtensions.InitializeModulesAsync(System.IServiceProvider, System.Threading.CancellationToken)
+  nameWithType: LedonServiceProviderExtensions.InitializeModulesAsync(IServiceProvider, CancellationToken)
+- uid: Ledon.Module.LedonServiceProviderExtensions.InitializeModulesAsync*
+  name: InitializeModulesAsync
+  href: api/Ledon.Module.LedonServiceProviderExtensions.html#Ledon_Module_LedonServiceProviderExtensions_InitializeModulesAsync_
+  commentId: Overload:Ledon.Module.LedonServiceProviderExtensions.InitializeModulesAsync
+  isSpec: "True"
+  fullName: Ledon.Module.LedonServiceProviderExtensions.InitializeModulesAsync
+  nameWithType: LedonServiceProviderExtensions.InitializeModulesAsync
+- uid: Ledon.Module.LedonServiceProviderExtensions.ShutdownModulesAsync(System.IServiceProvider,System.Threading.CancellationToken)
+  name: ShutdownModulesAsync(IServiceProvider, CancellationToken)
+  href: api/Ledon.Module.LedonServiceProviderExtensions.html#Ledon_Module_LedonServiceProviderExtensions_ShutdownModulesAsync_System_IServiceProvider_System_Threading_CancellationToken_
+  commentId: M:Ledon.Module.LedonServiceProviderExtensions.ShutdownModulesAsync(System.IServiceProvider,System.Threading.CancellationToken)
+  fullName: Ledon.Module.LedonServiceProviderExtensions.ShutdownModulesAsync(System.IServiceProvider, System.Threading.CancellationToken)
+  nameWithType: LedonServiceProviderExtensions.ShutdownModulesAsync(IServiceProvider, CancellationToken)
+- uid: Ledon.Module.LedonServiceProviderExtensions.ShutdownModulesAsync*
+  name: ShutdownModulesAsync
+  href: api/Ledon.Module.LedonServiceProviderExtensions.html#Ledon_Module_LedonServiceProviderExtensions_ShutdownModulesAsync_
+  commentId: Overload:Ledon.Module.LedonServiceProviderExtensions.ShutdownModulesAsync
+  isSpec: "True"
+  fullName: Ledon.Module.LedonServiceProviderExtensions.ShutdownModulesAsync
+  nameWithType: LedonServiceProviderExtensions.ShutdownModulesAsync
+- uid: Ledon.Module.Runtime
+  name: Ledon.Module.Runtime
+  href: api/Ledon.Module.Runtime.html
+  commentId: N:Ledon.Module.Runtime
+  fullName: Ledon.Module.Runtime
+  nameWithType: Ledon.Module.Runtime
+- uid: Ledon.Module.Runtime.ModuleManager
+  name: ModuleManager
+  href: api/Ledon.Module.Runtime.ModuleManager.html
+  commentId: T:Ledon.Module.Runtime.ModuleManager
+  fullName: Ledon.Module.Runtime.ModuleManager
+  nameWithType: ModuleManager
+- uid: Ledon.Module.Runtime.ModuleManager.GetModule(System.Type)
+  name: GetModule(Type)
+  href: api/Ledon.Module.Runtime.ModuleManager.html#Ledon_Module_Runtime_ModuleManager_GetModule_System_Type_
+  commentId: M:Ledon.Module.Runtime.ModuleManager.GetModule(System.Type)
+  fullName: Ledon.Module.Runtime.ModuleManager.GetModule(System.Type)
+  nameWithType: ModuleManager.GetModule(Type)
+- uid: Ledon.Module.Runtime.ModuleManager.GetModule*
+  name: GetModule
+  href: api/Ledon.Module.Runtime.ModuleManager.html#Ledon_Module_Runtime_ModuleManager_GetModule_
+  commentId: Overload:Ledon.Module.Runtime.ModuleManager.GetModule
+  isSpec: "True"
+  fullName: Ledon.Module.Runtime.ModuleManager.GetModule
+  nameWithType: ModuleManager.GetModule
+- uid: Ledon.Module.Runtime.ModuleManager.GetModule``1
+  name: GetModule<TModule>()
+  href: api/Ledon.Module.Runtime.ModuleManager.html#Ledon_Module_Runtime_ModuleManager_GetModule__1
+  commentId: M:Ledon.Module.Runtime.ModuleManager.GetModule``1
+  name.vb: GetModule(Of TModule)()
+  fullName: Ledon.Module.Runtime.ModuleManager.GetModule<TModule>()
+  fullName.vb: Ledon.Module.Runtime.ModuleManager.GetModule(Of TModule)()
+  nameWithType: ModuleManager.GetModule<TModule>()
+  nameWithType.vb: ModuleManager.GetModule(Of TModule)()
+- uid: Ledon.Module.Runtime.ModuleManager.InitializeAsync(System.IServiceProvider,System.Threading.CancellationToken)
+  name: InitializeAsync(IServiceProvider, CancellationToken)
+  href: api/Ledon.Module.Runtime.ModuleManager.html#Ledon_Module_Runtime_ModuleManager_InitializeAsync_System_IServiceProvider_System_Threading_CancellationToken_
+  commentId: M:Ledon.Module.Runtime.ModuleManager.InitializeAsync(System.IServiceProvider,System.Threading.CancellationToken)
+  fullName: Ledon.Module.Runtime.ModuleManager.InitializeAsync(System.IServiceProvider, System.Threading.CancellationToken)
+  nameWithType: ModuleManager.InitializeAsync(IServiceProvider, CancellationToken)
+- uid: Ledon.Module.Runtime.ModuleManager.InitializeAsync*
+  name: InitializeAsync
+  href: api/Ledon.Module.Runtime.ModuleManager.html#Ledon_Module_Runtime_ModuleManager_InitializeAsync_
+  commentId: Overload:Ledon.Module.Runtime.ModuleManager.InitializeAsync
+  isSpec: "True"
+  fullName: Ledon.Module.Runtime.ModuleManager.InitializeAsync
+  nameWithType: ModuleManager.InitializeAsync
+- uid: Ledon.Module.Runtime.ModuleManager.IsInitialized
+  name: IsInitialized
+  href: api/Ledon.Module.Runtime.ModuleManager.html#Ledon_Module_Runtime_ModuleManager_IsInitialized
+  commentId: P:Ledon.Module.Runtime.ModuleManager.IsInitialized
+  fullName: Ledon.Module.Runtime.ModuleManager.IsInitialized
+  nameWithType: ModuleManager.IsInitialized
+- uid: Ledon.Module.Runtime.ModuleManager.IsInitialized*
+  name: IsInitialized
+  href: api/Ledon.Module.Runtime.ModuleManager.html#Ledon_Module_Runtime_ModuleManager_IsInitialized_
+  commentId: Overload:Ledon.Module.Runtime.ModuleManager.IsInitialized
+  isSpec: "True"
+  fullName: Ledon.Module.Runtime.ModuleManager.IsInitialized
+  nameWithType: ModuleManager.IsInitialized
+- uid: Ledon.Module.Runtime.ModuleManager.Modules
+  name: Modules
+  href: api/Ledon.Module.Runtime.ModuleManager.html#Ledon_Module_Runtime_ModuleManager_Modules
+  commentId: P:Ledon.Module.Runtime.ModuleManager.Modules
+  fullName: Ledon.Module.Runtime.ModuleManager.Modules
+  nameWithType: ModuleManager.Modules
+- uid: Ledon.Module.Runtime.ModuleManager.Modules*
+  name: Modules
+  href: api/Ledon.Module.Runtime.ModuleManager.html#Ledon_Module_Runtime_ModuleManager_Modules_
+  commentId: Overload:Ledon.Module.Runtime.ModuleManager.Modules
+  isSpec: "True"
+  fullName: Ledon.Module.Runtime.ModuleManager.Modules
+  nameWithType: ModuleManager.Modules
+- uid: Ledon.Module.Runtime.ModuleManager.ShutdownAsync(System.Threading.CancellationToken)
+  name: ShutdownAsync(CancellationToken)
+  href: api/Ledon.Module.Runtime.ModuleManager.html#Ledon_Module_Runtime_ModuleManager_ShutdownAsync_System_Threading_CancellationToken_
+  commentId: M:Ledon.Module.Runtime.ModuleManager.ShutdownAsync(System.Threading.CancellationToken)
+  fullName: Ledon.Module.Runtime.ModuleManager.ShutdownAsync(System.Threading.CancellationToken)
+  nameWithType: ModuleManager.ShutdownAsync(CancellationToken)
+- uid: Ledon.Module.Runtime.ModuleManager.ShutdownAsync*
+  name: ShutdownAsync
+  href: api/Ledon.Module.Runtime.ModuleManager.html#Ledon_Module_Runtime_ModuleManager_ShutdownAsync_
+  commentId: Overload:Ledon.Module.Runtime.ModuleManager.ShutdownAsync
+  isSpec: "True"
+  fullName: Ledon.Module.Runtime.ModuleManager.ShutdownAsync
+  nameWithType: ModuleManager.ShutdownAsync
+- uid: Ledon.MultiTenancy
+  name: Ledon.MultiTenancy
+  href: api/Ledon.MultiTenancy.html
+  commentId: N:Ledon.MultiTenancy
+  fullName: Ledon.MultiTenancy
+  nameWithType: Ledon.MultiTenancy
+- uid: Ledon.MultiTenancy.ITenantContext
+  name: ITenantContext
+  href: api/Ledon.MultiTenancy.ITenantContext.html
+  commentId: T:Ledon.MultiTenancy.ITenantContext
+  fullName: Ledon.MultiTenancy.ITenantContext
+  nameWithType: ITenantContext
+- uid: Ledon.MultiTenancy.ITenantContext.IsMultiTenant
+  name: IsMultiTenant
+  href: api/Ledon.MultiTenancy.ITenantContext.html#Ledon_MultiTenancy_ITenantContext_IsMultiTenant
+  commentId: P:Ledon.MultiTenancy.ITenantContext.IsMultiTenant
+  fullName: Ledon.MultiTenancy.ITenantContext.IsMultiTenant
+  nameWithType: ITenantContext.IsMultiTenant
+- uid: Ledon.MultiTenancy.ITenantContext.IsMultiTenant*
+  name: IsMultiTenant
+  href: api/Ledon.MultiTenancy.ITenantContext.html#Ledon_MultiTenancy_ITenantContext_IsMultiTenant_
+  commentId: Overload:Ledon.MultiTenancy.ITenantContext.IsMultiTenant
+  isSpec: "True"
+  fullName: Ledon.MultiTenancy.ITenantContext.IsMultiTenant
+  nameWithType: ITenantContext.IsMultiTenant
+- uid: Ledon.MultiTenancy.ITenantContext.TenantId
+  name: TenantId
+  href: api/Ledon.MultiTenancy.ITenantContext.html#Ledon_MultiTenancy_ITenantContext_TenantId
+  commentId: P:Ledon.MultiTenancy.ITenantContext.TenantId
+  fullName: Ledon.MultiTenancy.ITenantContext.TenantId
+  nameWithType: ITenantContext.TenantId
+- uid: Ledon.MultiTenancy.ITenantContext.TenantId*
+  name: TenantId
+  href: api/Ledon.MultiTenancy.ITenantContext.html#Ledon_MultiTenancy_ITenantContext_TenantId_
+  commentId: Overload:Ledon.MultiTenancy.ITenantContext.TenantId
+  isSpec: "True"
+  fullName: Ledon.MultiTenancy.ITenantContext.TenantId
+  nameWithType: ITenantContext.TenantId
+- uid: Ledon.MultiTenancy.MultiTenancyOptions
+  name: MultiTenancyOptions
+  href: api/Ledon.MultiTenancy.MultiTenancyOptions.html
+  commentId: T:Ledon.MultiTenancy.MultiTenancyOptions
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions
+  nameWithType: MultiTenancyOptions
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.HeaderName
+  name: HeaderName
+  href: api/Ledon.MultiTenancy.MultiTenancyOptions.html#Ledon_MultiTenancy_MultiTenancyOptions_HeaderName
+  commentId: P:Ledon.MultiTenancy.MultiTenancyOptions.HeaderName
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.HeaderName
+  nameWithType: MultiTenancyOptions.HeaderName
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.HeaderName*
+  name: HeaderName
+  href: api/Ledon.MultiTenancy.MultiTenancyOptions.html#Ledon_MultiTenancy_MultiTenancyOptions_HeaderName_
+  commentId: Overload:Ledon.MultiTenancy.MultiTenancyOptions.HeaderName
+  isSpec: "True"
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.HeaderName
+  nameWithType: MultiTenancyOptions.HeaderName
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName
+  name: QueryStringName
+  href: api/Ledon.MultiTenancy.MultiTenancyOptions.html#Ledon_MultiTenancy_MultiTenancyOptions_QueryStringName
+  commentId: P:Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName
+  nameWithType: MultiTenancyOptions.QueryStringName
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName*
+  name: QueryStringName
+  href: api/Ledon.MultiTenancy.MultiTenancyOptions.html#Ledon_MultiTenancy_MultiTenancyOptions_QueryStringName_
+  commentId: Overload:Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName
+  isSpec: "True"
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName
+  nameWithType: MultiTenancyOptions.QueryStringName
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.Source
+  name: Source
+  href: api/Ledon.MultiTenancy.MultiTenancyOptions.html#Ledon_MultiTenancy_MultiTenancyOptions_Source
+  commentId: P:Ledon.MultiTenancy.MultiTenancyOptions.Source
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.Source
+  nameWithType: MultiTenancyOptions.Source
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.Source*
+  name: Source
+  href: api/Ledon.MultiTenancy.MultiTenancyOptions.html#Ledon_MultiTenancy_MultiTenancyOptions_Source_
+  commentId: Overload:Ledon.MultiTenancy.MultiTenancyOptions.Source
+  isSpec: "True"
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.Source
+  nameWithType: MultiTenancyOptions.Source
+- uid: Ledon.MultiTenancy.TenantContext
+  name: TenantContext
+  href: api/Ledon.MultiTenancy.TenantContext.html
+  commentId: T:Ledon.MultiTenancy.TenantContext
+  fullName: Ledon.MultiTenancy.TenantContext
+  nameWithType: TenantContext
+- uid: Ledon.MultiTenancy.TenantContext.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)
+  name: TenantContext(IHttpContextAccessor)
+  href: api/Ledon.MultiTenancy.TenantContext.html#Ledon_MultiTenancy_TenantContext__ctor_Microsoft_AspNetCore_Http_IHttpContextAccessor_
+  commentId: M:Ledon.MultiTenancy.TenantContext.#ctor(Microsoft.AspNetCore.Http.IHttpContextAccessor)
+  name.vb: New(IHttpContextAccessor)
+  fullName: Ledon.MultiTenancy.TenantContext.TenantContext(Microsoft.AspNetCore.Http.IHttpContextAccessor)
+  fullName.vb: Ledon.MultiTenancy.TenantContext.New(Microsoft.AspNetCore.Http.IHttpContextAccessor)
+  nameWithType: TenantContext.TenantContext(IHttpContextAccessor)
+  nameWithType.vb: TenantContext.New(IHttpContextAccessor)
+- uid: Ledon.MultiTenancy.TenantContext.#ctor*
+  name: TenantContext
+  href: api/Ledon.MultiTenancy.TenantContext.html#Ledon_MultiTenancy_TenantContext__ctor_
+  commentId: Overload:Ledon.MultiTenancy.TenantContext.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: Ledon.MultiTenancy.TenantContext.TenantContext
+  fullName.vb: Ledon.MultiTenancy.TenantContext.New
+  nameWithType: TenantContext.TenantContext
+  nameWithType.vb: TenantContext.New
+- uid: Ledon.MultiTenancy.TenantContext.SetAmbient(System.String)
+  name: SetAmbient(string?)
+  href: api/Ledon.MultiTenancy.TenantContext.html#Ledon_MultiTenancy_TenantContext_SetAmbient_System_String_
+  commentId: M:Ledon.MultiTenancy.TenantContext.SetAmbient(System.String)
+  name.vb: SetAmbient(String)
+  fullName: Ledon.MultiTenancy.TenantContext.SetAmbient(string?)
+  fullName.vb: Ledon.MultiTenancy.TenantContext.SetAmbient(String)
+  nameWithType: TenantContext.SetAmbient(string?)
+  nameWithType.vb: TenantContext.SetAmbient(String)
+- uid: Ledon.MultiTenancy.TenantContext.SetAmbient*
+  name: SetAmbient
+  href: api/Ledon.MultiTenancy.TenantContext.html#Ledon_MultiTenancy_TenantContext_SetAmbient_
+  commentId: Overload:Ledon.MultiTenancy.TenantContext.SetAmbient
+  isSpec: "True"
+  fullName: Ledon.MultiTenancy.TenantContext.SetAmbient
+  nameWithType: TenantContext.SetAmbient
+- uid: Ledon.MultiTenancy.TenantContext.TenantId
+  name: TenantId
+  href: api/Ledon.MultiTenancy.TenantContext.html#Ledon_MultiTenancy_TenantContext_TenantId
+  commentId: P:Ledon.MultiTenancy.TenantContext.TenantId
+  fullName: Ledon.MultiTenancy.TenantContext.TenantId
+  nameWithType: TenantContext.TenantId
+- uid: Ledon.MultiTenancy.TenantContext.TenantId*
+  name: TenantId
+  href: api/Ledon.MultiTenancy.TenantContext.html#Ledon_MultiTenancy_TenantContext_TenantId_
+  commentId: Overload:Ledon.MultiTenancy.TenantContext.TenantId
+  isSpec: "True"
+  fullName: Ledon.MultiTenancy.TenantContext.TenantId
+  nameWithType: TenantContext.TenantId
+- uid: Ledon.MultiTenancy.TenantSource
+  name: TenantSource
+  href: api/Ledon.MultiTenancy.TenantSource.html
+  commentId: T:Ledon.MultiTenancy.TenantSource
+  fullName: Ledon.MultiTenancy.TenantSource
+  nameWithType: TenantSource
+- uid: Ledon.MultiTenancy.TenantSource.Header
+  name: Header
+  href: api/Ledon.MultiTenancy.TenantSource.html#Ledon_MultiTenancy_TenantSource_Header
+  commentId: F:Ledon.MultiTenancy.TenantSource.Header
+  fullName: Ledon.MultiTenancy.TenantSource.Header
+  nameWithType: TenantSource.Header
+- uid: Ledon.MultiTenancy.TenantSource.QueryString
+  name: QueryString
+  href: api/Ledon.MultiTenancy.TenantSource.html#Ledon_MultiTenancy_TenantSource_QueryString
+  commentId: F:Ledon.MultiTenancy.TenantSource.QueryString
+  fullName: Ledon.MultiTenancy.TenantSource.QueryString
+  nameWithType: TenantSource.QueryString
+- uid: Ledon.Observability
+  name: Ledon.Observability
+  href: api/Ledon.Observability.html
+  commentId: N:Ledon.Observability
+  fullName: Ledon.Observability
+  nameWithType: Ledon.Observability
+- uid: Ledon.Observability.LedonObservabilityOptions
+  name: LedonObservabilityOptions
+  href: api/Ledon.Observability.LedonObservabilityOptions.html
+  commentId: T:Ledon.Observability.LedonObservabilityOptions
+  fullName: Ledon.Observability.LedonObservabilityOptions
+  nameWithType: LedonObservabilityOptions
+- uid: Ledon.Observability.LedonObservabilityOptions.EnableMetrics
+  name: EnableMetrics
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_EnableMetrics
+  commentId: P:Ledon.Observability.LedonObservabilityOptions.EnableMetrics
+  fullName: Ledon.Observability.LedonObservabilityOptions.EnableMetrics
+  nameWithType: LedonObservabilityOptions.EnableMetrics
+- uid: Ledon.Observability.LedonObservabilityOptions.EnableMetrics*
+  name: EnableMetrics
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_EnableMetrics_
+  commentId: Overload:Ledon.Observability.LedonObservabilityOptions.EnableMetrics
+  isSpec: "True"
+  fullName: Ledon.Observability.LedonObservabilityOptions.EnableMetrics
+  nameWithType: LedonObservabilityOptions.EnableMetrics
+- uid: Ledon.Observability.LedonObservabilityOptions.EnableTracing
+  name: EnableTracing
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_EnableTracing
+  commentId: P:Ledon.Observability.LedonObservabilityOptions.EnableTracing
+  fullName: Ledon.Observability.LedonObservabilityOptions.EnableTracing
+  nameWithType: LedonObservabilityOptions.EnableTracing
+- uid: Ledon.Observability.LedonObservabilityOptions.EnableTracing*
+  name: EnableTracing
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_EnableTracing_
+  commentId: Overload:Ledon.Observability.LedonObservabilityOptions.EnableTracing
+  isSpec: "True"
+  fullName: Ledon.Observability.LedonObservabilityOptions.EnableTracing
+  nameWithType: LedonObservabilityOptions.EnableTracing
+- uid: Ledon.Observability.LedonObservabilityOptions.OtlpEndpoint
+  name: OtlpEndpoint
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_OtlpEndpoint
+  commentId: P:Ledon.Observability.LedonObservabilityOptions.OtlpEndpoint
+  fullName: Ledon.Observability.LedonObservabilityOptions.OtlpEndpoint
+  nameWithType: LedonObservabilityOptions.OtlpEndpoint
+- uid: Ledon.Observability.LedonObservabilityOptions.OtlpEndpoint*
+  name: OtlpEndpoint
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_OtlpEndpoint_
+  commentId: Overload:Ledon.Observability.LedonObservabilityOptions.OtlpEndpoint
+  isSpec: "True"
+  fullName: Ledon.Observability.LedonObservabilityOptions.OtlpEndpoint
+  nameWithType: LedonObservabilityOptions.OtlpEndpoint
+- uid: Ledon.Observability.LedonObservabilityOptions.ServiceName
+  name: ServiceName
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_ServiceName
+  commentId: P:Ledon.Observability.LedonObservabilityOptions.ServiceName
+  fullName: Ledon.Observability.LedonObservabilityOptions.ServiceName
+  nameWithType: LedonObservabilityOptions.ServiceName
+- uid: Ledon.Observability.LedonObservabilityOptions.ServiceName*
+  name: ServiceName
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_ServiceName_
+  commentId: Overload:Ledon.Observability.LedonObservabilityOptions.ServiceName
+  isSpec: "True"
+  fullName: Ledon.Observability.LedonObservabilityOptions.ServiceName
+  nameWithType: LedonObservabilityOptions.ServiceName
+- uid: Ledon.Observability.LedonObservabilityOptions.ServiceVersion
+  name: ServiceVersion
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_ServiceVersion
+  commentId: P:Ledon.Observability.LedonObservabilityOptions.ServiceVersion
+  fullName: Ledon.Observability.LedonObservabilityOptions.ServiceVersion
+  nameWithType: LedonObservabilityOptions.ServiceVersion
+- uid: Ledon.Observability.LedonObservabilityOptions.ServiceVersion*
+  name: ServiceVersion
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_ServiceVersion_
+  commentId: Overload:Ledon.Observability.LedonObservabilityOptions.ServiceVersion
+  isSpec: "True"
+  fullName: Ledon.Observability.LedonObservabilityOptions.ServiceVersion
+  nameWithType: LedonObservabilityOptions.ServiceVersion
+- uid: Ledon.Observability.LedonObservabilityOptions.UseConsoleExporter
+  name: UseConsoleExporter
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_UseConsoleExporter
+  commentId: P:Ledon.Observability.LedonObservabilityOptions.UseConsoleExporter
+  fullName: Ledon.Observability.LedonObservabilityOptions.UseConsoleExporter
+  nameWithType: LedonObservabilityOptions.UseConsoleExporter
+- uid: Ledon.Observability.LedonObservabilityOptions.UseConsoleExporter*
+  name: UseConsoleExporter
+  href: api/Ledon.Observability.LedonObservabilityOptions.html#Ledon_Observability_LedonObservabilityOptions_UseConsoleExporter_
+  commentId: Overload:Ledon.Observability.LedonObservabilityOptions.UseConsoleExporter
+  isSpec: "True"
+  fullName: Ledon.Observability.LedonObservabilityOptions.UseConsoleExporter
+  nameWithType: LedonObservabilityOptions.UseConsoleExporter
+- uid: Ledon.Queues
+  name: Ledon.Queues
+  href: api/Ledon.Queues.html
+  commentId: N:Ledon.Queues
+  fullName: Ledon.Queues
+  nameWithType: Ledon.Queues
+- uid: Ledon.Queues.IBackgroundQueue
+  name: IBackgroundQueue
+  href: api/Ledon.Queues.IBackgroundQueue.html
+  commentId: T:Ledon.Queues.IBackgroundQueue
+  fullName: Ledon.Queues.IBackgroundQueue
+  nameWithType: IBackgroundQueue
+- uid: Ledon.Queues.IBackgroundQueue.EnqueueAsync(System.Func{System.IServiceProvider,System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken)
+  name: EnqueueAsync(Func<IServiceProvider, CancellationToken, Task>, CancellationToken)
+  href: api/Ledon.Queues.IBackgroundQueue.html#Ledon_Queues_IBackgroundQueue_EnqueueAsync_System_Func_System_IServiceProvider_System_Threading_CancellationToken_System_Threading_Tasks_Task__System_Threading_CancellationToken_
+  commentId: M:Ledon.Queues.IBackgroundQueue.EnqueueAsync(System.Func{System.IServiceProvider,System.Threading.CancellationToken,System.Threading.Tasks.Task},System.Threading.CancellationToken)
+  name.vb: EnqueueAsync(Func(Of IServiceProvider, CancellationToken, Task), CancellationToken)
+  fullName: Ledon.Queues.IBackgroundQueue.EnqueueAsync(System.Func<System.IServiceProvider, System.Threading.CancellationToken, System.Threading.Tasks.Task>, System.Threading.CancellationToken)
+  fullName.vb: Ledon.Queues.IBackgroundQueue.EnqueueAsync(System.Func(Of System.IServiceProvider, System.Threading.CancellationToken, System.Threading.Tasks.Task), System.Threading.CancellationToken)
+  nameWithType: IBackgroundQueue.EnqueueAsync(Func<IServiceProvider, CancellationToken, Task>, CancellationToken)
+  nameWithType.vb: IBackgroundQueue.EnqueueAsync(Func(Of IServiceProvider, CancellationToken, Task), CancellationToken)
+- uid: Ledon.Queues.IBackgroundQueue.EnqueueAsync*
+  name: EnqueueAsync
+  href: api/Ledon.Queues.IBackgroundQueue.html#Ledon_Queues_IBackgroundQueue_EnqueueAsync_
+  commentId: Overload:Ledon.Queues.IBackgroundQueue.EnqueueAsync
+  isSpec: "True"
+  fullName: Ledon.Queues.IBackgroundQueue.EnqueueAsync
+  nameWithType: IBackgroundQueue.EnqueueAsync
+- uid: Ledon.Queues.IIntegrationEvent
+  name: IIntegrationEvent
+  href: api/Ledon.Queues.IIntegrationEvent.html
+  commentId: T:Ledon.Queues.IIntegrationEvent
+  fullName: Ledon.Queues.IIntegrationEvent
+  nameWithType: IIntegrationEvent
+- uid: Ledon.Queues.IIntegrationEventHandler`1
+  name: IIntegrationEventHandler<TEvent>
+  href: api/Ledon.Queues.IIntegrationEventHandler-1.html
+  commentId: T:Ledon.Queues.IIntegrationEventHandler`1
+  name.vb: IIntegrationEventHandler(Of TEvent)
+  fullName: Ledon.Queues.IIntegrationEventHandler<TEvent>
+  fullName.vb: Ledon.Queues.IIntegrationEventHandler(Of TEvent)
+  nameWithType: IIntegrationEventHandler<TEvent>
+  nameWithType.vb: IIntegrationEventHandler(Of TEvent)
+- uid: Ledon.Queues.IIntegrationEventHandler`1.HandleAsync(`0,System.Threading.CancellationToken)
+  name: HandleAsync(TEvent, CancellationToken)
+  href: api/Ledon.Queues.IIntegrationEventHandler-1.html#Ledon_Queues_IIntegrationEventHandler_1_HandleAsync__0_System_Threading_CancellationToken_
+  commentId: M:Ledon.Queues.IIntegrationEventHandler`1.HandleAsync(`0,System.Threading.CancellationToken)
+  fullName: Ledon.Queues.IIntegrationEventHandler<TEvent>.HandleAsync(TEvent, System.Threading.CancellationToken)
+  fullName.vb: Ledon.Queues.IIntegrationEventHandler(Of TEvent).HandleAsync(TEvent, System.Threading.CancellationToken)
+  nameWithType: IIntegrationEventHandler<TEvent>.HandleAsync(TEvent, CancellationToken)
+  nameWithType.vb: IIntegrationEventHandler(Of TEvent).HandleAsync(TEvent, CancellationToken)
+- uid: Ledon.Queues.IIntegrationEventHandler`1.HandleAsync*
+  name: HandleAsync
+  href: api/Ledon.Queues.IIntegrationEventHandler-1.html#Ledon_Queues_IIntegrationEventHandler_1_HandleAsync_
+  commentId: Overload:Ledon.Queues.IIntegrationEventHandler`1.HandleAsync
+  isSpec: "True"
+  fullName: Ledon.Queues.IIntegrationEventHandler<TEvent>.HandleAsync
+  fullName.vb: Ledon.Queues.IIntegrationEventHandler(Of TEvent).HandleAsync
+  nameWithType: IIntegrationEventHandler<TEvent>.HandleAsync
+  nameWithType.vb: IIntegrationEventHandler(Of TEvent).HandleAsync
+- uid: Ledon.Queues.IOutboxStore
+  name: IOutboxStore
+  href: api/Ledon.Queues.IOutboxStore.html
+  commentId: T:Ledon.Queues.IOutboxStore
+  fullName: Ledon.Queues.IOutboxStore
+  nameWithType: IOutboxStore
+- uid: Ledon.Queues.IOutboxStore.Add(Ledon.Queues.IIntegrationEvent)
+  name: Add(IIntegrationEvent)
+  href: api/Ledon.Queues.IOutboxStore.html#Ledon_Queues_IOutboxStore_Add_Ledon_Queues_IIntegrationEvent_
+  commentId: M:Ledon.Queues.IOutboxStore.Add(Ledon.Queues.IIntegrationEvent)
+  fullName: Ledon.Queues.IOutboxStore.Add(Ledon.Queues.IIntegrationEvent)
+  nameWithType: IOutboxStore.Add(IIntegrationEvent)
+- uid: Ledon.Queues.IOutboxStore.Add*
+  name: Add
+  href: api/Ledon.Queues.IOutboxStore.html#Ledon_Queues_IOutboxStore_Add_
+  commentId: Overload:Ledon.Queues.IOutboxStore.Add
+  isSpec: "True"
+  fullName: Ledon.Queues.IOutboxStore.Add
+  nameWithType: IOutboxStore.Add
+- uid: Ledon.Queues.IOutboxStore.GetPendingAsync(System.Int32,System.Threading.CancellationToken)
+  name: GetPendingAsync(int, CancellationToken)
+  href: api/Ledon.Queues.IOutboxStore.html#Ledon_Queues_IOutboxStore_GetPendingAsync_System_Int32_System_Threading_CancellationToken_
+  commentId: M:Ledon.Queues.IOutboxStore.GetPendingAsync(System.Int32,System.Threading.CancellationToken)
+  name.vb: GetPendingAsync(Integer, CancellationToken)
+  fullName: Ledon.Queues.IOutboxStore.GetPendingAsync(int, System.Threading.CancellationToken)
+  fullName.vb: Ledon.Queues.IOutboxStore.GetPendingAsync(Integer, System.Threading.CancellationToken)
+  nameWithType: IOutboxStore.GetPendingAsync(int, CancellationToken)
+  nameWithType.vb: IOutboxStore.GetPendingAsync(Integer, CancellationToken)
+- uid: Ledon.Queues.IOutboxStore.GetPendingAsync*
+  name: GetPendingAsync
+  href: api/Ledon.Queues.IOutboxStore.html#Ledon_Queues_IOutboxStore_GetPendingAsync_
+  commentId: Overload:Ledon.Queues.IOutboxStore.GetPendingAsync
+  isSpec: "True"
+  fullName: Ledon.Queues.IOutboxStore.GetPendingAsync
+  nameWithType: IOutboxStore.GetPendingAsync
+- uid: Ledon.Queues.IOutboxStore.MarkFailedAsync(System.Guid,System.String,System.Threading.CancellationToken)
+  name: MarkFailedAsync(Guid, string, CancellationToken)
+  href: api/Ledon.Queues.IOutboxStore.html#Ledon_Queues_IOutboxStore_MarkFailedAsync_System_Guid_System_String_System_Threading_CancellationToken_
+  commentId: M:Ledon.Queues.IOutboxStore.MarkFailedAsync(System.Guid,System.String,System.Threading.CancellationToken)
+  name.vb: MarkFailedAsync(Guid, String, CancellationToken)
+  fullName: Ledon.Queues.IOutboxStore.MarkFailedAsync(System.Guid, string, System.Threading.CancellationToken)
+  fullName.vb: Ledon.Queues.IOutboxStore.MarkFailedAsync(System.Guid, String, System.Threading.CancellationToken)
+  nameWithType: IOutboxStore.MarkFailedAsync(Guid, string, CancellationToken)
+  nameWithType.vb: IOutboxStore.MarkFailedAsync(Guid, String, CancellationToken)
+- uid: Ledon.Queues.IOutboxStore.MarkFailedAsync*
+  name: MarkFailedAsync
+  href: api/Ledon.Queues.IOutboxStore.html#Ledon_Queues_IOutboxStore_MarkFailedAsync_
+  commentId: Overload:Ledon.Queues.IOutboxStore.MarkFailedAsync
+  isSpec: "True"
+  fullName: Ledon.Queues.IOutboxStore.MarkFailedAsync
+  nameWithType: IOutboxStore.MarkFailedAsync
+- uid: Ledon.Queues.IOutboxStore.MarkProcessedAsync(System.Guid,System.Threading.CancellationToken)
+  name: MarkProcessedAsync(Guid, CancellationToken)
+  href: api/Ledon.Queues.IOutboxStore.html#Ledon_Queues_IOutboxStore_MarkProcessedAsync_System_Guid_System_Threading_CancellationToken_
+  commentId: M:Ledon.Queues.IOutboxStore.MarkProcessedAsync(System.Guid,System.Threading.CancellationToken)
+  fullName: Ledon.Queues.IOutboxStore.MarkProcessedAsync(System.Guid, System.Threading.CancellationToken)
+  nameWithType: IOutboxStore.MarkProcessedAsync(Guid, CancellationToken)
+- uid: Ledon.Queues.IOutboxStore.MarkProcessedAsync*
+  name: MarkProcessedAsync
+  href: api/Ledon.Queues.IOutboxStore.html#Ledon_Queues_IOutboxStore_MarkProcessedAsync_
+  commentId: Overload:Ledon.Queues.IOutboxStore.MarkProcessedAsync
+  isSpec: "True"
+  fullName: Ledon.Queues.IOutboxStore.MarkProcessedAsync
+  nameWithType: IOutboxStore.MarkProcessedAsync
+- uid: Ledon.Queues.LedonOutboxOptions
+  name: LedonOutboxOptions
+  href: api/Ledon.Queues.LedonOutboxOptions.html
+  commentId: T:Ledon.Queues.LedonOutboxOptions
+  fullName: Ledon.Queues.LedonOutboxOptions
+  nameWithType: LedonOutboxOptions
+- uid: Ledon.Queues.LedonOutboxOptions.BatchSize
+  name: BatchSize
+  href: api/Ledon.Queues.LedonOutboxOptions.html#Ledon_Queues_LedonOutboxOptions_BatchSize
+  commentId: P:Ledon.Queues.LedonOutboxOptions.BatchSize
+  fullName: Ledon.Queues.LedonOutboxOptions.BatchSize
+  nameWithType: LedonOutboxOptions.BatchSize
+- uid: Ledon.Queues.LedonOutboxOptions.BatchSize*
+  name: BatchSize
+  href: api/Ledon.Queues.LedonOutboxOptions.html#Ledon_Queues_LedonOutboxOptions_BatchSize_
+  commentId: Overload:Ledon.Queues.LedonOutboxOptions.BatchSize
+  isSpec: "True"
+  fullName: Ledon.Queues.LedonOutboxOptions.BatchSize
+  nameWithType: LedonOutboxOptions.BatchSize
+- uid: Ledon.Queues.LedonOutboxOptions.MaxRetries
+  name: MaxRetries
+  href: api/Ledon.Queues.LedonOutboxOptions.html#Ledon_Queues_LedonOutboxOptions_MaxRetries
+  commentId: P:Ledon.Queues.LedonOutboxOptions.MaxRetries
+  fullName: Ledon.Queues.LedonOutboxOptions.MaxRetries
+  nameWithType: LedonOutboxOptions.MaxRetries
+- uid: Ledon.Queues.LedonOutboxOptions.MaxRetries*
+  name: MaxRetries
+  href: api/Ledon.Queues.LedonOutboxOptions.html#Ledon_Queues_LedonOutboxOptions_MaxRetries_
+  commentId: Overload:Ledon.Queues.LedonOutboxOptions.MaxRetries
+  isSpec: "True"
+  fullName: Ledon.Queues.LedonOutboxOptions.MaxRetries
+  nameWithType: LedonOutboxOptions.MaxRetries
+- uid: Ledon.Queues.LedonOutboxOptions.PollingInterval
+  name: PollingInterval
+  href: api/Ledon.Queues.LedonOutboxOptions.html#Ledon_Queues_LedonOutboxOptions_PollingInterval
+  commentId: P:Ledon.Queues.LedonOutboxOptions.PollingInterval
+  fullName: Ledon.Queues.LedonOutboxOptions.PollingInterval
+  nameWithType: LedonOutboxOptions.PollingInterval
+- uid: Ledon.Queues.LedonOutboxOptions.PollingInterval*
+  name: PollingInterval
+  href: api/Ledon.Queues.LedonOutboxOptions.html#Ledon_Queues_LedonOutboxOptions_PollingInterval_
+  commentId: Overload:Ledon.Queues.LedonOutboxOptions.PollingInterval
+  isSpec: "True"
+  fullName: Ledon.Queues.LedonOutboxOptions.PollingInterval
+  nameWithType: LedonOutboxOptions.PollingInterval
+- uid: Ledon.Queues.LedonQueueOptions
+  name: LedonQueueOptions
+  href: api/Ledon.Queues.LedonQueueOptions.html
+  commentId: T:Ledon.Queues.LedonQueueOptions
+  fullName: Ledon.Queues.LedonQueueOptions
+  nameWithType: LedonQueueOptions
+- uid: Ledon.Queues.LedonQueueOptions.Capacity
+  name: Capacity
+  href: api/Ledon.Queues.LedonQueueOptions.html#Ledon_Queues_LedonQueueOptions_Capacity
+  commentId: P:Ledon.Queues.LedonQueueOptions.Capacity
+  fullName: Ledon.Queues.LedonQueueOptions.Capacity
+  nameWithType: LedonQueueOptions.Capacity
+- uid: Ledon.Queues.LedonQueueOptions.Capacity*
+  name: Capacity
+  href: api/Ledon.Queues.LedonQueueOptions.html#Ledon_Queues_LedonQueueOptions_Capacity_
+  commentId: Overload:Ledon.Queues.LedonQueueOptions.Capacity
+  isSpec: "True"
+  fullName: Ledon.Queues.LedonQueueOptions.Capacity
+  nameWithType: LedonQueueOptions.Capacity
+- uid: Ledon.Queues.LedonQueueOptions.WorkerCount
+  name: WorkerCount
+  href: api/Ledon.Queues.LedonQueueOptions.html#Ledon_Queues_LedonQueueOptions_WorkerCount
+  commentId: P:Ledon.Queues.LedonQueueOptions.WorkerCount
+  fullName: Ledon.Queues.LedonQueueOptions.WorkerCount
+  nameWithType: LedonQueueOptions.WorkerCount
+- uid: Ledon.Queues.LedonQueueOptions.WorkerCount*
+  name: WorkerCount
+  href: api/Ledon.Queues.LedonQueueOptions.html#Ledon_Queues_LedonQueueOptions_WorkerCount_
+  commentId: Overload:Ledon.Queues.LedonQueueOptions.WorkerCount
+  isSpec: "True"
+  fullName: Ledon.Queues.LedonQueueOptions.WorkerCount
+  nameWithType: LedonQueueOptions.WorkerCount
+- uid: Ledon.Queues.OutboxDbContext
+  name: OutboxDbContext
+  href: api/Ledon.Queues.OutboxDbContext.html
+  commentId: T:Ledon.Queues.OutboxDbContext
+  fullName: Ledon.Queues.OutboxDbContext
+  nameWithType: OutboxDbContext
+- uid: Ledon.Queues.OutboxDbContext.#ctor
+  name: OutboxDbContext()
+  href: api/Ledon.Queues.OutboxDbContext.html#Ledon_Queues_OutboxDbContext__ctor
+  commentId: M:Ledon.Queues.OutboxDbContext.#ctor
+  name.vb: New()
+  fullName: Ledon.Queues.OutboxDbContext.OutboxDbContext()
+  fullName.vb: Ledon.Queues.OutboxDbContext.New()
+  nameWithType: OutboxDbContext.OutboxDbContext()
+  nameWithType.vb: OutboxDbContext.New()
+- uid: Ledon.Queues.OutboxDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions)
+  name: OutboxDbContext(DbContextOptions)
+  href: api/Ledon.Queues.OutboxDbContext.html#Ledon_Queues_OutboxDbContext__ctor_Microsoft_EntityFrameworkCore_DbContextOptions_
+  commentId: M:Ledon.Queues.OutboxDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions)
+  name.vb: New(DbContextOptions)
+  fullName: Ledon.Queues.OutboxDbContext.OutboxDbContext(Microsoft.EntityFrameworkCore.DbContextOptions)
+  fullName.vb: Ledon.Queues.OutboxDbContext.New(Microsoft.EntityFrameworkCore.DbContextOptions)
+  nameWithType: OutboxDbContext.OutboxDbContext(DbContextOptions)
+  nameWithType.vb: OutboxDbContext.New(DbContextOptions)
+- uid: Ledon.Queues.OutboxDbContext.#ctor*
+  name: OutboxDbContext
+  href: api/Ledon.Queues.OutboxDbContext.html#Ledon_Queues_OutboxDbContext__ctor_
+  commentId: Overload:Ledon.Queues.OutboxDbContext.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: Ledon.Queues.OutboxDbContext.OutboxDbContext
+  fullName.vb: Ledon.Queues.OutboxDbContext.New
+  nameWithType: OutboxDbContext.OutboxDbContext
+  nameWithType.vb: OutboxDbContext.New
+- uid: Ledon.Queues.OutboxDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)
+  name: OnModelCreating(ModelBuilder)
+  href: api/Ledon.Queues.OutboxDbContext.html#Ledon_Queues_OutboxDbContext_OnModelCreating_Microsoft_EntityFrameworkCore_ModelBuilder_
+  commentId: M:Ledon.Queues.OutboxDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)
+  fullName: Ledon.Queues.OutboxDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)
+  nameWithType: OutboxDbContext.OnModelCreating(ModelBuilder)
+- uid: Ledon.Queues.OutboxDbContext.OnModelCreating*
+  name: OnModelCreating
+  href: api/Ledon.Queues.OutboxDbContext.html#Ledon_Queues_OutboxDbContext_OnModelCreating_
+  commentId: Overload:Ledon.Queues.OutboxDbContext.OnModelCreating
+  isSpec: "True"
+  fullName: Ledon.Queues.OutboxDbContext.OnModelCreating
+  nameWithType: OutboxDbContext.OnModelCreating
+- uid: Ledon.Queues.OutboxDbContext.OutboxMessages
+  name: OutboxMessages
+  href: api/Ledon.Queues.OutboxDbContext.html#Ledon_Queues_OutboxDbContext_OutboxMessages
+  commentId: P:Ledon.Queues.OutboxDbContext.OutboxMessages
+  fullName: Ledon.Queues.OutboxDbContext.OutboxMessages
+  nameWithType: OutboxDbContext.OutboxMessages
+- uid: Ledon.Queues.OutboxDbContext.OutboxMessages*
+  name: OutboxMessages
+  href: api/Ledon.Queues.OutboxDbContext.html#Ledon_Queues_OutboxDbContext_OutboxMessages_
+  commentId: Overload:Ledon.Queues.OutboxDbContext.OutboxMessages
+  isSpec: "True"
+  fullName: Ledon.Queues.OutboxDbContext.OutboxMessages
+  nameWithType: OutboxDbContext.OutboxMessages
+- uid: Ledon.Queues.OutboxMessage
+  name: OutboxMessage
+  href: api/Ledon.Queues.OutboxMessage.html
+  commentId: T:Ledon.Queues.OutboxMessage
+  fullName: Ledon.Queues.OutboxMessage
+  nameWithType: OutboxMessage
+- uid: Ledon.Queues.OutboxMessage.CreatedAt
+  name: CreatedAt
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_CreatedAt
+  commentId: P:Ledon.Queues.OutboxMessage.CreatedAt
+  fullName: Ledon.Queues.OutboxMessage.CreatedAt
+  nameWithType: OutboxMessage.CreatedAt
+- uid: Ledon.Queues.OutboxMessage.CreatedAt*
+  name: CreatedAt
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_CreatedAt_
+  commentId: Overload:Ledon.Queues.OutboxMessage.CreatedAt
+  isSpec: "True"
+  fullName: Ledon.Queues.OutboxMessage.CreatedAt
+  nameWithType: OutboxMessage.CreatedAt
+- uid: Ledon.Queues.OutboxMessage.Error
+  name: Error
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_Error
+  commentId: P:Ledon.Queues.OutboxMessage.Error
+  fullName: Ledon.Queues.OutboxMessage.Error
+  nameWithType: OutboxMessage.Error
+- uid: Ledon.Queues.OutboxMessage.Error*
+  name: Error
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_Error_
+  commentId: Overload:Ledon.Queues.OutboxMessage.Error
+  isSpec: "True"
+  fullName: Ledon.Queues.OutboxMessage.Error
+  nameWithType: OutboxMessage.Error
+- uid: Ledon.Queues.OutboxMessage.Id
+  name: Id
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_Id
+  commentId: P:Ledon.Queues.OutboxMessage.Id
+  fullName: Ledon.Queues.OutboxMessage.Id
+  nameWithType: OutboxMessage.Id
+- uid: Ledon.Queues.OutboxMessage.Id*
+  name: Id
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_Id_
+  commentId: Overload:Ledon.Queues.OutboxMessage.Id
+  isSpec: "True"
+  fullName: Ledon.Queues.OutboxMessage.Id
+  nameWithType: OutboxMessage.Id
+- uid: Ledon.Queues.OutboxMessage.Payload
+  name: Payload
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_Payload
+  commentId: P:Ledon.Queues.OutboxMessage.Payload
+  fullName: Ledon.Queues.OutboxMessage.Payload
+  nameWithType: OutboxMessage.Payload
+- uid: Ledon.Queues.OutboxMessage.Payload*
+  name: Payload
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_Payload_
+  commentId: Overload:Ledon.Queues.OutboxMessage.Payload
+  isSpec: "True"
+  fullName: Ledon.Queues.OutboxMessage.Payload
+  nameWithType: OutboxMessage.Payload
+- uid: Ledon.Queues.OutboxMessage.ProcessedAt
+  name: ProcessedAt
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_ProcessedAt
+  commentId: P:Ledon.Queues.OutboxMessage.ProcessedAt
+  fullName: Ledon.Queues.OutboxMessage.ProcessedAt
+  nameWithType: OutboxMessage.ProcessedAt
+- uid: Ledon.Queues.OutboxMessage.ProcessedAt*
+  name: ProcessedAt
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_ProcessedAt_
+  commentId: Overload:Ledon.Queues.OutboxMessage.ProcessedAt
+  isSpec: "True"
+  fullName: Ledon.Queues.OutboxMessage.ProcessedAt
+  nameWithType: OutboxMessage.ProcessedAt
+- uid: Ledon.Queues.OutboxMessage.RetryCount
+  name: RetryCount
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_RetryCount
+  commentId: P:Ledon.Queues.OutboxMessage.RetryCount
+  fullName: Ledon.Queues.OutboxMessage.RetryCount
+  nameWithType: OutboxMessage.RetryCount
+- uid: Ledon.Queues.OutboxMessage.RetryCount*
+  name: RetryCount
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_RetryCount_
+  commentId: Overload:Ledon.Queues.OutboxMessage.RetryCount
+  isSpec: "True"
+  fullName: Ledon.Queues.OutboxMessage.RetryCount
+  nameWithType: OutboxMessage.RetryCount
+- uid: Ledon.Queues.OutboxMessage.Type
+  name: Type
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_Type
+  commentId: P:Ledon.Queues.OutboxMessage.Type
+  fullName: Ledon.Queues.OutboxMessage.Type
+  nameWithType: OutboxMessage.Type
+- uid: Ledon.Queues.OutboxMessage.Type*
+  name: Type
+  href: api/Ledon.Queues.OutboxMessage.html#Ledon_Queues_OutboxMessage_Type_
+  commentId: Overload:Ledon.Queues.OutboxMessage.Type
+  isSpec: "True"
+  fullName: Ledon.Queues.OutboxMessage.Type
+  nameWithType: OutboxMessage.Type
+- uid: Ledon.Resilience
+  name: Ledon.Resilience
+  href: api/Ledon.Resilience.html
+  commentId: N:Ledon.Resilience
+  fullName: Ledon.Resilience
+  nameWithType: Ledon.Resilience
+- uid: Ledon.Resilience.LedonResilienceOptions
+  name: LedonResilienceOptions
+  href: api/Ledon.Resilience.LedonResilienceOptions.html
+  commentId: T:Ledon.Resilience.LedonResilienceOptions
+  fullName: Ledon.Resilience.LedonResilienceOptions
+  nameWithType: LedonResilienceOptions
+- uid: Ledon.Resilience.LedonResilienceOptions.ApplyToAllHttpClients
+  name: ApplyToAllHttpClients
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_ApplyToAllHttpClients
+  commentId: P:Ledon.Resilience.LedonResilienceOptions.ApplyToAllHttpClients
+  fullName: Ledon.Resilience.LedonResilienceOptions.ApplyToAllHttpClients
+  nameWithType: LedonResilienceOptions.ApplyToAllHttpClients
+- uid: Ledon.Resilience.LedonResilienceOptions.ApplyToAllHttpClients*
+  name: ApplyToAllHttpClients
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_ApplyToAllHttpClients_
+  commentId: Overload:Ledon.Resilience.LedonResilienceOptions.ApplyToAllHttpClients
+  isSpec: "True"
+  fullName: Ledon.Resilience.LedonResilienceOptions.ApplyToAllHttpClients
+  nameWithType: LedonResilienceOptions.ApplyToAllHttpClients
+- uid: Ledon.Resilience.LedonResilienceOptions.AttemptTimeout
+  name: AttemptTimeout
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_AttemptTimeout
+  commentId: P:Ledon.Resilience.LedonResilienceOptions.AttemptTimeout
+  fullName: Ledon.Resilience.LedonResilienceOptions.AttemptTimeout
+  nameWithType: LedonResilienceOptions.AttemptTimeout
+- uid: Ledon.Resilience.LedonResilienceOptions.AttemptTimeout*
+  name: AttemptTimeout
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_AttemptTimeout_
+  commentId: Overload:Ledon.Resilience.LedonResilienceOptions.AttemptTimeout
+  isSpec: "True"
+  fullName: Ledon.Resilience.LedonResilienceOptions.AttemptTimeout
+  nameWithType: LedonResilienceOptions.AttemptTimeout
+- uid: Ledon.Resilience.LedonResilienceOptions.BaseDelay
+  name: BaseDelay
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_BaseDelay
+  commentId: P:Ledon.Resilience.LedonResilienceOptions.BaseDelay
+  fullName: Ledon.Resilience.LedonResilienceOptions.BaseDelay
+  nameWithType: LedonResilienceOptions.BaseDelay
+- uid: Ledon.Resilience.LedonResilienceOptions.BaseDelay*
+  name: BaseDelay
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_BaseDelay_
+  commentId: Overload:Ledon.Resilience.LedonResilienceOptions.BaseDelay
+  isSpec: "True"
+  fullName: Ledon.Resilience.LedonResilienceOptions.BaseDelay
+  nameWithType: LedonResilienceOptions.BaseDelay
+- uid: Ledon.Resilience.LedonResilienceOptions.BreakDuration
+  name: BreakDuration
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_BreakDuration
+  commentId: P:Ledon.Resilience.LedonResilienceOptions.BreakDuration
+  fullName: Ledon.Resilience.LedonResilienceOptions.BreakDuration
+  nameWithType: LedonResilienceOptions.BreakDuration
+- uid: Ledon.Resilience.LedonResilienceOptions.BreakDuration*
+  name: BreakDuration
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_BreakDuration_
+  commentId: Overload:Ledon.Resilience.LedonResilienceOptions.BreakDuration
+  isSpec: "True"
+  fullName: Ledon.Resilience.LedonResilienceOptions.BreakDuration
+  nameWithType: LedonResilienceOptions.BreakDuration
+- uid: Ledon.Resilience.LedonResilienceOptions.FailureRatio
+  name: FailureRatio
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_FailureRatio
+  commentId: P:Ledon.Resilience.LedonResilienceOptions.FailureRatio
+  fullName: Ledon.Resilience.LedonResilienceOptions.FailureRatio
+  nameWithType: LedonResilienceOptions.FailureRatio
+- uid: Ledon.Resilience.LedonResilienceOptions.FailureRatio*
+  name: FailureRatio
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_FailureRatio_
+  commentId: Overload:Ledon.Resilience.LedonResilienceOptions.FailureRatio
+  isSpec: "True"
+  fullName: Ledon.Resilience.LedonResilienceOptions.FailureRatio
+  nameWithType: LedonResilienceOptions.FailureRatio
+- uid: Ledon.Resilience.LedonResilienceOptions.MaxRetryAttempts
+  name: MaxRetryAttempts
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_MaxRetryAttempts
+  commentId: P:Ledon.Resilience.LedonResilienceOptions.MaxRetryAttempts
+  fullName: Ledon.Resilience.LedonResilienceOptions.MaxRetryAttempts
+  nameWithType: LedonResilienceOptions.MaxRetryAttempts
+- uid: Ledon.Resilience.LedonResilienceOptions.MaxRetryAttempts*
+  name: MaxRetryAttempts
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_MaxRetryAttempts_
+  commentId: Overload:Ledon.Resilience.LedonResilienceOptions.MaxRetryAttempts
+  isSpec: "True"
+  fullName: Ledon.Resilience.LedonResilienceOptions.MaxRetryAttempts
+  nameWithType: LedonResilienceOptions.MaxRetryAttempts
+- uid: Ledon.Resilience.LedonResilienceOptions.MinimumThroughput
+  name: MinimumThroughput
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_MinimumThroughput
+  commentId: P:Ledon.Resilience.LedonResilienceOptions.MinimumThroughput
+  fullName: Ledon.Resilience.LedonResilienceOptions.MinimumThroughput
+  nameWithType: LedonResilienceOptions.MinimumThroughput
+- uid: Ledon.Resilience.LedonResilienceOptions.MinimumThroughput*
+  name: MinimumThroughput
+  href: api/Ledon.Resilience.LedonResilienceOptions.html#Ledon_Resilience_LedonResilienceOptions_MinimumThroughput_
+  commentId: Overload:Ledon.Resilience.LedonResilienceOptions.MinimumThroughput
+  isSpec: "True"
+  fullName: Ledon.Resilience.LedonResilienceOptions.MinimumThroughput
+  nameWithType: LedonResilienceOptions.MinimumThroughput
+- uid: Ledon.Scheduling
+  name: Ledon.Scheduling
+  href: api/Ledon.Scheduling.html
+  commentId: N:Ledon.Scheduling
+  fullName: Ledon.Scheduling
+  nameWithType: Ledon.Scheduling
+- uid: Ledon.Scheduling.IScheduledTask
+  name: IScheduledTask
+  href: api/Ledon.Scheduling.IScheduledTask.html
+  commentId: T:Ledon.Scheduling.IScheduledTask
+  fullName: Ledon.Scheduling.IScheduledTask
+  nameWithType: IScheduledTask
+- uid: Ledon.Scheduling.IScheduledTask.CronExpression
+  name: CronExpression
+  href: api/Ledon.Scheduling.IScheduledTask.html#Ledon_Scheduling_IScheduledTask_CronExpression
+  commentId: P:Ledon.Scheduling.IScheduledTask.CronExpression
+  fullName: Ledon.Scheduling.IScheduledTask.CronExpression
+  nameWithType: IScheduledTask.CronExpression
+- uid: Ledon.Scheduling.IScheduledTask.CronExpression*
+  name: CronExpression
+  href: api/Ledon.Scheduling.IScheduledTask.html#Ledon_Scheduling_IScheduledTask_CronExpression_
+  commentId: Overload:Ledon.Scheduling.IScheduledTask.CronExpression
+  isSpec: "True"
+  fullName: Ledon.Scheduling.IScheduledTask.CronExpression
+  nameWithType: IScheduledTask.CronExpression
+- uid: Ledon.Scheduling.IScheduledTask.ExecuteAsync(System.Threading.CancellationToken)
+  name: ExecuteAsync(CancellationToken)
+  href: api/Ledon.Scheduling.IScheduledTask.html#Ledon_Scheduling_IScheduledTask_ExecuteAsync_System_Threading_CancellationToken_
+  commentId: M:Ledon.Scheduling.IScheduledTask.ExecuteAsync(System.Threading.CancellationToken)
+  fullName: Ledon.Scheduling.IScheduledTask.ExecuteAsync(System.Threading.CancellationToken)
+  nameWithType: IScheduledTask.ExecuteAsync(CancellationToken)
+- uid: Ledon.Scheduling.IScheduledTask.ExecuteAsync*
+  name: ExecuteAsync
+  href: api/Ledon.Scheduling.IScheduledTask.html#Ledon_Scheduling_IScheduledTask_ExecuteAsync_
+  commentId: Overload:Ledon.Scheduling.IScheduledTask.ExecuteAsync
+  isSpec: "True"
+  fullName: Ledon.Scheduling.IScheduledTask.ExecuteAsync
+  nameWithType: IScheduledTask.ExecuteAsync
+- uid: Ledon.Scheduling.LedonSchedulingOptions
+  name: LedonSchedulingOptions
+  href: api/Ledon.Scheduling.LedonSchedulingOptions.html
+  commentId: T:Ledon.Scheduling.LedonSchedulingOptions
+  fullName: Ledon.Scheduling.LedonSchedulingOptions
+  nameWithType: LedonSchedulingOptions
+- uid: Ledon.Scheduling.LedonSchedulingOptions.TimeZone
+  name: TimeZone
+  href: api/Ledon.Scheduling.LedonSchedulingOptions.html#Ledon_Scheduling_LedonSchedulingOptions_TimeZone
+  commentId: P:Ledon.Scheduling.LedonSchedulingOptions.TimeZone
+  fullName: Ledon.Scheduling.LedonSchedulingOptions.TimeZone
+  nameWithType: LedonSchedulingOptions.TimeZone
+- uid: Ledon.Scheduling.LedonSchedulingOptions.TimeZone*
+  name: TimeZone
+  href: api/Ledon.Scheduling.LedonSchedulingOptions.html#Ledon_Scheduling_LedonSchedulingOptions_TimeZone_
+  commentId: Overload:Ledon.Scheduling.LedonSchedulingOptions.TimeZone
+  isSpec: "True"
+  fullName: Ledon.Scheduling.LedonSchedulingOptions.TimeZone
+  nameWithType: LedonSchedulingOptions.TimeZone
+- uid: Ledon.Security
+  name: Ledon.Security
+  href: api/Ledon.Security.html
+  commentId: N:Ledon.Security
+  fullName: Ledon.Security
+  nameWithType: Ledon.Security
+- uid: Ledon.Security.ApiKeyOptions
+  name: ApiKeyOptions
+  href: api/Ledon.Security.ApiKeyOptions.html
+  commentId: T:Ledon.Security.ApiKeyOptions
+  fullName: Ledon.Security.ApiKeyOptions
+  nameWithType: ApiKeyOptions
+- uid: Ledon.Security.ApiKeyOptions.HeaderName
+  name: HeaderName
+  href: api/Ledon.Security.ApiKeyOptions.html#Ledon_Security_ApiKeyOptions_HeaderName
+  commentId: P:Ledon.Security.ApiKeyOptions.HeaderName
+  fullName: Ledon.Security.ApiKeyOptions.HeaderName
+  nameWithType: ApiKeyOptions.HeaderName
+- uid: Ledon.Security.ApiKeyOptions.HeaderName*
+  name: HeaderName
+  href: api/Ledon.Security.ApiKeyOptions.html#Ledon_Security_ApiKeyOptions_HeaderName_
+  commentId: Overload:Ledon.Security.ApiKeyOptions.HeaderName
+  isSpec: "True"
+  fullName: Ledon.Security.ApiKeyOptions.HeaderName
+  nameWithType: ApiKeyOptions.HeaderName
+- uid: Ledon.Security.ApiKeyOptions.Keys
+  name: Keys
+  href: api/Ledon.Security.ApiKeyOptions.html#Ledon_Security_ApiKeyOptions_Keys
+  commentId: P:Ledon.Security.ApiKeyOptions.Keys
+  fullName: Ledon.Security.ApiKeyOptions.Keys
+  nameWithType: ApiKeyOptions.Keys
+- uid: Ledon.Security.ApiKeyOptions.Keys*
+  name: Keys
+  href: api/Ledon.Security.ApiKeyOptions.html#Ledon_Security_ApiKeyOptions_Keys_
+  commentId: Overload:Ledon.Security.ApiKeyOptions.Keys
+  isSpec: "True"
+  fullName: Ledon.Security.ApiKeyOptions.Keys
+  nameWithType: ApiKeyOptions.Keys
+- uid: Ledon.Security.ICurrentUser
+  name: ICurrentUser
+  href: api/Ledon.Security.ICurrentUser.html
+  commentId: T:Ledon.Security.ICurrentUser
+  fullName: Ledon.Security.ICurrentUser
+  nameWithType: ICurrentUser
+- uid: Ledon.Security.ICurrentUser.HasPermission(System.String)
+  name: HasPermission(string)
+  href: api/Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_HasPermission_System_String_
+  commentId: M:Ledon.Security.ICurrentUser.HasPermission(System.String)
+  name.vb: HasPermission(String)
+  fullName: Ledon.Security.ICurrentUser.HasPermission(string)
+  fullName.vb: Ledon.Security.ICurrentUser.HasPermission(String)
+  nameWithType: ICurrentUser.HasPermission(string)
+  nameWithType.vb: ICurrentUser.HasPermission(String)
+- uid: Ledon.Security.ICurrentUser.HasPermission*
+  name: HasPermission
+  href: api/Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_HasPermission_
+  commentId: Overload:Ledon.Security.ICurrentUser.HasPermission
+  isSpec: "True"
+  fullName: Ledon.Security.ICurrentUser.HasPermission
+  nameWithType: ICurrentUser.HasPermission
+- uid: Ledon.Security.ICurrentUser.IsAuthenticated
+  name: IsAuthenticated
+  href: api/Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_IsAuthenticated
+  commentId: P:Ledon.Security.ICurrentUser.IsAuthenticated
+  fullName: Ledon.Security.ICurrentUser.IsAuthenticated
+  nameWithType: ICurrentUser.IsAuthenticated
+- uid: Ledon.Security.ICurrentUser.IsAuthenticated*
+  name: IsAuthenticated
+  href: api/Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_IsAuthenticated_
+  commentId: Overload:Ledon.Security.ICurrentUser.IsAuthenticated
+  isSpec: "True"
+  fullName: Ledon.Security.ICurrentUser.IsAuthenticated
+  nameWithType: ICurrentUser.IsAuthenticated
+- uid: Ledon.Security.ICurrentUser.Permissions
+  name: Permissions
+  href: api/Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_Permissions
+  commentId: P:Ledon.Security.ICurrentUser.Permissions
+  fullName: Ledon.Security.ICurrentUser.Permissions
+  nameWithType: ICurrentUser.Permissions
+- uid: Ledon.Security.ICurrentUser.Permissions*
+  name: Permissions
+  href: api/Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_Permissions_
+  commentId: Overload:Ledon.Security.ICurrentUser.Permissions
+  isSpec: "True"
+  fullName: Ledon.Security.ICurrentUser.Permissions
+  nameWithType: ICurrentUser.Permissions
+- uid: Ledon.Security.ICurrentUser.UserId
+  name: UserId
+  href: api/Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_UserId
+  commentId: P:Ledon.Security.ICurrentUser.UserId
+  fullName: Ledon.Security.ICurrentUser.UserId
+  nameWithType: ICurrentUser.UserId
+- uid: Ledon.Security.ICurrentUser.UserId*
+  name: UserId
+  href: api/Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_UserId_
+  commentId: Overload:Ledon.Security.ICurrentUser.UserId
+  isSpec: "True"
+  fullName: Ledon.Security.ICurrentUser.UserId
+  nameWithType: ICurrentUser.UserId
+- uid: Ledon.Security.ICurrentUser.UserName
+  name: UserName
+  href: api/Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_UserName
+  commentId: P:Ledon.Security.ICurrentUser.UserName
+  fullName: Ledon.Security.ICurrentUser.UserName
+  nameWithType: ICurrentUser.UserName
+- uid: Ledon.Security.ICurrentUser.UserName*
+  name: UserName
+  href: api/Ledon.Security.ICurrentUser.html#Ledon_Security_ICurrentUser_UserName_
+  commentId: Overload:Ledon.Security.ICurrentUser.UserName
+  isSpec: "True"
+  fullName: Ledon.Security.ICurrentUser.UserName
+  nameWithType: ICurrentUser.UserName
+- uid: Ledon.Security.IJwtTokenGenerator
+  name: IJwtTokenGenerator
+  href: api/Ledon.Security.IJwtTokenGenerator.html
+  commentId: T:Ledon.Security.IJwtTokenGenerator
+  fullName: Ledon.Security.IJwtTokenGenerator
+  nameWithType: IJwtTokenGenerator
+- uid: Ledon.Security.IJwtTokenGenerator.Generate(System.String,System.String,System.Collections.Generic.IEnumerable{System.String})
+  name: Generate(string, string, IEnumerable<string>?)
+  href: api/Ledon.Security.IJwtTokenGenerator.html#Ledon_Security_IJwtTokenGenerator_Generate_System_String_System_String_System_Collections_Generic_IEnumerable_System_String__
+  commentId: M:Ledon.Security.IJwtTokenGenerator.Generate(System.String,System.String,System.Collections.Generic.IEnumerable{System.String})
+  name.vb: Generate(String, String, IEnumerable(Of String))
+  fullName: Ledon.Security.IJwtTokenGenerator.Generate(string, string, System.Collections.Generic.IEnumerable<string>?)
+  fullName.vb: Ledon.Security.IJwtTokenGenerator.Generate(String, String, System.Collections.Generic.IEnumerable(Of String))
+  nameWithType: IJwtTokenGenerator.Generate(string, string, IEnumerable<string>?)
+  nameWithType.vb: IJwtTokenGenerator.Generate(String, String, IEnumerable(Of String))
+- uid: Ledon.Security.IJwtTokenGenerator.Generate*
+  name: Generate
+  href: api/Ledon.Security.IJwtTokenGenerator.html#Ledon_Security_IJwtTokenGenerator_Generate_
+  commentId: Overload:Ledon.Security.IJwtTokenGenerator.Generate
+  isSpec: "True"
+  fullName: Ledon.Security.IJwtTokenGenerator.Generate
+  nameWithType: IJwtTokenGenerator.Generate
+- uid: Ledon.Security.JwtOptions
+  name: JwtOptions
+  href: api/Ledon.Security.JwtOptions.html
+  commentId: T:Ledon.Security.JwtOptions
+  fullName: Ledon.Security.JwtOptions
+  nameWithType: JwtOptions
+- uid: Ledon.Security.JwtOptions.Audience
+  name: Audience
+  href: api/Ledon.Security.JwtOptions.html#Ledon_Security_JwtOptions_Audience
+  commentId: P:Ledon.Security.JwtOptions.Audience
+  fullName: Ledon.Security.JwtOptions.Audience
+  nameWithType: JwtOptions.Audience
+- uid: Ledon.Security.JwtOptions.Audience*
+  name: Audience
+  href: api/Ledon.Security.JwtOptions.html#Ledon_Security_JwtOptions_Audience_
+  commentId: Overload:Ledon.Security.JwtOptions.Audience
+  isSpec: "True"
+  fullName: Ledon.Security.JwtOptions.Audience
+  nameWithType: JwtOptions.Audience
+- uid: Ledon.Security.JwtOptions.Expiration
+  name: Expiration
+  href: api/Ledon.Security.JwtOptions.html#Ledon_Security_JwtOptions_Expiration
+  commentId: P:Ledon.Security.JwtOptions.Expiration
+  fullName: Ledon.Security.JwtOptions.Expiration
+  nameWithType: JwtOptions.Expiration
+- uid: Ledon.Security.JwtOptions.Expiration*
+  name: Expiration
+  href: api/Ledon.Security.JwtOptions.html#Ledon_Security_JwtOptions_Expiration_
+  commentId: Overload:Ledon.Security.JwtOptions.Expiration
+  isSpec: "True"
+  fullName: Ledon.Security.JwtOptions.Expiration
+  nameWithType: JwtOptions.Expiration
+- uid: Ledon.Security.JwtOptions.Issuer
+  name: Issuer
+  href: api/Ledon.Security.JwtOptions.html#Ledon_Security_JwtOptions_Issuer
+  commentId: P:Ledon.Security.JwtOptions.Issuer
+  fullName: Ledon.Security.JwtOptions.Issuer
+  nameWithType: JwtOptions.Issuer
+- uid: Ledon.Security.JwtOptions.Issuer*
+  name: Issuer
+  href: api/Ledon.Security.JwtOptions.html#Ledon_Security_JwtOptions_Issuer_
+  commentId: Overload:Ledon.Security.JwtOptions.Issuer
+  isSpec: "True"
+  fullName: Ledon.Security.JwtOptions.Issuer
+  nameWithType: JwtOptions.Issuer
+- uid: Ledon.Security.JwtOptions.SigningKey
+  name: SigningKey
+  href: api/Ledon.Security.JwtOptions.html#Ledon_Security_JwtOptions_SigningKey
+  commentId: P:Ledon.Security.JwtOptions.SigningKey
+  fullName: Ledon.Security.JwtOptions.SigningKey
+  nameWithType: JwtOptions.SigningKey
+- uid: Ledon.Security.JwtOptions.SigningKey*
+  name: SigningKey
+  href: api/Ledon.Security.JwtOptions.html#Ledon_Security_JwtOptions_SigningKey_
+  commentId: Overload:Ledon.Security.JwtOptions.SigningKey
+  isSpec: "True"
+  fullName: Ledon.Security.JwtOptions.SigningKey
+  nameWithType: JwtOptions.SigningKey
+- uid: Ledon.Security.LedonSecurityOptions
+  name: LedonSecurityOptions
+  href: api/Ledon.Security.LedonSecurityOptions.html
+  commentId: T:Ledon.Security.LedonSecurityOptions
+  fullName: Ledon.Security.LedonSecurityOptions
+  nameWithType: LedonSecurityOptions
+- uid: Ledon.Security.LedonSecurityOptions.ApiKey
+  name: ApiKey
+  href: api/Ledon.Security.LedonSecurityOptions.html#Ledon_Security_LedonSecurityOptions_ApiKey
+  commentId: P:Ledon.Security.LedonSecurityOptions.ApiKey
+  fullName: Ledon.Security.LedonSecurityOptions.ApiKey
+  nameWithType: LedonSecurityOptions.ApiKey
+- uid: Ledon.Security.LedonSecurityOptions.ApiKey*
+  name: ApiKey
+  href: api/Ledon.Security.LedonSecurityOptions.html#Ledon_Security_LedonSecurityOptions_ApiKey_
+  commentId: Overload:Ledon.Security.LedonSecurityOptions.ApiKey
+  isSpec: "True"
+  fullName: Ledon.Security.LedonSecurityOptions.ApiKey
+  nameWithType: LedonSecurityOptions.ApiKey
+- uid: Ledon.Security.LedonSecurityOptions.Jwt
+  name: Jwt
+  href: api/Ledon.Security.LedonSecurityOptions.html#Ledon_Security_LedonSecurityOptions_Jwt
+  commentId: P:Ledon.Security.LedonSecurityOptions.Jwt
+  fullName: Ledon.Security.LedonSecurityOptions.Jwt
+  nameWithType: LedonSecurityOptions.Jwt
+- uid: Ledon.Security.LedonSecurityOptions.Jwt*
+  name: Jwt
+  href: api/Ledon.Security.LedonSecurityOptions.html#Ledon_Security_LedonSecurityOptions_Jwt_
+  commentId: Overload:Ledon.Security.LedonSecurityOptions.Jwt
+  isSpec: "True"
+  fullName: Ledon.Security.LedonSecurityOptions.Jwt
+  nameWithType: LedonSecurityOptions.Jwt
+- uid: Ledon.Security.LedonSecurityOptions.PermissionClaimType
+  name: PermissionClaimType
+  href: api/Ledon.Security.LedonSecurityOptions.html#Ledon_Security_LedonSecurityOptions_PermissionClaimType
+  commentId: P:Ledon.Security.LedonSecurityOptions.PermissionClaimType
+  fullName: Ledon.Security.LedonSecurityOptions.PermissionClaimType
+  nameWithType: LedonSecurityOptions.PermissionClaimType
+- uid: Ledon.Security.LedonSecurityOptions.PermissionClaimType*
+  name: PermissionClaimType
+  href: api/Ledon.Security.LedonSecurityOptions.html#Ledon_Security_LedonSecurityOptions_PermissionClaimType_
+  commentId: Overload:Ledon.Security.LedonSecurityOptions.PermissionClaimType
+  isSpec: "True"
+  fullName: Ledon.Security.LedonSecurityOptions.PermissionClaimType
+  nameWithType: LedonSecurityOptions.PermissionClaimType
+- uid: Ledon.Security.PermissionRequirement
+  name: PermissionRequirement
+  href: api/Ledon.Security.PermissionRequirement.html
+  commentId: T:Ledon.Security.PermissionRequirement
+  fullName: Ledon.Security.PermissionRequirement
+  nameWithType: PermissionRequirement
+- uid: Ledon.Security.PermissionRequirement.#ctor(System.String)
+  name: PermissionRequirement(string)
+  href: api/Ledon.Security.PermissionRequirement.html#Ledon_Security_PermissionRequirement__ctor_System_String_
+  commentId: M:Ledon.Security.PermissionRequirement.#ctor(System.String)
+  name.vb: New(String)
+  fullName: Ledon.Security.PermissionRequirement.PermissionRequirement(string)
+  fullName.vb: Ledon.Security.PermissionRequirement.New(String)
+  nameWithType: PermissionRequirement.PermissionRequirement(string)
+  nameWithType.vb: PermissionRequirement.New(String)
+- uid: Ledon.Security.PermissionRequirement.#ctor*
+  name: PermissionRequirement
+  href: api/Ledon.Security.PermissionRequirement.html#Ledon_Security_PermissionRequirement__ctor_
+  commentId: Overload:Ledon.Security.PermissionRequirement.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: Ledon.Security.PermissionRequirement.PermissionRequirement
+  fullName.vb: Ledon.Security.PermissionRequirement.New
+  nameWithType: PermissionRequirement.PermissionRequirement
+  nameWithType.vb: PermissionRequirement.New
+- uid: Ledon.Security.PermissionRequirement.Permission
+  name: Permission
+  href: api/Ledon.Security.PermissionRequirement.html#Ledon_Security_PermissionRequirement_Permission
+  commentId: P:Ledon.Security.PermissionRequirement.Permission
+  fullName: Ledon.Security.PermissionRequirement.Permission
+  nameWithType: PermissionRequirement.Permission
+- uid: Ledon.Security.PermissionRequirement.Permission*
+  name: Permission
+  href: api/Ledon.Security.PermissionRequirement.html#Ledon_Security_PermissionRequirement_Permission_
+  commentId: Overload:Ledon.Security.PermissionRequirement.Permission
+  isSpec: "True"
+  fullName: Ledon.Security.PermissionRequirement.Permission
+  nameWithType: PermissionRequirement.Permission
+- uid: Ledon.Testing
+  name: Ledon.Testing
+  href: api/Ledon.Testing.html
+  commentId: N:Ledon.Testing
+  fullName: Ledon.Testing
+  nameWithType: Ledon.Testing
+- uid: Ledon.Testing.LedonWebTestHost
+  name: LedonWebTestHost
+  href: api/Ledon.Testing.LedonWebTestHost.html
+  commentId: T:Ledon.Testing.LedonWebTestHost
+  fullName: Ledon.Testing.LedonWebTestHost
+  nameWithType: LedonWebTestHost
+- uid: Ledon.Testing.LedonWebTestHost.Client
+  name: Client
+  href: api/Ledon.Testing.LedonWebTestHost.html#Ledon_Testing_LedonWebTestHost_Client
+  commentId: P:Ledon.Testing.LedonWebTestHost.Client
+  fullName: Ledon.Testing.LedonWebTestHost.Client
+  nameWithType: LedonWebTestHost.Client
+- uid: Ledon.Testing.LedonWebTestHost.Client*
+  name: Client
+  href: api/Ledon.Testing.LedonWebTestHost.html#Ledon_Testing_LedonWebTestHost_Client_
+  commentId: Overload:Ledon.Testing.LedonWebTestHost.Client
+  isSpec: "True"
+  fullName: Ledon.Testing.LedonWebTestHost.Client
+  nameWithType: LedonWebTestHost.Client
+- uid: Ledon.Testing.LedonWebTestHost.DisposeAsync
+  name: DisposeAsync()
+  href: api/Ledon.Testing.LedonWebTestHost.html#Ledon_Testing_LedonWebTestHost_DisposeAsync
+  commentId: M:Ledon.Testing.LedonWebTestHost.DisposeAsync
+  fullName: Ledon.Testing.LedonWebTestHost.DisposeAsync()
+  nameWithType: LedonWebTestHost.DisposeAsync()
+- uid: Ledon.Testing.LedonWebTestHost.DisposeAsync*
+  name: DisposeAsync
+  href: api/Ledon.Testing.LedonWebTestHost.html#Ledon_Testing_LedonWebTestHost_DisposeAsync_
+  commentId: Overload:Ledon.Testing.LedonWebTestHost.DisposeAsync
+  isSpec: "True"
+  fullName: Ledon.Testing.LedonWebTestHost.DisposeAsync
+  nameWithType: LedonWebTestHost.DisposeAsync
+- uid: Ledon.Testing.LedonWebTestHost.Services
+  name: Services
+  href: api/Ledon.Testing.LedonWebTestHost.html#Ledon_Testing_LedonWebTestHost_Services
+  commentId: P:Ledon.Testing.LedonWebTestHost.Services
+  fullName: Ledon.Testing.LedonWebTestHost.Services
+  nameWithType: LedonWebTestHost.Services
+- uid: Ledon.Testing.LedonWebTestHost.Services*
+  name: Services
+  href: api/Ledon.Testing.LedonWebTestHost.html#Ledon_Testing_LedonWebTestHost_Services_
+  commentId: Overload:Ledon.Testing.LedonWebTestHost.Services
+  isSpec: "True"
+  fullName: Ledon.Testing.LedonWebTestHost.Services
+  nameWithType: LedonWebTestHost.Services
+- uid: Ledon.Testing.LedonWebTestHost.StartAsync(System.Action{Microsoft.AspNetCore.Builder.WebApplicationBuilder},System.Action{Microsoft.AspNetCore.Builder.WebApplication})
+  name: StartAsync(Action<WebApplicationBuilder>?, Action<WebApplication>?)
+  href: api/Ledon.Testing.LedonWebTestHost.html#Ledon_Testing_LedonWebTestHost_StartAsync_System_Action_Microsoft_AspNetCore_Builder_WebApplicationBuilder__System_Action_Microsoft_AspNetCore_Builder_WebApplication__
+  commentId: M:Ledon.Testing.LedonWebTestHost.StartAsync(System.Action{Microsoft.AspNetCore.Builder.WebApplicationBuilder},System.Action{Microsoft.AspNetCore.Builder.WebApplication})
+  name.vb: StartAsync(Action(Of WebApplicationBuilder), Action(Of WebApplication))
+  fullName: Ledon.Testing.LedonWebTestHost.StartAsync(System.Action<Microsoft.AspNetCore.Builder.WebApplicationBuilder>?, System.Action<Microsoft.AspNetCore.Builder.WebApplication>?)
+  fullName.vb: Ledon.Testing.LedonWebTestHost.StartAsync(System.Action(Of Microsoft.AspNetCore.Builder.WebApplicationBuilder), System.Action(Of Microsoft.AspNetCore.Builder.WebApplication))
+  nameWithType: LedonWebTestHost.StartAsync(Action<WebApplicationBuilder>?, Action<WebApplication>?)
+  nameWithType.vb: LedonWebTestHost.StartAsync(Action(Of WebApplicationBuilder), Action(Of WebApplication))
+- uid: Ledon.Testing.LedonWebTestHost.StartAsync*
+  name: StartAsync
+  href: api/Ledon.Testing.LedonWebTestHost.html#Ledon_Testing_LedonWebTestHost_StartAsync_
+  commentId: Overload:Ledon.Testing.LedonWebTestHost.StartAsync
+  isSpec: "True"
+  fullName: Ledon.Testing.LedonWebTestHost.StartAsync
+  nameWithType: LedonWebTestHost.StartAsync
+- uid: Ledon.Testing.LedonWebTestHost.WithScopeAsync*
+  name: WithScopeAsync
+  href: api/Ledon.Testing.LedonWebTestHost.html#Ledon_Testing_LedonWebTestHost_WithScopeAsync_
+  commentId: Overload:Ledon.Testing.LedonWebTestHost.WithScopeAsync
+  isSpec: "True"
+  fullName: Ledon.Testing.LedonWebTestHost.WithScopeAsync
+  nameWithType: LedonWebTestHost.WithScopeAsync
+- uid: Ledon.Testing.LedonWebTestHost.WithScopeAsync``1(System.Func{System.IServiceProvider,System.Threading.Tasks.Task{``0}})
+  name: WithScopeAsync<T>(Func<IServiceProvider, Task<T>>)
+  href: api/Ledon.Testing.LedonWebTestHost.html#Ledon_Testing_LedonWebTestHost_WithScopeAsync__1_System_Func_System_IServiceProvider_System_Threading_Tasks_Task___0___
+  commentId: M:Ledon.Testing.LedonWebTestHost.WithScopeAsync``1(System.Func{System.IServiceProvider,System.Threading.Tasks.Task{``0}})
+  name.vb: WithScopeAsync(Of T)(Func(Of IServiceProvider, Task(Of T)))
+  fullName: Ledon.Testing.LedonWebTestHost.WithScopeAsync<T>(System.Func<System.IServiceProvider, System.Threading.Tasks.Task<T>>)
+  fullName.vb: Ledon.Testing.LedonWebTestHost.WithScopeAsync(Of T)(System.Func(Of System.IServiceProvider, System.Threading.Tasks.Task(Of T)))
+  nameWithType: LedonWebTestHost.WithScopeAsync<T>(Func<IServiceProvider, Task<T>>)
+  nameWithType.vb: LedonWebTestHost.WithScopeAsync(Of T)(Func(Of IServiceProvider, Task(Of T)))
+- uid: Ledon.Testing.ModuleAssertions
+  name: ModuleAssertions
+  href: api/Ledon.Testing.ModuleAssertions.html
+  commentId: T:Ledon.Testing.ModuleAssertions
+  fullName: Ledon.Testing.ModuleAssertions
+  nameWithType: ModuleAssertions
+- uid: Ledon.Testing.ModuleAssertions.ShouldBeInitialized(Ledon.Module.Abstractions.IModuleManager,System.String)
+  name: ShouldBeInitialized(IModuleManager, string)
+  href: api/Ledon.Testing.ModuleAssertions.html#Ledon_Testing_ModuleAssertions_ShouldBeInitialized_Ledon_Module_Abstractions_IModuleManager_System_String_
+  commentId: M:Ledon.Testing.ModuleAssertions.ShouldBeInitialized(Ledon.Module.Abstractions.IModuleManager,System.String)
+  name.vb: ShouldBeInitialized(IModuleManager, String)
+  fullName: Ledon.Testing.ModuleAssertions.ShouldBeInitialized(Ledon.Module.Abstractions.IModuleManager, string)
+  fullName.vb: Ledon.Testing.ModuleAssertions.ShouldBeInitialized(Ledon.Module.Abstractions.IModuleManager, String)
+  nameWithType: ModuleAssertions.ShouldBeInitialized(IModuleManager, string)
+  nameWithType.vb: ModuleAssertions.ShouldBeInitialized(IModuleManager, String)
+- uid: Ledon.Testing.ModuleAssertions.ShouldBeInitialized*
+  name: ShouldBeInitialized
+  href: api/Ledon.Testing.ModuleAssertions.html#Ledon_Testing_ModuleAssertions_ShouldBeInitialized_
+  commentId: Overload:Ledon.Testing.ModuleAssertions.ShouldBeInitialized
+  isSpec: "True"
+  fullName: Ledon.Testing.ModuleAssertions.ShouldBeInitialized
+  nameWithType: ModuleAssertions.ShouldBeInitialized
+- uid: Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder(Ledon.Module.Abstractions.IModuleManager,System.String[])
+  name: ShouldBeInitializedInOrder(IModuleManager, params string[])
+  href: api/Ledon.Testing.ModuleAssertions.html#Ledon_Testing_ModuleAssertions_ShouldBeInitializedInOrder_Ledon_Module_Abstractions_IModuleManager_System_String___
+  commentId: M:Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder(Ledon.Module.Abstractions.IModuleManager,System.String[])
+  name.vb: ShouldBeInitializedInOrder(IModuleManager, ParamArray String())
+  fullName: Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder(Ledon.Module.Abstractions.IModuleManager, params string[])
+  fullName.vb: Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder(Ledon.Module.Abstractions.IModuleManager, ParamArray String())
+  nameWithType: ModuleAssertions.ShouldBeInitializedInOrder(IModuleManager, params string[])
+  nameWithType.vb: ModuleAssertions.ShouldBeInitializedInOrder(IModuleManager, ParamArray String())
+- uid: Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder*
+  name: ShouldBeInitializedInOrder
+  href: api/Ledon.Testing.ModuleAssertions.html#Ledon_Testing_ModuleAssertions_ShouldBeInitializedInOrder_
+  commentId: Overload:Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder
+  isSpec: "True"
+  fullName: Ledon.Testing.ModuleAssertions.ShouldBeInitializedInOrder
+  nameWithType: ModuleAssertions.ShouldBeInitializedInOrder
+- uid: Ledon.Web
+  name: Ledon.Web
+  href: api/Ledon.Web.html
+  commentId: N:Ledon.Web
+  fullName: Ledon.Web
+  nameWithType: Ledon.Web
+- uid: Ledon.Web.ApiConventions
+  name: Ledon.Web.ApiConventions
+  href: api/Ledon.Web.ApiConventions.html
+  commentId: N:Ledon.Web.ApiConventions
+  fullName: Ledon.Web.ApiConventions
+  nameWithType: Ledon.Web.ApiConventions
+- uid: Ledon.Web.ApiConventions.ApiResponse
+  name: ApiResponse
+  href: api/Ledon.Web.ApiConventions.ApiResponse.html
+  commentId: T:Ledon.Web.ApiConventions.ApiResponse
+  fullName: Ledon.Web.ApiConventions.ApiResponse
+  nameWithType: ApiResponse
+- uid: Ledon.Web.ApiConventions.ApiResponse.Code
+  name: Code
+  href: api/Ledon.Web.ApiConventions.ApiResponse.html#Ledon_Web_ApiConventions_ApiResponse_Code
+  commentId: P:Ledon.Web.ApiConventions.ApiResponse.Code
+  fullName: Ledon.Web.ApiConventions.ApiResponse.Code
+  nameWithType: ApiResponse.Code
+- uid: Ledon.Web.ApiConventions.ApiResponse.Code*
+  name: Code
+  href: api/Ledon.Web.ApiConventions.ApiResponse.html#Ledon_Web_ApiConventions_ApiResponse_Code_
+  commentId: Overload:Ledon.Web.ApiConventions.ApiResponse.Code
+  isSpec: "True"
+  fullName: Ledon.Web.ApiConventions.ApiResponse.Code
+  nameWithType: ApiResponse.Code
+- uid: Ledon.Web.ApiConventions.ApiResponse.Data
+  name: Data
+  href: api/Ledon.Web.ApiConventions.ApiResponse.html#Ledon_Web_ApiConventions_ApiResponse_Data
+  commentId: P:Ledon.Web.ApiConventions.ApiResponse.Data
+  fullName: Ledon.Web.ApiConventions.ApiResponse.Data
+  nameWithType: ApiResponse.Data
+- uid: Ledon.Web.ApiConventions.ApiResponse.Data*
+  name: Data
+  href: api/Ledon.Web.ApiConventions.ApiResponse.html#Ledon_Web_ApiConventions_ApiResponse_Data_
+  commentId: Overload:Ledon.Web.ApiConventions.ApiResponse.Data
+  isSpec: "True"
+  fullName: Ledon.Web.ApiConventions.ApiResponse.Data
+  nameWithType: ApiResponse.Data
+- uid: Ledon.Web.ApiConventions.ApiResponse.Fail(System.Int32,System.String)
+  name: Fail(int, string)
+  href: api/Ledon.Web.ApiConventions.ApiResponse.html#Ledon_Web_ApiConventions_ApiResponse_Fail_System_Int32_System_String_
+  commentId: M:Ledon.Web.ApiConventions.ApiResponse.Fail(System.Int32,System.String)
+  name.vb: Fail(Integer, String)
+  fullName: Ledon.Web.ApiConventions.ApiResponse.Fail(int, string)
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse.Fail(Integer, String)
+  nameWithType: ApiResponse.Fail(int, string)
+  nameWithType.vb: ApiResponse.Fail(Integer, String)
+- uid: Ledon.Web.ApiConventions.ApiResponse.Fail*
+  name: Fail
+  href: api/Ledon.Web.ApiConventions.ApiResponse.html#Ledon_Web_ApiConventions_ApiResponse_Fail_
+  commentId: Overload:Ledon.Web.ApiConventions.ApiResponse.Fail
+  isSpec: "True"
+  fullName: Ledon.Web.ApiConventions.ApiResponse.Fail
+  nameWithType: ApiResponse.Fail
+- uid: Ledon.Web.ApiConventions.ApiResponse.Message
+  name: Message
+  href: api/Ledon.Web.ApiConventions.ApiResponse.html#Ledon_Web_ApiConventions_ApiResponse_Message
+  commentId: P:Ledon.Web.ApiConventions.ApiResponse.Message
+  fullName: Ledon.Web.ApiConventions.ApiResponse.Message
+  nameWithType: ApiResponse.Message
+- uid: Ledon.Web.ApiConventions.ApiResponse.Message*
+  name: Message
+  href: api/Ledon.Web.ApiConventions.ApiResponse.html#Ledon_Web_ApiConventions_ApiResponse_Message_
+  commentId: Overload:Ledon.Web.ApiConventions.ApiResponse.Message
+  isSpec: "True"
+  fullName: Ledon.Web.ApiConventions.ApiResponse.Message
+  nameWithType: ApiResponse.Message
+- uid: Ledon.Web.ApiConventions.ApiResponse.Ok(System.Object)
+  name: Ok(object?)
+  href: api/Ledon.Web.ApiConventions.ApiResponse.html#Ledon_Web_ApiConventions_ApiResponse_Ok_System_Object_
+  commentId: M:Ledon.Web.ApiConventions.ApiResponse.Ok(System.Object)
+  name.vb: Ok(Object)
+  fullName: Ledon.Web.ApiConventions.ApiResponse.Ok(object?)
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse.Ok(Object)
+  nameWithType: ApiResponse.Ok(object?)
+  nameWithType.vb: ApiResponse.Ok(Object)
+- uid: Ledon.Web.ApiConventions.ApiResponse.Ok*
+  name: Ok
+  href: api/Ledon.Web.ApiConventions.ApiResponse.html#Ledon_Web_ApiConventions_ApiResponse_Ok_
+  commentId: Overload:Ledon.Web.ApiConventions.ApiResponse.Ok
+  isSpec: "True"
+  fullName: Ledon.Web.ApiConventions.ApiResponse.Ok
+  nameWithType: ApiResponse.Ok
+- uid: Ledon.Web.ApiConventions.ApiResponse`1
+  name: ApiResponse<T>
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html
+  commentId: T:Ledon.Web.ApiConventions.ApiResponse`1
+  name.vb: ApiResponse(Of T)
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T)
+  nameWithType: ApiResponse<T>
+  nameWithType.vb: ApiResponse(Of T)
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.#ctor(`0)
+  name: ApiResponse(T?)
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1__ctor__0_
+  commentId: M:Ledon.Web.ApiConventions.ApiResponse`1.#ctor(`0)
+  name.vb: New(T)
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.ApiResponse(T?)
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).New(T)
+  nameWithType: ApiResponse<T>.ApiResponse(T?)
+  nameWithType.vb: ApiResponse(Of T).New(T)
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.#ctor*
+  name: ApiResponse
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1__ctor_
+  commentId: Overload:Ledon.Web.ApiConventions.ApiResponse`1.#ctor
+  isSpec: "True"
+  name.vb: New
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.ApiResponse
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).New
+  nameWithType: ApiResponse<T>.ApiResponse
+  nameWithType.vb: ApiResponse(Of T).New
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.Code
+  name: Code
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1_Code
+  commentId: P:Ledon.Web.ApiConventions.ApiResponse`1.Code
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.Code
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).Code
+  nameWithType: ApiResponse<T>.Code
+  nameWithType.vb: ApiResponse(Of T).Code
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.Code*
+  name: Code
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1_Code_
+  commentId: Overload:Ledon.Web.ApiConventions.ApiResponse`1.Code
+  isSpec: "True"
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.Code
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).Code
+  nameWithType: ApiResponse<T>.Code
+  nameWithType.vb: ApiResponse(Of T).Code
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.Data
+  name: Data
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1_Data
+  commentId: P:Ledon.Web.ApiConventions.ApiResponse`1.Data
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.Data
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).Data
+  nameWithType: ApiResponse<T>.Data
+  nameWithType.vb: ApiResponse(Of T).Data
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.Data*
+  name: Data
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1_Data_
+  commentId: Overload:Ledon.Web.ApiConventions.ApiResponse`1.Data
+  isSpec: "True"
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.Data
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).Data
+  nameWithType: ApiResponse<T>.Data
+  nameWithType.vb: ApiResponse(Of T).Data
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.Fail(System.Int32,System.String)
+  name: Fail(int, string)
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1_Fail_System_Int32_System_String_
+  commentId: M:Ledon.Web.ApiConventions.ApiResponse`1.Fail(System.Int32,System.String)
+  name.vb: Fail(Integer, String)
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.Fail(int, string)
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).Fail(Integer, String)
+  nameWithType: ApiResponse<T>.Fail(int, string)
+  nameWithType.vb: ApiResponse(Of T).Fail(Integer, String)
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.Fail*
+  name: Fail
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1_Fail_
+  commentId: Overload:Ledon.Web.ApiConventions.ApiResponse`1.Fail
+  isSpec: "True"
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.Fail
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).Fail
+  nameWithType: ApiResponse<T>.Fail
+  nameWithType.vb: ApiResponse(Of T).Fail
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.Message
+  name: Message
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1_Message
+  commentId: P:Ledon.Web.ApiConventions.ApiResponse`1.Message
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.Message
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).Message
+  nameWithType: ApiResponse<T>.Message
+  nameWithType.vb: ApiResponse(Of T).Message
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.Message*
+  name: Message
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1_Message_
+  commentId: Overload:Ledon.Web.ApiConventions.ApiResponse`1.Message
+  isSpec: "True"
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.Message
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).Message
+  nameWithType: ApiResponse<T>.Message
+  nameWithType.vb: ApiResponse(Of T).Message
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.Ok(`0)
+  name: Ok(T)
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1_Ok__0_
+  commentId: M:Ledon.Web.ApiConventions.ApiResponse`1.Ok(`0)
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.Ok(T)
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).Ok(T)
+  nameWithType: ApiResponse<T>.Ok(T)
+  nameWithType.vb: ApiResponse(Of T).Ok(T)
+- uid: Ledon.Web.ApiConventions.ApiResponse`1.Ok*
+  name: Ok
+  href: api/Ledon.Web.ApiConventions.ApiResponse-1.html#Ledon_Web_ApiConventions_ApiResponse_1_Ok_
+  commentId: Overload:Ledon.Web.ApiConventions.ApiResponse`1.Ok
+  isSpec: "True"
+  fullName: Ledon.Web.ApiConventions.ApiResponse<T>.Ok
+  fullName.vb: Ledon.Web.ApiConventions.ApiResponse(Of T).Ok
+  nameWithType: ApiResponse<T>.Ok
+  nameWithType.vb: ApiResponse(Of T).Ok
+- uid: Ledon.Web.IEndpoint
+  name: IEndpoint
+  href: api/Ledon.Web.IEndpoint.html
+  commentId: T:Ledon.Web.IEndpoint
+  fullName: Ledon.Web.IEndpoint
+  nameWithType: IEndpoint
+- uid: Ledon.Web.IEndpoint.Map(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)
+  name: Map(IEndpointRouteBuilder)
+  href: api/Ledon.Web.IEndpoint.html#Ledon_Web_IEndpoint_Map_Microsoft_AspNetCore_Routing_IEndpointRouteBuilder_
+  commentId: M:Ledon.Web.IEndpoint.Map(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)
+  fullName: Ledon.Web.IEndpoint.Map(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)
+  nameWithType: IEndpoint.Map(IEndpointRouteBuilder)
+- uid: Ledon.Web.IEndpoint.Map*
+  name: Map
+  href: api/Ledon.Web.IEndpoint.html#Ledon_Web_IEndpoint_Map_
+  commentId: Overload:Ledon.Web.IEndpoint.Map
+  isSpec: "True"
+  fullName: Ledon.Web.IEndpoint.Map
+  nameWithType: IEndpoint.Map
+- uid: Ledon.Web.LedonWebApplicationExtensions
+  name: LedonWebApplicationExtensions
+  href: api/Ledon.Web.LedonWebApplicationExtensions.html
+  commentId: T:Ledon.Web.LedonWebApplicationExtensions
+  fullName: Ledon.Web.LedonWebApplicationExtensions
+  nameWithType: LedonWebApplicationExtensions
+- uid: Ledon.Web.LedonWebApplicationExtensions.UseLedonCorrelation(Microsoft.AspNetCore.Builder.IApplicationBuilder)
+  name: UseLedonCorrelation(IApplicationBuilder)
+  href: api/Ledon.Web.LedonWebApplicationExtensions.html#Ledon_Web_LedonWebApplicationExtensions_UseLedonCorrelation_Microsoft_AspNetCore_Builder_IApplicationBuilder_
+  commentId: M:Ledon.Web.LedonWebApplicationExtensions.UseLedonCorrelation(Microsoft.AspNetCore.Builder.IApplicationBuilder)
+  fullName: Ledon.Web.LedonWebApplicationExtensions.UseLedonCorrelation(Microsoft.AspNetCore.Builder.IApplicationBuilder)
+  nameWithType: LedonWebApplicationExtensions.UseLedonCorrelation(IApplicationBuilder)
+- uid: Ledon.Web.LedonWebApplicationExtensions.UseLedonCorrelation*
+  name: UseLedonCorrelation
+  href: api/Ledon.Web.LedonWebApplicationExtensions.html#Ledon_Web_LedonWebApplicationExtensions_UseLedonCorrelation_
+  commentId: Overload:Ledon.Web.LedonWebApplicationExtensions.UseLedonCorrelation
+  isSpec: "True"
+  fullName: Ledon.Web.LedonWebApplicationExtensions.UseLedonCorrelation
+  nameWithType: LedonWebApplicationExtensions.UseLedonCorrelation
+- uid: Ledon.Web.LedonWebApplicationExtensions.UseLedonWeb(Microsoft.AspNetCore.Builder.WebApplication)
+  name: UseLedonWeb(WebApplication)
+  href: api/Ledon.Web.LedonWebApplicationExtensions.html#Ledon_Web_LedonWebApplicationExtensions_UseLedonWeb_Microsoft_AspNetCore_Builder_WebApplication_
+  commentId: M:Ledon.Web.LedonWebApplicationExtensions.UseLedonWeb(Microsoft.AspNetCore.Builder.WebApplication)
+  fullName: Ledon.Web.LedonWebApplicationExtensions.UseLedonWeb(Microsoft.AspNetCore.Builder.WebApplication)
+  nameWithType: LedonWebApplicationExtensions.UseLedonWeb(WebApplication)
+- uid: Ledon.Web.LedonWebApplicationExtensions.UseLedonWeb*
+  name: UseLedonWeb
+  href: api/Ledon.Web.LedonWebApplicationExtensions.html#Ledon_Web_LedonWebApplicationExtensions_UseLedonWeb_
+  commentId: Overload:Ledon.Web.LedonWebApplicationExtensions.UseLedonWeb
+  isSpec: "True"
+  fullName: Ledon.Web.LedonWebApplicationExtensions.UseLedonWeb
+  nameWithType: LedonWebApplicationExtensions.UseLedonWeb
+- uid: Ledon.Web.LedonWebOptions
+  name: LedonWebOptions
+  href: api/Ledon.Web.LedonWebOptions.html
+  commentId: T:Ledon.Web.LedonWebOptions
+  fullName: Ledon.Web.LedonWebOptions
+  nameWithType: LedonWebOptions
+- uid: Ledon.Web.LedonWebOptions.OpenApiPath
+  name: OpenApiPath
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_OpenApiPath
+  commentId: P:Ledon.Web.LedonWebOptions.OpenApiPath
+  fullName: Ledon.Web.LedonWebOptions.OpenApiPath
+  nameWithType: LedonWebOptions.OpenApiPath
+- uid: Ledon.Web.LedonWebOptions.OpenApiPath*
+  name: OpenApiPath
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_OpenApiPath_
+  commentId: Overload:Ledon.Web.LedonWebOptions.OpenApiPath
+  isSpec: "True"
+  fullName: Ledon.Web.LedonWebOptions.OpenApiPath
+  nameWithType: LedonWebOptions.OpenApiPath
+- uid: Ledon.Web.LedonWebOptions.UseApiVersioning
+  name: UseApiVersioning
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseApiVersioning
+  commentId: P:Ledon.Web.LedonWebOptions.UseApiVersioning
+  fullName: Ledon.Web.LedonWebOptions.UseApiVersioning
+  nameWithType: LedonWebOptions.UseApiVersioning
+- uid: Ledon.Web.LedonWebOptions.UseApiVersioning*
+  name: UseApiVersioning
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseApiVersioning_
+  commentId: Overload:Ledon.Web.LedonWebOptions.UseApiVersioning
+  isSpec: "True"
+  fullName: Ledon.Web.LedonWebOptions.UseApiVersioning
+  nameWithType: LedonWebOptions.UseApiVersioning
+- uid: Ledon.Web.LedonWebOptions.UseControllers
+  name: UseControllers
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseControllers
+  commentId: P:Ledon.Web.LedonWebOptions.UseControllers
+  fullName: Ledon.Web.LedonWebOptions.UseControllers
+  nameWithType: LedonWebOptions.UseControllers
+- uid: Ledon.Web.LedonWebOptions.UseControllers*
+  name: UseControllers
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseControllers_
+  commentId: Overload:Ledon.Web.LedonWebOptions.UseControllers
+  isSpec: "True"
+  fullName: Ledon.Web.LedonWebOptions.UseControllers
+  nameWithType: LedonWebOptions.UseControllers
+- uid: Ledon.Web.LedonWebOptions.UseCorrelationId
+  name: UseCorrelationId
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseCorrelationId
+  commentId: P:Ledon.Web.LedonWebOptions.UseCorrelationId
+  fullName: Ledon.Web.LedonWebOptions.UseCorrelationId
+  nameWithType: LedonWebOptions.UseCorrelationId
+- uid: Ledon.Web.LedonWebOptions.UseCorrelationId*
+  name: UseCorrelationId
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseCorrelationId_
+  commentId: Overload:Ledon.Web.LedonWebOptions.UseCorrelationId
+  isSpec: "True"
+  fullName: Ledon.Web.LedonWebOptions.UseCorrelationId
+  nameWithType: LedonWebOptions.UseCorrelationId
+- uid: Ledon.Web.LedonWebOptions.UseOpenApi
+  name: UseOpenApi
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseOpenApi
+  commentId: P:Ledon.Web.LedonWebOptions.UseOpenApi
+  fullName: Ledon.Web.LedonWebOptions.UseOpenApi
+  nameWithType: LedonWebOptions.UseOpenApi
+- uid: Ledon.Web.LedonWebOptions.UseOpenApi*
+  name: UseOpenApi
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseOpenApi_
+  commentId: Overload:Ledon.Web.LedonWebOptions.UseOpenApi
+  isSpec: "True"
+  fullName: Ledon.Web.LedonWebOptions.UseOpenApi
+  nameWithType: LedonWebOptions.UseOpenApi
+- uid: Ledon.Web.LedonWebOptions.UseProblemDetails
+  name: UseProblemDetails
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseProblemDetails
+  commentId: P:Ledon.Web.LedonWebOptions.UseProblemDetails
+  fullName: Ledon.Web.LedonWebOptions.UseProblemDetails
+  nameWithType: LedonWebOptions.UseProblemDetails
+- uid: Ledon.Web.LedonWebOptions.UseProblemDetails*
+  name: UseProblemDetails
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseProblemDetails_
+  commentId: Overload:Ledon.Web.LedonWebOptions.UseProblemDetails
+  isSpec: "True"
+  fullName: Ledon.Web.LedonWebOptions.UseProblemDetails
+  nameWithType: LedonWebOptions.UseProblemDetails
+- uid: Ledon.Web.LedonWebOptions.UseUnifiedResponse
+  name: UseUnifiedResponse
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseUnifiedResponse
+  commentId: P:Ledon.Web.LedonWebOptions.UseUnifiedResponse
+  fullName: Ledon.Web.LedonWebOptions.UseUnifiedResponse
+  nameWithType: LedonWebOptions.UseUnifiedResponse
+- uid: Ledon.Web.LedonWebOptions.UseUnifiedResponse*
+  name: UseUnifiedResponse
+  href: api/Ledon.Web.LedonWebOptions.html#Ledon_Web_LedonWebOptions_UseUnifiedResponse_
+  commentId: Overload:Ledon.Web.LedonWebOptions.UseUnifiedResponse
+  isSpec: "True"
+  fullName: Ledon.Web.LedonWebOptions.UseUnifiedResponse
+  nameWithType: LedonWebOptions.UseUnifiedResponse
+- uid: Ledon.Web.LedonWebServiceCollectionExtensions
+  name: LedonWebServiceCollectionExtensions
+  href: api/Ledon.Web.LedonWebServiceCollectionExtensions.html
+  commentId: T:Ledon.Web.LedonWebServiceCollectionExtensions
+  fullName: Ledon.Web.LedonWebServiceCollectionExtensions
+  nameWithType: LedonWebServiceCollectionExtensions
+- uid: Ledon.Web.LedonWebServiceCollectionExtensions.AddLedonWeb(Microsoft.AspNetCore.Builder.WebApplicationBuilder,System.Action{Ledon.Web.LedonWebOptions})
+  name: AddLedonWeb(WebApplicationBuilder, Action<LedonWebOptions>?)
+  href: api/Ledon.Web.LedonWebServiceCollectionExtensions.html#Ledon_Web_LedonWebServiceCollectionExtensions_AddLedonWeb_Microsoft_AspNetCore_Builder_WebApplicationBuilder_System_Action_Ledon_Web_LedonWebOptions__
+  commentId: M:Ledon.Web.LedonWebServiceCollectionExtensions.AddLedonWeb(Microsoft.AspNetCore.Builder.WebApplicationBuilder,System.Action{Ledon.Web.LedonWebOptions})
+  name.vb: AddLedonWeb(WebApplicationBuilder, Action(Of LedonWebOptions))
+  fullName: Ledon.Web.LedonWebServiceCollectionExtensions.AddLedonWeb(Microsoft.AspNetCore.Builder.WebApplicationBuilder, System.Action<Ledon.Web.LedonWebOptions>?)
+  fullName.vb: Ledon.Web.LedonWebServiceCollectionExtensions.AddLedonWeb(Microsoft.AspNetCore.Builder.WebApplicationBuilder, System.Action(Of Ledon.Web.LedonWebOptions))
+  nameWithType: LedonWebServiceCollectionExtensions.AddLedonWeb(WebApplicationBuilder, Action<LedonWebOptions>?)
+  nameWithType.vb: LedonWebServiceCollectionExtensions.AddLedonWeb(WebApplicationBuilder, Action(Of LedonWebOptions))
+- uid: Ledon.Web.LedonWebServiceCollectionExtensions.AddLedonWeb(Microsoft.AspNetCore.Builder.WebApplicationBuilder,System.Action{Ledon.Web.LedonWebOptions},System.Action{Ledon.Module.Hosting.LedonOptions})
+  name: AddLedonWeb(WebApplicationBuilder, Action<LedonWebOptions>?, Action<LedonOptions>?)
+  href: api/Ledon.Web.LedonWebServiceCollectionExtensions.html#Ledon_Web_LedonWebServiceCollectionExtensions_AddLedonWeb_Microsoft_AspNetCore_Builder_WebApplicationBuilder_System_Action_Ledon_Web_LedonWebOptions__System_Action_Ledon_Module_Hosting_LedonOptions__
+  commentId: M:Ledon.Web.LedonWebServiceCollectionExtensions.AddLedonWeb(Microsoft.AspNetCore.Builder.WebApplicationBuilder,System.Action{Ledon.Web.LedonWebOptions},System.Action{Ledon.Module.Hosting.LedonOptions})
+  name.vb: AddLedonWeb(WebApplicationBuilder, Action(Of LedonWebOptions), Action(Of LedonOptions))
+  fullName: Ledon.Web.LedonWebServiceCollectionExtensions.AddLedonWeb(Microsoft.AspNetCore.Builder.WebApplicationBuilder, System.Action<Ledon.Web.LedonWebOptions>?, System.Action<Ledon.Module.Hosting.LedonOptions>?)
+  fullName.vb: Ledon.Web.LedonWebServiceCollectionExtensions.AddLedonWeb(Microsoft.AspNetCore.Builder.WebApplicationBuilder, System.Action(Of Ledon.Web.LedonWebOptions), System.Action(Of Ledon.Module.Hosting.LedonOptions))
+  nameWithType: LedonWebServiceCollectionExtensions.AddLedonWeb(WebApplicationBuilder, Action<LedonWebOptions>?, Action<LedonOptions>?)
+  nameWithType.vb: LedonWebServiceCollectionExtensions.AddLedonWeb(WebApplicationBuilder, Action(Of LedonWebOptions), Action(Of LedonOptions))
+- uid: Ledon.Web.LedonWebServiceCollectionExtensions.AddLedonWeb*
+  name: AddLedonWeb
+  href: api/Ledon.Web.LedonWebServiceCollectionExtensions.html#Ledon_Web_LedonWebServiceCollectionExtensions_AddLedonWeb_
+  commentId: Overload:Ledon.Web.LedonWebServiceCollectionExtensions.AddLedonWeb
+  isSpec: "True"
+  fullName: Ledon.Web.LedonWebServiceCollectionExtensions.AddLedonWeb
+  nameWithType: LedonWebServiceCollectionExtensions.AddLedonWeb
+- uid: Microsoft.Extensions.DependencyInjection
+  name: Microsoft.Extensions.DependencyInjection
+  href: api/Microsoft.Extensions.DependencyInjection.html
+  commentId: N:Microsoft.Extensions.DependencyInjection
+  fullName: Microsoft.Extensions.DependencyInjection
+  nameWithType: Microsoft.Extensions.DependencyInjection
+- uid: Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions
+  name: LedonCachingServiceCollectionExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions
+  nameWithType: LedonCachingServiceCollectionExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions.AddLedonCaching(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Caching.LedonCachingOptions})
+  name: AddLedonCaching(IServiceCollection, Action<LedonCachingOptions>?)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonCachingServiceCollectionExtensions_AddLedonCaching_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_Caching_LedonCachingOptions__
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions.AddLedonCaching(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Caching.LedonCachingOptions})
+  name.vb: AddLedonCaching(IServiceCollection, Action(Of LedonCachingOptions))
+  fullName: Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions.AddLedonCaching(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.Caching.LedonCachingOptions>?)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions.AddLedonCaching(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.Caching.LedonCachingOptions))
+  nameWithType: LedonCachingServiceCollectionExtensions.AddLedonCaching(IServiceCollection, Action<LedonCachingOptions>?)
+  nameWithType.vb: LedonCachingServiceCollectionExtensions.AddLedonCaching(IServiceCollection, Action(Of LedonCachingOptions))
+- uid: Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions.AddLedonCaching*
+  name: AddLedonCaching
+  href: api/Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonCachingServiceCollectionExtensions_AddLedonCaching_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions.AddLedonCaching
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonCachingServiceCollectionExtensions.AddLedonCaching
+  nameWithType: LedonCachingServiceCollectionExtensions.AddLedonCaching
+- uid: Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions
+  name: LedonConfigurationServiceCollectionExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions
+  nameWithType: LedonConfigurationServiceCollectionExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions.AddLedonOptions*
+  name: AddLedonOptions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonConfigurationServiceCollectionExtensions_AddLedonOptions_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions.AddLedonOptions
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions.AddLedonOptions
+  nameWithType: LedonConfigurationServiceCollectionExtensions.AddLedonOptions
+- uid: Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions.AddLedonOptions``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)
+  name: AddLedonOptions<TOptions>(IServiceCollection, IConfiguration, string?)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonConfigurationServiceCollectionExtensions_AddLedonOptions__1_Microsoft_Extensions_DependencyInjection_IServiceCollection_Microsoft_Extensions_Configuration_IConfiguration_System_String_
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions.AddLedonOptions``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)
+  name.vb: AddLedonOptions(Of TOptions)(IServiceCollection, IConfiguration, String)
+  fullName: Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions.AddLedonOptions<TOptions>(Microsoft.Extensions.DependencyInjection.IServiceCollection, Microsoft.Extensions.Configuration.IConfiguration, string?)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonConfigurationServiceCollectionExtensions.AddLedonOptions(Of TOptions)(Microsoft.Extensions.DependencyInjection.IServiceCollection, Microsoft.Extensions.Configuration.IConfiguration, String)
+  nameWithType: LedonConfigurationServiceCollectionExtensions.AddLedonOptions<TOptions>(IServiceCollection, IConfiguration, string?)
+  nameWithType.vb: LedonConfigurationServiceCollectionExtensions.AddLedonOptions(Of TOptions)(IServiceCollection, IConfiguration, String)
+- uid: Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions
+  name: LedonDistributedCachingServiceCollectionExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions
+  nameWithType: LedonDistributedCachingServiceCollectionExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions.AddLedonDistributedCaching(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Caching.LedonDistributedCachingOptions})
+  name: AddLedonDistributedCaching(IServiceCollection, Action<LedonDistributedCachingOptions>?)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonDistributedCachingServiceCollectionExtensions_AddLedonDistributedCaching_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_Caching_LedonDistributedCachingOptions__
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions.AddLedonDistributedCaching(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Caching.LedonDistributedCachingOptions})
+  name.vb: AddLedonDistributedCaching(IServiceCollection, Action(Of LedonDistributedCachingOptions))
+  fullName: Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions.AddLedonDistributedCaching(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.Caching.LedonDistributedCachingOptions>?)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions.AddLedonDistributedCaching(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.Caching.LedonDistributedCachingOptions))
+  nameWithType: LedonDistributedCachingServiceCollectionExtensions.AddLedonDistributedCaching(IServiceCollection, Action<LedonDistributedCachingOptions>?)
+  nameWithType.vb: LedonDistributedCachingServiceCollectionExtensions.AddLedonDistributedCaching(IServiceCollection, Action(Of LedonDistributedCachingOptions))
+- uid: Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions.AddLedonDistributedCaching*
+  name: AddLedonDistributedCaching
+  href: api/Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonDistributedCachingServiceCollectionExtensions_AddLedonDistributedCaching_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions.AddLedonDistributedCaching
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonDistributedCachingServiceCollectionExtensions.AddLedonDistributedCaching
+  nameWithType: LedonDistributedCachingServiceCollectionExtensions.AddLedonDistributedCaching
+- uid: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions
+  name: LedonHealthCheckEndpointExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions
+  nameWithType: LedonHealthCheckEndpointExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonHealthChecks(Microsoft.AspNetCore.Builder.WebApplication,System.String,System.Func{Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckRegistration,System.Boolean})
+  name: MapLedonHealthChecks(WebApplication, string, Func<HealthCheckRegistration, bool>?)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.html#Microsoft_Extensions_DependencyInjection_LedonHealthCheckEndpointExtensions_MapLedonHealthChecks_Microsoft_AspNetCore_Builder_WebApplication_System_String_System_Func_Microsoft_Extensions_Diagnostics_HealthChecks_HealthCheckRegistration_System_Boolean__
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonHealthChecks(Microsoft.AspNetCore.Builder.WebApplication,System.String,System.Func{Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckRegistration,System.Boolean})
+  name.vb: MapLedonHealthChecks(WebApplication, String, Func(Of HealthCheckRegistration, Boolean))
+  fullName: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonHealthChecks(Microsoft.AspNetCore.Builder.WebApplication, string, System.Func<Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckRegistration, bool>?)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonHealthChecks(Microsoft.AspNetCore.Builder.WebApplication, String, System.Func(Of Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckRegistration, Boolean))
+  nameWithType: LedonHealthCheckEndpointExtensions.MapLedonHealthChecks(WebApplication, string, Func<HealthCheckRegistration, bool>?)
+  nameWithType.vb: LedonHealthCheckEndpointExtensions.MapLedonHealthChecks(WebApplication, String, Func(Of HealthCheckRegistration, Boolean))
+- uid: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonHealthChecks*
+  name: MapLedonHealthChecks
+  href: api/Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.html#Microsoft_Extensions_DependencyInjection_LedonHealthCheckEndpointExtensions_MapLedonHealthChecks_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonHealthChecks
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonHealthChecks
+  nameWithType: LedonHealthCheckEndpointExtensions.MapLedonHealthChecks
+- uid: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonLiveness(Microsoft.AspNetCore.Builder.WebApplication,System.String)
+  name: MapLedonLiveness(WebApplication, string)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.html#Microsoft_Extensions_DependencyInjection_LedonHealthCheckEndpointExtensions_MapLedonLiveness_Microsoft_AspNetCore_Builder_WebApplication_System_String_
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonLiveness(Microsoft.AspNetCore.Builder.WebApplication,System.String)
+  name.vb: MapLedonLiveness(WebApplication, String)
+  fullName: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonLiveness(Microsoft.AspNetCore.Builder.WebApplication, string)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonLiveness(Microsoft.AspNetCore.Builder.WebApplication, String)
+  nameWithType: LedonHealthCheckEndpointExtensions.MapLedonLiveness(WebApplication, string)
+  nameWithType.vb: LedonHealthCheckEndpointExtensions.MapLedonLiveness(WebApplication, String)
+- uid: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonLiveness*
+  name: MapLedonLiveness
+  href: api/Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.html#Microsoft_Extensions_DependencyInjection_LedonHealthCheckEndpointExtensions_MapLedonLiveness_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonLiveness
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonLiveness
+  nameWithType: LedonHealthCheckEndpointExtensions.MapLedonLiveness
+- uid: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonReadiness(Microsoft.AspNetCore.Builder.WebApplication,System.String)
+  name: MapLedonReadiness(WebApplication, string)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.html#Microsoft_Extensions_DependencyInjection_LedonHealthCheckEndpointExtensions_MapLedonReadiness_Microsoft_AspNetCore_Builder_WebApplication_System_String_
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonReadiness(Microsoft.AspNetCore.Builder.WebApplication,System.String)
+  name.vb: MapLedonReadiness(WebApplication, String)
+  fullName: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonReadiness(Microsoft.AspNetCore.Builder.WebApplication, string)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonReadiness(Microsoft.AspNetCore.Builder.WebApplication, String)
+  nameWithType: LedonHealthCheckEndpointExtensions.MapLedonReadiness(WebApplication, string)
+  nameWithType.vb: LedonHealthCheckEndpointExtensions.MapLedonReadiness(WebApplication, String)
+- uid: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonReadiness*
+  name: MapLedonReadiness
+  href: api/Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.html#Microsoft_Extensions_DependencyInjection_LedonHealthCheckEndpointExtensions_MapLedonReadiness_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonReadiness
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonHealthCheckEndpointExtensions.MapLedonReadiness
+  nameWithType: LedonHealthCheckEndpointExtensions.MapLedonReadiness
+- uid: Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions
+  name: LedonHealthCheckServiceCollectionExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions
+  nameWithType: LedonHealthCheckServiceCollectionExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions.AddLedonHealthChecks(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+  name: AddLedonHealthChecks(IServiceCollection)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonHealthCheckServiceCollectionExtensions_AddLedonHealthChecks_Microsoft_Extensions_DependencyInjection_IServiceCollection_
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions.AddLedonHealthChecks(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+  fullName: Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions.AddLedonHealthChecks(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+  nameWithType: LedonHealthCheckServiceCollectionExtensions.AddLedonHealthChecks(IServiceCollection)
+- uid: Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions.AddLedonHealthChecks*
+  name: AddLedonHealthChecks
+  href: api/Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonHealthCheckServiceCollectionExtensions_AddLedonHealthChecks_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions.AddLedonHealthChecks
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonHealthCheckServiceCollectionExtensions.AddLedonHealthChecks
+  nameWithType: LedonHealthCheckServiceCollectionExtensions.AddLedonHealthChecks
+- uid: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions
+  name: LedonMultiTenancyApplicationExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions
+  nameWithType: LedonMultiTenancyApplicationExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions.UseLedonMultiTenancy(Microsoft.AspNetCore.Builder.IApplicationBuilder)
+  name: UseLedonMultiTenancy(IApplicationBuilder)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions.html#Microsoft_Extensions_DependencyInjection_LedonMultiTenancyApplicationExtensions_UseLedonMultiTenancy_Microsoft_AspNetCore_Builder_IApplicationBuilder_
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions.UseLedonMultiTenancy(Microsoft.AspNetCore.Builder.IApplicationBuilder)
+  fullName: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions.UseLedonMultiTenancy(Microsoft.AspNetCore.Builder.IApplicationBuilder)
+  nameWithType: LedonMultiTenancyApplicationExtensions.UseLedonMultiTenancy(IApplicationBuilder)
+- uid: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions.UseLedonMultiTenancy*
+  name: UseLedonMultiTenancy
+  href: api/Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions.html#Microsoft_Extensions_DependencyInjection_LedonMultiTenancyApplicationExtensions_UseLedonMultiTenancy_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions.UseLedonMultiTenancy
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyApplicationExtensions.UseLedonMultiTenancy
+  nameWithType: LedonMultiTenancyApplicationExtensions.UseLedonMultiTenancy
+- uid: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions
+  name: LedonMultiTenancyServiceCollectionExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions
+  nameWithType: LedonMultiTenancyServiceCollectionExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions.AddLedonMultiTenancy(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.MultiTenancy.MultiTenancyOptions})
+  name: AddLedonMultiTenancy(IServiceCollection, Action<MultiTenancyOptions>?)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonMultiTenancyServiceCollectionExtensions_AddLedonMultiTenancy_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_MultiTenancy_MultiTenancyOptions__
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions.AddLedonMultiTenancy(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.MultiTenancy.MultiTenancyOptions})
+  name.vb: AddLedonMultiTenancy(IServiceCollection, Action(Of MultiTenancyOptions))
+  fullName: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions.AddLedonMultiTenancy(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.MultiTenancy.MultiTenancyOptions>?)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions.AddLedonMultiTenancy(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.MultiTenancy.MultiTenancyOptions))
+  nameWithType: LedonMultiTenancyServiceCollectionExtensions.AddLedonMultiTenancy(IServiceCollection, Action<MultiTenancyOptions>?)
+  nameWithType.vb: LedonMultiTenancyServiceCollectionExtensions.AddLedonMultiTenancy(IServiceCollection, Action(Of MultiTenancyOptions))
+- uid: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions.AddLedonMultiTenancy*
+  name: AddLedonMultiTenancy
+  href: api/Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonMultiTenancyServiceCollectionExtensions_AddLedonMultiTenancy_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions.AddLedonMultiTenancy
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonMultiTenancyServiceCollectionExtensions.AddLedonMultiTenancy
+  nameWithType: LedonMultiTenancyServiceCollectionExtensions.AddLedonMultiTenancy
+- uid: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions
+  name: LedonObservabilityServiceCollectionExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions
+  nameWithType: LedonObservabilityServiceCollectionExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Observability.LedonObservabilityOptions})
+  name: AddLedonObservability(IServiceCollection, Action<LedonObservabilityOptions>?)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonObservabilityServiceCollectionExtensions_AddLedonObservability_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_Observability_LedonObservabilityOptions__
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Observability.LedonObservabilityOptions})
+  name.vb: AddLedonObservability(IServiceCollection, Action(Of LedonObservabilityOptions))
+  fullName: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.Observability.LedonObservabilityOptions>?)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.Observability.LedonObservabilityOptions))
+  nameWithType: LedonObservabilityServiceCollectionExtensions.AddLedonObservability(IServiceCollection, Action<LedonObservabilityOptions>?)
+  nameWithType.vb: LedonObservabilityServiceCollectionExtensions.AddLedonObservability(IServiceCollection, Action(Of LedonObservabilityOptions))
+- uid: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability*
+  name: AddLedonObservability
+  href: api/Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonObservabilityServiceCollectionExtensions_AddLedonObservability_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability
+  nameWithType: LedonObservabilityServiceCollectionExtensions.AddLedonObservability
+- uid: Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions
+  name: LedonOutboxServiceCollectionExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions
+  nameWithType: LedonOutboxServiceCollectionExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions.AddLedonOutbox(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Queues.LedonOutboxOptions})
+  name: AddLedonOutbox(IServiceCollection, Action<LedonOutboxOptions>?)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonOutboxServiceCollectionExtensions_AddLedonOutbox_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_Queues_LedonOutboxOptions__
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions.AddLedonOutbox(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Queues.LedonOutboxOptions})
+  name.vb: AddLedonOutbox(IServiceCollection, Action(Of LedonOutboxOptions))
+  fullName: Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions.AddLedonOutbox(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.Queues.LedonOutboxOptions>?)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions.AddLedonOutbox(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.Queues.LedonOutboxOptions))
+  nameWithType: LedonOutboxServiceCollectionExtensions.AddLedonOutbox(IServiceCollection, Action<LedonOutboxOptions>?)
+  nameWithType.vb: LedonOutboxServiceCollectionExtensions.AddLedonOutbox(IServiceCollection, Action(Of LedonOutboxOptions))
+- uid: Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions.AddLedonOutbox*
+  name: AddLedonOutbox
+  href: api/Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonOutboxServiceCollectionExtensions_AddLedonOutbox_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions.AddLedonOutbox
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonOutboxServiceCollectionExtensions.AddLedonOutbox
+  nameWithType: LedonOutboxServiceCollectionExtensions.AddLedonOutbox
+- uid: Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions
+  name: LedonQueueServiceCollectionExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions
+  nameWithType: LedonQueueServiceCollectionExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions.AddLedonQueues(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Queues.LedonQueueOptions})
+  name: AddLedonQueues(IServiceCollection, Action<LedonQueueOptions>?)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonQueueServiceCollectionExtensions_AddLedonQueues_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_Queues_LedonQueueOptions__
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions.AddLedonQueues(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Queues.LedonQueueOptions})
+  name.vb: AddLedonQueues(IServiceCollection, Action(Of LedonQueueOptions))
+  fullName: Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions.AddLedonQueues(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.Queues.LedonQueueOptions>?)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions.AddLedonQueues(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.Queues.LedonQueueOptions))
+  nameWithType: LedonQueueServiceCollectionExtensions.AddLedonQueues(IServiceCollection, Action<LedonQueueOptions>?)
+  nameWithType.vb: LedonQueueServiceCollectionExtensions.AddLedonQueues(IServiceCollection, Action(Of LedonQueueOptions))
+- uid: Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions.AddLedonQueues*
+  name: AddLedonQueues
+  href: api/Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonQueueServiceCollectionExtensions_AddLedonQueues_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions.AddLedonQueues
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonQueueServiceCollectionExtensions.AddLedonQueues
+  nameWithType: LedonQueueServiceCollectionExtensions.AddLedonQueues
+- uid: Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions
+  name: LedonResilienceServiceCollectionExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions
+  nameWithType: LedonResilienceServiceCollectionExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.AddLedonResilience(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Resilience.LedonResilienceOptions})
+  name: AddLedonResilience(IServiceCollection, Action<LedonResilienceOptions>?)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonResilienceServiceCollectionExtensions_AddLedonResilience_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_Resilience_LedonResilienceOptions__
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.AddLedonResilience(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Resilience.LedonResilienceOptions})
+  name.vb: AddLedonResilience(IServiceCollection, Action(Of LedonResilienceOptions))
+  fullName: Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.AddLedonResilience(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.Resilience.LedonResilienceOptions>?)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.AddLedonResilience(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.Resilience.LedonResilienceOptions))
+  nameWithType: LedonResilienceServiceCollectionExtensions.AddLedonResilience(IServiceCollection, Action<LedonResilienceOptions>?)
+  nameWithType.vb: LedonResilienceServiceCollectionExtensions.AddLedonResilience(IServiceCollection, Action(Of LedonResilienceOptions))
+- uid: Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.AddLedonResilience*
+  name: AddLedonResilience
+  href: api/Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonResilienceServiceCollectionExtensions_AddLedonResilience_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.AddLedonResilience
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.AddLedonResilience
+  nameWithType: LedonResilienceServiceCollectionExtensions.AddLedonResilience
+- uid: Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.HttpPipelineName
+  name: HttpPipelineName
+  href: api/Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonResilienceServiceCollectionExtensions_HttpPipelineName
+  commentId: F:Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.HttpPipelineName
+  fullName: Microsoft.Extensions.DependencyInjection.LedonResilienceServiceCollectionExtensions.HttpPipelineName
+  nameWithType: LedonResilienceServiceCollectionExtensions.HttpPipelineName
+- uid: Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions
+  name: LedonSchedulingServiceCollectionExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions
+  nameWithType: LedonSchedulingServiceCollectionExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions.AddLedonScheduling(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Scheduling.LedonSchedulingOptions})
+  name: AddLedonScheduling(IServiceCollection, Action<LedonSchedulingOptions>?)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonSchedulingServiceCollectionExtensions_AddLedonScheduling_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_Scheduling_LedonSchedulingOptions__
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions.AddLedonScheduling(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Scheduling.LedonSchedulingOptions})
+  name.vb: AddLedonScheduling(IServiceCollection, Action(Of LedonSchedulingOptions))
+  fullName: Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions.AddLedonScheduling(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.Scheduling.LedonSchedulingOptions>?)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions.AddLedonScheduling(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.Scheduling.LedonSchedulingOptions))
+  nameWithType: LedonSchedulingServiceCollectionExtensions.AddLedonScheduling(IServiceCollection, Action<LedonSchedulingOptions>?)
+  nameWithType.vb: LedonSchedulingServiceCollectionExtensions.AddLedonScheduling(IServiceCollection, Action(Of LedonSchedulingOptions))
+- uid: Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions.AddLedonScheduling*
+  name: AddLedonScheduling
+  href: api/Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonSchedulingServiceCollectionExtensions_AddLedonScheduling_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions.AddLedonScheduling
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonSchedulingServiceCollectionExtensions.AddLedonScheduling
+  nameWithType: LedonSchedulingServiceCollectionExtensions.AddLedonScheduling
+- uid: Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions
+  name: LedonSecurityServiceCollectionExtensions
+  href: api/Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions.html
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions
+  nameWithType: LedonSecurityServiceCollectionExtensions
+- uid: Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions.AddLedonSecurity(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Security.LedonSecurityOptions})
+  name: AddLedonSecurity(IServiceCollection, Action<LedonSecurityOptions>?)
+  href: api/Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonSecurityServiceCollectionExtensions_AddLedonSecurity_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_Security_LedonSecurityOptions__
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions.AddLedonSecurity(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Security.LedonSecurityOptions})
+  name.vb: AddLedonSecurity(IServiceCollection, Action(Of LedonSecurityOptions))
+  fullName: Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions.AddLedonSecurity(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.Security.LedonSecurityOptions>?)
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions.AddLedonSecurity(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.Security.LedonSecurityOptions))
+  nameWithType: LedonSecurityServiceCollectionExtensions.AddLedonSecurity(IServiceCollection, Action<LedonSecurityOptions>?)
+  nameWithType.vb: LedonSecurityServiceCollectionExtensions.AddLedonSecurity(IServiceCollection, Action(Of LedonSecurityOptions))
+- uid: Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions.AddLedonSecurity*
+  name: AddLedonSecurity
+  href: api/Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonSecurityServiceCollectionExtensions_AddLedonSecurity_
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions.AddLedonSecurity
+  isSpec: "True"
+  fullName: Microsoft.Extensions.DependencyInjection.LedonSecurityServiceCollectionExtensions.AddLedonSecurity
+  nameWithType: LedonSecurityServiceCollectionExtensions.AddLedonSecurity

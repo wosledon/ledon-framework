@@ -1,0 +1,37 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Data
+  commentId: N:Ledon.Data
+  id: Ledon.Data
+  children:
+  - Ledon.Data.ILedonDbContext
+  - Ledon.Data.LedonDataOptions
+  - Ledon.Data.LedonDataServiceCollectionExtensions
+  langs:
+  - csharp
+  - vb
+  name: Ledon.Data
+  nameWithType: Ledon.Data
+  fullName: Ledon.Data
+  type: Namespace
+  assemblies:
+  - Ledon.Data
+references:
+- uid: Ledon.Data.ILedonDbContext
+  commentId: T:Ledon.Data.ILedonDbContext
+  href: Ledon.Data.ILedonDbContext.html
+  name: ILedonDbContext
+  nameWithType: ILedonDbContext
+  fullName: Ledon.Data.ILedonDbContext
+- uid: Ledon.Data.LedonDataOptions
+  commentId: T:Ledon.Data.LedonDataOptions
+  href: Ledon.Data.LedonDataOptions.html
+  name: LedonDataOptions
+  nameWithType: LedonDataOptions
+  fullName: Ledon.Data.LedonDataOptions
+- uid: Ledon.Data.LedonDataServiceCollectionExtensions
+  commentId: T:Ledon.Data.LedonDataServiceCollectionExtensions
+  href: Ledon.Data.LedonDataServiceCollectionExtensions.html
+  name: LedonDataServiceCollectionExtensions
+  nameWithType: LedonDataServiceCollectionExtensions
+  fullName: Ledon.Data.LedonDataServiceCollectionExtensions

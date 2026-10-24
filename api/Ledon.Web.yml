@@ -1,0 +1,44 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Web
+  commentId: N:Ledon.Web
+  id: Ledon.Web
+  children:
+  - Ledon.Web.IEndpoint
+  - Ledon.Web.LedonWebApplicationExtensions
+  - Ledon.Web.LedonWebOptions
+  - Ledon.Web.LedonWebServiceCollectionExtensions
+  langs:
+  - csharp
+  - vb
+  name: Ledon.Web
+  nameWithType: Ledon.Web
+  fullName: Ledon.Web
+  type: Namespace
+  assemblies:
+  - Ledon.Web
+references:
+- uid: Ledon.Web.IEndpoint
+  commentId: T:Ledon.Web.IEndpoint
+  href: Ledon.Web.IEndpoint.html
+  name: IEndpoint
+  nameWithType: IEndpoint
+  fullName: Ledon.Web.IEndpoint
+- uid: Ledon.Web.LedonWebApplicationExtensions
+  commentId: T:Ledon.Web.LedonWebApplicationExtensions
+  href: Ledon.Web.LedonWebApplicationExtensions.html
+  name: LedonWebApplicationExtensions
+  nameWithType: LedonWebApplicationExtensions
+  fullName: Ledon.Web.LedonWebApplicationExtensions
+- uid: Ledon.Web.LedonWebOptions
+  commentId: T:Ledon.Web.LedonWebOptions
+  href: Ledon.Web.LedonWebOptions.html
+  name: LedonWebOptions
+  nameWithType: LedonWebOptions
+  fullName: Ledon.Web.LedonWebOptions
+- uid: Ledon.Web.LedonWebServiceCollectionExtensions
+  commentId: T:Ledon.Web.LedonWebServiceCollectionExtensions
+  href: Ledon.Web.LedonWebServiceCollectionExtensions.html
+  name: LedonWebServiceCollectionExtensions
+  nameWithType: LedonWebServiceCollectionExtensions
+  fullName: Ledon.Web.LedonWebServiceCollectionExtensions

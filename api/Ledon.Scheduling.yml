@@ -1,0 +1,30 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Scheduling
+  commentId: N:Ledon.Scheduling
+  id: Ledon.Scheduling
+  children:
+  - Ledon.Scheduling.IScheduledTask
+  - Ledon.Scheduling.LedonSchedulingOptions
+  langs:
+  - csharp
+  - vb
+  name: Ledon.Scheduling
+  nameWithType: Ledon.Scheduling
+  fullName: Ledon.Scheduling
+  type: Namespace
+  assemblies:
+  - Ledon.Scheduling
+references:
+- uid: Ledon.Scheduling.IScheduledTask
+  commentId: T:Ledon.Scheduling.IScheduledTask
+  href: Ledon.Scheduling.IScheduledTask.html
+  name: IScheduledTask
+  nameWithType: IScheduledTask
+  fullName: Ledon.Scheduling.IScheduledTask
+- uid: Ledon.Scheduling.LedonSchedulingOptions
+  commentId: T:Ledon.Scheduling.LedonSchedulingOptions
+  href: Ledon.Scheduling.LedonSchedulingOptions.html
+  name: LedonSchedulingOptions
+  nameWithType: LedonSchedulingOptions
+  fullName: Ledon.Scheduling.LedonSchedulingOptions

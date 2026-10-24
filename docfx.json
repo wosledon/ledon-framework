@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "src",
+          "files": ["**/*.csproj"]
+        }
+      ],
+      "dest": "api"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": ["**/*.{md,yml}"],
+        "src": "docs",
+        "dest": "."
+      },
+      {
+        "files": ["*.yml"],
+        "src": "api",
+        "dest": "api"
+      }
+    ],
+    "resource": [
+      {
+        "files": ["images/**"]
+      }
+    ],
+    "dest": "_site",
+    "globalMetadata": {
+      "_appName": "Ledon Framework",
+      "_appTitle": "Ledon Framework",
+      "_appFooter": "Ledon Framework — .NET 10 模块化 Web 开发框架",
+      "_enableSearch": true,
+      "pdf": false
+    }
+  }
+}

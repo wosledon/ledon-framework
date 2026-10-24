@@ -1,0 +1,82 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Security
+  commentId: N:Ledon.Security
+  id: Ledon.Security
+  children:
+  - Ledon.Security.ApiKeyOptions
+  - Ledon.Security.ICurrentUser
+  - Ledon.Security.IJwtTokenGenerator
+  - Ledon.Security.JwtOptions
+  - Ledon.Security.LedonSecurityOptions
+  - Ledon.Security.PermissionRequirement
+  langs:
+  - csharp
+  - vb
+  name: Ledon.Security
+  nameWithType: Ledon.Security
+  fullName: Ledon.Security
+  type: Namespace
+  assemblies:
+  - Ledon.Security
+references:
+- uid: Ledon.Security.ICurrentUser
+  commentId: T:Ledon.Security.ICurrentUser
+  href: Ledon.Security.ICurrentUser.html
+  name: ICurrentUser
+  nameWithType: ICurrentUser
+  fullName: Ledon.Security.ICurrentUser
+- uid: Ledon.Security.IJwtTokenGenerator
+  commentId: T:Ledon.Security.IJwtTokenGenerator
+  href: Ledon.Security.IJwtTokenGenerator.html
+  name: IJwtTokenGenerator
+  nameWithType: IJwtTokenGenerator
+  fullName: Ledon.Security.IJwtTokenGenerator
+- uid: Ledon.Security.JwtOptions
+  commentId: T:Ledon.Security.JwtOptions
+  parent: Ledon.Security
+  href: Ledon.Security.JwtOptions.html
+  name: JwtOptions
+  nameWithType: JwtOptions
+  fullName: Ledon.Security.JwtOptions
+- uid: Ledon.Security.ApiKeyOptions
+  commentId: T:Ledon.Security.ApiKeyOptions
+  parent: Ledon.Security
+  href: Ledon.Security.ApiKeyOptions.html
+  name: ApiKeyOptions
+  nameWithType: ApiKeyOptions
+  fullName: Ledon.Security.ApiKeyOptions
+- uid: Ledon.Security.LedonSecurityOptions
+  commentId: T:Ledon.Security.LedonSecurityOptions
+  href: Ledon.Security.LedonSecurityOptions.html
+  name: LedonSecurityOptions
+  nameWithType: LedonSecurityOptions
+  fullName: Ledon.Security.LedonSecurityOptions
+- uid: Ledon.Security.PermissionRequirement
+  commentId: T:Ledon.Security.PermissionRequirement
+  href: Ledon.Security.PermissionRequirement.html
+  name: PermissionRequirement
+  nameWithType: PermissionRequirement
+  fullName: Ledon.Security.PermissionRequirement
+- uid: Ledon.Security
+  commentId: N:Ledon.Security
+  href: Ledon.html
+  name: Ledon.Security
+  nameWithType: Ledon.Security
+  fullName: Ledon.Security
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Security
+    name: Security
+    href: Ledon.Security.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Security
+    name: Security
+    href: Ledon.Security.html

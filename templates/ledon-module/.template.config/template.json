@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "wosledon",
+  "classifications": ["Library", "Ledon"],
+  "identity": "Ledon.Templates.Module",
+  "name": "Ledon Module",
+  "description": "Ledon Framework 业务模块（独立程序集，实现 IModule 即被宿主自动发现）",
+  "shortName": "ledon-module",
+  "tags": { "language": "C#", "type": "project" },
+  "sourceName": "Ledon.MyModule",
+  "preferNameDirectory": true
+}

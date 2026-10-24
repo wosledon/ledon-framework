@@ -1,0 +1,30 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Testing
+  commentId: N:Ledon.Testing
+  id: Ledon.Testing
+  children:
+  - Ledon.Testing.LedonWebTestHost
+  - Ledon.Testing.ModuleAssertions
+  langs:
+  - csharp
+  - vb
+  name: Ledon.Testing
+  nameWithType: Ledon.Testing
+  fullName: Ledon.Testing
+  type: Namespace
+  assemblies:
+  - Ledon.Testing
+references:
+- uid: Ledon.Testing.LedonWebTestHost
+  commentId: T:Ledon.Testing.LedonWebTestHost
+  href: Ledon.Testing.LedonWebTestHost.html
+  name: LedonWebTestHost
+  nameWithType: LedonWebTestHost
+  fullName: Ledon.Testing.LedonWebTestHost
+- uid: Ledon.Testing.ModuleAssertions
+  commentId: T:Ledon.Testing.ModuleAssertions
+  href: Ledon.Testing.ModuleAssertions.html
+  name: ModuleAssertions
+  nameWithType: ModuleAssertions
+  fullName: Ledon.Testing.ModuleAssertions

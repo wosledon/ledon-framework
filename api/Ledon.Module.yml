@@ -1,0 +1,51 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Module
+  commentId: N:Ledon.Module
+  id: Ledon.Module
+  children:
+  - Ledon.Module.ConventionScanner
+  - Ledon.Module.LedonAssemblies
+  - Ledon.Module.LedonModuleException
+  - Ledon.Module.LedonServiceCollectionExtensions
+  - Ledon.Module.LedonServiceProviderExtensions
+  langs:
+  - csharp
+  - vb
+  name: Ledon.Module
+  nameWithType: Ledon.Module
+  fullName: Ledon.Module
+  type: Namespace
+  assemblies:
+  - Ledon.Module
+references:
+- uid: Ledon.Module.ConventionScanner
+  commentId: T:Ledon.Module.ConventionScanner
+  href: Ledon.Module.ConventionScanner.html
+  name: ConventionScanner
+  nameWithType: ConventionScanner
+  fullName: Ledon.Module.ConventionScanner
+- uid: Ledon.Module.LedonServiceCollectionExtensions
+  commentId: T:Ledon.Module.LedonServiceCollectionExtensions
+  href: Ledon.Module.LedonServiceCollectionExtensions.html
+  name: LedonServiceCollectionExtensions
+  nameWithType: LedonServiceCollectionExtensions
+  fullName: Ledon.Module.LedonServiceCollectionExtensions
+- uid: Ledon.Module.LedonServiceProviderExtensions
+  commentId: T:Ledon.Module.LedonServiceProviderExtensions
+  href: Ledon.Module.LedonServiceProviderExtensions.html
+  name: LedonServiceProviderExtensions
+  nameWithType: LedonServiceProviderExtensions
+  fullName: Ledon.Module.LedonServiceProviderExtensions
+- uid: Ledon.Module.LedonAssemblies
+  commentId: T:Ledon.Module.LedonAssemblies
+  href: Ledon.Module.LedonAssemblies.html
+  name: LedonAssemblies
+  nameWithType: LedonAssemblies
+  fullName: Ledon.Module.LedonAssemblies
+- uid: Ledon.Module.LedonModuleException
+  commentId: T:Ledon.Module.LedonModuleException
+  href: Ledon.Module.LedonModuleException.html
+  name: LedonModuleException
+  nameWithType: LedonModuleException
+  fullName: Ledon.Module.LedonModuleException

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Namespace Ledon.Module.Abstractions | Ledon Framework </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Namespace Ledon.Module.Abstractions | Ledon Framework ">
+    
+    
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../styles/docfx.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="Ledon Framework">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first=First data-prev=Previous data-next=Next data-last=Last></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Ledon.Module.Abstractions">
+
+  <h1 id="Ledon_Module_Abstractions" data-uid="Ledon.Module.Abstractions" class="text-break">Namespace Ledon.Module.Abstractions</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+    <h3 id="classes">
+Classes
+</h3>
+      <h4><a class="xref" href="Ledon.Module.Abstractions.DependsOnAttribute.html">DependsOnAttribute</a></h4>
+      <section><p>声明当前模块依赖的其它模块。被依赖的模块会先完成服务注册与初始化，后于当前模块关闭。</p>
+</section>
+      <h4><a class="xref" href="Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute.html">DisableAutoDiscoveryAttribute</a></h4>
+      <section><p>自动发现逃生门：标记的类型（及其所有嵌套类型）不参与程序集自动扫描，只能通过
+<code>AddLedon(o =&gt; o.AddModule&lt;T&gt;())</code> 显式注册。
+用于测试夹具、条件装配等&quot;不希望被默认拉入&quot;的模块。标在容器类上即可整体屏蔽其中的模块。</p>
+</section>
+      <h4><a class="xref" href="Ledon.Module.Abstractions.ModuleContext.html">ModuleContext</a></h4>
+      <section><p>模块运行阶段（初始化/关闭）的执行上下文，始终持有已构建的服务容器。</p>
+</section>
+      <h4><a class="xref" href="Ledon.Module.Abstractions.ModuleDescriptor.html">ModuleDescriptor</a></h4>
+      <section><p>模块的运行时描述：类型、依赖、实例与当前状态。由依赖图构建，顺序即初始化顺序。</p>
+</section>
+    <h3 id="interfaces">
+Interfaces
+</h3>
+      <h4><a class="xref" href="Ledon.Module.Abstractions.ILedonPreInitialization.html">ILedonPreInitialization</a></h4>
+      <section><p>模块初始化前的前置任务：在 <a class="xref" href="Ledon.Module.Abstractions.IModuleManager.html#Ledon_Module_Abstractions_IModuleManager_InitializeAsync_System_IServiceProvider_System_Threading_CancellationToken_">InitializeAsync(IServiceProvider, CancellationToken)</a> 开始初始化
+任何模块之前执行。用于&quot;必须先于模块就绪&quot;的基础设施（如数据库建库/迁移）。
+执行顺序按容器注册顺序；任一任务失败将中止模块初始化（此时还没有模块启动，无需回滚）。</p>
+</section>
+      <h4><a class="xref" href="Ledon.Module.Abstractions.IModule.html">IModule</a></h4>
+      <section><p>模块契约。业务模块实现此接口即可接入框架，三个钩子均为可选（默认接口实现）。</p>
+</section>
+      <h4><a class="xref" href="Ledon.Module.Abstractions.IModuleManager.html">IModuleManager</a></h4>
+      <section><p>模块管理器：对外暴露模块清单与状态，并驱动初始化/关闭两个运行阶段。
+由 <code>AddLedon</code> 注册为单例。</p>
+</section>
+    <h3 id="enums">
+Enums
+</h3>
+      <h4><a class="xref" href="Ledon.Module.Abstractions.ModuleState.html">ModuleState</a></h4>
+      <section><p>模块在生命周期中的状态。</p>
+</section>
+
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      Ledon Framework — .NET 10 模块化 Web 开发框架
+      
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

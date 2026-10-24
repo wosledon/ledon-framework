@@ -1,0 +1,107 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Module.Abstractions
+  commentId: N:Ledon.Module.Abstractions
+  id: Ledon.Module.Abstractions
+  children:
+  - Ledon.Module.Abstractions.DependsOnAttribute
+  - Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute
+  - Ledon.Module.Abstractions.ILedonPreInitialization
+  - Ledon.Module.Abstractions.IModule
+  - Ledon.Module.Abstractions.IModuleManager
+  - Ledon.Module.Abstractions.ModuleContext
+  - Ledon.Module.Abstractions.ModuleDescriptor
+  - Ledon.Module.Abstractions.ModuleState
+  langs:
+  - csharp
+  - vb
+  name: Ledon.Module.Abstractions
+  nameWithType: Ledon.Module.Abstractions
+  fullName: Ledon.Module.Abstractions
+  type: Namespace
+  assemblies:
+  - Ledon.Module
+references:
+- uid: Ledon.Module.Abstractions.DependsOnAttribute
+  commentId: T:Ledon.Module.Abstractions.DependsOnAttribute
+  href: Ledon.Module.Abstractions.DependsOnAttribute.html
+  name: DependsOnAttribute
+  nameWithType: DependsOnAttribute
+  fullName: Ledon.Module.Abstractions.DependsOnAttribute
+- uid: Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute
+  commentId: T:Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute
+  href: Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute.html
+  name: DisableAutoDiscoveryAttribute
+  nameWithType: DisableAutoDiscoveryAttribute
+  fullName: Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute
+- uid: Ledon.Module.Abstractions.ILedonPreInitialization
+  commentId: T:Ledon.Module.Abstractions.ILedonPreInitialization
+  href: Ledon.Module.Abstractions.ILedonPreInitialization.html
+  name: ILedonPreInitialization
+  nameWithType: ILedonPreInitialization
+  fullName: Ledon.Module.Abstractions.ILedonPreInitialization
+- uid: Ledon.Module.Abstractions.IModule
+  commentId: T:Ledon.Module.Abstractions.IModule
+  parent: Ledon.Module.Abstractions
+  href: Ledon.Module.Abstractions.IModule.html
+  name: IModule
+  nameWithType: IModule
+  fullName: Ledon.Module.Abstractions.IModule
+- uid: Ledon.Module.Abstractions.IModuleManager
+  commentId: T:Ledon.Module.Abstractions.IModuleManager
+  parent: Ledon.Module.Abstractions
+  href: Ledon.Module.Abstractions.IModuleManager.html
+  name: IModuleManager
+  nameWithType: IModuleManager
+  fullName: Ledon.Module.Abstractions.IModuleManager
+- uid: Ledon.Module.Abstractions.ModuleContext
+  commentId: T:Ledon.Module.Abstractions.ModuleContext
+  parent: Ledon.Module.Abstractions
+  href: Ledon.Module.Abstractions.ModuleContext.html
+  name: ModuleContext
+  nameWithType: ModuleContext
+  fullName: Ledon.Module.Abstractions.ModuleContext
+- uid: Ledon.Module.Abstractions.ModuleState
+  commentId: T:Ledon.Module.Abstractions.ModuleState
+  parent: Ledon.Module.Abstractions
+  href: Ledon.Module.Abstractions.ModuleState.html
+  name: ModuleState
+  nameWithType: ModuleState
+  fullName: Ledon.Module.Abstractions.ModuleState
+- uid: Ledon.Module.Abstractions.ModuleDescriptor
+  commentId: T:Ledon.Module.Abstractions.ModuleDescriptor
+  parent: Ledon.Module.Abstractions
+  href: Ledon.Module.Abstractions.ModuleDescriptor.html
+  name: ModuleDescriptor
+  nameWithType: ModuleDescriptor
+  fullName: Ledon.Module.Abstractions.ModuleDescriptor
+- uid: Ledon.Module.Abstractions
+  commentId: N:Ledon.Module.Abstractions
+  href: Ledon.html
+  name: Ledon.Module.Abstractions
+  nameWithType: Ledon.Module.Abstractions
+  fullName: Ledon.Module.Abstractions
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Module
+    name: Module
+    href: Ledon.Module.html
+  - name: .
+  - uid: Ledon.Module.Abstractions
+    name: Abstractions
+    href: Ledon.Module.Abstractions.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Module
+    name: Module
+    href: Ledon.Module.html
+  - name: .
+  - uid: Ledon.Module.Abstractions
+    name: Abstractions
+    href: Ledon.Module.Abstractions.html

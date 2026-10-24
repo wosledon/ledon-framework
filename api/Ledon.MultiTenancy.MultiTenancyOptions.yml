@@ -1,0 +1,413 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.MultiTenancy.MultiTenancyOptions
+  commentId: T:Ledon.MultiTenancy.MultiTenancyOptions
+  id: MultiTenancyOptions
+  parent: Ledon.MultiTenancy
+  children:
+  - Ledon.MultiTenancy.MultiTenancyOptions.HeaderName
+  - Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName
+  - Ledon.MultiTenancy.MultiTenancyOptions.Source
+  langs:
+  - csharp
+  - vb
+  name: MultiTenancyOptions
+  nameWithType: MultiTenancyOptions
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions
+  type: Class
+  source:
+    remote:
+      path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: MultiTenancyOptions
+    path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+    startLine: 13
+  assemblies:
+  - Ledon.MultiTenancy
+  namespace: Ledon.MultiTenancy
+  summary: 多租户默认参数。
+  example: []
+  syntax:
+    content: public sealed class MultiTenancyOptions
+    content.vb: Public NotInheritable Class MultiTenancyOptions
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.HeaderName
+  commentId: P:Ledon.MultiTenancy.MultiTenancyOptions.HeaderName
+  id: HeaderName
+  parent: Ledon.MultiTenancy.MultiTenancyOptions
+  langs:
+  - csharp
+  - vb
+  name: HeaderName
+  nameWithType: MultiTenancyOptions.HeaderName
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.HeaderName
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: HeaderName
+    path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+    startLine: 16
+  assemblies:
+  - Ledon.MultiTenancy
+  namespace: Ledon.MultiTenancy
+  summary: 请求头名，默认 X-Tenant-Id。
+  example: []
+  syntax:
+    content: public string HeaderName { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property HeaderName As String
+  overload: Ledon.MultiTenancy.MultiTenancyOptions.HeaderName*
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName
+  commentId: P:Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName
+  id: QueryStringName
+  parent: Ledon.MultiTenancy.MultiTenancyOptions
+  langs:
+  - csharp
+  - vb
+  name: QueryStringName
+  nameWithType: MultiTenancyOptions.QueryStringName
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: QueryStringName
+    path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+    startLine: 19
+  assemblies:
+  - Ledon.MultiTenancy
+  namespace: Ledon.MultiTenancy
+  summary: 查询参数名（<xref href="Ledon.MultiTenancy.TenantSource.QueryString" data-throw-if-not-resolved="false"></xref> 时用），默认 tenantId。
+  example: []
+  syntax:
+    content: public string QueryStringName { get; set; }
+    parameters: []
+    return:
+      type: System.String
+    content.vb: Public Property QueryStringName As String
+  overload: Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName*
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.Source
+  commentId: P:Ledon.MultiTenancy.MultiTenancyOptions.Source
+  id: Source
+  parent: Ledon.MultiTenancy.MultiTenancyOptions
+  langs:
+  - csharp
+  - vb
+  name: Source
+  nameWithType: MultiTenancyOptions.Source
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.Source
+  type: Property
+  source:
+    remote:
+      path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Source
+    path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+    startLine: 22
+  assemblies:
+  - Ledon.MultiTenancy
+  namespace: Ledon.MultiTenancy
+  summary: 解析来源，默认请求头。
+  example: []
+  syntax:
+    content: public TenantSource Source { get; set; }
+    parameters: []
+    return:
+      type: Ledon.MultiTenancy.TenantSource
+    content.vb: Public Property Source As TenantSource
+  overload: Ledon.MultiTenancy.MultiTenancyOptions.Source*
+references:
+- uid: Ledon.MultiTenancy
+  commentId: N:Ledon.MultiTenancy
+  href: Ledon.html
+  name: Ledon.MultiTenancy
+  nameWithType: Ledon.MultiTenancy
+  fullName: Ledon.MultiTenancy
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.MultiTenancy
+    name: MultiTenancy
+    href: Ledon.MultiTenancy.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.MultiTenancy
+    name: MultiTenancy
+    href: Ledon.MultiTenancy.html
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.HeaderName*
+  commentId: Overload:Ledon.MultiTenancy.MultiTenancyOptions.HeaderName
+  href: Ledon.MultiTenancy.MultiTenancyOptions.html#Ledon_MultiTenancy_MultiTenancyOptions_HeaderName
+  name: HeaderName
+  nameWithType: MultiTenancyOptions.HeaderName
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.HeaderName
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: Ledon.MultiTenancy.TenantSource.QueryString
+  commentId: F:Ledon.MultiTenancy.TenantSource.QueryString
+  href: Ledon.MultiTenancy.TenantSource.html#Ledon_MultiTenancy_TenantSource_QueryString
+  name: QueryString
+  nameWithType: TenantSource.QueryString
+  fullName: Ledon.MultiTenancy.TenantSource.QueryString
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName*
+  commentId: Overload:Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName
+  href: Ledon.MultiTenancy.MultiTenancyOptions.html#Ledon_MultiTenancy_MultiTenancyOptions_QueryStringName
+  name: QueryStringName
+  nameWithType: MultiTenancyOptions.QueryStringName
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.QueryStringName
+- uid: Ledon.MultiTenancy.MultiTenancyOptions.Source*
+  commentId: Overload:Ledon.MultiTenancy.MultiTenancyOptions.Source
+  href: Ledon.MultiTenancy.MultiTenancyOptions.html#Ledon_MultiTenancy_MultiTenancyOptions_Source
+  name: Source
+  nameWithType: MultiTenancyOptions.Source
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions.Source
+- uid: Ledon.MultiTenancy.TenantSource
+  commentId: T:Ledon.MultiTenancy.TenantSource
+  parent: Ledon.MultiTenancy
+  href: Ledon.MultiTenancy.TenantSource.html
+  name: TenantSource
+  nameWithType: TenantSource
+  fullName: Ledon.MultiTenancy.TenantSource

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Ledon Framework | Ledon Framework </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Ledon Framework | Ledon Framework ">
+    
+    
+      <link rel="shortcut icon" href="favicon.ico">
+      <link rel="stylesheet" href="styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="styles/docfx.css">
+      <link rel="stylesheet" href="styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="">
+    
+    <meta property="docfx:rel" content="">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="index.html">
+                <img id="logo" class="svg" src="logo.svg" alt="Ledon Framework">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first=First data-prev=Previous data-next=Next data-last=Last></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="ledon-framework">Ledon Framework</h1>
+
+<p>.NET 10 模块化 <strong>Web 开发框架</strong>。解耦优先，靠自动发现和自动注入，把心智负担降到几行接入代码；能力拆成独立包，<strong>用哪个引哪个</strong>。</p>
+<h2 id="30-秒上手">30 秒上手</h2>
+<pre><code class="lang-csharp">var builder = WebApplication.CreateBuilder(args);
+builder.AddLedonWeb(o =&gt; o.UseOpenApi = true);   // 模块 + 端点/控制器 + OpenAPI
+builder.Services.AddLedonData();                 // 数据访问（按需）
+
+var app = builder.Build();
+app.UseLedonWeb();
+app.Run();
+</code></pre>
+<p>没有 <code>AddModule</code>、没有 <code>AddControllers</code>、没有 <code>MapGet</code>——模块、服务、事件处理器、端点全部按约定自动接线。</p>
+<h2 id="文档导航">文档导航</h2>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="getting-started.html">快速开始</a></td>
+<td>安装、第一个应用、运行示例</td>
+</tr>
+<tr>
+<td><a href="modules.html">模块系统</a></td>
+<td>IModule、依赖排序、生命周期、事件</td>
+</tr>
+<tr>
+<td><a href="discovery.html">自动发现</a></td>
+<td>允许列表规则、约定注册、逃生门</td>
+</tr>
+<tr>
+<td><a href="web.html">Web 开发</a></td>
+<td>端点、控制器、API 规范化</td>
+</tr>
+<tr>
+<td><a href="data.html">数据与发件箱</a></td>
+<td>EF Core、Outbox 至少一次投递</td>
+</tr>
+</tbody>
+</table>
+<h2 id="能力包">能力包</h2>
+<p>模块系统（<code>Ledon.Module</code>）、Web（<code>Ledon.Web</code>）、数据（<code>Ledon.Data</code>）、缓存（<code>Ledon.Caching</code>）、队列与发件箱（<code>Ledon.Queues</code>）、定时任务（<code>Ledon.Scheduling</code>）、认证授权（<code>Ledon.Security</code>）、可观测性（<code>Ledon.Observability</code>）、弹性策略（<code>Ledon.Resilience</code>）、配置（<code>Ledon.Configuration</code>）、多租户（<code>Ledon.MultiTenancy</code>）、测试基建（<code>Ledon.Testing</code>）。</p>
+<p>详见 <a href="https://github.com/wosledon/ledon-framework">README</a> 的能力矩阵。</p>
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/wosledon/ledon-framework/blob/main/docs/index.md/#L1" class="contribution-link">Edit this page</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      Ledon Framework — .NET 10 模块化 Web 开发框架
+      
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="styles/docfx.js"></script>
+    <script type="text/javascript" src="styles/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Ledon.Module" Version="0.1.0" />
+        <PackageReference Include="Ledon.Queues" Version="0.1.0" />
+        <PackageReference Include="Ledon.Scheduling" Version="0.1.0" />
+    </ItemGroup>
+
+</Project>

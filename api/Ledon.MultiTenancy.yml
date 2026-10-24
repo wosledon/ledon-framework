@@ -1,0 +1,68 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.MultiTenancy
+  commentId: N:Ledon.MultiTenancy
+  id: Ledon.MultiTenancy
+  children:
+  - Ledon.MultiTenancy.ITenantContext
+  - Ledon.MultiTenancy.MultiTenancyOptions
+  - Ledon.MultiTenancy.TenantContext
+  - Ledon.MultiTenancy.TenantSource
+  langs:
+  - csharp
+  - vb
+  name: Ledon.MultiTenancy
+  nameWithType: Ledon.MultiTenancy
+  fullName: Ledon.MultiTenancy
+  type: Namespace
+  assemblies:
+  - Ledon.MultiTenancy
+references:
+- uid: Ledon.MultiTenancy.ITenantContext
+  commentId: T:Ledon.MultiTenancy.ITenantContext
+  parent: Ledon.MultiTenancy
+  href: Ledon.MultiTenancy.ITenantContext.html
+  name: ITenantContext
+  nameWithType: ITenantContext
+  fullName: Ledon.MultiTenancy.ITenantContext
+- uid: Ledon.MultiTenancy.TenantSource
+  commentId: T:Ledon.MultiTenancy.TenantSource
+  parent: Ledon.MultiTenancy
+  href: Ledon.MultiTenancy.TenantSource.html
+  name: TenantSource
+  nameWithType: TenantSource
+  fullName: Ledon.MultiTenancy.TenantSource
+- uid: Ledon.MultiTenancy.MultiTenancyOptions
+  commentId: T:Ledon.MultiTenancy.MultiTenancyOptions
+  href: Ledon.MultiTenancy.MultiTenancyOptions.html
+  name: MultiTenancyOptions
+  nameWithType: MultiTenancyOptions
+  fullName: Ledon.MultiTenancy.MultiTenancyOptions
+- uid: Ledon.MultiTenancy.TenantContext
+  commentId: T:Ledon.MultiTenancy.TenantContext
+  href: Ledon.MultiTenancy.TenantContext.html
+  name: TenantContext
+  nameWithType: TenantContext
+  fullName: Ledon.MultiTenancy.TenantContext
+- uid: Ledon.MultiTenancy
+  commentId: N:Ledon.MultiTenancy
+  href: Ledon.html
+  name: Ledon.MultiTenancy
+  nameWithType: Ledon.MultiTenancy
+  fullName: Ledon.MultiTenancy
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.MultiTenancy
+    name: MultiTenancy
+    href: Ledon.MultiTenancy.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.MultiTenancy
+    name: MultiTenancy
+    href: Ledon.MultiTenancy.html

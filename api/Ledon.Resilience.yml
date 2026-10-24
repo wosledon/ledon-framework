@@ -1,0 +1,23 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Resilience
+  commentId: N:Ledon.Resilience
+  id: Ledon.Resilience
+  children:
+  - Ledon.Resilience.LedonResilienceOptions
+  langs:
+  - csharp
+  - vb
+  name: Ledon.Resilience
+  nameWithType: Ledon.Resilience
+  fullName: Ledon.Resilience
+  type: Namespace
+  assemblies:
+  - Ledon.Resilience
+references:
+- uid: Ledon.Resilience.LedonResilienceOptions
+  commentId: T:Ledon.Resilience.LedonResilienceOptions
+  href: Ledon.Resilience.LedonResilienceOptions.html
+  name: LedonResilienceOptions
+  nameWithType: LedonResilienceOptions
+  fullName: Ledon.Resilience.LedonResilienceOptions

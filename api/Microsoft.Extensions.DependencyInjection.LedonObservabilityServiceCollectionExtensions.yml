@@ -1,0 +1,435 @@
+### YamlMime:ManagedReference
+items:
+- uid: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions
+  commentId: T:Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions
+  id: LedonObservabilityServiceCollectionExtensions
+  parent: Microsoft.Extensions.DependencyInjection
+  children:
+  - Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Observability.LedonObservabilityOptions})
+  langs:
+  - csharp
+  - vb
+  name: LedonObservabilityServiceCollectionExtensions
+  nameWithType: LedonObservabilityServiceCollectionExtensions
+  fullName: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions
+  type: Class
+  source:
+    remote:
+      path: src/Ledon.Observability/LedonObservabilityServiceCollectionExtensions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: LedonObservabilityServiceCollectionExtensions
+    path: src/Ledon.Observability/LedonObservabilityServiceCollectionExtensions.cs
+    startLine: 17
+  assemblies:
+  - Ledon.Observability
+  namespace: Microsoft.Extensions.DependencyInjection
+  summary: >-
+    可观测性入口扩展。日常用法一行：
+
+    <pre><code class="lang-csharp">builder.Services.AddLedonObservability(o =&gt; o.OtlpEndpoint = new Uri("http://localhost:4317"));</code></pre>
+
+    自动接入 ASP.NET Core / HttpClient / 运行时插桩与框架自身源
+
+    （<xref href="Ledon.Module.Diagnostics.LedonActivity.RootSourceName" data-throw-if-not-resolved="false"></xref>：模块生命周期 / 事件发布 / 队列处理的 span）；
+
+    不配 OTLP 端点则读 OTEL_EXPORTER_OTLP_ENDPOINT 环境变量。
+  example: []
+  syntax:
+    content: public static class LedonObservabilityServiceCollectionExtensions
+    content.vb: Public Module LedonObservabilityServiceCollectionExtensions
+  inheritance:
+  - System.Object
+  inheritedMembers:
+  - System.Object.Equals(System.Object)
+  - System.Object.Equals(System.Object,System.Object)
+  - System.Object.GetHashCode
+  - System.Object.GetType
+  - System.Object.MemberwiseClone
+  - System.Object.ReferenceEquals(System.Object,System.Object)
+  - System.Object.ToString
+- uid: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Observability.LedonObservabilityOptions})
+  commentId: M:Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Observability.LedonObservabilityOptions})
+  id: AddLedonObservability(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Ledon.Observability.LedonObservabilityOptions})
+  isExtensionMethod: true
+  parent: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions
+  langs:
+  - csharp
+  - vb
+  name: AddLedonObservability(IServiceCollection, Action<LedonObservabilityOptions>?)
+  nameWithType: LedonObservabilityServiceCollectionExtensions.AddLedonObservability(IServiceCollection, Action<LedonObservabilityOptions>?)
+  fullName: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action<Ledon.Observability.LedonObservabilityOptions>?)
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Observability/LedonObservabilityServiceCollectionExtensions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: AddLedonObservability
+    path: src/Ledon.Observability/LedonObservabilityServiceCollectionExtensions.cs
+    startLine: 19
+  assemblies:
+  - Ledon.Observability
+  namespace: Microsoft.Extensions.DependencyInjection
+  syntax:
+    content: public static IServiceCollection AddLedonObservability(this IServiceCollection services, Action<LedonObservabilityOptions>? configure = null)
+    parameters:
+    - id: services
+      type: Microsoft.Extensions.DependencyInjection.IServiceCollection
+    - id: configure
+      type: System.Action{Ledon.Observability.LedonObservabilityOptions}
+    return:
+      type: Microsoft.Extensions.DependencyInjection.IServiceCollection
+    content.vb: Public Shared Function AddLedonObservability(services As IServiceCollection, configure As Action(Of LedonObservabilityOptions) = Nothing) As IServiceCollection
+  overload: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability*
+  nameWithType.vb: LedonObservabilityServiceCollectionExtensions.AddLedonObservability(IServiceCollection, Action(Of LedonObservabilityOptions))
+  fullName.vb: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action(Of Ledon.Observability.LedonObservabilityOptions))
+  name.vb: AddLedonObservability(IServiceCollection, Action(Of LedonObservabilityOptions))
+references:
+- uid: Ledon.Module.Diagnostics.LedonActivity.RootSourceName
+  commentId: F:Ledon.Module.Diagnostics.LedonActivity.RootSourceName
+  name: RootSourceName
+  nameWithType: LedonActivity.RootSourceName
+  fullName: Ledon.Module.Diagnostics.LedonActivity.RootSourceName
+- uid: Microsoft.Extensions.DependencyInjection
+  commentId: N:Microsoft.Extensions.DependencyInjection
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.Extensions.DependencyInjection
+  nameWithType: Microsoft.Extensions.DependencyInjection
+  fullName: Microsoft.Extensions.DependencyInjection
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.DependencyInjection
+    name: DependencyInjection
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.dependencyinjection
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.Extensions
+    name: Extensions
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions
+  - name: .
+  - uid: Microsoft.Extensions.DependencyInjection
+    name: DependencyInjection
+    href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.dependencyinjection
+- uid: System.Object
+  commentId: T:System.Object
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object
+  name: object
+  nameWithType: object
+  fullName: object
+  nameWithType.vb: Object
+  fullName.vb: Object
+  name.vb: Object
+- uid: System.Object.Equals(System.Object)
+  commentId: M:System.Object.Equals(System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  name: Equals(object)
+  nameWithType: object.Equals(object)
+  fullName: object.Equals(object)
+  nameWithType.vb: Object.Equals(Object)
+  fullName.vb: Object.Equals(Object)
+  name.vb: Equals(Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.Equals(System.Object,System.Object)
+  commentId: M:System.Object.Equals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  name: Equals(object, object)
+  nameWithType: object.Equals(object, object)
+  fullName: object.Equals(object, object)
+  nameWithType.vb: Object.Equals(Object, Object)
+  fullName.vb: Object.Equals(Object, Object)
+  name.vb: Equals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.Equals(System.Object,System.Object)
+    name: Equals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.GetHashCode
+  commentId: M:System.Object.GetHashCode
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  name: GetHashCode()
+  nameWithType: object.GetHashCode()
+  fullName: object.GetHashCode()
+  nameWithType.vb: Object.GetHashCode()
+  fullName.vb: Object.GetHashCode()
+  spec.csharp:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetHashCode
+    name: GetHashCode
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gethashcode
+  - name: (
+  - name: )
+- uid: System.Object.GetType
+  commentId: M:System.Object.GetType
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  name: GetType()
+  nameWithType: object.GetType()
+  fullName: object.GetType()
+  nameWithType.vb: Object.GetType()
+  fullName.vb: Object.GetType()
+  spec.csharp:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.GetType
+    name: GetType
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.gettype
+  - name: (
+  - name: )
+- uid: System.Object.MemberwiseClone
+  commentId: M:System.Object.MemberwiseClone
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  name: MemberwiseClone()
+  nameWithType: object.MemberwiseClone()
+  fullName: object.MemberwiseClone()
+  nameWithType.vb: Object.MemberwiseClone()
+  fullName.vb: Object.MemberwiseClone()
+  spec.csharp:
+  - uid: System.Object.MemberwiseClone
+    name: MemberwiseClone
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.MemberwiseClone
+    name: MemberwiseClone
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone
+  - name: (
+  - name: )
+- uid: System.Object.ReferenceEquals(System.Object,System.Object)
+  commentId: M:System.Object.ReferenceEquals(System.Object,System.Object)
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  name: ReferenceEquals(object, object)
+  nameWithType: object.ReferenceEquals(object, object)
+  fullName: object.ReferenceEquals(object, object)
+  nameWithType.vb: Object.ReferenceEquals(Object, Object)
+  fullName.vb: Object.ReferenceEquals(Object, Object)
+  name.vb: ReferenceEquals(Object, Object)
+  spec.csharp:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+  spec.vb:
+  - uid: System.Object.ReferenceEquals(System.Object,System.Object)
+    name: ReferenceEquals
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.referenceequals
+  - name: (
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: ','
+  - name: " "
+  - uid: System.Object
+    name: Object
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object
+  - name: )
+- uid: System.Object.ToString
+  commentId: M:System.Object.ToString
+  parent: System.Object
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  name: ToString()
+  nameWithType: object.ToString()
+  fullName: object.ToString()
+  nameWithType.vb: Object.ToString()
+  fullName.vb: Object.ToString()
+  spec.csharp:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+  spec.vb:
+  - uid: System.Object.ToString
+    name: ToString
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.object.tostring
+  - name: (
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability*
+  commentId: Overload:Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability
+  href: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.html#Microsoft_Extensions_DependencyInjection_LedonObservabilityServiceCollectionExtensions_AddLedonObservability_Microsoft_Extensions_DependencyInjection_IServiceCollection_System_Action_Ledon_Observability_LedonObservabilityOptions__
+  name: AddLedonObservability
+  nameWithType: LedonObservabilityServiceCollectionExtensions.AddLedonObservability
+  fullName: Microsoft.Extensions.DependencyInjection.LedonObservabilityServiceCollectionExtensions.AddLedonObservability
+- uid: Microsoft.Extensions.DependencyInjection.IServiceCollection
+  commentId: T:Microsoft.Extensions.DependencyInjection.IServiceCollection
+  parent: Microsoft.Extensions.DependencyInjection
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.extensions.dependencyinjection.iservicecollection
+  name: IServiceCollection
+  nameWithType: IServiceCollection
+  fullName: Microsoft.Extensions.DependencyInjection.IServiceCollection
+- uid: System.Action{Ledon.Observability.LedonObservabilityOptions}
+  commentId: T:System.Action{Ledon.Observability.LedonObservabilityOptions}
+  parent: System
+  definition: System.Action`1
+  href: https://learn.microsoft.com/dotnet/api/system.action-1
+  name: Action<LedonObservabilityOptions>
+  nameWithType: Action<LedonObservabilityOptions>
+  fullName: System.Action<Ledon.Observability.LedonObservabilityOptions>
+  nameWithType.vb: Action(Of LedonObservabilityOptions)
+  fullName.vb: System.Action(Of Ledon.Observability.LedonObservabilityOptions)
+  name.vb: Action(Of LedonObservabilityOptions)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: <
+  - uid: Ledon.Observability.LedonObservabilityOptions
+    name: LedonObservabilityOptions
+    href: Ledon.Observability.LedonObservabilityOptions.html
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: Ledon.Observability.LedonObservabilityOptions
+    name: LedonObservabilityOptions
+    href: Ledon.Observability.LedonObservabilityOptions.html
+  - name: )
+- uid: System.Action`1
+  commentId: T:System.Action`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.action-1
+  name: Action<T>
+  nameWithType: Action<T>
+  fullName: System.Action<T>
+  nameWithType.vb: Action(Of T)
+  fullName.vb: System.Action(Of T)
+  name.vb: Action(Of T)
+  spec.csharp:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Action`1
+    name: Action
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.action-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )

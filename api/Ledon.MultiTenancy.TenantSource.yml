@@ -1,0 +1,118 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.MultiTenancy.TenantSource
+  commentId: T:Ledon.MultiTenancy.TenantSource
+  id: TenantSource
+  parent: Ledon.MultiTenancy
+  children:
+  - Ledon.MultiTenancy.TenantSource.Header
+  - Ledon.MultiTenancy.TenantSource.QueryString
+  langs:
+  - csharp
+  - vb
+  name: TenantSource
+  nameWithType: TenantSource
+  fullName: Ledon.MultiTenancy.TenantSource
+  type: Enum
+  source:
+    remote:
+      path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: TenantSource
+    path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+    startLine: 3
+  assemblies:
+  - Ledon.MultiTenancy
+  namespace: Ledon.MultiTenancy
+  summary: 租户解析来源。
+  example: []
+  syntax:
+    content: public enum TenantSource
+    content.vb: Public Enum TenantSource
+- uid: Ledon.MultiTenancy.TenantSource.Header
+  commentId: F:Ledon.MultiTenancy.TenantSource.Header
+  id: Header
+  parent: Ledon.MultiTenancy.TenantSource
+  langs:
+  - csharp
+  - vb
+  name: Header
+  nameWithType: TenantSource.Header
+  fullName: Ledon.MultiTenancy.TenantSource.Header
+  type: Field
+  source:
+    remote:
+      path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Header
+    path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+    startLine: 6
+  assemblies:
+  - Ledon.MultiTenancy
+  namespace: Ledon.MultiTenancy
+  summary: 请求头（默认）。
+  example: []
+  syntax:
+    content: Header = 0
+    return:
+      type: Ledon.MultiTenancy.TenantSource
+- uid: Ledon.MultiTenancy.TenantSource.QueryString
+  commentId: F:Ledon.MultiTenancy.TenantSource.QueryString
+  id: QueryString
+  parent: Ledon.MultiTenancy.TenantSource
+  langs:
+  - csharp
+  - vb
+  name: QueryString
+  nameWithType: TenantSource.QueryString
+  fullName: Ledon.MultiTenancy.TenantSource.QueryString
+  type: Field
+  source:
+    remote:
+      path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: QueryString
+    path: src/Ledon.MultiTenancy/MultiTenancyOptions.cs
+    startLine: 9
+  assemblies:
+  - Ledon.MultiTenancy
+  namespace: Ledon.MultiTenancy
+  summary: 查询字符串。
+  example: []
+  syntax:
+    content: QueryString = 1
+    return:
+      type: Ledon.MultiTenancy.TenantSource
+references:
+- uid: Ledon.MultiTenancy
+  commentId: N:Ledon.MultiTenancy
+  href: Ledon.html
+  name: Ledon.MultiTenancy
+  nameWithType: Ledon.MultiTenancy
+  fullName: Ledon.MultiTenancy
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.MultiTenancy
+    name: MultiTenancy
+    href: Ledon.MultiTenancy.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.MultiTenancy
+    name: MultiTenancy
+    href: Ledon.MultiTenancy.html
+- uid: Ledon.MultiTenancy.TenantSource
+  commentId: T:Ledon.MultiTenancy.TenantSource
+  parent: Ledon.MultiTenancy
+  href: Ledon.MultiTenancy.TenantSource.html
+  name: TenantSource
+  nameWithType: TenantSource
+  fullName: Ledon.MultiTenancy.TenantSource

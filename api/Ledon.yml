@@ -1,0 +1,23 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon
+  commentId: N:Ledon
+  id: Ledon
+  children:
+  - Ledon.AssemblyExtensions
+  langs:
+  - csharp
+  - vb
+  name: Ledon
+  nameWithType: Ledon
+  fullName: Ledon
+  type: Namespace
+  assemblies:
+  - Ledon.Core
+references:
+- uid: Ledon.AssemblyExtensions
+  commentId: T:Ledon.AssemblyExtensions
+  href: Ledon.AssemblyExtensions.html
+  name: AssemblyExtensions
+  nameWithType: AssemblyExtensions
+  fullName: Ledon.AssemblyExtensions

@@ -1,0 +1,221 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Security.IJwtTokenGenerator
+  commentId: T:Ledon.Security.IJwtTokenGenerator
+  id: IJwtTokenGenerator
+  parent: Ledon.Security
+  children:
+  - Ledon.Security.IJwtTokenGenerator.Generate(System.String,System.String,System.Collections.Generic.IEnumerable{System.String})
+  langs:
+  - csharp
+  - vb
+  name: IJwtTokenGenerator
+  nameWithType: IJwtTokenGenerator
+  fullName: Ledon.Security.IJwtTokenGenerator
+  type: Interface
+  source:
+    remote:
+      path: src/Ledon.Security/JwtTokenGenerator.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: IJwtTokenGenerator
+    path: src/Ledon.Security/JwtTokenGenerator.cs
+    startLine: 8
+  assemblies:
+  - Ledon.Security
+  namespace: Ledon.Security
+  summary: JWT 令牌签发器（登录成功后调用）。
+  example: []
+  syntax:
+    content: public interface IJwtTokenGenerator
+    content.vb: Public Interface IJwtTokenGenerator
+- uid: Ledon.Security.IJwtTokenGenerator.Generate(System.String,System.String,System.Collections.Generic.IEnumerable{System.String})
+  commentId: M:Ledon.Security.IJwtTokenGenerator.Generate(System.String,System.String,System.Collections.Generic.IEnumerable{System.String})
+  id: Generate(System.String,System.String,System.Collections.Generic.IEnumerable{System.String})
+  parent: Ledon.Security.IJwtTokenGenerator
+  langs:
+  - csharp
+  - vb
+  name: Generate(string, string, IEnumerable<string>?)
+  nameWithType: IJwtTokenGenerator.Generate(string, string, IEnumerable<string>?)
+  fullName: Ledon.Security.IJwtTokenGenerator.Generate(string, string, System.Collections.Generic.IEnumerable<string>?)
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Security/JwtTokenGenerator.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Generate
+    path: src/Ledon.Security/JwtTokenGenerator.cs
+    startLine: 14
+  assemblies:
+  - Ledon.Security
+  namespace: Ledon.Security
+  summary: 签发访问令牌。
+  example: []
+  syntax:
+    content: string Generate(string userId, string userName, IEnumerable<string>? permissions = null)
+    parameters:
+    - id: userId
+      type: System.String
+      description: 用户标识（写入 sub 与 nameidentifier）。
+    - id: userName
+      type: System.String
+      description: 用户名。
+    - id: permissions
+      type: System.Collections.Generic.IEnumerable{System.String}
+      description: 权限列表（每条一个 permission claim）。
+    return:
+      type: System.String
+    content.vb: Function Generate(userId As String, userName As String, permissions As IEnumerable(Of String) = Nothing) As String
+  overload: Ledon.Security.IJwtTokenGenerator.Generate*
+  nameWithType.vb: IJwtTokenGenerator.Generate(String, String, IEnumerable(Of String))
+  fullName.vb: Ledon.Security.IJwtTokenGenerator.Generate(String, String, System.Collections.Generic.IEnumerable(Of String))
+  name.vb: Generate(String, String, IEnumerable(Of String))
+references:
+- uid: Ledon.Security
+  commentId: N:Ledon.Security
+  href: Ledon.html
+  name: Ledon.Security
+  nameWithType: Ledon.Security
+  fullName: Ledon.Security
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Security
+    name: Security
+    href: Ledon.Security.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Security
+    name: Security
+    href: Ledon.Security.html
+- uid: Ledon.Security.IJwtTokenGenerator.Generate*
+  commentId: Overload:Ledon.Security.IJwtTokenGenerator.Generate
+  href: Ledon.Security.IJwtTokenGenerator.html#Ledon_Security_IJwtTokenGenerator_Generate_System_String_System_String_System_Collections_Generic_IEnumerable_System_String__
+  name: Generate
+  nameWithType: IJwtTokenGenerator.Generate
+  fullName: Ledon.Security.IJwtTokenGenerator.Generate
+- uid: System.String
+  commentId: T:System.String
+  parent: System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.string
+  name: string
+  nameWithType: string
+  fullName: string
+  nameWithType.vb: String
+  fullName.vb: String
+  name.vb: String
+- uid: System.Collections.Generic.IEnumerable{System.String}
+  commentId: T:System.Collections.Generic.IEnumerable{System.String}
+  parent: System.Collections.Generic
+  definition: System.Collections.Generic.IEnumerable`1
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  name: IEnumerable<string>
+  nameWithType: IEnumerable<string>
+  fullName: System.Collections.Generic.IEnumerable<string>
+  nameWithType.vb: IEnumerable(Of String)
+  fullName.vb: System.Collections.Generic.IEnumerable(Of String)
+  name.vb: IEnumerable(Of String)
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: <
+  - uid: System.String
+    name: string
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - uid: System.String
+    name: String
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.string
+  - name: )
+- uid: System
+  commentId: N:System
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System
+  nameWithType: System
+  fullName: System
+- uid: System.Collections.Generic.IEnumerable`1
+  commentId: T:System.Collections.Generic.IEnumerable`1
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  name: IEnumerable<T>
+  nameWithType: IEnumerable<T>
+  fullName: System.Collections.Generic.IEnumerable<T>
+  nameWithType.vb: IEnumerable(Of T)
+  fullName.vb: System.Collections.Generic.IEnumerable(Of T)
+  name.vb: IEnumerable(Of T)
+  spec.csharp:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: <
+  - name: T
+  - name: '>'
+  spec.vb:
+  - uid: System.Collections.Generic.IEnumerable`1
+    name: IEnumerable
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1
+  - name: (
+  - name: Of
+  - name: " "
+  - name: T
+  - name: )
+- uid: System.Collections.Generic
+  commentId: N:System.Collections.Generic
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Collections.Generic
+  nameWithType: System.Collections.Generic
+  fullName: System.Collections.Generic
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Collections
+    name: Collections
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections
+  - name: .
+  - uid: System.Collections.Generic
+    name: Generic
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.collections.generic

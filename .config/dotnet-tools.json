@@ -1,0 +1,10 @@
+{
+  "isRoot": true,
+  "version": 1,
+  "tools": {
+    "docfx": {
+      "version": "2.78.3",
+      "commands": ["docfx"]
+    }
+  }
+}

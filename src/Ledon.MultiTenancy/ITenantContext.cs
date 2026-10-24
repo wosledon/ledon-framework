@@ -2,7 +2,7 @@ namespace Ledon.MultiTenancy;
 
 /// <summary>
 /// 当前租户上下文。Web 请求取中间件解析的值；
-/// 后台任务（队列/调度）经 <see cref="TenantContext.AmbientTenantId"/> 穿透
+/// 后台任务（队列/调度）经 <see cref="TenantContext.SetAmbient"/> 穿透
 /// （入队时捕获、执行时恢复），避免后台工作丢租户。
 /// </summary>
 public interface ITenantContext

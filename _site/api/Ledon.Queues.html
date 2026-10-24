@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+
+  <head>
+    <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+      <title>Namespace Ledon.Queues | Ledon Framework </title>
+      <meta name="viewport" content="width=device-width">
+      <meta name="title" content="Namespace Ledon.Queues | Ledon Framework ">
+    
+    
+      <link rel="shortcut icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../styles/docfx.vendor.min.css">
+      <link rel="stylesheet" href="../styles/docfx.css">
+      <link rel="stylesheet" href="../styles/main.css">
+      <meta property="docfx:navrel" content="">
+      <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="../">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../logo.svg" alt="Ledon Framework">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first=First data-prev=Previous data-next=Next data-last=Last></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div id="sidetoc"></div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Ledon.Queues">
+
+  <h1 id="Ledon_Queues" data-uid="Ledon.Queues" class="text-break">Namespace Ledon.Queues</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+    <h3 id="classes">
+Classes
+</h3>
+      <h4><a class="xref" href="Ledon.Queues.LedonOutboxOptions.html">LedonOutboxOptions</a></h4>
+      <section><p>发件箱调度默认参数。</p>
+</section>
+      <h4><a class="xref" href="Ledon.Queues.LedonQueueOptions.html">LedonQueueOptions</a></h4>
+      <section><p>后台队列默认参数。</p>
+</section>
+      <h4><a class="xref" href="Ledon.Queues.OutboxDbContext.html">OutboxDbContext</a></h4>
+      <section><p>带发件箱的 DbContext 基类：用户的 DbContext 继承它即获得
+<a class="xref" href="Ledon.Queues.OutboxDbContext.html#Ledon_Queues_OutboxDbContext_OutboxMessages">OutboxMessages</a> 集合与表结构约定。</p>
+</section>
+      <h4><a class="xref" href="Ledon.Queues.OutboxMessage.html">OutboxMessage</a></h4>
+      <section><p>发件箱消息：与业务数据同事务落库，由调度器异步投递（至少一次）。</p>
+</section>
+    <h3 id="interfaces">
+Interfaces
+</h3>
+      <h4><a class="xref" href="Ledon.Queues.IBackgroundQueue.html">IBackgroundQueue</a></h4>
+      <section><p>后台任务队列：把工作丢进队列由 worker 异步处理，不阻塞请求线程。
+每个任务在执行时都会拿到一个独立的 DI 作用域（<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iserviceprovider">IServiceProvider</a> 即作用域提供器），
+可安全解析 Scoped 服务。worker 崩溃不会影响其它任务（失败记录日志后继续）。
+v1 为进程内 Channel 实现；接外部 Broker（RabbitMQ/Kafka 等）时替换实现即可。</p>
+</section>
+      <h4><a class="xref" href="Ledon.Queues.IIntegrationEvent.html">IIntegrationEvent</a></h4>
+      <section><p>集成事件标记：跨模块/跨进程的领域事件，经 Outbox 保证至少一次投递。
+与进程内事件（<code>IEventHandler&lt;T&gt;</code>，Ledon.Core）区分：
+进程内事件追求即时，集成事件追求可靠。</p>
+</section>
+      <h4><a class="xref" href="Ledon.Queues.IIntegrationEventHandler-1.html">IIntegrationEventHandler&lt;TEvent&gt;</a></h4>
+      <section><p>集成事件处理器。实现类被自动发现并注册。</p>
+</section>
+      <h4><a class="xref" href="Ledon.Queues.IOutboxStore.html">IOutboxStore</a></h4>
+      <section><p>发件箱存储抽象。替换实现即可换存储（默认 EF Core）。</p>
+</section>
+
+
+</article>
+          </div>
+
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In this article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+      Ledon Framework — .NET 10 模块化 Web 开发框架
+      
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="text/javascript" src="../styles/docfx.vendor.min.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "wosledon",
+  "classifications": ["Web", "API", "Ledon"],
+  "identity": "Ledon.Templates.Web",
+  "name": "Ledon Web App",
+  "description": "Ledon Framework Web 应用（模块系统 + 端点/控制器自动发现 + API 规范化）",
+  "shortName": "ledon-web",
+  "tags": { "language": "C#", "type": "project" },
+  "sourceName": "Ledon.WebApp",
+  "preferNameDirectory": true
+}

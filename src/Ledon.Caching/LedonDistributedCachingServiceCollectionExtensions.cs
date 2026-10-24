@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// builder.Services.AddLedonDistributedCaching(o =&gt; o.RedisConnectionString = "localhost:6379");
 /// </code>
 /// 不配连接字符串时退化为进程内内存实现（开发/单机可用，语义与内存缓存一致）。
-/// 与 <see cref="AddLedonCaching"/> 二选一——后者是带 single-flight 的纯内存实现。
+/// 与带 single-flight 的纯内存实现（AddLedonCaching）二选一。
 /// </summary>
 public static class LedonDistributedCachingServiceCollectionExtensions
 {

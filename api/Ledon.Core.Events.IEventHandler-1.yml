@@ -1,0 +1,203 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Core.Events.IEventHandler`1
+  commentId: T:Ledon.Core.Events.IEventHandler`1
+  id: IEventHandler`1
+  parent: Ledon.Core.Events
+  children:
+  - Ledon.Core.Events.IEventHandler`1.HandleAsync(`0,System.Threading.CancellationToken)
+  langs:
+  - csharp
+  - vb
+  name: IEventHandler<TEvent>
+  nameWithType: IEventHandler<TEvent>
+  fullName: Ledon.Core.Events.IEventHandler<TEvent>
+  type: Interface
+  source:
+    remote:
+      path: src/Ledon.Core/Events/IEventHandler.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: IEventHandler
+    path: src/Ledon.Core/Events/IEventHandler.cs
+    startLine: 6
+  assemblies:
+  - Ledon.Core
+  namespace: Ledon.Core.Events
+  summary: 事件处理器契约。一个事件可有多个处理器，按其在容器中的注册顺序依次执行。
+  example: []
+  syntax:
+    content: public interface IEventHandler<in TEvent>
+    typeParameters:
+    - id: TEvent
+      description: 要处理的事件类型（按精确类型匹配，不支持基类协变查找）。
+    content.vb: Public Interface IEventHandler(Of In TEvent)
+  nameWithType.vb: IEventHandler(Of TEvent)
+  fullName.vb: Ledon.Core.Events.IEventHandler(Of TEvent)
+  name.vb: IEventHandler(Of TEvent)
+- uid: Ledon.Core.Events.IEventHandler`1.HandleAsync(`0,System.Threading.CancellationToken)
+  commentId: M:Ledon.Core.Events.IEventHandler`1.HandleAsync(`0,System.Threading.CancellationToken)
+  id: HandleAsync(`0,System.Threading.CancellationToken)
+  parent: Ledon.Core.Events.IEventHandler`1
+  langs:
+  - csharp
+  - vb
+  name: HandleAsync(TEvent, CancellationToken)
+  nameWithType: IEventHandler<TEvent>.HandleAsync(TEvent, CancellationToken)
+  fullName: Ledon.Core.Events.IEventHandler<TEvent>.HandleAsync(TEvent, System.Threading.CancellationToken)
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Core/Events/IEventHandler.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: HandleAsync
+    path: src/Ledon.Core/Events/IEventHandler.cs
+    startLine: 9
+  assemblies:
+  - Ledon.Core
+  namespace: Ledon.Core.Events
+  summary: 处理事件。
+  example: []
+  syntax:
+    content: Task HandleAsync(TEvent @event, CancellationToken cancellationToken = default)
+    parameters:
+    - id: event
+      type: '{TEvent}'
+    - id: cancellationToken
+      type: System.Threading.CancellationToken
+    return:
+      type: System.Threading.Tasks.Task
+    content.vb: Function HandleAsync([event] As TEvent, cancellationToken As CancellationToken = Nothing) As Task
+  overload: Ledon.Core.Events.IEventHandler`1.HandleAsync*
+  nameWithType.vb: IEventHandler(Of TEvent).HandleAsync(TEvent, CancellationToken)
+  fullName.vb: Ledon.Core.Events.IEventHandler(Of TEvent).HandleAsync(TEvent, System.Threading.CancellationToken)
+references:
+- uid: Ledon.Core.Events
+  commentId: N:Ledon.Core.Events
+  href: Ledon.html
+  name: Ledon.Core.Events
+  nameWithType: Ledon.Core.Events
+  fullName: Ledon.Core.Events
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Core
+    name: Core
+    href: Ledon.Core.html
+  - name: .
+  - uid: Ledon.Core.Events
+    name: Events
+    href: Ledon.Core.Events.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Core
+    name: Core
+    href: Ledon.Core.html
+  - name: .
+  - uid: Ledon.Core.Events
+    name: Events
+    href: Ledon.Core.Events.html
+- uid: Ledon.Core.Events.IEventHandler`1.HandleAsync*
+  commentId: Overload:Ledon.Core.Events.IEventHandler`1.HandleAsync
+  href: Ledon.Core.Events.IEventHandler-1.html#Ledon_Core_Events_IEventHandler_1_HandleAsync__0_System_Threading_CancellationToken_
+  name: HandleAsync
+  nameWithType: IEventHandler<TEvent>.HandleAsync
+  fullName: Ledon.Core.Events.IEventHandler<TEvent>.HandleAsync
+  nameWithType.vb: IEventHandler(Of TEvent).HandleAsync
+  fullName.vb: Ledon.Core.Events.IEventHandler(Of TEvent).HandleAsync
+- uid: '{TEvent}'
+  commentId: '!:TEvent'
+  definition: TEvent
+  name: TEvent
+  nameWithType: TEvent
+  fullName: TEvent
+- uid: System.Threading.CancellationToken
+  commentId: T:System.Threading.CancellationToken
+  parent: System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken
+  name: CancellationToken
+  nameWithType: CancellationToken
+  fullName: System.Threading.CancellationToken
+- uid: System.Threading.Tasks.Task
+  commentId: T:System.Threading.Tasks.Task
+  parent: System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system.threading.tasks.task
+  name: Task
+  nameWithType: Task
+  fullName: System.Threading.Tasks.Task
+- uid: TEvent
+  name: TEvent
+  nameWithType: TEvent
+  fullName: TEvent
+- uid: System.Threading
+  commentId: N:System.Threading
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading
+  nameWithType: System.Threading
+  fullName: System.Threading
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+- uid: System.Threading.Tasks
+  commentId: N:System.Threading.Tasks
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/system
+  name: System.Threading.Tasks
+  nameWithType: System.Threading.Tasks
+  fullName: System.Threading.Tasks
+  spec.csharp:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks
+  spec.vb:
+  - uid: System
+    name: System
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system
+  - name: .
+  - uid: System.Threading
+    name: Threading
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading
+  - name: .
+  - uid: System.Threading.Tasks
+    name: Tasks
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/system.threading.tasks

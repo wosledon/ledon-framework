@@ -19,20 +19,20 @@ app.Run();
 
 ## 能力矩阵（按需引入）
 
-| 能力 | 包 | 引入方式 | 说明 |
-|---|---|---|---|
-| 模块系统（发现/依赖/生命周期/事件） | `Ledon.Module` | 被 `Ledon.Web` 自动带入 | 核心，默认在场 |
-| Web 集成（端点/控制器/OpenAPI/规范化） | `Ledon.Web` | `builder.AddLedonWeb()` | 含 ProblemDetails、关联 ID、统一响应、版本化开关 |
-| 数据访问（EF Core + 发件箱） | `Ledon.Data` / `Ledon.Queues` | `AddLedonData()` / `AddLedonOutbox()` | 自动注册 + 前置自动建库 + 至少一次投递 |
-| 缓存 | `Ledon.Caching` | `AddLedonCaching()` / `AddLedonDistributedCaching()` | 内存（single-flight）/ 分布式（Redis） |
-| 后台任务 | `Ledon.Queues` | `AddLedonQueues()` | Channel 有界 + 多 worker |
-| 定时任务 | `Ledon.Scheduling` | `AddLedonScheduling()` | cron 驱动（5/6 段） |
-| 认证授权 | `Ledon.Security` | `AddLedonSecurity()` | JWT + API Key + 权限策略 |
-| 可观测性 | `Ledon.Observability` | `AddLedonObservability()` | OTel 链路/指标（含框架自身 span）+ 健康检查 |
-| 弹性策略 | `Ledon.Resilience` | `AddLedonResilience()` | 重试/超时/熔断，接管全部 HttpClient |
-| 强类型配置 | `Ledon.Configuration` | `AddLedonOptions<T>(config)` | 绑定 + 启动校验 |
-| 多租户 | `Ledon.MultiTenancy` | `AddLedonMultiTenancy()` | 租户解析 + 后台穿透 |
-| 测试基建 | `Ledon.Testing` | `LedonWebTestHost` | 一行搭 TestServer + 生命周期断言 |
+| 能力                                   | 包                            | 引入方式                                             | 说明                                             |
+| -------------------------------------- | ----------------------------- | ---------------------------------------------------- | ------------------------------------------------ |
+| 模块系统（发现/依赖/生命周期/事件）    | `Ledon.Module`                | 被 `Ledon.Web` 自动带入                              | 核心，默认在场                                   |
+| Web 集成（端点/控制器/OpenAPI/规范化） | `Ledon.Web`                   | `builder.AddLedonWeb()`                              | 含 ProblemDetails、关联 ID、统一响应、版本化开关 |
+| 数据访问（EF Core + 发件箱）           | `Ledon.Data` / `Ledon.Queues` | `AddLedonData()` / `AddLedonOutbox()`                | 自动注册 + 前置自动建库 + 至少一次投递           |
+| 缓存                                   | `Ledon.Caching`               | `AddLedonCaching()` / `AddLedonDistributedCaching()` | 内存（single-flight）/ 分布式（Redis）           |
+| 后台任务                               | `Ledon.Queues`                | `AddLedonQueues()`                                   | Channel 有界 + 多 worker                         |
+| 定时任务                               | `Ledon.Scheduling`            | `AddLedonScheduling()`                               | cron 驱动（5/6 段）                              |
+| 认证授权                               | `Ledon.Security`              | `AddLedonSecurity()`                                 | JWT + API Key + 权限策略                         |
+| 可观测性                               | `Ledon.Observability`         | `AddLedonObservability()`                            | OTel 链路/指标（含框架自身 span）+ 健康检查      |
+| 弹性策略                               | `Ledon.Resilience`            | `AddLedonResilience()`                               | 重试/超时/熔断，接管全部 HttpClient              |
+| 强类型配置                             | `Ledon.Configuration`         | `AddLedonOptions<T>(config)`                         | 绑定 + 启动校验                                  |
+| 多租户                                 | `Ledon.MultiTenancy`          | `AddLedonMultiTenancy()`                             | 租户解析 + 后台穿透                              |
+| 测试基建                               | `Ledon.Testing`               | `LedonWebTestHost`                                   | 一行搭 TestServer + 生命周期断言                 |
 
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
@@ -107,13 +107,13 @@ public class TodosController(TodoDbContext db) : ControllerBase
 
 **API 规范化**（`LedonWebOptions` 控制，均有默认值）：
 
-| 开关 | 默认 | 行为 |
-|---|---|---|
-| `UseProblemDetails` | ✅ | 未处理异常 → RFC 7807（含关联 ID/TraceId） |
-| 模型验证 | ✅ | 失败统一 400 ValidationProblemDetails |
-| `UseCorrelationId` | ✅ | `X-Correlation-Id` 贯穿请求/响应头/日志作用域 |
-| `UseUnifiedResponse` | ❌ | 成功响应包 `{"code":0,"data":...}` 信封 |
-| `UseApiVersioning` | ❌ | URL 段 `api/v{version}/...` |
+| 开关                 | 默认 | 行为                                          |
+| -------------------- | ---- | --------------------------------------------- |
+| `UseProblemDetails`  | ✅    | 未处理异常 → RFC 7807（含关联 ID/TraceId）    |
+| 模型验证             | ✅    | 失败统一 400 ValidationProblemDetails         |
+| `UseCorrelationId`   | ✅    | `X-Correlation-Id` 贯穿请求/响应头/日志作用域 |
+| `UseUnifiedResponse` | ❌    | 成功响应包 `{"code":0,"data":...}` 信封       |
+| `UseApiVersioning`   | ❌    | URL 段 `api/v{version}/...`                   |
 
 ## 数据访问
 
@@ -192,10 +192,10 @@ app.UseLedonMultiTenancy();
 
 扫描到的程序集里，每个具体类按以下规则自动进容器（`TryAdd`，手动注册优先）：
 
-| 规则 | 示例 | 注册结果 |
-|---|---|---|
-| 同名接口 | `class UserService : IUserService` | `IUserService → UserService`（默认 Scoped） |
-| 事件处理器 | `class X : IEventHandler<E>` | `IEventHandler<E> → X`（Transient） |
+| 规则       | 示例                               | 注册结果                                    |
+| ---------- | ---------------------------------- | ------------------------------------------- |
+| 同名接口   | `class UserService : IUserService` | `IUserService → UserService`（默认 Scoped） |
+| 事件处理器 | `class X : IEventHandler<E>`       | `IEventHandler<E> → X`（Transient）         |
 
 **没有接口的类（DTO、控制器、端点）不会被自动注册**——把 MVC 动作参数类型注册进 DI 会让 `[ApiController]` 的隐式 `[FromBody]` 推断失效。此类类型请显式注册。
 

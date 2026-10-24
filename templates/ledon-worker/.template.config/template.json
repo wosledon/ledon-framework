@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "wosledon",
+  "classifications": ["Worker", "Service", "Ledon"],
+  "identity": "Ledon.Templates.Worker",
+  "name": "Ledon Worker",
+  "description": "Ledon Framework 工作进程（模块系统 + 后台队列 + 定时任务，非 Web）",
+  "shortName": "ledon-worker",
+  "tags": { "language": "C#", "type": "project" },
+  "sourceName": "Ledon.WorkerApp",
+  "preferNameDirectory": true
+}

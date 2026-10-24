@@ -1,0 +1,137 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Web.IEndpoint
+  commentId: T:Ledon.Web.IEndpoint
+  id: IEndpoint
+  parent: Ledon.Web
+  children:
+  - Ledon.Web.IEndpoint.Map(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)
+  langs:
+  - csharp
+  - vb
+  name: IEndpoint
+  nameWithType: IEndpoint
+  fullName: Ledon.Web.IEndpoint
+  type: Interface
+  source:
+    remote:
+      path: src/Ledon.Web/IEndpoint.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: IEndpoint
+    path: src/Ledon.Web/IEndpoint.cs
+    startLine: 8
+  assemblies:
+  - Ledon.Web
+  namespace: Ledon.Web
+  summary: >-
+    最小 API 端点抽象。实现类会被自动发现，并在启动时统一映射，
+
+    不需要在 Program.cs 里手工 <code>MapGet/MapGroup</code>。
+  example: []
+  syntax:
+    content: public interface IEndpoint
+    content.vb: Public Interface IEndpoint
+- uid: Ledon.Web.IEndpoint.Map(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)
+  commentId: M:Ledon.Web.IEndpoint.Map(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)
+  id: Map(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)
+  parent: Ledon.Web.IEndpoint
+  langs:
+  - csharp
+  - vb
+  name: Map(IEndpointRouteBuilder)
+  nameWithType: IEndpoint.Map(IEndpointRouteBuilder)
+  fullName: Ledon.Web.IEndpoint.Map(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)
+  type: Method
+  source:
+    remote:
+      path: src/Ledon.Web/IEndpoint.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: Map
+    path: src/Ledon.Web/IEndpoint.cs
+    startLine: 10
+  assemblies:
+  - Ledon.Web
+  namespace: Ledon.Web
+  syntax:
+    content: void Map(IEndpointRouteBuilder builder)
+    parameters:
+    - id: builder
+      type: Microsoft.AspNetCore.Routing.IEndpointRouteBuilder
+    content.vb: Sub Map(builder As IEndpointRouteBuilder)
+  overload: Ledon.Web.IEndpoint.Map*
+references:
+- uid: Ledon.Web
+  commentId: N:Ledon.Web
+  href: Ledon.html
+  name: Ledon.Web
+  nameWithType: Ledon.Web
+  fullName: Ledon.Web
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Web
+    name: Web
+    href: Ledon.Web.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Web
+    name: Web
+    href: Ledon.Web.html
+- uid: Ledon.Web.IEndpoint.Map*
+  commentId: Overload:Ledon.Web.IEndpoint.Map
+  href: Ledon.Web.IEndpoint.html#Ledon_Web_IEndpoint_Map_Microsoft_AspNetCore_Routing_IEndpointRouteBuilder_
+  name: Map
+  nameWithType: IEndpoint.Map
+  fullName: Ledon.Web.IEndpoint.Map
+- uid: Microsoft.AspNetCore.Routing.IEndpointRouteBuilder
+  commentId: T:Microsoft.AspNetCore.Routing.IEndpointRouteBuilder
+  parent: Microsoft.AspNetCore.Routing
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.routing.iendpointroutebuilder
+  name: IEndpointRouteBuilder
+  nameWithType: IEndpointRouteBuilder
+  fullName: Microsoft.AspNetCore.Routing.IEndpointRouteBuilder
+- uid: Microsoft.AspNetCore.Routing
+  commentId: N:Microsoft.AspNetCore.Routing
+  isExternal: true
+  href: https://learn.microsoft.com/dotnet/api/microsoft
+  name: Microsoft.AspNetCore.Routing
+  nameWithType: Microsoft.AspNetCore.Routing
+  fullName: Microsoft.AspNetCore.Routing
+  spec.csharp:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Routing
+    name: Routing
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.routing
+  spec.vb:
+  - uid: Microsoft
+    name: Microsoft
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft
+  - name: .
+  - uid: Microsoft.AspNetCore
+    name: AspNetCore
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore
+  - name: .
+  - uid: Microsoft.AspNetCore.Routing
+    name: Routing
+    isExternal: true
+    href: https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.routing

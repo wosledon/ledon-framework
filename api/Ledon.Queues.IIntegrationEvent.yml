@@ -1,0 +1,58 @@
+### YamlMime:ManagedReference
+items:
+- uid: Ledon.Queues.IIntegrationEvent
+  commentId: T:Ledon.Queues.IIntegrationEvent
+  id: IIntegrationEvent
+  parent: Ledon.Queues
+  children: []
+  langs:
+  - csharp
+  - vb
+  name: IIntegrationEvent
+  nameWithType: IIntegrationEvent
+  fullName: Ledon.Queues.IIntegrationEvent
+  type: Interface
+  source:
+    remote:
+      path: src/Ledon.Queues/IIntegrationEvent.cs
+      branch: main
+      repo: https://github.com/wosledon/ledon-framework.git
+    id: IIntegrationEvent
+    path: src/Ledon.Queues/IIntegrationEvent.cs
+    startLine: 7
+  assemblies:
+  - Ledon.Queues
+  namespace: Ledon.Queues
+  summary: >-
+    集成事件标记：跨模块/跨进程的领域事件，经 Outbox 保证至少一次投递。
+
+    与进程内事件（<code>IEventHandler&lt;T&gt;</code>，Ledon.Core）区分：
+
+    进程内事件追求即时，集成事件追求可靠。
+  example: []
+  syntax:
+    content: public interface IIntegrationEvent
+    content.vb: Public Interface IIntegrationEvent
+references:
+- uid: Ledon.Queues
+  commentId: N:Ledon.Queues
+  href: Ledon.html
+  name: Ledon.Queues
+  nameWithType: Ledon.Queues
+  fullName: Ledon.Queues
+  spec.csharp:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Queues
+    name: Queues
+    href: Ledon.Queues.html
+  spec.vb:
+  - uid: Ledon
+    name: Ledon
+    href: Ledon.html
+  - name: .
+  - uid: Ledon.Queues
+    name: Queues
+    href: Ledon.Queues.html
