@@ -33,6 +33,7 @@ app.Run();
 | 结构化日志                             | `Ledon.Serilog`               | `builder.AddLedonSerilog()`                          | Serilog + TraceId/SpanId 富化              |
 | 弹性策略                               | `Ledon.Resilience`            | `AddLedonResilience()`                               | 重试/超时/熔断，接管全部 HttpClient              |
 | 强类型配置                             | `Ledon.Configuration`         | `AddLedonOptions<T>(config)`                         | 绑定 + 启动校验                                  |
+| FluentValidation                      | `Ledon.FluentValidation`      | `AddLedonFluentValidation()`                         | 验证器自动发现 + 统一 400                        |
 | 多租户                                 | `Ledon.MultiTenancy`          | `AddLedonMultiTenancy()`                             | 租户解析 + 后台穿透                              |
 | 测试基建                               | `Ledon.Testing`               | `LedonWebTestHost`                                   | 一行搭 TestServer + 生命周期断言                 |
 
@@ -139,6 +140,17 @@ builder.AddLedonWeb(o => o.DataProtectionRedisConnectionString = "localhost:6379
 ```
 
 应用标识默认取入口程序集名（多服务共享码环时用 `o.DataProtectionApplicationName` 对齐）。连接惰性建立 + `AbortOnConnectFail=false`——Redis 短暂不在线不阻塞启动。
+
+## 验证
+
+DataAnnotations 之外用 FluentValidation（`AddLedonFluentValidation()`，验证器自动发现，失败统一 400 ValidationProblemDetails）：
+
+```csharp
+public class EchoRequestValidator : AbstractValidator<EchoRequest>
+{
+    public EchoRequestValidator() => RuleFor(x => x.Name).NotEmpty().MaximumLength(50);
+}
+```
 
 ## 数据访问
 
@@ -273,6 +285,7 @@ src/Ledon.Configuration/ 强类型配置约定
 src/Ledon.MultiTenancy/ 多租户
 src/Ledon.Testing/      集成测试基建
 src/Ledon.Serilog/       Serilog 结构化日志集成
+src/Ledon.FluentValidation/ FluentValidation 验证器自动发现
 src/Ledon.Queues.RabbitMQ/ RabbitMQ 传输（发件箱 ↔ broker）
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）

@@ -18,6 +18,8 @@
         <PackageVersion Include="Scalar.AspNetCore" Version="2.18.3" />
         <!-- Data Protection Redis 密钥环（按需引入） -->
         <PackageVersion Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.13" />
+        <!-- 验证（按需引入） -->
+        <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
         <!-- 框架运行期 -->
         <PackageVersion Include="Cronos" Version="0.13.0" />
         <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />

@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using FluentValidation;
 using Ledon.Data;
 using Ledon.Module;
 using Ledon.Module.Abstractions;
@@ -96,6 +97,18 @@ public class EchoRequest
 {
     [Required]
     public string Name { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// FluentValidation 验证器（自动发现）：Name 不能为 forbidden——
+/// DataAnnotations 覆盖不到的规则，验证 FV 经同一模型验证管线产出 400。
+/// </summary>
+public class EchoRequestValidator : AbstractValidator<EchoRequest>
+{
+    public EchoRequestValidator()
+    {
+        RuleFor(x => x.Name).NotEqual("forbidden");
+    }
 }
 
 [ApiController]

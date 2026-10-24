@@ -15,6 +15,7 @@
     <Project Path="src/Ledon.Configuration/Ledon.Configuration.csproj" />
     <Project Path="src/Ledon.Core/Ledon.Core.csproj" />
     <Project Path="src/Ledon.Data/Ledon.Data.csproj" />
+    <Project Path="src/Ledon.FluentValidation/Ledon.FluentValidation.csproj" />
     <Project Path="src/Ledon.Module/Ledon.Module.csproj" />
     <Project Path="src/Ledon.MultiTenancy/Ledon.MultiTenancy.csproj" />
     <Project Path="src/Ledon.Observability/Ledon.Observability.csproj" />
