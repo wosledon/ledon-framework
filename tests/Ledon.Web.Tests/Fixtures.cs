@@ -7,6 +7,7 @@ using Ledon.Queues;
 using Ledon.Scheduling;
 using Ledon.Security;
 using Ledon.Web;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -315,6 +316,14 @@ public class TestUserValidator : ILedonUserValidator
         Task.FromResult(userId == "u1"
             ? new LedonUser("u1", "alice", ["secure.read"])
             : null);
+}
+
+// ---------- SignalR 夹具 ----------
+
+/// <summary>SignalR 测试 Hub：自动发现，按约定映射到 /hubs/chat。</summary>
+public class ChatHub : Hub
+{
+    public Task Echo(string message) => Clients.Caller.SendAsync("Echo", message);
 }
 
 // ---------- 数据（ILedonDbContext 自动注册 + 前置自动建库） ----------

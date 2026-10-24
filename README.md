@@ -31,6 +31,7 @@ app.Run();
 | 认证授权                               | `Ledon.Security`              | `AddLedonSecurity()`                                 | JWT + API Key + 权限策略                         |
 | 可观测性                               | `Ledon.Observability`         | `AddLedonObservability()`                            | OTel 链路/指标/日志 + 健康检查 + Prometheus |
 | 结构化日志                             | `Ledon.Serilog`               | `builder.AddLedonSerilog()`                          | Serilog + TraceId/SpanId 富化              |
+| 实时推送                               | `Ledon.SignalR`               | `AddLedonSignalR()`                                 | Hub 自动发现 + 约定路径映射                |
 | 弹性策略                               | `Ledon.Resilience`            | `AddLedonResilience()`                               | 重试/超时/熔断，接管全部 HttpClient              |
 | 强类型配置                             | `Ledon.Configuration`         | `AddLedonOptions<T>(config)`                         | 绑定 + 启动校验                                  |
 | FluentValidation                      | `Ledon.FluentValidation`      | `AddLedonFluentValidation()`                         | 验证器自动发现 + 统一 400                        |
