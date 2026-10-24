@@ -1,0 +1,153 @@
+# Ledon.Core
+class Ledon.AssemblyExtensions
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  System.Collections.Generic.IEnumerable`1[System.Type] GetLoadableTypes(System.Reflection.Assembly)
+  System.String ToString()
+  System.Type GetType()
+interface Ledon.Core.Events.IEventBus
+  System.Threading.Tasks.Task PublishAsync[TEvent](TEvent, System.Threading.CancellationToken)
+interface Ledon.Core.Events.IEventHandler`1
+  System.Threading.Tasks.Task HandleAsync(TEvent, System.Threading.CancellationToken)
+
+# Ledon.Module
+class Ledon.Module.Abstractions.DependsOnAttribute
+  .ctor(Type[])
+  Boolean Equals(System.Object)
+  Boolean IsDefaultAttribute()
+  Boolean Match(System.Object)
+  Int32 GetHashCode()
+  System.String ToString()
+  System.Type GetType()
+  P ModuleTypes : IReadOnlyList`1
+  P TypeId : Object
+class Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute
+  .ctor()
+  Boolean Equals(System.Object)
+  Boolean IsDefaultAttribute()
+  Boolean Match(System.Object)
+  Int32 GetHashCode()
+  System.String ToString()
+  System.Type GetType()
+  P TypeId : Object
+interface Ledon.Module.Abstractions.ILedonPreInitialization
+  System.Threading.Tasks.Task ExecuteAsync(System.Threading.CancellationToken)
+interface Ledon.Module.Abstractions.IModule
+  System.Threading.Tasks.Task OnInitializedAsync(Ledon.Module.Abstractions.ModuleContext, System.Threading.CancellationToken)
+  System.Threading.Tasks.Task OnShutdownAsync(Ledon.Module.Abstractions.ModuleContext, System.Threading.CancellationToken)
+  Void ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)
+interface Ledon.Module.Abstractions.IModuleManager
+  Ledon.Module.Abstractions.ModuleDescriptor GetModule(System.Type)
+  Ledon.Module.Abstractions.ModuleDescriptor GetModule[TModule]()
+  System.Threading.Tasks.Task InitializeAsync(System.IServiceProvider, System.Threading.CancellationToken)
+  System.Threading.Tasks.Task ShutdownAsync(System.Threading.CancellationToken)
+  P IsInitialized : Boolean
+  P Modules : IReadOnlyList`1
+class Ledon.Module.Abstractions.ModuleContext
+  .ctor(ModuleDescriptor, IServiceProvider)
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  System.String ToString()
+  System.Type GetType()
+  P Configuration : IConfiguration
+  P Events : IEventBus
+  P Logger : ILogger
+  P Module : ModuleDescriptor
+  P Services : IServiceProvider
+class Ledon.Module.Abstractions.ModuleDescriptor
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  System.String ToString()
+  System.Type GetType()
+  P Dependencies : IReadOnlyList`1
+  P Instance : IModule
+  P ModuleType : Type
+  P Name : String
+  P State : ModuleState
+enum Ledon.Module.Abstractions.ModuleState
+  Boolean Equals(System.Object)
+  Boolean HasFlag(System.Enum)
+  Int32 CompareTo(System.Object)
+  Int32 GetHashCode()
+  System.String ToString()
+  System.String ToString(System.IFormatProvider)
+  System.String ToString(System.String)
+  System.String ToString(System.String, System.IFormatProvider)
+  System.Type GetType()
+  System.TypeCode GetTypeCode()
+  F Discovered : ModuleState
+  F Failed : ModuleState
+  F Initialized : ModuleState
+  F Registered : ModuleState
+  F Shutdown : ModuleState
+class Ledon.Module.ConventionScanner
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  Microsoft.Extensions.DependencyInjection.IServiceCollection ScanAssembly(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Reflection.Assembly, Microsoft.Extensions.DependencyInjection.ServiceLifetime, System.Collections.Generic.ICollection`1[System.String])
+  System.String ToString()
+  System.Type GetType()
+class Ledon.Module.Dependency.ModuleGraph
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  System.Collections.Generic.IReadOnlyList`1[Ledon.Module.Abstractions.ModuleDescriptor] Build(System.Collections.Generic.IEnumerable`1[System.Type])
+  System.String ToString()
+  System.Type GetType()
+class Ledon.Module.Hosting.LedonOptions
+  .ctor()
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  Ledon.Module.Hosting.LedonOptions AddAssembly(System.Reflection.Assembly)
+  Ledon.Module.Hosting.LedonOptions AddAssembly[TModule]()
+  Ledon.Module.Hosting.LedonOptions AddModule[TModule]()
+  Ledon.Module.Hosting.LedonOptions DisableAutoDiscovery()
+  System.String ToString()
+  System.Type GetType()
+  P DefaultServiceLifetime : ServiceLifetime
+class Ledon.Module.LedonAssemblies
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  System.Collections.Generic.IReadOnlyList`1[System.Reflection.Assembly] Scan(System.Action`1[Ledon.Module.Hosting.LedonOptions])
+  System.String ToString()
+  System.Type GetType()
+class Ledon.Module.LedonModuleException
+  .ctor(String)
+  .ctor(String, Exception)
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  System.Exception GetBaseException()
+  System.String ToString()
+  System.Type GetType()
+  System.Type GetType()
+  Void GetObjectData(System.Runtime.Serialization.SerializationInfo, System.Runtime.Serialization.StreamingContext)
+  P Data : IDictionary
+  P HResult : Int32
+  P HelpLink : String
+  P InnerException : Exception
+  P Message : String
+  P Source : String
+  P StackTrace : String
+  P TargetSite : MethodBase
+class Ledon.Module.LedonServiceCollectionExtensions
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  Microsoft.Extensions.DependencyInjection.IServiceCollection AddLedon(Microsoft.Extensions.DependencyInjection.IServiceCollection, System.Action`1[Ledon.Module.Hosting.LedonOptions])
+  System.String ToString()
+  System.Type GetType()
+class Ledon.Module.LedonServiceProviderExtensions
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  System.String ToString()
+  System.Threading.Tasks.Task InitializeModulesAsync(System.IServiceProvider, System.Threading.CancellationToken)
+  System.Threading.Tasks.Task ShutdownModulesAsync(System.IServiceProvider, System.Threading.CancellationToken)
+  System.Type GetType()
+class Ledon.Module.Runtime.ModuleManager
+  Boolean Equals(System.Object)
+  Int32 GetHashCode()
+  Ledon.Module.Abstractions.ModuleDescriptor GetModule(System.Type)
+  Ledon.Module.Abstractions.ModuleDescriptor GetModule[TModule]()
+  System.String ToString()
+  System.Threading.Tasks.Task InitializeAsync(System.IServiceProvider, System.Threading.CancellationToken)
+  System.Threading.Tasks.Task ShutdownAsync(System.Threading.CancellationToken)
+  System.Type GetType()
+  P IsInitialized : Boolean
+  P Modules : IReadOnlyList`1
