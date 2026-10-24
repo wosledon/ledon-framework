@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
 using Ledon.Caching;
@@ -6,6 +7,7 @@ using Ledon.Module;
 using Ledon.Observability;
 using Ledon.Queues;
 using Ledon.Scheduling;
+using Ledon.Testing;
 using Ledon.Web.Tests.Fixtures;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -376,6 +378,52 @@ public class FeaturePackagesTests : IDisposable
         Assert.Equal("created", created!.Name);
         Assert.True(cacheB.TryGet<Payload>("new", out var shared));
         Assert.Equal("created", shared!.Name);
+    }
+
+    [Fact]
+    public async Task Distributed_cache_round_trips_against_real_redis()
+    {
+        // 真实 Redis（Testcontainers）——需要 Docker；无 Docker 环境跳过
+        if (!await DockerAvailableAsync())
+            return;
+
+        await using var redis = new LedonRedisContainer();
+        var connectionString = await redis.StartAsync();
+
+        var services = new ServiceCollection();
+        services.AddLedonDistributedCaching(o => o.RedisConnectionString = connectionString);
+        using var provider = services.BuildServiceProvider();
+
+        var cacheA = provider.GetRequiredService<ICacheService>();
+        var cacheB = provider.GetRequiredService<ICacheService>();
+
+        cacheA.Set("k", new Payload { Name = "from-redis" });
+        Assert.True(cacheB.TryGet<Payload>("k", out var seen));
+        Assert.Equal("from-redis", seen!.Name);
+    }
+
+    private static async Task<bool> DockerAvailableAsync()
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo("docker", "info")
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+
+            using var process = Process.Start(startInfo);
+            if (process is null)
+                return false;
+
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            await process.WaitForExitAsync(timeout.Token);
+            return process.ExitCode == 0;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     // ---------- 定时任务 ----------

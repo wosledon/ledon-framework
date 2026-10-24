@@ -28,4 +28,6 @@ host.Services.GetRequiredService<IModuleManager>()
     .ShouldBeInitializedInOrder("DataModule", "UserModule");
 ```
 
+真实基础设施（Testcontainers，需 Docker）：`new LedonRedisContainer()` / `new LedonPostgresContainer()`，`StartAsync()` 返回连接串。
+
 完整文档：<https://github.com/wosledon/ledon-framework>
