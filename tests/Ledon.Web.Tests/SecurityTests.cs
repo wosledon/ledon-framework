@@ -94,6 +94,66 @@ public class SecurityTests : IDisposable
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/secure/whoami")).StatusCode);
     }
 
+    // ---------- 刷新令牌 ----------
+
+    [Fact]
+    public async Task Refresh_token_round_trips_and_rotation_invalidates_old()
+    {
+        await using var provider = new ServiceCollection()
+            .AddLedonSecurity()
+            .BuildServiceProvider();
+
+        var refresh = provider.GetRequiredService<IRefreshTokenService>();
+
+        var token = await refresh.IssueAsync("u1");
+        Assert.Equal("u1", await refresh.ValidateAsync(token));
+
+        // 轮换：新令牌可用，旧令牌立即作废
+        var rotated = await refresh.RotateAsync(token);
+        Assert.NotNull(rotated);
+        Assert.NotEqual(token, rotated);
+        Assert.Equal("u1", await refresh.ValidateAsync(rotated!));
+        Assert.Null(await refresh.ValidateAsync(token));
+
+        // 未知/篡改的令牌 → null
+        Assert.Null(await refresh.ValidateAsync("not-a-real-token"));
+        Assert.Null(await refresh.RotateAsync("not-a-real-token"));
+    }
+
+    [Fact]
+    public async Task Expired_refresh_token_is_rejected()
+    {
+        await using var provider = new ServiceCollection()
+            .AddLedonSecurity(o => o.RefreshTokenExpiration = TimeSpan.FromMilliseconds(1))
+            .BuildServiceProvider();
+
+        var refresh = provider.GetRequiredService<IRefreshTokenService>();
+
+        var token = await refresh.IssueAsync("u1");
+        await Task.Delay(50);
+
+        Assert.Null(await refresh.ValidateAsync(token));
+        Assert.Null(await refresh.RotateAsync(token));
+    }
+
+    [Fact]
+    public async Task Replayed_revoked_token_revokes_the_whole_family()
+    {
+        await using var provider = new ServiceCollection()
+            .AddLedonSecurity()
+            .BuildServiceProvider();
+
+        var refresh = provider.GetRequiredService<IRefreshTokenService>();
+
+        var first = await refresh.IssueAsync("u1");
+        var second = await refresh.RotateAsync(first);
+        Assert.NotNull(second);
+
+        // 重放已吊销的 first：不仅拒绝，还把该用户其余令牌全部作废（second 也失效）
+        Assert.Null(await refresh.ValidateAsync(first));
+        Assert.Null(await refresh.ValidateAsync(second));
+    }
+
     public void Dispose()
     {
         _client?.Dispose();

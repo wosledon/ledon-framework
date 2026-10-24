@@ -35,4 +35,7 @@ public sealed class LedonSecurityOptions
 
     /// <summary>权限声明类型（claim type），默认 permission。</summary>
     public string PermissionClaimType { get; set; } = "permission";
+
+    /// <summary>刷新令牌有效期，默认 7 天（见 <see cref="IRefreshTokenService"/>）。</summary>
+    public TimeSpan RefreshTokenExpiration { get; set; } = TimeSpan.FromDays(7);
 }

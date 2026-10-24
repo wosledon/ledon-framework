@@ -164,6 +164,8 @@ builder.Services.AddLedonSecurity(o => o.Jwt.SigningKey = Configuration["Jwt:Key
 var token = provider.GetRequiredService<IJwtTokenGenerator>().Generate("u1", "alice", ["users.read"]);
 ```
 
+访问令牌过期后用 `IRefreshTokenService` 轮换（哈希存储 + 重放保护），详见[认证授权文档](docs/security.md)。
+
 ## 可观测性
 
 **框架自身即可观测**——模块生命周期、事件发布、队列处理全部产出 span，`AddLedonObservability()` 自动收听：

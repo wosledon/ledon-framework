@@ -47,7 +47,27 @@ public class AuditFilter(ICurrentUser user)
 
 `ICurrentUser` 暴露 `IsAuthenticated` / `UserId` / `UserName` / `HasPermission(p)` / `Permissions`。非 Web 场景（后台任务）下为匿名。
 
+## 刷新令牌
+
+访问令牌过期后换取新令牌（无需重新登录）：
+
+```csharp
+// 登录：两个令牌一起签发
+var access = jwt.Generate("u1", "alice", ["users.read"]);
+var refreshToken = await refresh.IssueAsync("u1");
+
+// 刷新：轮换换取新刷新令牌（旧的随即作废）
+var newRefresh = await refresh.RotateAsync(oldRefreshToken);
+if (newRefresh is null) { /* 刷新失败：重新登录 */ }
+```
+
+- 刷新令牌为 256-bit 随机不透明串，服务端**只存 SHA-256 哈希**（库被拖库也换不出可用令牌）；
+- 默认有效期 7 天：`o.RefreshTokenExpiration` 可调；
+- **轮换语义**：每次刷新旧令牌即吊销，新令牌与旧令牌不共存；
+- **重放保护**：已吊销的令牌被再次使用（重放）时，该用户全部令牌作废——请引导客户端重新登录；
+- 默认进程内存储；多实例部署替换为共享存储：实现 `IRefreshTokenStore`（如 Redis）并注册，框架的 TryAdd 注册让位于手动注册。
+
 ## 边界
 
-- 只发**访问令牌**，无 refresh token 流程（过期重新登录/签发）；无令牌吊销列表（需要踢人下线时缩短有效期 + 换签名密钥）；
+- 访问令牌本身无吊销列表（JWT 无状态特性）——需要踢人下线时缩短 `o.Jwt.Expiration` + 轮换刷新令牌（吊销刷新令牌即切断续期）；
 - API Key 为静态字典配置，适合少量固定调用方；大量动态 Key 请替换为自己的方案（实现 `IAuthenticationHandler` 注册即可）。

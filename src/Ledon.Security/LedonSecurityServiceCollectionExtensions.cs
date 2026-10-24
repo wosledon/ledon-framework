@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,8 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// builder.Services.AddLedonSecurity(o =&gt; o.Jwt.SigningKey = Configuration["Jwt:Key"]!);
 /// </code>
 /// 之后：<c>[Authorize]</c> 走 JWT Bearer；<c>[Authorize(Policy = "权限名")]</c> 走权限策略；
-/// 配置了 API Key 时请求头 <c>X-Api-Key</c> 亦可认证。
+/// 配置了 API Key 时请求头 <c>X-Api-Key</c> 亦可认证。刷新令牌签发/轮换走
+/// <see cref="IRefreshTokenService"/>（自动注册，默认进程内存储）。
 /// </summary>
 public static class LedonSecurityServiceCollectionExtensions
 {
@@ -31,6 +33,10 @@ public static class LedonSecurityServiceCollectionExtensions
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddHttpContextAccessor();
         services.AddSingleton<ICurrentUser, CurrentUser>();
+
+        // 刷新令牌（TryAdd：多实例部署可替换为共享存储实现后自行注册）
+        services.TryAddSingleton<IRefreshTokenStore, InMemoryRefreshTokenStore>();
+        services.TryAddSingleton<IRefreshTokenService, RefreshTokenService>();
 
         var authentication = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 
