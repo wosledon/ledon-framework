@@ -29,6 +29,17 @@ builder.Services.AddLedonGrpcClient<Greeter.GreeterClient>("https://localhost:70
 
 地址配置驱动；已注册 `Ledon.Resilience` 时自动获得重试/超时/熔断。多服务寻址可接 `Ledon.Aspire` 的服务发现（`https+服务名://`）。
 
+## 健康检查与日志拦截器
+
+```csharp
+builder.Services.AddLedonGrpc();   // UseHealthChecks / UseLoggingInterceptor 默认都开
+app.MapLedonGrpcServices();        // 一并映射 grpc.health.v1.Health
+```
+
+- **标准健康服务**：`grpc.health.v1.Health/Check`（整体状态默认 Serving）——负载均衡/K8s 的 gRPC 探针直接可用，不必自己实现；
+- **日志拦截器**：每次调用记录方法、耗时与成败（unary/客户端流/服务端流/双流四种都覆盖）——gRPC 调用不只在链路里可见；
+- 关掉任一：`AddLedonGrpc(o => { o.UseHealthChecks = false; o.UseLoggingInterceptor = false; })`。
+
 ## 与 HTTP API 的分工
 
 | 场景                        | 选择               |

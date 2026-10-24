@@ -1,5 +1,8 @@
 using Ledon.Configuration.Nacos;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http.Headers;
 
@@ -129,9 +132,41 @@ public class NacosConfigurationTests
         Assert.Equal("second", value);
     }
 
+    /// <summary>强类型配置的热更新：配置中心变更 → IConfiguration 重载 → IOptionsMonitor 收到新值。</summary>
     [Fact]
-    public void Auth_login_happens_when_credentials_configured()
+    public async Task Strongly_typed_options_hot_reload_via_options_monitor()
     {
+        var configs = new Dictionary<string, string> { ["app"] = "Smtp:Host=first.example.com\nSmtp:Port=25" };
+        var configuration = Build(configs, ["app"]);
+
+        var services = new ServiceCollection();
+        services.AddLedonOptions<SmtpOptions>(configuration);
+        await using var provider = services.BuildServiceProvider();
+
+
+        var monitor = provider.GetRequiredService<IOptionsMonitor<SmtpOptions>>();
+        Assert.Equal("first.example.com", monitor.CurrentValue.Host);
+
+        // 配置中心内容变更 → 轮询热更新 → IOptionsMonitor 的 CurrentValue 跟着变
+        configs["app"] = "Smtp:Host=second.example.com\nSmtp:Port=25";
+
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (monitor.CurrentValue.Host != "second.example.com" && DateTime.UtcNow < deadline)
+            await Task.Delay(50);
+
+        Assert.Equal("second.example.com", monitor.CurrentValue.Host);
+    }
+
+    /// <summary>强类型选项夹具（DataAnnotations 启动校验）。</summary>
+    public sealed class SmtpOptions
+    {
+        [Required] public string Host { get; set; } = string.Empty;
+
+        [Range(1, 65535)] public int Port { get; set; }
+    }
+
+    [Fact]
+    public void Auth_login_happens_when_credentials_configured()    {
         var handler = new FakeNacosHandler(new Dictionary<string, string> { ["app"] = "Value=v" })
         {
             RequireToken = true,   // 未带有效 token 一律 401

@@ -8,4 +8,11 @@ public sealed class LedonQueueOptions
 
     /// <summary>有界队列容量（满了写入方等待），默认 1000。</summary>
     public int Capacity { get; set; } = 1000;
+
+    /// <summary>
+    /// 停机 drain 时长（默认 5 秒）：宿主停止时把队列中已入队、未处理的任务继续处理完
+    /// （有界），避免优雅退出丢任务。设为 <see cref="TimeSpan.Zero"/> 则不 drain，直接丢弃
+    /// （丢弃数量记 Warning 日志）。正在执行中的任务由停机令牌取消，语义不变。
+    /// </summary>
+    public TimeSpan DrainTimeout { get; set; } = TimeSpan.FromSeconds(5);
 }

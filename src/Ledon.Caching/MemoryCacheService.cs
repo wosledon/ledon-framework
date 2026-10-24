@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Ledon.Caching;
 
@@ -13,6 +14,7 @@ internal sealed class MemoryCacheService : ICacheService
 {
     private readonly IMemoryCache _cache;
     private readonly LedonCachingOptions _options;
+    private readonly ICacheKeyPrefixProvider? _prefixProvider;
 
     /// <summary>进行中的回源任务（key 为完整 key）：保证同一 key 只回源一次。</summary>
     private readonly ConcurrentDictionary<string, object> _inFlight = new();
@@ -20,10 +22,15 @@ internal sealed class MemoryCacheService : ICacheService
     /// <summary>进程内 key 索引：前缀删除用。条目逐出/移除时经回调清理，不随缓存无限增长。</summary>
     private readonly ConcurrentDictionary<string, byte> _keys = new();
 
-    public MemoryCacheService(IMemoryCache cache, LedonCachingOptions options)
+    public MemoryCacheService(
+        IMemoryCache cache,
+        LedonCachingOptions options,
+        IServiceProvider services)
     {
         _cache = cache;
         _options = options;
+        // 动态前缀提供者（多租户隔离）：单例安全的实现（读环境/静态状态）
+        _prefixProvider = services.GetService<ICacheKeyPrefixProvider>();
     }
 
     public bool TryGet<T>(string key, out T? value)
@@ -139,6 +146,12 @@ internal sealed class MemoryCacheService : ICacheService
         _cache.Set(fullKey, value, entryOptions);
     }
 
-    private string FullKey(string key) =>
-        string.IsNullOrEmpty(_options.KeyPrefix) ? key : $"{_options.KeyPrefix}:{key}";
+    private string FullKey(string key)
+    {
+        var prefix = _prefixProvider?.GetKeyPrefix();
+        if (string.IsNullOrEmpty(prefix))
+            prefix = _options.KeyPrefix;
+
+        return string.IsNullOrEmpty(prefix) ? key : $"{prefix}:{key}";
+    }
 }

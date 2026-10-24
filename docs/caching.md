@@ -73,8 +73,21 @@ builder.Services.AddLedonHybridCaching();   // 注册了 IDistributedCache 即�
 services.AddLedonCaching(o => o.KeyPrefix = "module-a:");
 ```
 
-## 选择建议
+## 多租户：缓存键隔离（防跨租户数据泄漏）
 
+`KeyPrefix` 是进程级常量——多租户应用共享缓存时两个租户同一 key 会互读。配了多租户包后自动按租户加前缀：
+
+```csharp
+builder.Services.AddLedonMultiTenancy();   // 默认 CacheKeyPrefix = "tenant:"
+builder.Services.AddLedonCaching();        // 缓存键变成 tenant:{租户ID}:{原key}
+```
+
+- 取值走环境租户（`TenantContext.AmbientTenantId`，Web 中间件/后台 SetAmbient 写入），单例安全；
+- 无租户上下文（单租户模式）自动退化为静态前缀，不受影响；
+- 关闭：`AddLedonMultiTenancy(o => o.CacheKeyPrefix = "")`，改为自行在 key 里带租户；
+- 自定义前缀逻辑：实现 `ICacheKeyPrefixProvider` 注册即可（TryAdd，手动优先）。
+
+## 选择建议
 - 读多写少、允许秒级陈旧 → 缓存
 - 强一致要求 → 直接读库，缓存只用于无关紧要的投影
 - 大 value（>100KB）谨慎：Redis 单 value 默认上限 512MB，但大 value 会拖慢序列化

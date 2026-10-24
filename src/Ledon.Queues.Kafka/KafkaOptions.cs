@@ -32,7 +32,6 @@ public sealed class KafkaOptions
 
     /// <summary>额外订阅的主题（发现机制之外手动指定），默认空。</summary>
     public List<string> ExtraTopics { get; set; } = [];
-
     /// <summary>
     /// 单条消息的最大投递尝试次数（默认 5）。超过后进入死信主题（<c>{主题}{DeadLetterTopicSuffix}</c>），
     /// 不再阻塞分区重投；重置消费组偏移量可重放。设为 0 或负值表示不启用死信（无限重投）。

@@ -176,6 +176,10 @@ var demo = new Demo.DemoClient(channel);
 var reply = await demo.PingAsync(new PingRequest { Message = "Ledon" });
 await Show("GRPC", $"Demo.Ping → {reply.Reply}");
 
+// gRPC 标准健康检查服务（grpc.health.v1）：负载均衡/K8s 探针可直接用
+var health = new Grpc.Health.V1.Health.HealthClient(channel);
+var healthReply = await health.CheckAsync(new Grpc.Health.V1.HealthCheckRequest { Service = "" });
+await Show("GRPC health", $"grpc.health.v1.Health/Check → {healthReply.Status}");
 Console.WriteLine("\n正在停止宿主（模块将按初始化逆序自动关闭）...");
 await app.StopAsync();
 

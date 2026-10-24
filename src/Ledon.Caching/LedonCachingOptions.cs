@@ -9,6 +9,10 @@ public sealed class LedonCachingOptions
     /// <summary>默认滑动过期（一段时间未访问即失效），默认空 = 不用滑动过期。</summary>
     public TimeSpan? DefaultSlidingExpiration { get; set; }
 
-    /// <summary>所有 key 的前缀（多应用共享缓存时避免冲突），默认空。</summary>
+    /// <summary>
+    /// 所有 key 的前缀（多应用共享缓存时避免冲突），默认空。
+    /// 多租户隔离请实现 <see cref="ICacheKeyPrefixProvider"/>（按租户动态前缀），
+    /// 而不是把这个静态前缀当租户隔离手段——它是进程级常量，所有租户共用。
+    /// </summary>
     public string? KeyPrefix { get; set; }
 }

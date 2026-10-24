@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Ledon.Caching;
 
@@ -31,11 +32,16 @@ internal sealed class HybridCacheService : ICacheService
 {
     private readonly HybridCache _cache;
     private readonly LedonHybridCachingOptions _options;
+    private readonly ICacheKeyPrefixProvider? _prefixProvider;
 
-    public HybridCacheService(HybridCache cache, LedonHybridCachingOptions options)
+    public HybridCacheService(
+        HybridCache cache,
+        LedonHybridCachingOptions options,
+        IServiceProvider services)
     {
         _cache = cache;
         _options = options;
+        _prefixProvider = services.GetService<ICacheKeyPrefixProvider>();
     }
 
     public bool TryGet<T>(string key, out T? value)
@@ -103,8 +109,8 @@ internal sealed class HybridCacheService : ICacheService
     {
         ArgumentNullException.ThrowIfNull(prefix);
 
-        // 标签 = 命名空间（键首段）：删除经 L1+L2 全局生效
-        return _cache.RemoveByTagAsync(NamespaceOf(prefix), cancellationToken).AsTask();
+        // 标签 = 命名空间（键首段，含动态前缀）：删除经 L1+L2 全局生效
+        return _cache.RemoveByTagAsync(NamespaceOf(FullKey(prefix)), cancellationToken).AsTask();
     }
 
     private HybridCacheEntryOptions BuildOptions(string key, TimeSpan? expiration) =>
@@ -123,6 +129,12 @@ internal sealed class HybridCacheService : ICacheService
         return separator < 0 ? key : key[..separator];
     }
 
-    private string FullKey(string key) =>
-        string.IsNullOrEmpty(_options.KeyPrefix) ? key : $"{_options.KeyPrefix}{key}";
+    private string FullKey(string key)
+    {
+        var prefix = _prefixProvider?.GetKeyPrefix();
+        if (string.IsNullOrEmpty(prefix))
+            prefix = _options.KeyPrefix;
+
+        return string.IsNullOrEmpty(prefix) ? key : $"{prefix}{key}";
+    }
 }

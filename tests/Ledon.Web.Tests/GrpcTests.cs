@@ -3,6 +3,7 @@ using System.Text;
 using Grpc.AspNetCore.Server;
 using Grpc.Core;
 using Ledon.Grpc;
+using Ledon.Testing;
 using Ledon.Web.Tests.Fixtures;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -33,6 +34,24 @@ public class GrpcTests : IDisposable
     }
 
     [Fact]
+    public void Health_service_is_discovered_when_enabled_and_absent_when_disabled()
+    {
+        var withHealth = new ServiceCollection();
+        withHealth.AddLedonGrpc();   // UseHealthChecks 默认开
+        using var providerWithHealth = withHealth.BuildServiceProvider();
+        Assert.Contains(
+            providerWithHealth.GetRequiredService<DiscoveredGrpcServices>().Services,
+            type => type == typeof(global::Grpc.HealthCheck.HealthServiceImpl));
+
+        var withoutHealth = new ServiceCollection();
+        withoutHealth.AddLedonGrpc(o => o.UseHealthChecks = false);
+        using var providerWithoutHealth = withoutHealth.BuildServiceProvider();
+        Assert.DoesNotContain(
+            providerWithoutHealth.GetRequiredService<DiscoveredGrpcServices>().Services,
+            type => type == typeof(global::Grpc.HealthCheck.HealthServiceImpl));
+    }
+
+    [Fact]
     public void IsGrpcService_rejects_abstract_base_and_plain_classes()
     {
         Assert.True(GrpcServiceDiscovery.IsGrpcService(typeof(FakeGreeter)));
@@ -44,24 +63,25 @@ public class GrpcTests : IDisposable
     [Fact]
     public async Task Discovered_services_are_mapped_by_convention_and_mapping_is_idempotent()
     {
-        var builder = WebApplication.CreateBuilder();
-        builder.WebHost.UseTestServer();
-        builder.Services.AddLedonGrpc();
+        await using var host = await LedonWebTestHost.StartAsync(
+            configure: builder => builder.Services.AddLedonGrpc(),
+            configureApp: app => app.MapLedonGrpcServices());
 
-        var app = builder.Build();
-        _app = app;
-        app.MapLedonGrpcServices();
-        await app.StartAsync();
-
-        var routes = RoutePatterns(app);
+        var routes = host.App.Services.GetRequiredService<Microsoft.AspNetCore.Routing.EndpointDataSource>()
+            .Endpoints
+            .Select(endpoint => (endpoint as Microsoft.AspNetCore.Routing.RouteEndpoint)?.RoutePattern?.RawText)
+            .ToArray();
 
         // FakeGreeter.BindService 注册的 SayHello 方法被映射
         Assert.Contains(routes, pattern => pattern!.Contains("SayHello", StringComparison.Ordinal));
 
-        // 幂等：重复映射不产生重复端点
-        app.MapLedonGrpcServices();
+        // 标准健康检查服务（默认开）一并映射
+        Assert.Contains(routes, pattern => pattern!.Contains("grpc.health.v1.Health", StringComparison.Ordinal));
 
-        var routesAgain = RoutePatterns(app)
+        // 幂等：重复映射不产生重复端点
+        host.App.MapLedonGrpcServices();
+
+        var routesAgain = RoutePatterns(host.App)
             .Where(pattern => pattern?.Contains("SayHello", StringComparison.Ordinal) == true)
             .Count();
 

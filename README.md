@@ -25,8 +25,8 @@ app.Run();
 | Web 集成（端点/控制器/OpenAPI/规范化） | `Ledon.Web`                   | `builder.AddLedonWeb()`                              | 含 ProblemDetails、关联 ID、统一响应、版本化、CORS、限流、压缩、请求超时、幂等 |
 | 数据访问（EF Core + 发件箱）           | `Ledon.Data` / `Ledon.Queues` | `AddLedonData()` / `AddLedonOutbox()`                | 自动注册 + 前置自动建库 + 至少一次投递 + 审计/软删除 |
 | 可靠投递（收件箱去重/死信管理）        | `Ledon.Queues`                | `AddLedonInbox()`                                    | 至少一次投递 + 恰好一次处理；死信查询/重放         |
-| 缓存                                   | `Ledon.Caching`               | `AddLedonCaching()` / `AddLedonDistributedCaching()` / `AddLedonHybridCaching()` | 内存（single-flight）/ 分布式（Redis）/ 混合两级 |
-| 后台任务                               | `Ledon.Queues`                | `AddLedonQueues()`                                   | Channel 有界 + 多 worker                          |
+| 缓存                                   | `Ledon.Caching`               | `AddLedonCaching()` / `AddLedonDistributedCaching()` / `AddLedonHybridCaching()` | 内存（single-flight）/ 分布式（Redis）/ 混合两级；多租户键自动隔离 |
+| 后台任务                               | `Ledon.Queues`                | `AddLedonQueues()`                                   | Channel 有界 + 多 worker + 停机 drain                 |
 | 消息中间件传输                         | `Ledon.Queues.RabbitMQ` / `Ledon.Queues.Kafka` | `AddLedonRabbitMqTransport()` / `AddLedonKafkaTransport()` | 发件箱 ↔ broker，跨服务投递；Kafka 消费侧带死信主题 |
 | 定时任务                               | `Ledon.Scheduling`            | `AddLedonScheduling()`                               | cron 驱动（5/6 段）+ 执行历史 + 手动触发          |
 | 认证授权                               | `Ledon.Security`              | `AddLedonSecurity()`                                 | JWT + API Key + 权限策略                          |
@@ -42,7 +42,7 @@ app.Run();
 | 多租户                                 | `Ledon.MultiTenancy`          | `AddLedonMultiTenancy()`                             | 租户解析 + 后台穿透 + 查询过滤助手                |
 | 测试基建                               | `Ledon.Testing`               | `LedonWebTestHost`                                   | 一行搭 TestServer + 生命周期断言                 |
 | 云原生默认值                           | `Ledon.Aspire`                | `AddLedonServiceDefaults()`                          | OTel+健康检查+弹性+服务发现一次装齐              |
-| gRPC 服务间通信                       | `Ledon.Grpc`                  | `AddLedonGrpc()` / `AddLedonGrpcClient<T>()`         | 服务自动发现 + 约定映射 + 强类型客户端            |
+| gRPC 服务间通信                       | `Ledon.Grpc`                  | `AddLedonGrpc()` / `AddLedonGrpcClient<T>()`         | 服务自动发现 + 约定映射 + 强类型客户端 + 健康服务/日志拦截器 |
 
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
@@ -323,7 +323,7 @@ src/Ledon.Queues.Kafka/    Kafka 传输（发件箱 ↔ broker）
 src/Ledon.Grpc/            gRPC 服务间通信（自动发现 + 约定映射 + 客户端）
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（模块 26 + Web 140 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 146 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）
@@ -344,6 +344,8 @@ docs/                   文档站（docfx）
 ## 发布
 
 CI（`.github/workflows/ci.yml`）在 push/PR 时 build+test；打 `v*` tag 时按版本打包并推 NuGet.org（需仓库 secret `NUGET_API_KEY`）。本地打包：`dotnet pack -c Release`。
+
+每次推送到 main 还会跑 `Preview Packages` 工作流：产出 `{VersionPrefix}-preview.{run_number}` 的预览包并作为构件保留 14 天（不推 NuGet.org，不污染正式源）。
 
 ## 可靠投递：收件箱去重 + 死信管理
 

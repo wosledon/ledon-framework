@@ -20,15 +20,18 @@ internal sealed class DistributedCacheService : ICacheService
     private readonly IDistributedCache _cache;
     private readonly LedonDistributedCachingOptions _options;
     private readonly IConnectionMultiplexer? _multiplexer;
+    private readonly ICacheKeyPrefixProvider? _prefixProvider;
 
     public DistributedCacheService(
         IDistributedCache cache,
         LedonDistributedCachingOptions options,
-        IConnectionMultiplexer? multiplexer = null)
+        IConnectionMultiplexer? multiplexer = null,
+        ICacheKeyPrefixProvider? prefixProvider = null)
     {
         _cache = cache;
         _options = options;
         _multiplexer = multiplexer;
+        _prefixProvider = prefixProvider;
     }
 
     public bool TryGet<T>(string key, out T? value)
@@ -115,5 +118,12 @@ internal sealed class DistributedCacheService : ICacheService
             SlidingExpiration = slidingExpiration ?? _options.DefaultSlidingExpiration,
         };
 
-    private string FullKey(string key) => $"{_options.KeyPrefix}{key}";
+    private string FullKey(string key)
+    {
+        var prefix = _prefixProvider?.GetKeyPrefix();
+        if (string.IsNullOrEmpty(prefix))
+            prefix = _options.KeyPrefix;
+
+        return $"{prefix}{key}";
+    }
 }

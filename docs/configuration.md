@@ -24,11 +24,28 @@ public class SmtpOptions
 读取与标准 options 模式一致：注入 `IOptions<SmtpOptions>` / `IOptionsSnapshot<>` / `IOptionsMonitor<>`。
 
 ## 与模块配置的关系
-
 `ModuleContext.Configuration` 暴露宿主配置（任意节、任意键），适合模块读取**共享配置**；`AddLedonOptions<T>` 适合模块**自己的强类型选项**（带校验契约）。两者可混用。
 
 ## 配置中心（Nacos）
 
+远程配置 + 热更新。强类型配置（`AddLedonOptions<T>`）配 `IOptionsMonitor<T>` 消费，
+配置中心变更后自动拿到新值（已对该链路做集成测试）：
+
+```csharp
+// Program.cs
+builder.Configuration.AddLedonNacos(o => { o.ServerAddresses = ["http://nacos:8848"]; o.DataIds = ["app"]; });
+builder.Services.AddLedonOptions<SmtpOptions>(builder.Configuration);
+
+// 业务代码：改配置中心 → CurrentValue 自动变
+public class Mailer(IOptionsMonitor<SmtpOptions> options)
+{
+    public string Host => options.CurrentValue.Host;
+}
+```
+
+- 轮询检测变更（默认 30s）→ `IConfiguration` 重载 → `IOptionsMonitor` 联动；
+- Apollo（`AddLedonApollo`）同一套语义；多命名空间/多 DataId 合并规则见各包文档；
+- 启动时拉不到配置直接失败（不带病启动）；轮询失败不抛，旧配置继续生效。
 要把配置托管到 Nacos（多环境集中管理 + 变更热更新）时装 `Ledon.Configuration.Nacos`：
 
 ```csharp

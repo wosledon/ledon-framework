@@ -34,6 +34,8 @@ public class ArchitectureTests
         ["Ledon.Queues.Kafka"] = ["Ledon.Queues"],
         ["Ledon.Testing"] = ["Ledon.Module", "Ledon.Web"],
         ["Ledon.Grpc"] = ["Ledon.Module"],
+        // 缓存键的租户隔离（ICacheKeyPrefixProvider 实现）
+        ["Ledon.MultiTenancy"] = ["Ledon.Caching"],
 
         // 只依赖 Microsoft.Extensions.* 的轻量接入包
         ["Ledon.Configuration.Nacos"] = [],

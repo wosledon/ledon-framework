@@ -42,4 +42,11 @@ public sealed class MultiTenancyOptions
     /// Host 不以后缀结尾（apex 域名或无关域名）时按单租户处理。
     /// </summary>
     public string HostSuffix { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 缓存键的租户前缀（默认 <c>tenant:</c>）：配了缓存包（AddLedonCaching 等）时，
+    /// 当前租户下的缓存键自动变成 <c>tenant:{租户ID}:{原key}</c>——不配则租户间互串（数据泄漏）。
+    /// 置空可关闭（自行在 key 里带租户）。
+    /// </summary>
+    public string CacheKeyPrefix { get; set; } = "tenant:";
 }

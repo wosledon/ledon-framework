@@ -1,4 +1,5 @@
 using Ledon.Caching;
+using Ledon.MultiTenancy;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -140,9 +141,51 @@ public class CacheExtensionTests
         Assert.Equal("c", await cache.GetAsync<string>("orders:1"));
     }
 
+    // ---------- 多租户缓存隔离 ----------
+
     [Fact]
-    public async Task Hybrid_cache_set_and_remove_roundtrip()
+    public void Tenant_cache_keys_are_isolated_between_tenants()
     {
+        var services = new ServiceCollection();
+        services.AddLedonMultiTenancy();
+        services.AddLedonCaching();
+        using var provider = services.BuildServiceProvider();
+        var cache = provider.GetRequiredService<ICacheService>();
+
+        using (TenantContext.SetAmbient("tenant-a"))
+            cache.Set("shared-key", "a 的数据");
+
+        using (TenantContext.SetAmbient("tenant-b"))
+        {
+            // tenant-b 读不到 tenant-a 写进去的值——否则就是跨租户数据泄漏
+            Assert.False(cache.TryGet<string>("shared-key", out _));
+            cache.Set("shared-key", "b 的数据");
+        }
+
+        using (TenantContext.SetAmbient("tenant-a"))
+            Assert.Equal("a 的数据", cache.GetAsync<string>("shared-key").GetAwaiter().GetResult());
+
+        using (TenantContext.SetAmbient("tenant-b"))
+            Assert.Equal("b 的数据", cache.GetAsync<string>("shared-key").GetAwaiter().GetResult());
+    }
+
+    [Fact]
+    public void No_tenant_context_uses_static_prefix()
+    {
+        var services = new ServiceCollection();
+        services.AddLedonMultiTenancy(o => o.CacheKeyPrefix = "");   // 关闭租户前缀
+        services.AddLedonCaching(o => o.KeyPrefix = "app:");
+        using var provider = services.BuildServiceProvider();
+        var cache = provider.GetRequiredService<ICacheService>();
+
+        // 单租户模式：租户前后缀都退化为静态前缀，读写一致
+        cache.Set("k", "v");
+        Assert.True(cache.TryGet<string>("k", out var value));
+        Assert.Equal("v", value);
+    }
+
+    [Fact]
+    public async Task Hybrid_cache_set_and_remove_roundtrip()    {
         var services = new ServiceCollection();
         services.AddLedonHybridCaching();   // 无 L2：纯 L1
         using var provider = services.BuildServiceProvider();

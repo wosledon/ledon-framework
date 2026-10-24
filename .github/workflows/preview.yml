@@ -1,0 +1,40 @@
+name: Preview Packages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # 手动触发
+
+# 同一时间只保留一个打包任务
+concurrency:
+  group: preview-packages
+  cancel-in-progress: true
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: 安装 .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: 还原
+        run: dotnet restore
+
+      - name: 打包（预览版本：VersionPrefix + preview.{run_number}）
+        run: >
+          dotnet pack --configuration Release
+          -p:VersionSuffix="preview.${{ github.run_number }}"
+          -o out
+
+      - name: 上传预览包
+        uses: actions/upload-artifact@v5
+        with:
+          name: ledon-preview-packages
+          path: out/*.nupkg
+          retention-days: 14

@@ -12,6 +12,7 @@
 
     <ItemGroup>
         <PackageReference Include="Grpc.AspNetCore" />
+        <PackageReference Include="Grpc.HealthCheck" />
         <PackageReference Include="Grpc.Net.ClientFactory" />
     </ItemGroup>
 

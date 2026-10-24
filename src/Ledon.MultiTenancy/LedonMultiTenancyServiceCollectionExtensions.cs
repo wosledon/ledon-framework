@@ -1,3 +1,4 @@
+using Ledon.Caching;
 using Ledon.MultiTenancy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,10 @@ public static class LedonMultiTenancyServiceCollectionExtensions
         services.AddSingleton(options);
         services.AddHttpContextAccessor();
         services.TryAddSingleton<ITenantContext, TenantContext>();
+
+        // 缓存键按租户隔离（多租户 + 缓存同场时的防泄漏默认值；TryAdd：可自行替换）
+        if (!string.IsNullOrEmpty(options.CacheKeyPrefix))
+            services.TryAddSingleton<ICacheKeyPrefixProvider, TenantCacheKeyPrefixProvider>();
 
         return services;
     }

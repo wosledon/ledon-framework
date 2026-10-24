@@ -1,11 +1,30 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Grpc.AspNetCore.Server;
+using Grpc.Health.V1;
+using Grpc.HealthCheck;
 using Ledon.Grpc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;
+
+/// <summary>gRPC 服务端/客户端配置。</summary>
+public sealed class LedonGrpcOptions
+{
+    /// <summary>
+    /// 注册标准健康检查服务 <c>grpc.health.v1.Health</c>（默认开）：
+    /// 随 <c>MapLedonGrpcServices</c> 一起映射，负载均衡/K8s gRPC 探针可直接用。
+    /// </summary>
+    public bool UseHealthChecks { get; set; } = true;
+
+    /// <summary>
+    /// 注册默认日志拦截器（默认开）：记录每次调用的方法、耗时与成败——
+    /// gRPC 调用不再只在链路里可见，应用日志同样可观测。
+    /// </summary>
+    public bool UseLoggingInterceptor { get; set; } = true;
+}
 
 /// <summary>
 /// gRPC 集成：服务自动发现 + 按约定映射（与 Ledon 其它包一致的"引用框架 = 选择加入"）。
@@ -30,14 +49,38 @@ public static class LedonGrpcServiceCollectionExtensions
     /// （protoc 生成的抽象基类 + 业务实现类形态）。
     /// </summary>
     [RequiresDynamicCode(AotBoundary)]
-    public static IServiceCollection AddLedonGrpc(this IServiceCollection services)
+    public static IServiceCollection AddLedonGrpc(
+        this IServiceCollection services,
+        Action<LedonGrpcOptions>? configure = null)
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddGrpc();
+        var options = new LedonGrpcOptions();
+        configure?.Invoke(options);
+        services.TryAddSingleton(options);
 
-        var serviceTypes = GrpcServiceDiscovery.Discover().ToArray();   // 供 MapLedonGrpcServices 映射
-        services.AddSingleton(new DiscoveredGrpcServices(serviceTypes));
+        var discovered = GrpcServiceDiscovery.Discover().ToList();
+
+        if (options.UseHealthChecks)
+        {
+            // grpc.health.v1 标准健康服务：显式加入发现列表，随 MapLedonGrpcServices 映射。
+            // 默认整体状态置为 SERVING（进程在跑即服务中；不置则空服务名返回 NotFound）
+            services.TryAddSingleton(_ =>
+            {
+                var impl = new HealthServiceImpl();
+                impl.SetStatus(string.Empty, Grpc.Health.V1.HealthCheckResponse.Types.ServingStatus.Serving);
+                return impl;
+            });
+            discovered.Add(typeof(HealthServiceImpl));
+        }
+
+        var grpc = services.AddGrpc(o =>
+        {
+            if (options.UseLoggingInterceptor)
+                o.Interceptors.Add<LedonGrpcLoggingInterceptor>();
+        });
+
+        services.AddSingleton(new DiscoveredGrpcServices(discovered));
 
         return services;
     }

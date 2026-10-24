@@ -19,29 +19,45 @@ namespace Ledon.Testing;
 public sealed class LedonWebTestHost : IAsyncDisposable
 {
     private readonly WebApplication _app;
+    private HttpClient? _client;
 
-    private LedonWebTestHost(WebApplication app, HttpClient client)
+    private LedonWebTestHost(WebApplication app)
     {
         _app = app;
-        Client = client;
-        Services = app.Services;
     }
 
-    /// <summary>测试客户端（TestServer）。</summary>
-    public HttpClient Client { get; }
+    /// <summary>测试客户端（TestServer，首次访问时惰性创建）。</summary>
+    public HttpClient Client => _client ??= _app.GetTestClient();
 
     /// <summary>根服务提供器。</summary>
-    public IServiceProvider Services { get; }
+    public IServiceProvider Services => _app.Services;
+
+    /// <summary>
+    /// 底层 <see cref="WebApplication"/>：需要额外装配（映射端点、检查 EndpointDataSource、
+    /// 读取配置）时用它，不必再手搓一套宿主。
+    /// </summary>
+    public WebApplication App => _app;
 
     /// <summary>搭建并启动宿主。</summary>
     /// <param name="configure">对 WebApplicationBuilder 的额外配置（AddLedonWeb 等）。</param>
     /// <param name="configureApp">自定义管线；不传则默认 <see cref="LedonWebApplicationExtensions.UseLedonWeb"/>。</param>
+    public static Task<LedonWebTestHost> StartAsync(
+        Action<WebApplicationBuilder>? configure = null,
+        Action<WebApplication>? configureApp = null) =>
+        StartAsync(null, configure, configureApp);
+
+    /// <summary>搭建并启动宿主（LedonWeb 选项重载：不必在回调里再包一层）。</summary>
+    /// <param name="configureWeb">LedonWeb 开关（OpenAPI/限流/压缩/超时/幂等……）。</param>
+    /// <param name="configure">对 WebApplicationBuilder 的额外配置。</param>
+    /// <param name="configureApp">自定义管线；不传则默认 <see cref="LedonWebApplicationExtensions.UseLedonWeb"/>。</param>
     public static async Task<LedonWebTestHost> StartAsync(
+        Action<LedonWebOptions>? configureWeb,
         Action<WebApplicationBuilder>? configure = null,
         Action<WebApplication>? configureApp = null)
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
+        builder.AddLedonWeb(configureWeb);
         configure?.Invoke(builder);
 
         var app = builder.Build();
@@ -53,7 +69,7 @@ public sealed class LedonWebTestHost : IAsyncDisposable
 
         await app.StartAsync().ConfigureAwait(false);
 
-        return new LedonWebTestHost(app, app.GetTestClient());
+        return new LedonWebTestHost(app);
     }
 
     /// <summary>在独立作用域中执行（解析 Scoped 服务，如 DbContext）。</summary>
