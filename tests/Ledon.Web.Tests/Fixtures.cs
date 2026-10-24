@@ -245,6 +245,25 @@ public class OrderPlacedHandler : IIntegrationEventHandler<OrderPlaced>
     }
 }
 
+// ---------- 收件箱（Inbox）夹具 ----------
+
+public record InboxTestEvent(string Id) : IIntegrationEvent;
+
+/// <summary>计数型集成事件处理器：收件箱去重测试用（与 OrderPlaced 事件隔离）。</summary>
+public static class InboxSignal
+{
+    public static int Count;
+}
+
+public class InboxTestEventHandler : IIntegrationEventHandler<InboxTestEvent>
+{
+    public Task HandleAsync(InboxTestEvent @event, CancellationToken cancellationToken = default)
+    {
+        Interlocked.Increment(ref InboxSignal.Count);
+        return Task.CompletedTask;
+    }
+}
+
 /// <summary>测试用传输：记录投递的事件（验证 dispatcher 注册传输后走 broker 而非进程内 handler）。</summary>
 public sealed class RecordingTransport : IIntegrationEventTransport
 {
@@ -256,10 +275,20 @@ public sealed class RecordingTransport : IIntegrationEventTransport
         get { lock (_gate) return _published.ToArray(); }
     }
 
-    public Task PublishAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default)
+    public IReadOnlyList<string?> PublishedMessageIds
+    {
+        get { lock (_gate) return _messageIds.ToArray(); }
+    }
+
+    private readonly List<string?> _messageIds = [];
+
+    public Task PublishAsync(IIntegrationEvent @event, string? messageId, CancellationToken cancellationToken = default)
     {
         lock (_gate)
+        {
             _published.Add(@event);
+            _messageIds.Add(messageId);
+        }
 
         return Task.CompletedTask;
     }

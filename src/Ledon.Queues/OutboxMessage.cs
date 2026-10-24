@@ -39,6 +39,9 @@ public abstract class OutboxDbContext : DbContext
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
+    /// <summary>收件箱（消费侧去重）。注册 <see cref="IInboxStore"/> 后生效，表结构随基类一并约定。</summary>
+    public DbSet<InboxMessage> InboxMessages => Set<InboxMessage>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<OutboxMessage>(entity =>
@@ -47,6 +50,17 @@ public abstract class OutboxDbContext : DbContext
             entity.Property(message => message.Type).IsRequired().HasMaxLength(500);
             entity.Property(message => message.Payload).IsRequired();
             entity.HasIndex(message => message.ProcessedAt);
+        });
+
+        modelBuilder.Entity<InboxMessage>(entity =>
+        {
+            entity.HasKey(message => message.Id);
+
+            // MessageId 唯一：并发认领靠唯一约束决出胜者（Insert 冲突 = 已被认领）
+            entity.HasIndex(message => message.MessageId).IsUnique();
+            entity.Property(message => message.MessageId).IsRequired().HasMaxLength(200);
+            entity.Property(message => message.EventType).IsRequired().HasMaxLength(500);
+            entity.HasIndex(message => message.CompletedAt);
         });
 
         base.OnModelCreating(modelBuilder);

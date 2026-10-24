@@ -67,6 +67,7 @@ public static class LedonServiceCollectionExtensions
 
         services.AddSingleton<IModuleManager>(manager);
         services.TryAddSingleton<IEventBus, EventHub>();
+        services.TryAddSingleton(options.Events);
         services.AddHostedService<LedonHostedService>();
 
         return services;

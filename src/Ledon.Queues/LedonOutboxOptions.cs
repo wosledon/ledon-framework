@@ -11,4 +11,13 @@ public sealed class LedonOutboxOptions
 
     /// <summary>单条消息最大重试次数（超过即搁置），默认 5。</summary>
     public int MaxRetries { get; set; } = 5;
+
+    /// <summary>
+    /// 已处理消息保留时长，默认 7 天：调度器按 <see cref="CleanupInterval"/> 清理更早的已处理消息
+    /// （表无维护会无限增长）。<see cref="TimeSpan.Zero"/> = 不自动清理（自行管理）。
+    /// </summary>
+    public TimeSpan Retention { get; set; } = TimeSpan.FromDays(7);
+
+    /// <summary>清理与死信检查的间隔，默认 1 小时。</summary>
+    public TimeSpan CleanupInterval { get; set; } = TimeSpan.FromHours(1);
 }

@@ -14,4 +14,19 @@ public interface IOutboxStore
 
     /// <summary>标记投递失败（重试计数 +1）。</summary>
     Task MarkFailedAsync(Guid id, string error, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 清理超过保留期的已处理消息，返回删除条数。
+    /// <paramref name="retention"/> 为 <see cref="TimeSpan.Zero"/> 或负值时实现应直接返回 0。
+    /// </summary>
+    Task<int> DeleteProcessedAsync(TimeSpan retention, CancellationToken cancellationToken = default);
+
+    /// <summary>取搁置（未处理且重试次数已达上限）的消息——死信，需人工介入。</summary>
+    Task<IReadOnlyList<OutboxMessage>> GetDeadLettersAsync(int batchSize, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 重放搁置消息：清零重试计数与错误，使其重新进入投递队列。
+    /// 返回 false 表示消息不存在（已被清理或手工删除）。
+    /// </summary>
+    Task<bool> ReviveAsync(Guid id, CancellationToken cancellationToken = default);
 }

@@ -21,7 +21,7 @@ internal sealed class RabbitMqIntegrationEventTransport : IIntegrationEventTrans
         _options = options;
     }
 
-    public async Task PublishAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default)
+    public async Task PublishAsync(IIntegrationEvent @event, string? messageId, CancellationToken cancellationToken = default)
     {
         var eventType = @event.GetType();
 
@@ -41,7 +41,8 @@ internal sealed class RabbitMqIntegrationEventTransport : IIntegrationEventTrans
             Type = eventType.AssemblyQualifiedName ?? eventType.FullName!,
             ContentType = "application/json",
             DeliveryMode = (DeliveryModes)(_options.PersistentMessages ? 2 : 1),
-            MessageId = Guid.NewGuid().ToString(),
+            // 发件箱消息 Id：消费侧据此做收件箱去重（至少一次投递 + 恰好一次处理）
+            MessageId = messageId ?? Guid.NewGuid().ToString(),
             Timestamp = new AmqpTimestamp(DateTimeOffset.UtcNow.ToUnixTimeSeconds()),
         };
 

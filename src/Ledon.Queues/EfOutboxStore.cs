@@ -50,4 +50,34 @@ internal sealed class EfOutboxStore(OutboxDbContext context, LedonOutboxOptions 
             await context.SaveChangesAsync(cancellationToken);
         }
     }
+
+    public async Task<int> DeleteProcessedAsync(TimeSpan retention, CancellationToken cancellationToken = default)
+    {
+        if (retention <= TimeSpan.Zero)
+            return 0;
+
+        var cutoff = DateTime.UtcNow - retention;
+        return await context.OutboxMessages
+            .Where(message => message.ProcessedAt != null && message.ProcessedAt < cutoff)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<OutboxMessage>> GetDeadLettersAsync(int batchSize, CancellationToken cancellationToken = default) =>
+        await context.OutboxMessages
+            .Where(message => message.ProcessedAt == null && message.RetryCount >= options.MaxRetries)
+            .OrderBy(message => message.CreatedAt)
+            .Take(batchSize)
+            .ToListAsync(cancellationToken);
+
+    public async Task<bool> ReviveAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var message = await context.OutboxMessages.FindAsync([id], cancellationToken);
+        if (message is null)
+            return false;
+
+        message.RetryCount = 0;
+        message.Error = null;
+        await context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
 }

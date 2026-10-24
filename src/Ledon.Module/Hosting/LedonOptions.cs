@@ -1,5 +1,6 @@
 using System.Reflection;
 using Ledon.Module.Abstractions;
+using Ledon.Module.Events;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ledon.Module.Hosting;
@@ -22,6 +23,9 @@ public sealed class LedonOptions
 
     /// <summary>默认服务生命周期（约定注册未显式指定时使用），默认 <see cref="ServiceLifetime.Scoped"/>。</summary>
     public ServiceLifetime DefaultServiceLifetime { get; set; } = ServiceLifetime.Scoped;
+
+    /// <summary>事件总线行为（处理器错误策略），默认失败即停。</summary>
+    public EventOptions Events { get; } = new();
 
     /// <summary>追加一个要扫描的模块程序集（与自动发现叠加生效）。</summary>
     public LedonOptions AddAssembly(Assembly assembly)

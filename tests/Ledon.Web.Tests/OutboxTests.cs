@@ -1,3 +1,4 @@
+using System.Diagnostics.Metrics;
 using Ledon.Queues;
 using Ledon.Queues.RabbitMQ;
 using Ledon.Web.Tests.Fixtures;
@@ -158,6 +159,155 @@ public class OutboxTests : IDisposable
             await Task.Delay(100);
 
         Assert.True(OutboxSignal.Delivered, "事件未经 RabbitMQ 送达进程内 handler（检查 LEDON_TEST_RABBITMQ_URL）");
+    }
+
+    // ---------- 维护：清理 / 死信 / 指标 ----------
+
+    [Fact]
+    public async Task Outbox_cleanup_deletes_only_processed_messages_beyond_retention()
+    {
+        var dbPath = Path.Combine(AppContext.BaseDirectory, $"outbox-cleanup-{Guid.NewGuid():N}.db");
+
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonOutbox(options =>
+        {
+            options.PollingInterval = TimeSpan.FromMilliseconds(50);
+            options.CleanupInterval = TimeSpan.FromMilliseconds(100);   // 测试里让维护快速触发
+        });
+        builder.Services.AddDbContext<TestOutboxDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath}"));
+
+        var app = builder.Build();
+        _app = app;
+        await app.StartAsync();
+
+        Guid processedOldId, processedNewId, pendingId;
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+            await db.Database.EnsureCreatedAsync();
+
+            var store = scope.ServiceProvider.GetRequiredService<IOutboxStore>();
+            store.Add(new OrderPlaced("old"));
+            store.Add(new OrderPlaced("new"));
+            store.Add(new OrderPlaced("pending"));
+            await db.SaveChangesAsync();
+
+            var messages = await db.OutboxMessages.ToListAsync();
+            var processedOld = messages.Single(m => m.Payload.Contains("old"));
+            var processedNew = messages.Single(m => m.Payload.Contains("new"));
+            var pending = messages.Single(m => m.Payload.Contains("pending"));
+            processedOldId = processedOld.Id;
+            processedNewId = processedNew.Id;
+            pendingId = pending.Id;
+
+            // 直接调用存储清理（保留期 7 天）：只应删掉 10 天前处理的
+            processedOld.ProcessedAt = DateTime.UtcNow.AddDays(-10);
+            processedNew.ProcessedAt = DateTime.UtcNow;
+            pending.ProcessedAt = null;
+            await db.SaveChangesAsync();
+
+            var deleted = await store.DeleteProcessedAsync(TimeSpan.FromDays(7), CancellationToken.None);
+            Assert.Equal(1, deleted);
+        }
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+            Assert.False(await db.OutboxMessages.AnyAsync(m => m.Id == processedOldId));
+            Assert.True(await db.OutboxMessages.AnyAsync(m => m.Id == processedNewId));
+            Assert.True(await db.OutboxMessages.AnyAsync(m => m.Id == pendingId));
+        }
+    }
+
+    [Fact]
+    public async Task Outbox_dead_letters_are_queryable_and_revivable()
+    {
+        var dbPath = Path.Combine(AppContext.BaseDirectory, $"outbox-dead-{Guid.NewGuid():N}.db");
+
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonOutbox(options => options.PollingInterval = TimeSpan.FromMilliseconds(50));
+        builder.Services.AddDbContext<TestOutboxDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath}"));
+
+        var app = builder.Build();
+        _app = app;
+        await app.StartAsync();
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+            await db.Database.EnsureCreatedAsync();
+
+            var store = scope.ServiceProvider.GetRequiredService<IOutboxStore>();
+            store.Add(new OrderPlaced("dead"));
+            await db.SaveChangesAsync();
+
+            var message = await db.OutboxMessages.SingleAsync();
+            message.RetryCount = 5;   // 达到 MaxRetries 默认值：搁置（死信）
+            await db.SaveChangesAsync();
+
+            // 死信：不在待投递列表里，但可查询
+            var pending = await store.GetPendingAsync(10, CancellationToken.None);
+            Assert.Empty(pending);
+
+            var deadLetters = await store.GetDeadLettersAsync(10, CancellationToken.None);
+            var dead = Assert.Single(deadLetters);
+            Assert.Equal(message.Id, dead.Id);
+
+            // 重放：清零重试计数后重新进入投递队列
+            Assert.True(await store.ReviveAsync(dead.Id, CancellationToken.None));
+            Assert.False(await store.ReviveAsync(Guid.NewGuid(), CancellationToken.None));
+
+            var revived = await store.GetPendingAsync(10, CancellationToken.None);
+            Assert.Single(revived);
+            Assert.Equal(0, revived[0].RetryCount);
+        }
+    }
+
+    [Fact]
+    public async Task Outbox_dispatch_reports_metrics()
+    {
+        var dbPath = Path.Combine(AppContext.BaseDirectory, $"outbox-metrics-{Guid.NewGuid():N}.db");
+
+        long dispatched = 0;
+        using var listener = new MeterListener();
+        listener.InstrumentPublished = (instrument, meterListener) =>
+        {
+            if (instrument.Meter.Name == QueueMetrics.MeterName && instrument.Name == "ledon.outbox.dispatched")
+                meterListener.EnableMeasurementEvents(instrument);
+        };
+        listener.SetMeasurementEventCallback<long>((_, value, _, _) => Interlocked.Add(ref dispatched, value));
+        listener.Start();
+
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonOutbox(options => options.PollingInterval = TimeSpan.FromMilliseconds(50));
+        builder.Services.AddDbContext<TestOutboxDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath}"));
+
+        var app = builder.Build();
+        _app = app;
+        await app.StartAsync();
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+            await db.Database.EnsureCreatedAsync();
+
+            var store = scope.ServiceProvider.GetRequiredService<IOutboxStore>();
+            store.Add(new OrderPlaced("metrics"));
+            await db.SaveChangesAsync();
+        }
+
+        // 轮询等待指标（调度器异步投递）
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (Volatile.Read(ref dispatched) == 0 && DateTime.UtcNow < deadline)
+            await Task.Delay(50);
+
+        Assert.True(dispatched >= 1, "未观测到 ledon.outbox.dispatched 指标");
     }
 
     public void Dispose()

@@ -122,7 +122,8 @@ internal sealed class RabbitMqConsumerService : BackgroundService
         var @event = (IIntegrationEvent)boxed;
 
         await using var scope = _services.CreateAsyncScope();
-        await IntegrationEventDispatcher.DispatchAsync(scope.ServiceProvider, @event, cancellationToken);
+        // MessageId 透传：收件箱去重凭据（broker 重投时跳过已处理的消息）
+        await IntegrationEventDispatcher.DispatchAsync(scope.ServiceProvider, @event, args.BasicProperties.MessageId, cancellationToken);
     }
 
     /// <summary>服务名（队列名默认后缀）：环境变量 LEDON_SERVICE_NAME 优先，其次入口程序集名。</summary>

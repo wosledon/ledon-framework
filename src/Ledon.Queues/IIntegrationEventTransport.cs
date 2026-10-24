@@ -7,6 +7,13 @@ namespace Ledon.Queues;
 /// </summary>
 public interface IIntegrationEventTransport
 {
-    /// <summary>把集成事件发布到传输通道。失败时由发件箱记录重试（至少一次语义）。</summary>
-    Task PublishAsync(IIntegrationEvent @event, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// 把集成事件发布到传输通道。失败时由发件箱记录重试（至少一次语义）。
+    /// </summary>
+    /// <param name="event">集成事件。</param>
+    /// <param name="messageId">
+    /// 投递标识（发件箱消息 Id）：传输应把它写进 broker 消息属性（如 RabbitMQ MessageId），
+    /// 消费侧据此做收件箱去重；无消息源标识时传 null。
+    /// </param>
+    Task PublishAsync(IIntegrationEvent @event, string? messageId, CancellationToken cancellationToken = default);
 }
