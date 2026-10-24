@@ -144,7 +144,7 @@ public class CacheExtensionTests
     // ---------- 多租户缓存隔离 ----------
 
     [Fact]
-    public void Tenant_cache_keys_are_isolated_between_tenants()
+    public async Task Tenant_cache_keys_are_isolated_between_tenants()
     {
         var services = new ServiceCollection();
         services.AddLedonMultiTenancy();
@@ -163,10 +163,10 @@ public class CacheExtensionTests
         }
 
         using (TenantContext.SetAmbient("tenant-a"))
-            Assert.Equal("a 的数据", cache.GetAsync<string>("shared-key").GetAwaiter().GetResult());
+            Assert.Equal("a 的数据", await cache.GetAsync<string>("shared-key"));
 
         using (TenantContext.SetAmbient("tenant-b"))
-            Assert.Equal("b 的数据", cache.GetAsync<string>("shared-key").GetAwaiter().GetResult());
+            Assert.Equal("b 的数据", await cache.GetAsync<string>("shared-key"));
     }
 
     [Fact]

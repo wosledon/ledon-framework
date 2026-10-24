@@ -17,10 +17,8 @@ namespace Ledon.Web.Tests;
 /// gRPC 集成测试：服务发现（生成基类判据）、约定映射（幂等）、客户端注册。
 /// 夹具模拟 protoc 生成代码的形状（抽象基类 + BindService + 具体实现），无需 .proto。
 /// </summary>
-public class GrpcTests : IDisposable
+public class GrpcTests
 {
-    private WebApplication? _app;
-
     [Fact]
     public void Discovery_finds_generated_shape_services_only()
     {
@@ -112,17 +110,6 @@ public class GrpcTests : IDisposable
 
         Assert.Throws<InvalidOperationException>(
             () => services.AddLedonGrpcClient<FakeGreeterClient>(""));
-    }
-
-    public void Dispose()
-    {
-        if (_app is not null)
-        {
-            _app.StopAsync().GetAwaiter().GetResult();
-            _app.DisposeAsync().AsTask().GetAwaiter().GetResult();
-        }
-
-        GC.SuppressFinalize(this);
     }
 }
 
