@@ -43,6 +43,7 @@ app.Run();
 | 测试基建                               | `Ledon.Testing`               | `LedonWebTestHost`                                   | 一行搭 TestServer + 生命周期断言                 |
 | 云原生默认值                           | `Ledon.Aspire`                | `AddLedonServiceDefaults()`                          | OTel+健康检查+弹性+服务发现一次装齐              |
 | gRPC 服务间通信                       | `Ledon.Grpc`                  | `AddLedonGrpc()` / `AddLedonGrpcClient<T>()`         | 服务自动发现 + 约定映射 + 强类型客户端 + 健康服务/日志拦截器 |
+| 工作流引擎                            | `Ledon.Workflow`              | `AddLedonWorkflow()`                                 | 多步骤编排 + 重试 + Saga 补偿 + 重启恢复            |
 
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
@@ -321,9 +322,11 @@ src/Ledon.FluentValidation/ FluentValidation 验证器自动发现
 src/Ledon.Queues.RabbitMQ/ RabbitMQ 传输（发件箱 ↔ broker）
 src/Ledon.Queues.Kafka/    Kafka 传输（发件箱 ↔ broker）
 src/Ledon.Grpc/            gRPC 服务间通信（自动发现 + 约定映射 + 客户端）
+src/Ledon.Workflow/        工作流引擎（步骤编排 + 重试 + Saga 补偿 + 重启恢复）
+src/Ledon.Workflow/        工作流引擎（步骤编排 + 重试 + Saga 补偿 + 重启恢复）
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（模块 26 + Web 146 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 156 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

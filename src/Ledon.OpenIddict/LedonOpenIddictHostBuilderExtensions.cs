@@ -138,15 +138,21 @@ public static class LedonOpenIddictHostBuilderExtensions
             authentication.DefaultForbidScheme ??= authentication.DefaultScheme;
         });
 
-        // 四个内存存储（可替换：先删默认注册再注册自己的）
-        services.AddSingleton<IOpenIddictApplicationStore<OpenIddictApplicationDescriptor>>(
-            new InMemoryApplicationStore(options));
-        services.AddSingleton<IOpenIddictScopeStore<OpenIddictScopeDescriptor>>(
-            new InMemoryScopeStore(options));
-        services.AddSingleton<IOpenIddictAuthorizationStore<OpenIddictAuthorizationDescriptor>>(
-            new InMemoryAuthorizationStore());
-        services.AddSingleton<IOpenIddictTokenStore<OpenIddictTokenDescriptor>>(
-            new InMemoryTokenStore());
+        // 四个默认存储（可替换：先注册自己的实现即生效——TryAdd 语义，手动优先。
+        // 多实例部署换 OpenIddict 官方的 EF/Redis 存储时在此前注册即可：
+        //   services.AddSingleton<IOpenIddictTokenStore<OpenIddictTokenDescriptor>, MyRedisTokenStore>();）
+        services.TryAdd(ServiceDescriptor.Singleton(
+            typeof(IOpenIddictApplicationStore<OpenIddictApplicationDescriptor>),
+            new InMemoryApplicationStore(options)));
+        services.TryAdd(ServiceDescriptor.Singleton(
+            typeof(IOpenIddictScopeStore<OpenIddictScopeDescriptor>),
+            new InMemoryScopeStore(options)));
+        services.TryAdd(ServiceDescriptor.Singleton(
+            typeof(IOpenIddictAuthorizationStore<OpenIddictAuthorizationDescriptor>),
+            new InMemoryAuthorizationStore()));
+        services.TryAdd(ServiceDescriptor.Singleton(
+            typeof(IOpenIddictTokenStore<OpenIddictTokenDescriptor>),
+            new InMemoryTokenStore()));
 
         // 登录校验实现自动发现（password 授权的凭证校验；与 AddLedonSecurity 同一约定，手动注册优先）
         foreach (var assembly in LedonAssemblies.Scan())

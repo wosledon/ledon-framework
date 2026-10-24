@@ -76,7 +76,7 @@ public static class LedonSignalRServiceCollectionExtensions
                 redis => redis.Configuration.ChannelPrefix = StackExchange.Redis.RedisChannel.Literal(options.RedisChannelPrefix));
         }
 
-        // Hub 自动发现（沿用框架的允许列表扫描）
+        // Hub 自动发现（沿用框架的允许列表扫描；Hub<T> 强类型 Hub 同样匹配）
         var hubs = LedonAssemblies.Scan()
             .SelectMany(assembly => assembly.GetLoadableTypes())
             .Where(type => type is { IsClass: true, IsAbstract: false }

@@ -33,6 +33,12 @@ public sealed class LedonSchedulingOptions
 
     /// <summary>领导权锁 TTL（续约周期为其 1/3），默认 30 秒。</summary>
     public TimeSpan LeaderLockExpiry { get; set; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// 关闭定时任务的自动发现（默认开）。关闭后只执行显式注册的 <see cref="IScheduledTask"/>
+    /// （`services.AddSingleton&lt;IScheduledTask, MyTask&gt;()`）——测试或需要精确控制任务集合时用。
+    /// </summary>
+    public bool AutoDiscoverTasks { get; set; } = true;
 }
 
 /// <summary>调度领导权选举方式。</summary>

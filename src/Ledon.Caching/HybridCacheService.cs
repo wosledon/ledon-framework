@@ -13,8 +13,36 @@ public sealed class LedonHybridCachingOptions
     public string? KeyPrefix { get; set; }
 }
 
-/// <summary>HybridCache 不回源信号：工厂抛出即不缓存（用来实现"只读不写"的 GetAsync）。</summary>
-internal sealed class CacheMissSignal : Exception;
+/// <summary>
+/// 缓存值包装：区分"缓存了 null"与"未命中"（HybridCache 没有只读 API，
+/// GetAsync 需要工厂；工厂返回 Miss 实例表示未命中且不写入缓存）。
+/// 用值对象而不是异常——未命中是高频路径，不该付异常开销。
+/// 必须是可 JSON 序列化的具体类型（L2 分布式缓存要落盘）。
+/// </summary>
+internal sealed class CacheValue<T>
+{
+    // System.Text.Json 反序列化需要（L2 分布式缓存落盘/读盘）
+    public CacheValue()
+    {
+    }
+
+    private CacheValue(T? value, bool hit) => (Value, IsHit) = (value, hit);
+
+    /// <summary>是否命中（false = 未命中哨兵，不写入缓存）。</summary>
+    public bool IsHit { get; set; }
+
+    /// <summary>缓存的值（未命中时为 default）。</summary>
+    public T? Value { get; set; }
+
+    /// <summary>未命中哨兵。</summary>
+    public static CacheValue<T> Miss { get; } = new() { IsHit = false };
+
+    /// <summary>命中包装。</summary>
+    public static CacheValue<T> Hit(T? value) => new() { IsHit = true, Value = value };
+
+    /// <summary>取出值；未命中返回 fallback。</summary>
+    public T? ValueOr(T? fallback) => IsHit ? Value : fallback;
+}
 
 /// <summary>
 /// 基于 .NET 10 <see cref="HybridCache"/> 的 <see cref="ICacheService"/> 实现：
@@ -52,20 +80,16 @@ internal sealed class HybridCacheService : ICacheService
 
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            // HybridCache 无"只读"API：工厂抛出即不缓存——用信号异常实现"未命中不写入"
-            return await _cache.GetOrCreateAsync<T?>(
-                FullKey(key),
-                _ => throw new CacheMissSignal(),
-                BuildOptions(key, null),
-                Tags(key),
-                cancellationToken).ConfigureAwait(false);
-        }
-        catch (CacheMissSignal)
-        {
-            return default;
-        }
+        // HybridCache 没有只读 API；工厂返回 Miss 哨兵表示未命中且不写入缓存——
+        // 用值对象而非异常：未命中是高频路径，不该付异常开销
+        var cached = await _cache.GetOrCreateAsync<CacheValue<T>>(
+            FullKey(key),
+            static _ => new ValueTask<CacheValue<T>>(CacheValue<T>.Miss),
+            BuildOptions(key, null),
+            Tags(key),
+            cancellationToken).ConfigureAwait(false);
+
+        return cached.ValueOr(default);
     }
 
     public void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? slidingExpiration = null) =>
@@ -77,9 +101,15 @@ internal sealed class HybridCacheService : ICacheService
         TimeSpan? expiration = null,
         CancellationToken cancellationToken = default,
         TimeSpan? slidingExpiration = null) =>
-        _cache.SetAsync(FullKey(key), value, BuildOptions(key, expiration), Tags(key), cancellationToken).AsTask();
+        // 与 GetAsync 对称地写包装（GetAsync 读包装类型；两边不一致会读到 null）
+        _cache.SetAsync(
+            FullKey(key),
+            CacheValue<T>.Hit(value),
+            BuildOptions(key, expiration),
+            Tags(key),
+            cancellationToken).AsTask();
 
-    public Task<T?> GetOrCreateAsync<T>(
+    public async Task<T?> GetOrCreateAsync<T>(
         string key,
         Func<CancellationToken, Task<T>> factory,
         TimeSpan? expiration = null,
@@ -88,12 +118,24 @@ internal sealed class HybridCacheService : ICacheService
     {
         ArgumentNullException.ThrowIfNull(factory);
 
-        return _cache.GetOrCreateAsync(
+        // HybridCache 原生 single-flight：并发未命中共享同一次回源。
+        // GetAsync 的 Miss 哨兵可能已被 HybridCache 写入（框架不提供工厂短路），
+        // 这里读到 Miss 视为未命中，回源后覆写
+        var cached = await _cache.GetOrCreateAsync<CacheValue<T>>(
             FullKey(key),
-            async token => (T?)(await factory(token).ConfigureAwait(false)),
+            async token => CacheValue<T>.Hit(await factory(token).ConfigureAwait(false)),
             BuildOptions(key, expiration),
             Tags(key),
-            cancellationToken).AsTask();
+            cancellationToken).ConfigureAwait(false);
+
+        if (!cached.IsHit)
+        {
+            var value = await factory(cancellationToken).ConfigureAwait(false);
+            await SetAsync(key, value, expiration, cancellationToken).ConfigureAwait(false);
+            return value;
+        }
+
+        return cached.ValueOr(default);
     }
 
     public void Remove(string key) =>

@@ -1,0 +1,224 @@
+using Ledon.Data;
+using Ledon.Module.Abstractions;
+using Ledon.Workflow;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Ledon.Web.Tests;
+
+/// <summary>
+/// 工作流引擎测试：happy path、步骤失败重试、Saga 补偿、EF 持久化与重启恢复。
+/// 夹具模拟 protoc/用户代码形状（步骤 + 定义实现类，自动发现）。
+/// </summary>
+public class WorkflowTests : IDisposable
+{
+    private WebApplication? _app;
+
+    private async Task<WebApplication> StartAsync(string dbPath)
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonWorkflow();
+        builder.Services.AddLedonData();   // 前置自动建库（工作流表随 WorkflowDbContext 建立）
+        builder.Services.AddDbContext<WorkflowTestDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath}"));
+
+        var app = builder.Build();
+        _app = app;
+        await app.StartAsync();
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<WorkflowTestDbContext>();
+            await db.Database.EnsureCreatedAsync();
+        }
+
+        return app;
+    }
+
+    [Fact]
+    public async Task Happy_path_runs_all_steps_to_completion()
+    {
+        var app = await StartAsync(NewDb("happy"));
+
+        var engine = app.Services.CreateScope().ServiceProvider.GetRequiredService<WorkflowEngine>();
+        var instance = await engine.CreateAsync("happy-flow");
+        var result = await engine.RunAsync(instance.Id);
+
+        Assert.Equal(WorkflowStatus.Completed, result.Status);
+        Assert.Equal(new[] { "step-a", "step-b" }, result.CompletedSteps);
+        Assert.Equal("a→b", result.Data["trace"]);
+    }
+
+    [Fact]
+    public async Task Failure_retries_then_compensates_executed_steps()
+    {
+        var app = await StartAsync(NewDb("saga"));
+
+        var engine = app.Services.CreateScope().ServiceProvider.GetRequiredService<WorkflowEngine>();
+        var instance = await engine.CreateAsync("saga-flow");
+
+        var ex = await Assert.ThrowsAsync<WorkflowExecutionException>(
+            () => engine.RunAsync(instance.Id));
+
+        Assert.Equal("boom", ex.Instance.LastError);
+        Assert.Equal("boom", ex.Step);
+
+        // 重试耗尽后逆序补偿：step-a 被补偿，实例标记 Compensated
+        var stored = await app.Services.CreateScope().ServiceProvider
+            .GetRequiredService<IWorkflowStore>().GetAsync(instance.Id);
+        Assert.NotNull(stored);
+        Assert.Equal(WorkflowStatus.Compensated, stored.Status);
+        Assert.Contains("compensate-a", StubWorkflowState.Compensated);
+    }
+
+    [Fact]
+    public async Task Retry_succeeds_when_step_recovers()
+    {
+        StubWorkflowState.Attempts = 0;
+        var app = await StartAsync(NewDb("retry"));
+
+        var engine = app.Services.CreateScope().ServiceProvider.GetRequiredService<WorkflowEngine>();
+        var instance = await engine.CreateAsync("flaky-flow");
+        var result = await engine.RunAsync(instance.Id);
+
+        Assert.Equal(WorkflowStatus.Completed, result.Status);
+        Assert.Equal(2, StubWorkflowState.Attempts);   // 第一次失败，第二次成功
+    }
+
+    [Fact]
+    public async Task Instance_persists_across_engine_instances()
+    {
+        var dbPath = NewDb("persist");
+        var app = await StartAsync(dbPath);
+
+        Guid instanceId;
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var engine = scope.ServiceProvider.GetRequiredService<WorkflowEngine>();
+            var instance = await engine.CreateAsync("happy-flow", new Dictionary<string, object?> { ["k"] = "v" });
+            instanceId = instance.Id;
+            await engine.RunAsync(instanceId);
+        }
+
+        // 用新的作用域（模拟重启后的新引擎实例）从存储读回
+        await using var scope2 = app.Services.CreateAsyncScope();
+        var store = scope2.ServiceProvider.GetRequiredService<IWorkflowStore>();
+        var reloaded = await store.GetAsync(instanceId);
+
+        Assert.NotNull(reloaded);
+        Assert.Equal(WorkflowStatus.Completed, reloaded.Status);
+        Assert.Equal("v", reloaded.Data["k"]?.ToString());
+        Assert.Equal(new[] { "step-a", "step-b" }, reloaded.CompletedSteps);
+    }
+
+    private static string NewDb(string name) =>
+        Path.Combine(AppContext.BaseDirectory, $"workflow-{name}-{Guid.NewGuid():N}.db");
+
+    public void Dispose()
+    {
+        if (_app is not null)
+        {
+            _app.StopAsync().GetAwaiter().GetResult();
+            _app.DisposeAsync().AsTask().GetAwaiter().GetResult();
+        }
+
+        GC.SuppressFinalize(this);
+    }
+}
+
+/// <summary>测试夹具的共享状态（顺序执行，静态安全）。</summary>
+public static class StubWorkflowState
+{
+    public static int Attempts { get; set; }
+
+    public static List<string> Compensated { get; } = [];
+}
+
+// ---------- 夹具：步骤与定义 ----------
+
+public class StepA : IWorkflowStep, ICompensableStep
+{
+    public string Name => "step-a";
+
+    public Task<StepOutcome> ExecuteAsync(StepContext context, CancellationToken cancellationToken = default)
+    {
+        context.Data["trace"] = $"{(context.Data.TryGetValue("trace", out var t) ? t : null)}a→";
+        return Task.FromResult(StepOutcome.Success);
+    }
+
+    public Task CompensateAsync(StepContext context, CancellationToken cancellationToken = default)
+    {
+        StubWorkflowState.Compensated.Add("compensate-a");
+        return Task.CompletedTask;
+    }
+}
+
+public class StepB : IWorkflowStep
+{
+    public string Name => "step-b";
+
+    public Task<StepOutcome> ExecuteAsync(StepContext context, CancellationToken cancellationToken = default)
+    {
+        context.Data["trace"] = $"{(context.Data.TryGetValue("trace", out var t) ? t : null)}b";
+        return Task.FromResult(StepOutcome.Success);
+    }
+}
+
+/// <summary>总是失败的步骤（用于重试 + 补偿断言）。</summary>
+public class BoomStep : IWorkflowStep
+{
+    public string Name => "boom";
+
+    public Task<StepOutcome> ExecuteAsync(StepContext context, CancellationToken cancellationToken = default) =>
+        throw new InvalidOperationException("boom");
+}
+
+/// <summary>前两次失败、第三次成功的步骤（验证重试恢复）。</summary>
+public class FlakyStep : IWorkflowStep
+{
+    public string Name => "flaky";
+
+    public Task<StepOutcome> ExecuteAsync(StepContext context, CancellationToken cancellationToken = default)
+    {
+        StubWorkflowState.Attempts++;
+        return Task.FromResult(StubWorkflowState.Attempts >= 2 ? StepOutcome.Success : StepOutcome.Failure);
+    }
+}
+
+public class HappyFlow : IWorkflowDefinition
+{
+    public string Name => "happy-flow";
+    public string InitialStep => "step-a";
+    public IReadOnlyDictionary<string, string[]> Transitions => new Dictionary<string, string[]>
+    {
+        ["step-a"] = ["step-b"],
+    };
+}
+
+public class SagaFlow : IWorkflowDefinition
+{
+    public string Name => "saga-flow";
+    public string InitialStep => "step-a";
+    public IReadOnlyDictionary<string, string[]> Transitions => new Dictionary<string, string[]>
+    {
+        ["step-a"] = ["boom"],
+    };
+}
+
+public class FlakyFlow : IWorkflowDefinition
+{
+    public string Name => "flaky-flow";
+    public string InitialStep => "step-a";
+    public IReadOnlyDictionary<string, string[]> Transitions => new Dictionary<string, string[]>
+    {
+        ["step-a"] = ["flaky"],
+    };
+}
+
+/// <summary>测试夹具上下文：标记禁用自动发现，避免污染其它用例的 AddLedonData 建库前置任务。</summary>
+[DisableAutoDiscovery]
+public class WorkflowTestDbContext(DbContextOptions<WorkflowTestDbContext> options) : WorkflowDbContext(options), ILedonDbContext;

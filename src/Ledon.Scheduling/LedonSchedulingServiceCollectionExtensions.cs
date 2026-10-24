@@ -33,6 +33,7 @@ public static class LedonSchedulingServiceCollectionExtensions
         // 执行历史（运维排障 / 手动重放确认）与手动触发
         services.TryAddSingleton<IScheduledTaskExecutionHistory>(new ScheduledTaskExecutionHistory());
         services.TryAddSingleton<ISchedulerInvoker, SchedulerInvoker>();
+        services.TryAddSingleton<ISchedulerClock, SystemSchedulerClock>();
 
         // 多实例部署：领导权选举（仅领导实例执行定时任务）
         if (options.LeaderElection == SchedulerLeaderElection.Redis)
@@ -44,14 +45,17 @@ public static class LedonSchedulingServiceCollectionExtensions
             services.TryAddSingleton<ISchedulerLock, RedisSchedulerLock>();
         }
 
-        // 任务自动发现（沿用框架的允许列表扫描）
-        foreach (var assembly in LedonAssemblies.Scan())
+        // 任务自动发现（沿用框架的允许列表扫描；AutoDiscoverTasks = false 时只认显式注册）
+        if (options.AutoDiscoverTasks)
         {
-            foreach (var type in assembly.GetLoadableTypes()
-                .Where(type => type is { IsClass: true, IsAbstract: false }
-                    && typeof(IScheduledTask).IsAssignableFrom(type)))
+            foreach (var assembly in LedonAssemblies.Scan())
             {
-                services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(IScheduledTask), type));
+                foreach (var type in assembly.GetLoadableTypes()
+                    .Where(type => type is { IsClass: true, IsAbstract: false }
+                        && typeof(IScheduledTask).IsAssignableFrom(type)))
+                {
+                    services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(IScheduledTask), type));
+                }
             }
         }
 

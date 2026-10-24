@@ -18,15 +18,18 @@ internal sealed class SchedulerHostedService : BackgroundService
 {
     private readonly IServiceProvider _services;
     private readonly LedonSchedulingOptions _options;
+    private readonly ISchedulerClock _clock;
     private readonly ILogger<SchedulerHostedService> _logger;
 
     public SchedulerHostedService(
         IServiceProvider services,
         LedonSchedulingOptions options,
+        ISchedulerClock clock,
         ILogger<SchedulerHostedService> logger)
     {
         _services = services;
         _options = options;
+        _clock = clock;
         _logger = logger;
     }
 
@@ -135,21 +138,20 @@ internal sealed class SchedulerHostedService : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var now = DateTimeOffset.UtcNow;
+        var now = _clock.UtcNow;
 
-            // 补跑模式：从上次执行的触发点推算下一个发生时刻（执行期间错过的触发点会立即补上）；
-            // 默认模式：从当前时刻推算（错过的触发点被丢弃，等下一个未来触发点）
-            var reference = _options.CatchUpMissedTriggers ? lastTrigger ?? now : now;
-            var next = cron.GetNextOccurrence(reference, _options.TimeZone);
-            if (next is null)
-                return;
+        // 补跑模式：从上次执行的触发点推算下一个发生时刻（执行期间错过的触发点会立即补上）；
+        // 默认模式：从当前时刻推算（错过的触发点被丢弃，等下一个未来触发点）
+        var reference = _options.CatchUpMissedTriggers ? lastTrigger ?? now : now;
+        var next = cron.GetNextOccurrence(reference, _options.TimeZone);
+        if (next is null)
+            return;
 
-            var delay = next.Value - now;
-            if (delay > TimeSpan.Zero)
-                await Task.Delay(delay, stoppingToken).ConfigureAwait(false);
+        if (next.Value > now)
+            await _clock.DelayAsync(next.Value, stoppingToken).ConfigureAwait(false);
 
-            if (stoppingToken.IsCancellationRequested)
-                return;
+        if (stoppingToken.IsCancellationRequested)
+            return;
 
             lastTrigger = next.Value;
             await using var scope = _services.CreateAsyncScope();

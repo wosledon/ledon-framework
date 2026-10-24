@@ -29,6 +29,7 @@ app.Run();
 | [自动发现](~/docs/discovery.md)       | 允许列表规则、约定注册、逃生门             |
 | [Web 开发](~/docs/web.md)             | 端点、控制器、API 规范化、CORS             |
 | [数据与发件箱](~/docs/data.md)        | EF Core、Outbox 至少一次投递               |
+| [工作流引擎](~/docs/workflow.md)      | 多步骤编排、重试、Saga 补偿、重启恢复      |
 | [可靠投递](~/docs/reliability.md)     | 发件箱清理/死信、收件箱去重                |
 | [gRPC](~/docs/grpc.md)                | 服务间通信：自动发现与约定映射             |
 | [Kafka](~/docs/kafka.md)              | 发件箱 ↔ Kafka 跨服务投递                 |
