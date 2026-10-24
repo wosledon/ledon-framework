@@ -24,9 +24,10 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);CS1591</NoWarn>
 
-        <!-- 测试与示例项目不打包 -->
+        <!-- 测试与示例项目不打包（路径分隔符兼容 Windows 反斜杠与 Linux 正斜杠：
+             CI 的 pack 作业在 ubuntu 上跑，只判反斜杠会漏掉 tests/samples） -->
         <IsPackable
-            Condition="'$(IsPackable)' == '' AND ($(MSBuildProjectDirectory.Contains('\samples\')) OR $(MSBuildProjectDirectory.Contains('\tests\')))">
+            Condition="'$(IsPackable)' == '' AND ($(MSBuildProjectDirectory.Contains('\samples\')) OR $(MSBuildProjectDirectory.Contains('\tests\')) OR $(MSBuildProjectDirectory.Contains('/samples/')) OR $(MSBuildProjectDirectory.Contains('/tests/')))">
             false</IsPackable>
     </PropertyGroup>
 
