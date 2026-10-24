@@ -2,6 +2,7 @@ using Ledon.Data;
 using Ledon.Caching;
 using Ledon.Observability;
 using Ledon.Queues;
+using Ledon.Sample.Api;
 using Ledon.Web;
 using Ledon.WebSample;
 using Microsoft.AspNetCore.Builder;

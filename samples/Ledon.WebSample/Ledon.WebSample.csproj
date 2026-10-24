@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Ledon.Web\Ledon.Web.csproj" />
+    <ProjectReference Include="..\Modules\Ledon.Sample.Api\Ledon.Sample.Api.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Data\Ledon.Data.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Caching\Ledon.Caching.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Queues\Ledon.Queues.csproj" />

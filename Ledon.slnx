@@ -5,6 +5,7 @@
     <Project Path="samples/Ledon.WorkerSample/Ledon.WorkerSample.csproj" />
   </Folder>
   <Folder Name="/samples/Modules/">
+    <Project Path="samples/Modules/Ledon.Sample.Api/Ledon.Sample.Api.csproj" />
     <Project Path="samples/Modules/Ledon.Sample.Contracts/Ledon.Sample.Contracts.csproj" />
     <Project Path="samples/Modules/Ledon.Sample.Notifications/Ledon.Sample.Notifications.csproj" />
     <Project Path="samples/Modules/Ledon.Sample.Users/Ledon.Sample.Users.csproj" />
