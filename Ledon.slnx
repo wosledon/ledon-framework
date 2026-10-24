@@ -11,6 +11,7 @@
     <Project Path="samples/Modules/Ledon.Sample.Users/Ledon.Sample.Users.csproj" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/Ledon.Aspire/Ledon.Aspire.csproj" />
     <Project Path="src/Ledon.Caching/Ledon.Caching.csproj" />
     <Project Path="src/Ledon.Configuration/Ledon.Configuration.csproj" />
     <Project Path="src/Ledon.Core/Ledon.Core.csproj" />

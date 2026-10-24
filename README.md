@@ -36,6 +36,7 @@ app.Run();
 | FluentValidation                      | `Ledon.FluentValidation`      | `AddLedonFluentValidation()`                         | 验证器自动发现 + 统一 400                        |
 | 多租户                                 | `Ledon.MultiTenancy`          | `AddLedonMultiTenancy()`                             | 租户解析 + 后台穿透                              |
 | 测试基建                               | `Ledon.Testing`               | `LedonWebTestHost`                                   | 一行搭 TestServer + 生命周期断言                 |
+| 云原生默认值                           | `Ledon.Aspire`                | `AddLedonServiceDefaults()`                          | OTel+健康检查+弹性+服务发现一次装齐              |
 
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
@@ -218,6 +219,13 @@ builder.Services.AddLedonResilience();                    // 重试+超时+熔�
 builder.Services.AddLedonOptions<SmtpOptions>(builder.Configuration);   // 绑定+启动校验
 builder.Services.AddLedonMultiTenancy();                  // 租户解析（请求头/查询串/claim/子域名）+ 后台穿透
 app.UseLedonMultiTenancy();
+```
+
+## 云原生编排（Aspire）
+
+```csharp
+builder.AddLedonServiceDefaults();   // OTel（环境变量驱动）+ 健康检查 + 弹性 + 服务发现
+app.MapLedonDefaultEndpoints();      // /health/live 与 /health/ready
 ```
 
 ## 自动发现规则（允许列表）

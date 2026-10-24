@@ -22,6 +22,8 @@
         <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
         <!-- 集成测试基建（Testcontainers 夹具） -->
         <PackageVersion Include="Testcontainers" Version="4.16.0" />
+        <!-- Aspire 服务编排默认值（按需引入） -->
+        <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.11.0" />
         <!-- 框架运行期 -->
         <PackageVersion Include="Cronos" Version="0.13.0" />
         <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />

@@ -32,6 +32,7 @@
         <ProjectReference Include="..\..\src\Ledon.Queues.RabbitMQ\Ledon.Queues.RabbitMQ.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Serilog\Ledon.Serilog.csproj" />
         <ProjectReference Include="..\..\src\Ledon.FluentValidation\Ledon.FluentValidation.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Aspire\Ledon.Aspire.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Observability\Ledon.Observability.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Security\Ledon.Security.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Scheduling\Ledon.Scheduling.csproj" />
