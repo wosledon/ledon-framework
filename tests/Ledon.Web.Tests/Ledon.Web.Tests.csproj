@@ -31,6 +31,7 @@
         <ProjectReference Include="..\..\src\Ledon.Observability\Ledon.Observability.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Security\Ledon.Security.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Scheduling\Ledon.Scheduling.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Resilience\Ledon.Resilience.csproj" />
     </ItemGroup>
 
 </Project>
