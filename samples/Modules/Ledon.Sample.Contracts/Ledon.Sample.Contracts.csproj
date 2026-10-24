@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <!-- 契约程序集只依赖 Core：用户模块与通知模块都只引用它，彼此零引用 -->
-    <ProjectReference Include="..\..\..\src\Ledon.Core\Ledon.Core.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <!-- 契约程序集只依赖 Core：用户模块与通知模块都只引用它，彼此零引用 -->
+        <ProjectReference Include="..\..\..\src\Ledon.Core\Ledon.Core.csproj" />
+    </ItemGroup>
 
 </Project>
