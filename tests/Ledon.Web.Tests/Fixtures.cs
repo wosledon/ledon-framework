@@ -34,6 +34,12 @@ public sealed class Recorder
     }
 }
 
+/// <summary>缓存测试用的可序列化负载。</summary>
+public class Payload
+{
+    public string Name { get; set; } = string.Empty;
+}
+
 /// <summary>健康检查夹具：被 AddLedonHealthChecks 自动发现。</summary>
 public class SampleHealthCheck : IHealthCheck
 {

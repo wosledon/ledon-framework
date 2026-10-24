@@ -8,6 +8,7 @@ using Ledon.Web.Tests.Fixtures;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -241,6 +242,40 @@ public class FeaturePackagesTests : IDisposable
 
         // EF Core 等基础设施不扫
         Assert.DoesNotContain(typeof(Microsoft.EntityFrameworkCore.DbContext).Assembly.GetName().Name!, names);
+    }
+
+    // ---------- 分布式缓存 ----------
+
+    [Fact]
+    public async Task Distributed_cache_shares_values_across_instances()
+    {
+        // 同一 IDistributedCache 上的两个 ICacheService 实例 = 两个应用实例共享缓存
+        var services = new ServiceCollection();
+        services.AddDistributedMemoryCache();
+        services.AddLedonDistributedCaching(o => o.KeyPrefix = "test:");
+        using var provider = services.BuildServiceProvider();
+
+        var cacheA = provider.GetRequiredService<ICacheService>();
+        var cacheB = provider.GetRequiredService<ICacheService>();
+
+        cacheA.Set("k", new Payload { Name = "from-a" });
+
+        // 实例 B 立即可见（多实例共享语义）
+        Assert.True(cacheB.TryGet<Payload>("k", out var seen));
+        Assert.Equal("from-a", seen!.Name);
+
+        // 前缀隔离：另一个前缀的实例看不到
+        var other = new ServiceCollection();
+        other.AddDistributedMemoryCache();
+        other.AddLedonDistributedCaching(o => o.KeyPrefix = "other:");
+        using var otherProvider = other.BuildServiceProvider();
+        Assert.False(otherProvider.GetRequiredService<ICacheService>().TryGet<Payload>("k", out _));
+
+        // 回源后写入
+        var created = await cacheA.GetOrCreateAsync("new", _ => Task.FromResult(new Payload { Name = "created" }));
+        Assert.Equal("created", created!.Name);
+        Assert.True(cacheB.TryGet<Payload>("new", out var shared));
+        Assert.Equal("created", shared!.Name);
     }
 
     public void Dispose()
