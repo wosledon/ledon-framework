@@ -143,6 +143,41 @@ public class EverySecondTask : IScheduledTask
     }
 }
 
+/// <summary>
+/// 慢任务：首次执行阻塞在闸门上（时长 6s，跨过一个 4s 周期的触发点），
+/// 用于验证默认丢弃与补跑（CatchUpMissedTriggers）两种 misfire 语义。
+/// 后续执行立即完成并发出 <see cref="SecondRun"/> 信号。
+/// </summary>
+public class SlowTask : IScheduledTask
+{
+    private int _invocations;
+    private readonly TaskCompletionSource _started = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource _secondRun = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    public string CronExpression => "*/4 * * * * *";
+
+    public int Invocations => Volatile.Read(ref _invocations);
+
+    public Task Started => _started.Task;
+
+    public Task SecondRun => _secondRun.Task;
+
+    public TaskCompletionSource Release { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    public async Task ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        if (Interlocked.Increment(ref _invocations) == 1)
+        {
+            _started.TrySetResult();
+            await Release.Task.WaitAsync(TimeSpan.FromSeconds(15));
+        }
+        else
+        {
+            _secondRun.TrySetResult();
+        }
+    }
+}
+
 // ---------- 发件箱（Outbox）夹具 ----------
 
 /// <summary>测试用发件箱 DbContext（Sqlite 文件在测试中配置）。</summary>

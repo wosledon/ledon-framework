@@ -11,6 +11,8 @@ namespace Ledon.Scheduling;
 /// <summary>
 /// 调度宿主服务：为每个 <see cref="IScheduledTask"/> 维护一个按 cron 表达式驱动的循环，
 /// 每个任务的执行都在独立 DI 作用域与 span 中进行。单个任务失败只记录日志，不影响其它任务与调度循环。
+/// 同一任务的执行天然串行（循环等待上次执行结束）；执行跨过触发点时是否补跑见
+/// <see cref="LedonSchedulingOptions.CatchUpMissedTriggers"/>。
 /// </summary>
 internal sealed class SchedulerHostedService : BackgroundService
 {
@@ -56,10 +58,17 @@ internal sealed class SchedulerHostedService : BackgroundService
                 $"定时任务 {name} 的 cron 表达式无效：'{task.CronExpression}'");
         }
 
+        // 上一次执行的触发点（补跑模式据此推算"下一个"发生时刻，不错过执行期间跨过的触发点）
+        DateTimeOffset? lastTrigger = null;
+
         while (!stoppingToken.IsCancellationRequested)
         {
             var now = DateTimeOffset.UtcNow;
-            var next = cron.GetNextOccurrence(now, _options.TimeZone);
+
+            // 补跑模式：从上次执行的触发点推算下一个发生时刻（执行期间错过的触发点会立即补上）；
+            // 默认模式：从当前时刻推算（错过的触发点被丢弃，等下一个未来触发点）
+            var reference = _options.CatchUpMissedTriggers ? lastTrigger ?? now : now;
+            var next = cron.GetNextOccurrence(reference, _options.TimeZone);
             if (next is null)
                 return;
 
@@ -69,6 +78,8 @@ internal sealed class SchedulerHostedService : BackgroundService
 
             if (stoppingToken.IsCancellationRequested)
                 return;
+
+            lastTrigger = next.Value;
 
             await using var scope = _services.CreateAsyncScope();
 

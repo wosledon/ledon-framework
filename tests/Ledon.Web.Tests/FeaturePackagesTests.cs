@@ -299,6 +299,60 @@ public class FeaturePackagesTests : IDisposable
         await app.StopAsync();
     }
 
+    [Fact]
+    public async Task Scheduled_task_drops_triggers_missed_during_execution_by_default()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonScheduling();   // 默认 CatchUpMissedTriggers = false
+
+        var app = builder.Build();
+        await app.StartAsync();
+
+        var task = app.Services.GetServices<IScheduledTask>().OfType<SlowTask>().Single();
+
+        // 首次执行开始并阻塞 6s（4s 周期的 cron，期间跨过一个触发点）
+        await task.Started.WaitAsync(TimeSpan.FromSeconds(5));
+        await Task.Delay(6000);
+        Assert.Equal(1, task.Invocations);
+
+        // 放行：错过的触发点被丢弃，下一次执行要等到"执行完毕后"的下一个未来触发点（约 2s 后），
+        // 不会立即补跑——1.5s 内不应出现第二次执行
+        task.Release.TrySetResult();
+        await Assert.ThrowsAsync<TimeoutException>(
+            () => task.SecondRun.WaitAsync(TimeSpan.FromSeconds(1.5)));
+
+        // 下一个未来触发点到达后恢复执行
+        await task.SecondRun.WaitAsync(TimeSpan.FromSeconds(3));
+        Assert.True(task.Invocations >= 2);
+
+        await app.StopAsync();
+    }
+
+    [Fact]
+    public async Task Scheduled_task_catches_up_missed_triggers_when_enabled()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonScheduling(o => o.CatchUpMissedTriggers = true);
+
+        var app = builder.Build();
+        await app.StartAsync();
+
+        var task = app.Services.GetServices<IScheduledTask>().OfType<SlowTask>().Single();
+
+        await task.Started.WaitAsync(TimeSpan.FromSeconds(5));
+        await Task.Delay(6000);
+        Assert.Equal(1, task.Invocations);
+
+        // 放行：错过的触发点立即补上（无需等到下一个未来触发点）
+        task.Release.TrySetResult();
+        await task.SecondRun.WaitAsync(TimeSpan.FromSeconds(1.5));
+        Assert.True(task.Invocations >= 2);
+
+        await app.StopAsync();
+    }
+
     public void Dispose()
     {
         _client?.Dispose();

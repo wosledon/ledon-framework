@@ -7,13 +7,27 @@ app.UseLedonMultiTenancy();
 
 ## 租户解析
 
-默认从 `X-Tenant-Id` 请求头解析（`o.HeaderName` 可改），也支持查询串：
+四种解析来源（`o.Source`）：
+
+| 来源      | 配置                                  | 示例                              |
+| --------- | ------------------------------------- | --------------------------------- |
+| `Header`（默认） | `o.HeaderName`                 | `X-Tenant-Id: tenant-a`           |
+| `QueryString`   | `o.QueryStringName`           | `?tenantId=tenant-a`              |
+| `Claim`         | `o.ClaimType`（默认 tenant_id）| 令牌里的租户声明                  |
+| `Host`          | `o.HostSuffix`                | `tenant-a.example.com` → tenant-a |
 
 ```csharp
-builder.Services.AddLedonMultiTenancy(o => o.Source = TenantSource.QueryString);  // ?tenantId=xxx
+// 子域名多租户
+builder.Services.AddLedonMultiTenancy(o =>
+{
+    o.Source = TenantSource.Host;
+    o.HostSuffix = ".example.com";
+});
 ```
 
-- 未携带租户标识时按**单租户**处理（`TenantId == null`，`IsMultiTenant == false`），记 Debug 日志；
+- `Claim` 来源要求认证先于租户解析：`app.UseAuthentication(); app.UseLedonMultiTenancy();`
+- `Host` 来源下 apex 域名（`example.com`）与无关域名按单租户处理
+- 任何来源未解析到租户标识时按**单租户**处理（`TenantId == null`，`IsMultiTenant == false`），记 Debug 日志
 - 解析结果经 `ITenantContext` 暴露给请求管线内的任意服务：
 
 ```csharp
@@ -45,4 +59,4 @@ db.Orders.Where(o => o.TenantId == tenant.TenantId);
 
 ## 边界
 
-解析来源目前只有请求头/查询串。JWT claim、子域名、路由值等解析策略可在 `TenantResolutionMiddleware` 基础上自行扩展（或订阅后续版本）。
+路由值解析（`/tenants/{tenantId}/...`）未内置，可在 `TenantResolutionMiddleware` 基础上自行扩展。后台任务的环境租户靠入队时捕获，**不会**随每次队列派发重新解析——跨租户复用的 worker 进程需显式 `SetAmbient`。

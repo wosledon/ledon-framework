@@ -153,6 +153,8 @@ public class CleanupTask : IScheduledTask
 }
 ```
 
+执行天然串行；耗时跨过触发点默认丢弃，`o.CatchUpMissedTriggers = true` 可补跑。
+
 ## 认证授权
 
 ```csharp
@@ -186,7 +188,7 @@ app.MapLedonReadiness();   // /health/ready 聚合全部检查
 ```csharp
 builder.Services.AddLedonResilience();                    // 重试+超时+熔断，接管全部 HttpClient
 builder.Services.AddLedonOptions<SmtpOptions>(builder.Configuration);   // 绑定+启动校验
-builder.Services.AddLedonMultiTenancy();                  // X-Tenant-Id 解析 + 后台穿透
+builder.Services.AddLedonMultiTenancy();                  // 租户解析（请求头/查询串/claim/子域名）+ 后台穿透
 app.UseLedonMultiTenancy();
 ```
 

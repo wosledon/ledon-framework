@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Claims;
 using Ledon.MultiTenancy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,13 +13,16 @@ public class MultiTenancyTests : IDisposable
 {
     private WebApplication? _app;
 
-    private async Task<HttpClient> StartAsync()
+    private async Task<HttpClient> StartAsync(
+        Action<MultiTenancyOptions>? configureTenancy = null,
+        Action<WebApplication>? configurePipeline = null)
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
-        builder.Services.AddLedonMultiTenancy();
+        builder.Services.AddLedonMultiTenancy(configureTenancy);
 
         var app = builder.Build();
+        configurePipeline?.Invoke(app);
         app.UseLedonMultiTenancy();
         app.MapGet("/whoami", (ITenantContext tenant) => new
         {
@@ -53,6 +57,69 @@ public class MultiTenancyTests : IDisposable
 
         Assert.Contains("null", body);
         Assert.Contains("false", body);
+    }
+
+    // ---------- 声明 / Host 子域名解析 ----------
+
+    [Fact]
+    public async Task Tenant_id_is_resolved_from_claim()
+    {
+        // claim 来源要求认证先于租户解析：生产由 UseAuthentication 完成，测试直接注入 User
+        using var client = await StartAsync(
+            o => o.Source = TenantSource.Claim,
+            app => app.Use((context, next) =>
+            {
+                context.User = new ClaimsPrincipal(new ClaimsIdentity(
+                    [new Claim("tenant_id", "tenant-claim")], "test"));
+                return next();
+            }));
+
+        var body = await client.GetStringAsync("/whoami");
+
+        Assert.Contains("tenant-claim", body);
+        Assert.Contains("true", body);
+    }
+
+    [Fact]
+    public async Task Tenant_id_is_resolved_from_host_subdomain()
+    {
+        using var client = await StartAsync(o =>
+        {
+            o.Source = TenantSource.Host;
+            o.HostSuffix = ".example.com";
+        });
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/whoami");
+        request.Headers.Host = "tenant-a.example.com";
+        var body = await (await client.SendAsync(request)).Content.ReadAsStringAsync();
+
+        Assert.Contains("tenant-a", body);
+        Assert.Contains("true", body);
+    }
+
+    [Fact]
+    public async Task Apex_host_falls_back_to_single_tenant()
+    {
+        using var client = await StartAsync(o =>
+        {
+            o.Source = TenantSource.Host;
+            o.HostSuffix = ".example.com";
+        });
+
+        // apex 域名（无子域名段）与无关域名都按单租户处理
+        var apex = new HttpRequestMessage(HttpMethod.Get, "/whoami");
+        apex.Headers.Host = "example.com";
+        var apexBody = await (await client.SendAsync(apex)).Content.ReadAsStringAsync();
+
+        Assert.Contains("null", apexBody);
+        Assert.Contains("false", apexBody);
+
+        var foreign = new HttpRequestMessage(HttpMethod.Get, "/whoami");
+        foreign.Headers.Host = "tenant-b.other.com";
+        var foreignBody = await (await client.SendAsync(foreign)).Content.ReadAsStringAsync();
+
+        Assert.Contains("null", foreignBody);
+        Assert.Contains("false", foreignBody);
     }
 
     [Fact]
