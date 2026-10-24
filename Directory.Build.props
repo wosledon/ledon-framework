@@ -27,7 +27,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
+        <!-- 包 README：包目录下有自定义 README 时优先（NuGet 包页展示），否则用仓库根 README -->
+        <None Include="README.md" Pack="true" PackagePath="\" Condition="Exists('README.md')" />
+        <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\"
+            Condition="!Exists('README.md') And '$(IsPackable)' != 'false'" />
     </ItemGroup>
 
 </Project>
