@@ -31,6 +31,12 @@ app.Run();
 
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
+### 自动发现规则（允许列表）
+
+一个程序集被扫描，当且仅当它**直接引用了框架程序集**（Ledon.* 功能包）——「引用框架 = 选择加入」。基础设施（EF Core、xUnit、TestPlatform……）不引用框架，天然被排除；框架自身包显式排除。来源 = 入口程序集引用闭包 ∪ 已加载程序集，结果按程序集名排序，跨宿主确定。
+
+启动时会在 `Ledon.Module` 日志分类输出诊断：**Information** 报告发现了哪些模块、扫描了哪些程序集；**Debug** 给出被跳过的程序集清单与每条约定注册明细——「我的模块为什么没被发现」不用猜。需要扫描不引用框架的程序集时用 `AddAssembly` 逃生门。
+
 ## 写一个模块
 
 ```csharp
@@ -196,17 +202,21 @@ public class MyFixture { }
 
 ## 生命周期
 
+一个机制、两个阶段。基础设施任务（`ILedonPreInitialization`）是模块生命周期的前置阶段，与模块共用同一套启停语义：
+
 ```
-发现程序集（入口引用图 BFS ∪ 已加载程序集，自动排除框架与基础设施）
-  → 约定注入（服务 + 事件处理器）
+发现程序集（允许列表：引用框架的程序集；入口引用闭包 ∪ 已加载，按名排序）
+  → 诊断日志（Information：模块与扫描集；Debug：跳过清单与约定注册明细）
+  → 约定注入（服务 + 事件处理器，TryAdd，模块显式注册优先）
   → 各模块 ConfigureServices（拓扑序，容器 Build 之前）
-  → [Ledon.Data] 前置任务：建库/迁移（ILedonPreInitialization，先于所有模块）
-  → host.StartAsync → OnInitializedAsync（拓扑序）→ [Ledon.Queues] worker 启动
+  → host.StartAsync
+      → 阶段一（基础设施）：ILedonPreInitialization 前置任务——如 [Ledon.Data] 建库/迁移
+      → 阶段二（应用）：OnInitializedAsync（拓扑序）→ [Ledon.Queues] worker 启动
   → 运行期：事件总线通信 / 后台队列处理 / 缓存 / 链路指标
   → host.StopAsync  → OnShutdownAsync（逆序）
 ```
 
-初始化失败时已初始化的模块会**逆序回滚**，原始异常原样抛出。不用通用主机时：`await provider.InitializeModulesAsync()` / `ShutdownModulesAsync()`。
+任一阶段失败即中止：阶段二失败时已初始化模块**逆序回滚**，原始异常原样抛出。不用通用主机时：`await provider.InitializeModulesAsync()` / `ShutdownModulesAsync()`。
 
 ## 项目结构
 
