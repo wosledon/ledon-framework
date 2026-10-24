@@ -46,7 +46,9 @@ public static class LedonDataServiceCollectionExtensions
     private static bool IsDbContext(Type type) =>
         type is { IsClass: true, IsAbstract: false }
         && type != typeof(DbContext)
-        && typeof(DbContext).IsAssignableFrom(type);
+        // ILedonDbContext 是选择加入的标记：只登记实现了它的 DbContext，
+        // 否则任意 DbContext（如继承 OutboxDbContext 的）会被误注册为 ILedonDbContext
+        && typeof(ILedonDbContext).IsAssignableFrom(type);
 
     /// <summary>
     /// 通过反射调用 EF 的 <c>AddDbContext</c>（DbContext 类型是运行时发现的）。

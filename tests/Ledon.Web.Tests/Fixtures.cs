@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Ledon.Data;
 using Ledon.Module;
 using Ledon.Module.Abstractions;
+using Ledon.Queues;
 using Ledon.Scheduling;
 using Ledon.Web;
 using Microsoft.AspNetCore.Authorization;
@@ -138,6 +139,28 @@ public class EverySecondTask : IScheduledTask
     public Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
         _fired.TrySetResult();
+        return Task.CompletedTask;
+    }
+}
+
+// ---------- 发件箱（Outbox）夹具 ----------
+
+/// <summary>测试用发件箱 DbContext（Sqlite 文件在测试中配置）。</summary>
+public class TestOutboxDbContext(DbContextOptions<TestOutboxDbContext> options) : OutboxDbContext(options);
+
+public record OrderPlaced(string OrderId) : IIntegrationEvent;
+
+/// <summary>集成事件投递信号（测试串行执行，静态安全）。</summary>
+public static class OutboxSignal
+{
+    public static bool Delivered { get; set; }
+}
+
+public class OrderPlacedHandler : IIntegrationEventHandler<OrderPlaced>
+{
+    public Task HandleAsync(OrderPlaced @event, CancellationToken cancellationToken = default)
+    {
+        OutboxSignal.Delivered = true;
         return Task.CompletedTask;
     }
 }
