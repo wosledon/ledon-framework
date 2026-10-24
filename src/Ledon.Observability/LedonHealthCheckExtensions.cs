@@ -27,6 +27,7 @@ public static class LedonHealthCheckServiceCollectionExtensions
         return services.AddLedonHealthChecks(null);
     }
 
+    /// <param name="services">服务集合。</param>
     /// <param name="configure">健康检查参数（如 Redis 连接串）。</param>
     public static IServiceCollection AddLedonHealthChecks(
         this IServiceCollection services,
