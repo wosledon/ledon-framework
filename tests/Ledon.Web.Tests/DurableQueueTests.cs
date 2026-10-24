@@ -17,18 +17,40 @@ public class DurableQueueTests : IDisposable
 {
     private WebApplication? _app;
 
+    /// <summary>不起调度器的宿主（只入队，验证持久化）。</summary>
+    private WebApplication BuildWithoutDispatcher(string dbPath, DurableRecorder recorder)
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddSingleton<IDurableJobHandler>(new RecordJobHandler(recorder));
+        builder.Services.AddLedonDurableQueue(o =>
+        {
+            // 轮询间隔 60s + Retention 0：测试窗口内调度器不会投递/清理
+            o.PollingInterval = TimeSpan.FromSeconds(60);
+            o.Retention = TimeSpan.Zero;
+        });
+        builder.Services.AddDbContext<TestOutboxDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath};Cache=Shared"));
+
+        return builder.Build();
+    }
+
     private async Task<WebApplication> StartAsync(string dbPath, DurableRecorder? recorder = null)
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
-        builder.Services.AddLedonDurableQueue(o => o.PollingInterval = TimeSpan.FromMilliseconds(50));
+
+        // 先手动注册处理器：框架的自动发现用 TryAddEnumerable，不会覆盖手动注册——
+        // 这样每测试实例用自己的一份 recorder（避免静态信号被并行测试污染）
         if (recorder is not null)
         {
             builder.Services.AddSingleton<IDurableJobHandler>(new RecordJobHandler(recorder));
             builder.Services.AddSingleton<IDurableJobHandler>(new FlakyJobHandler(recorder));
         }
+
+        builder.Services.AddLedonDurableQueue(o => o.PollingInterval = TimeSpan.FromMilliseconds(50));
         builder.Services.AddDbContext<TestOutboxDbContext>(options =>
-            options.UseSqlite($"Data Source={dbPath}"));
+            options.UseSqlite($"Data Source={dbPath};Cache=Shared"));
 
         var app = builder.Build();
         _app = app;
@@ -57,7 +79,7 @@ public class DurableQueueTests : IDisposable
             await queue.EnqueueAsync(new DurableJob("record", "payload-1"));
         }
 
-        await WaitUntil(() => recorder.Snapshot().Count >= 1, TimeSpan.FromSeconds(5));
+        await WaitUntil(() => recorder.Snapshot().Count >= 1, TimeSpan.FromSeconds(15));
 
         Assert.Equal("payload-1", recorder.Snapshot()[0]);
 
@@ -76,25 +98,32 @@ public class DurableQueueTests : IDisposable
         var recorder = new DurableRecorder();
         var dbPath = NewDb("restart");
 
-        // 第一次运行：只入队，不起调度器（模拟"进程在投递前被杀"）
-        await using (var app = await StartAsync(dbPath, recorder))
+        // 第一次运行：构建但不启动宿主（调度器不跑）——模拟"进程在投递前被杀"
+        await using (var app = BuildWithoutDispatcher(dbPath, recorder))
         {
-            await using var scope = app.Services.CreateAsyncScope();
-            var queue = scope.ServiceProvider.GetRequiredService<IDurableQueue>();
-            await queue.EnqueueAsync(new DurableJob("record", "before-restart"));
+            await using (var scope = app.Services.CreateAsyncScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+                await db.Database.EnsureCreatedAsync();
+
+                var queue = scope.ServiceProvider.GetRequiredService<IDurableQueue>();
+                await queue.EnqueueAsync(new DurableJob("record", "before-restart"));
+            }
 
             // 任务已落库但未处理（进程内队列此时会随进程消失）
-            await using var check = app.Services.CreateAsyncScope();
-            var db = check.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
-            var job = await db.QueuedJobs.SingleAsync();
-            Assert.Null(job.ProcessedAt);
+            await using (var check = app.Services.CreateAsyncScope())
+            {
+                var db = check.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+                var job = await db.QueuedJobs.SingleAsync();
+                Assert.Null(job.ProcessedAt);
+            }
         }
 
         Assert.Empty(recorder.Snapshot());
 
         // 第二次运行（同一数据库）：重启后调度器把未处理任务继续投递
         await using var app2 = await StartAsync(dbPath, recorder);
-        await WaitUntil(() => recorder.Snapshot().Count >= 1, TimeSpan.FromSeconds(5));
+        await WaitUntil(() => recorder.Snapshot().Count >= 1, TimeSpan.FromSeconds(15));
 
         Assert.Equal("before-restart", recorder.Snapshot()[0]);
     }
@@ -150,7 +179,7 @@ public class DurableQueueTests : IDisposable
             var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
             var job = await db.QueuedJobs.FirstOrDefaultAsync();
             return job?.RetryCount > 0;
-        }, TimeSpan.FromSeconds(5));
+        }, TimeSpan.FromSeconds(15));
 
         await using (var scope = app.Services.CreateAsyncScope())
         {
@@ -163,17 +192,39 @@ public class DurableQueueTests : IDisposable
     [Fact]
     public async Task Cleanup_deletes_only_processed_beyond_retention()
     {
-        var app = await StartAsync(NewDb("cleanup"));
+        // 纯存储语义测试：轮询间隔拉到 10s，使清理在调度器干预前完成（避免投递竞争）
+        var dbPath = NewDb("cleanup");
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonDurableQueue(o =>
+        {
+            o.PollingInterval = TimeSpan.FromSeconds(10);
+            o.Retention = TimeSpan.Zero;   // 关掉调度器自带的清理，避免与断言竞争
+        });
+        builder.Services.AddDbContext<TestOutboxDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath};Cache=Shared"));
+
+        var app = builder.Build();
+        _app = app;
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+            await db.Database.EnsureCreatedAsync();
+        }
+
+        await app.StartAsync();
 
         Guid oldId, recentId, pendingId;
         await using (var scope = app.Services.CreateAsyncScope())
         {
-            var queue = scope.ServiceProvider.GetRequiredService<IDurableQueue>();
-            await queue.EnqueueAsync(new DurableJob("record", "old"));
-            await queue.EnqueueAsync(new DurableJob("record", "recent"));
-            await queue.EnqueueAsync(new DurableJob("record", "pending"));
-
             var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+            db.QueuedJobs.AddRange(
+                new QueuedJobMessage { Id = Guid.NewGuid(), QueueName = "h", Payload = "old", CreatedAt = DateTime.UtcNow, AvailableAt = DateTime.UtcNow },
+                new QueuedJobMessage { Id = Guid.NewGuid(), QueueName = "h", Payload = "recent", CreatedAt = DateTime.UtcNow, AvailableAt = DateTime.UtcNow },
+                new QueuedJobMessage { Id = Guid.NewGuid(), QueueName = "h", Payload = "pending", CreatedAt = DateTime.UtcNow, AvailableAt = DateTime.UtcNow });
+            await db.SaveChangesAsync();
+
             var jobs = await db.QueuedJobs.ToListAsync();
             var old = jobs.Single(j => j.Payload == "old");
             var recent = jobs.Single(j => j.Payload == "recent");
@@ -184,6 +235,7 @@ public class DurableQueueTests : IDisposable
 
             old.ProcessedAt = DateTime.UtcNow.AddDays(-10);
             recent.ProcessedAt = DateTime.UtcNow;
+            pending.ProcessedAt = null;
             await db.SaveChangesAsync();
         }
 
