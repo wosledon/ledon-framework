@@ -25,7 +25,8 @@ public static class ConventionScanner
     public static IServiceCollection ScanAssembly(
         this IServiceCollection services,
         Assembly assembly,
-        ServiceLifetime lifetime = ServiceLifetime.Scoped)
+        ServiceLifetime lifetime = ServiceLifetime.Scoped,
+        ICollection<string>? log = null)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(assembly);
@@ -42,10 +43,16 @@ public static class ConventionScanner
                 .ToList();
 
             foreach (var serviceInterface in serviceInterfaces)
+            {
                 services.TryAdd(new ServiceDescriptor(serviceInterface, type, lifetime));
+                log?.Add($"{serviceInterface.Name} -> {type.Name} ({lifetime})");
+            }
 
             foreach (var handlerInterface in handlerInterfaces)
+            {
                 services.TryAdd(new ServiceDescriptor(handlerInterface, type, ServiceLifetime.Transient));
+                log?.Add($"{handlerInterface.Name} -> {type.Name} (Transient)");
+            }
         }
 
         return services;

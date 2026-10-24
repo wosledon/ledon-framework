@@ -3,71 +3,89 @@ using Ledon.Module.Abstractions;
 
 namespace Ledon.Module.Hosting;
 
+/// <summary>程序集扫描结果：纳入的程序集 + 被跳过的（诊断用，解释"为什么我的模块没被发现"）。</summary>
+internal sealed class AssemblyScanResult(
+    IReadOnlyList<Assembly> assemblies,
+    IReadOnlyList<string> skippedAssemblies)
+{
+    /// <summary>纳入扫描的业务程序集（按名称排序，结果确定）。</summary>
+    public IReadOnlyList<Assembly> Assemblies { get; } = assemblies;
+
+    /// <summary>已加载但未纳入的程序集名（诊断信息：未引用框架）。</summary>
+    public IReadOnlyList<string> SkippedAssemblies { get; } = skippedAssemblies;
+}
+
 /// <summary>
-/// 程序集扫描器：自动发现"业务程序集"的双通道——
-/// A. 入口程序集引用图 BFS（覆盖引用了但尚未加载的程序集）；
-/// B. 当前已加载程序集（覆盖入口不可用的宿主，如 VSTest 测试宿主）。
-/// 框架自身与常见基础设施前缀会被跳过；无法加载的引用安全忽略。
+/// 程序集扫描器（允许列表，非黑名单）。
+/// 规则：一个程序集被扫描，当且仅当它直接引用了框架程序集（Ledon.* 功能包）——
+/// 即"引用框架 = 选择加入"，基础设施（EF、xUnit、TestPlatform……）不引用框架，天然被排除。
+/// 来源两个通道合并：入口程序集引用闭包（覆盖引用了但尚未加载的）+ 已加载程序集（覆盖宿主入口
+/// 不可用的场景，如 VSTest）。结果按程序集名排序，保证跨宿主确定性。
 /// </summary>
 internal static class AssemblyScanner
 {
-    /// <summary>不参与自动扫描的基础设施前缀（用户程序集一般不会以这些开头）。</summary>
-    private static readonly string[] FrameworkPrefixes =
-    [
-        "System", "mscorlib", "netstandard", "Microsoft.Extensions", "Microsoft.AspNetCore",
-        "Microsoft.NETCore", "Microsoft.WindowsDesktop", "Microsoft.EntityFrameworkCore",
-        "Microsoft.Data", "Microsoft.IdentityModel", "Microsoft.OpenApi", "Microsoft.TestPlatform",
-        "Microsoft.VisualStudio", "Microsoft.Win32", "Microsoft.Net", "SQLitePCLRaw", "xunit",
-        "testhost", "testplatform", "coverlet", "NuGet", "Humanizer", "ICSharpCode", "Newtonsoft",
-        "Serilog", "NLog",
-    ];
-
-    /// <summary>框架自身的程序集（按名精确排除——用户模块即使叫 Ledon.Xxx 也不受影响）。</summary>
+    /// <summary>
+    /// 框架自身的程序集名。引用它们不等于业务程序集，需显式排除。
+    /// 新增功能包时在此登记（测试会守住这一点）。
+    /// </summary>
     private static readonly HashSet<string> FrameworkAssemblyNames = new(StringComparer.OrdinalIgnoreCase)
     {
-        typeof(IModule).Assembly.GetName().Name!,   // Ledon.Module
-        typeof(Ledon.Core.Events.IEventBus).Assembly.GetName().Name!,   // Ledon.Core
+        typeof(IModule).Assembly.GetName().Name!,                                  // Ledon.Module
+        typeof(Ledon.Core.Events.IEventBus).Assembly.GetName().Name!,              // Ledon.Core
         "Ledon.Web",
         "Ledon.Data",
+        "Ledon.Caching",
+        "Ledon.Queues",
+        "Ledon.Observability",
     };
 
-    /// <summary>汇总最终扫描集：自动发现（可选）+ 显式指定的程序集。</summary>
-    public static IReadOnlyList<Assembly> ResolveAssemblies(LedonOptions options)
+    public static AssemblyScanResult ResolveAssemblies(LedonOptions options)
     {
-        var assemblies = new List<Assembly>();
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var candidates = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
 
-        void Add(Assembly assembly)
+        // 通道 A：入口程序集引用闭包 BFS（覆盖"引用了但尚未加载"）
+        if (Assembly.GetEntryAssembly() is { } entry)
+        {
+            foreach (var assembly in WalkReferences(entry))
+                candidates[assembly.GetName().Name!] = assembly;
+        }
+
+        // 通道 B：已加载程序集（覆盖入口不可用/不引用业务的宿主，如 VSTest 测试宿主）
+        var skipped = new List<string>();
+        foreach (var loaded in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            if (loaded.IsDynamic)
+                continue;
+
+            var name = loaded.GetName().Name;
+            if (string.IsNullOrEmpty(name))
+                continue;
+
+            if (FrameworkAssemblyNames.Contains(name))
+                continue;
+
+            if (ReferencesFramework(loaded))
+                candidates[name] = loaded;
+            else
+                skipped.Add(name);
+        }
+
+        // 显式追加（逃生门）：无条件纳入
+        foreach (var assembly in options.Assemblies)
         {
             var name = assembly.GetName().Name;
-            if (!string.IsNullOrEmpty(name) && seen.Add(name))
-                assemblies.Add(assembly);
+            if (!string.IsNullOrEmpty(name))
+                candidates[name] = assembly;
         }
 
-        if (options.AutoDiscovery)
-        {
-            // 通道 A：入口程序集引用图 BFS——覆盖"引用了但尚未加载"的程序集（典型控制台应用）
-            if (Assembly.GetEntryAssembly() is { } entry)
-            {
-                foreach (var assembly in WalkReferences(entry))
-                    Add(assembly);
-            }
+        var ordered = candidates.Values
+            .OrderBy(assembly => assembly.GetName().Name, StringComparer.Ordinal)
+            .ToList();
 
-            // 通道 B：当前已加载的程序集——覆盖入口不可用的场景（如 VSTest 测试宿主，
-            // GetEntryAssembly() 指向 testhost 而非测试程序集）
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                if (IsScannable(assembly))
-                    Add(assembly);
-            }
-        }
-
-        foreach (var assembly in options.Assemblies)
-            Add(assembly);
-
-        return assemblies;
+        return new AssemblyScanResult(ordered, skipped);
     }
 
+    /// <summary>入口程序集的引用闭包（含入口自身）。</summary>
     private static IEnumerable<Assembly> WalkReferences(Assembly entry)
     {
         var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -77,11 +95,8 @@ internal static class AssemblyScanner
         while (queue.Count > 0)
         {
             var assembly = queue.Dequeue();
-            if (!IsScannable(assembly))
-                continue;
-
-            var name = assembly.GetName().Name!;
-            if (!visited.Add(name))
+            var name = assembly.GetName().Name;
+            if (string.IsNullOrEmpty(name) || !visited.Add(name))
                 continue;
 
             yield return assembly;
@@ -94,26 +109,21 @@ internal static class AssemblyScanner
                 }
                 catch
                 {
-                    // 无法加载的引用（如平台特定）直接跳过，不影响自动发现
+                    // 无法加载的引用（如平台特定）跳过
                 }
             }
         }
     }
 
-    private static bool IsScannable(Assembly assembly)
+    /// <summary>允许列表判据：直接引用任一框架程序集。</summary>
+    private static bool ReferencesFramework(Assembly assembly)
     {
-        if (assembly.IsDynamic)
-            return false;
+        foreach (var reference in assembly.GetReferencedAssemblies())
+        {
+            if (reference.Name is not null && FrameworkAssemblyNames.Contains(reference.Name))
+                return true;
+        }
 
-        var name = assembly.GetName().Name;
-        if (string.IsNullOrEmpty(name))
-            return false;
-
-        // 框架自身（模块系统、Core 基元与各功能包）不扫
-        if (FrameworkAssemblyNames.Contains(name))
-            return false;
-
-        return !FrameworkPrefixes.Any(prefix =>
-            name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+        return false;
     }
 }

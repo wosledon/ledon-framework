@@ -1,6 +1,7 @@
 using System.Runtime.ExceptionServices;
 using Ledon.Module.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Ledon.Module.Runtime;
 
@@ -11,12 +12,14 @@ namespace Ledon.Module.Runtime;
 public sealed class ModuleManager : IModuleManager
 {
     private readonly List<ModuleDescriptor> _modules;
+    private readonly ModuleDiagnostics _diagnostics;
     private IServiceProvider? _services;
     private bool _initialized;
 
-    internal ModuleManager(IReadOnlyList<ModuleDescriptor> modules)
+    internal ModuleManager(IReadOnlyList<ModuleDescriptor> modules, ModuleDiagnostics diagnostics)
     {
         _modules = modules as List<ModuleDescriptor> ?? modules.ToList();
+        _diagnostics = diagnostics;
     }
 
     public IReadOnlyList<ModuleDescriptor> Modules => _modules;
@@ -46,6 +49,8 @@ public sealed class ModuleManager : IModuleManager
 
         try
         {
+            LogDiagnostics(services);
+
             // 前置任务：先于任何模块初始化（如数据库建库/迁移），失败则整体中止
             foreach (var task in services.GetServices<ILedonPreInitialization>())
                 await task.ExecuteAsync(cancellationToken);
@@ -129,4 +134,39 @@ public sealed class ModuleManager : IModuleManager
 
     private static Task ShutdownCoreAsync(ModuleDescriptor descriptor, IServiceProvider services, CancellationToken cancellationToken) =>
         descriptor.Instance!.OnShutdownAsync(new ModuleContext(descriptor, services), cancellationToken);
+
+    /// <summary>
+    /// 输出启动诊断：Information 级别报告模块与扫描结果（回答"发现了什么"），
+    /// Debug 级别给出跳过清单与约定注册明细（回答"为什么没发现/这个服务是谁注册的"）。
+    /// </summary>
+    private void LogDiagnostics(IServiceProvider services)
+    {
+        var logger = services.GetService<ILoggerFactory>()?.CreateLogger("Ledon.Module");
+        if (logger is null)
+            return;
+
+        var moduleNames = string.Join(", ", _modules.Select(module => module.Name));
+        logger.LogInformation(
+            "模块发现完成：{ModuleCount} 个模块 [{Modules}]，扫描 {AssemblyCount} 个程序集 [{Assemblies}]",
+            _modules.Count,
+            moduleNames,
+            _diagnostics.ScannedAssemblies.Count,
+            string.Join(", ", _diagnostics.ScannedAssemblies));
+
+        if (_diagnostics.SkippedAssemblies.Count > 0)
+        {
+            logger.LogDebug(
+                "已跳过 {Count} 个已加载但未引用框架的程序集：{Skipped}",
+                _diagnostics.SkippedAssemblies.Count,
+                string.Join(", ", _diagnostics.SkippedAssemblies));
+        }
+
+        if (_diagnostics.ConventionRegistrations.Count > 0)
+        {
+            logger.LogDebug(
+                "约定注册 {Count} 项：{Registrations}",
+                _diagnostics.ConventionRegistrations.Count,
+                string.Join(", ", _diagnostics.ConventionRegistrations));
+        }
+    }
 }

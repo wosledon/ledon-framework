@@ -19,15 +19,15 @@ app.Run();
 
 ## 能力矩阵（按需引入）
 
-| 能力 | 包 | 引入方式 | 说明 |
-|---|---|---|---|
-| 模块系统（发现/依赖/生命周期/事件） | `Ledon.Module` | 被 `Ledon.Web` 自动带入 | 核心，默认在场 |
-| Web 集成（端点/控制器/OpenAPI） | `Ledon.Web` | `builder.AddLedonWeb()` | 控制器默认自动发现 |
-| 数据访问（EF Core） | `Ledon.Data` | `builder.Services.AddLedonData()` | 自动注册 + 前置自动建库/迁移 |
-| 缓存 | `Ledon.Caching` | `builder.Services.AddLedonCaching()` | `ICacheService`，single-flight 回源 |
-| 后台队列 | `Ledon.Queues` | `builder.Services.AddLedonQueues()` | `IBackgroundQueue`，Channel 有界 + 多 worker |
-| 可观测性 | `Ledon.Observability` | `builder.Services.AddLedonObservability()` | OpenTelemetry 链路/指标 + 健康检查 |
-| OpenAPI 文档 | （随 `Ledon.Web`） | `o.UseOpenApi = true` | `/openapi/v1.json` |
+| 能力                                | 包                    | 引入方式                                   | 说明                                         |
+| ----------------------------------- | --------------------- | ------------------------------------------ | -------------------------------------------- |
+| 模块系统（发现/依赖/生命周期/事件） | `Ledon.Module`        | 被 `Ledon.Web` 自动带入                    | 核心，默认在场                               |
+| Web 集成（端点/控制器/OpenAPI）     | `Ledon.Web`           | `builder.AddLedonWeb()`                    | 控制器默认自动发现                           |
+| 数据访问（EF Core）                 | `Ledon.Data`          | `builder.Services.AddLedonData()`          | 自动注册 + 前置自动建库/迁移                 |
+| 缓存                                | `Ledon.Caching`       | `builder.Services.AddLedonCaching()`       | `ICacheService`，single-flight 回源          |
+| 后台队列                            | `Ledon.Queues`        | `builder.Services.AddLedonQueues()`        | `IBackgroundQueue`，Channel 有界 + 多 worker |
+| 可观测性                            | `Ledon.Observability` | `builder.Services.AddLedonObservability()` | OpenTelemetry 链路/指标 + 健康检查           |
+| OpenAPI 文档                        | （随 `Ledon.Web`）    | `o.UseOpenApi = true`                      | `/openapi/v1.json`                           |
 
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
@@ -168,10 +168,10 @@ app.MapLedonHealthChecks();   // GET /health
 
 扫描到的程序集里，每个具体类按以下规则自动进容器（`TryAdd`，手动注册优先）：
 
-| 规则 | 示例 | 注册结果 |
-|---|---|---|
-| 同名接口 | `class UserService : IUserService` | `IUserService → UserService`（默认 Scoped） |
-| 事件处理器 | `class X : IEventHandler<E>` | `IEventHandler<E> → X`（Transient） |
+| 规则       | 示例                               | 注册结果                                    |
+| ---------- | ---------------------------------- | ------------------------------------------- |
+| 同名接口   | `class UserService : IUserService` | `IUserService → UserService`（默认 Scoped） |
+| 事件处理器 | `class X : IEventHandler<E>`       | `IEventHandler<E> → X`（Transient）         |
 
 **没有接口的类（DTO、控制器、端点）不会被自动注册**——这不仅是减少噪音：把 MVC 动作参数类型注册进容器会让 `[ApiController]` 的隐式 `[FromBody]` 推断失效（退化为查询绑定）。此类类型请显式注册。泛型 arity 会被忽略（`IRepo<T>` ↔ `Repo<T>`）。默认生命周期可用 `o.DefaultServiceLifetime` 调整。
 

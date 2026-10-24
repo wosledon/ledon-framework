@@ -14,6 +14,6 @@ public static class LedonAssemblies
     {
         var options = new LedonOptions();
         configure?.Invoke(options);
-        return AssemblyScanner.ResolveAssemblies(options);
+        return AssemblyScanner.ResolveAssemblies(options).Assemblies;
     }
 }

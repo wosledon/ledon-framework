@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Ledon.Caching;
+using Ledon.Module;
 using Ledon.Observability;
 using Ledon.Queues;
 using Ledon.Web.Tests.Fixtures;
@@ -154,6 +155,29 @@ public class FeaturePackagesTests : IDisposable
 
         var response = await client.GetAsync("/");
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode); // 无端点，仅验证管线可用
+    }
+
+    // ---------- 程序集扫描（允许列表） ----------
+
+    [Fact]
+    public void Scan_set_excludes_framework_and_infrastructure_assemblies()
+    {
+        var names = LedonAssemblies.Scan()
+            .Select(assembly => assembly.GetName().Name!)
+            .ToHashSet(StringComparer.Ordinal);
+
+        // 引用框架的测试程序集被纳入
+        Assert.Contains(typeof(FeaturePackagesTests).Assembly.GetName().Name!, names);
+
+        // 框架功能包自身不扫（即使测试项目直接引用它们）
+        Assert.DoesNotContain(typeof(Ledon.Web.IEndpoint).Assembly.GetName().Name!, names);
+        Assert.DoesNotContain(typeof(Ledon.Data.ILedonDbContext).Assembly.GetName().Name!, names);
+        Assert.DoesNotContain(typeof(Ledon.Caching.ICacheService).Assembly.GetName().Name!, names);
+        Assert.DoesNotContain(typeof(Ledon.Queues.IBackgroundQueue).Assembly.GetName().Name!, names);
+        Assert.DoesNotContain(typeof(Ledon.Observability.LedonObservabilityOptions).Assembly.GetName().Name!, names);
+
+        // EF Core 等基础设施不扫
+        Assert.DoesNotContain(typeof(Microsoft.EntityFrameworkCore.DbContext).Assembly.GetName().Name!, names);
     }
 
     public void Dispose()

@@ -1,10 +1,10 @@
 <Project>
 
-  <PropertyGroup>
-    <!-- Microsoft.AspNetCore.OpenApi 的源生成器会发出拦截器代码，
+    <PropertyGroup>
+        <!-- Microsoft.AspNetCore.OpenApi 的源生成器会发出拦截器代码，
          消费该包（含经 Ledon.Web 间接引用）且使用最小 API 映射的项目必须显式启用。
          打包为 NuGet 时应改由 buildTransitive/Ledon.Web.props 向使用方传递。 -->
-    <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.AspNetCore.OpenApi.Generated</InterceptorsNamespaces>
-  </PropertyGroup>
+        <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.AspNetCore.OpenApi.Generated</InterceptorsNamespaces>
+    </PropertyGroup>
 
 </Project>

@@ -1,26 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Ledon.Web\Ledon.Web.csproj" />
-    <ProjectReference Include="..\..\src\Ledon.Data\Ledon.Data.csproj" />
-    <ProjectReference Include="..\..\src\Ledon.Caching\Ledon.Caching.csproj" />
-    <ProjectReference Include="..\..\src\Ledon.Queues\Ledon.Queues.csproj" />
-    <ProjectReference Include="..\..\src\Ledon.Observability\Ledon.Observability.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Ledon.Web\Ledon.Web.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Data\Ledon.Data.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Caching\Ledon.Caching.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Queues\Ledon.Queues.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Observability\Ledon.Observability.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.13" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.13" />
+    </ItemGroup>
 
 </Project>

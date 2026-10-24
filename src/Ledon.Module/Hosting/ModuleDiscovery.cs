@@ -3,12 +3,21 @@ using Ledon.Module.Abstractions;
 
 namespace Ledon.Module.Hosting;
 
-/// <summary>发现结果：模块类型列表（显式优先，其余按 程序集BFS序 + 类型全名序，结果确定）+ 参与约定注册的程序集。</summary>
-internal sealed class DiscoveryOutcome(IReadOnlyList<Type> moduleTypes, IReadOnlyList<Assembly> assemblies)
+/// <summary>
+/// 发现结果：模块类型列表（显式优先，其余按 程序集名 + 类型全名序，结果确定）
+/// + 参与约定注册的程序集 + 诊断信息（扫描/跳过的程序集）。
+/// </summary>
+internal sealed class DiscoveryOutcome(
+    IReadOnlyList<Type> moduleTypes,
+    IReadOnlyList<Assembly> assemblies,
+    IReadOnlyList<string> skippedAssemblies)
 {
     public IReadOnlyList<Type> ModuleTypes { get; } = moduleTypes;
 
     public IReadOnlyList<Assembly> Assemblies { get; } = assemblies;
+
+    /// <summary>已加载但未纳入扫描的程序集（诊断：未引用框架）。</summary>
+    public IReadOnlyList<string> SkippedAssemblies { get; } = skippedAssemblies;
 }
 
 /// <summary>模块发现：合并显式注册与程序集自动扫描，保证顺序确定、结果去重。</summary>
@@ -16,7 +25,8 @@ internal static class ModuleDiscovery
 {
     public static DiscoveryOutcome Discover(LedonOptions options)
     {
-        var scannedAssemblies = AssemblyScanner.ResolveAssemblies(options);
+        var scan = AssemblyScanner.ResolveAssemblies(options);
+        var scannedAssemblies = scan.Assemblies;
 
         var types = new List<Type>();
         var seen = new HashSet<Type>();
@@ -49,7 +59,7 @@ internal static class ModuleDiscovery
 
         if (types.Count == 0)
             throw new LedonModuleException(
-                "未发现任何模块。请确认模块实现了 IModule 且所在程序集可被扫描；" +
+                "未发现任何模块。请确认模块实现了 IModule 且所在程序集引用了框架；" +
                 "需要精确控制时用 AddLedon(o => o.AddModule<T>()) 显式注册。");
 
         // 约定注册的程序集 = 扫描集 ∪ 显式模块所在程序集
@@ -67,7 +77,7 @@ internal static class ModuleDiscovery
                 conventionAssemblies.Add(type.Assembly);
         }
 
-        return new DiscoveryOutcome(types, conventionAssemblies);
+        return new DiscoveryOutcome(types, conventionAssemblies, scan.SkippedAssemblies);
     }
 
     /// <summary>类型自身或其任一外层容器类标记了 <see cref="DisableAutoDiscoveryAttribute"/>。</summary>

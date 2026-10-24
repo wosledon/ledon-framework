@@ -40,10 +40,11 @@ public static class LedonServiceCollectionExtensions
         }
 
         // 约定自动注入先跑：模块自己的 ConfigureServices 后跑，天然获得覆盖权
+        var registrations = new List<string>();
         foreach (var assembly in discovery.Assemblies)
-            services.ScanAssembly(assembly, options.DefaultServiceLifetime);
+            services.ScanAssembly(assembly, options.DefaultServiceLifetime, registrations);
 
-        var manager = new ModuleManager(descriptors);
+        var manager = new ModuleManager(descriptors, new ModuleDiagnostics(discovery, registrations));
 
         // 阶段一：在宿主 BuildServiceProvider 之前按拓扑序执行各模块的服务注册
         foreach (var descriptor in descriptors)
