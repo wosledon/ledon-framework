@@ -21,6 +21,7 @@
     <Project Path="src/Ledon.Resilience/Ledon.Resilience.csproj" />
     <Project Path="src/Ledon.Scheduling/Ledon.Scheduling.csproj" />
     <Project Path="src/Ledon.Security/Ledon.Security.csproj" />
+    <Project Path="src/Ledon.Testing/Ledon.Testing.csproj" />
     <Project Path="src/Ledon.Web/Ledon.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
