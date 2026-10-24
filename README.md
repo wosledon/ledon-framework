@@ -22,7 +22,7 @@ app.Run();
 | 能力                                   | 包                            | 引入方式                                             | 说明                                             |
 | -------------------------------------- | ----------------------------- | ---------------------------------------------------- | ------------------------------------------------ |
 | 模块系统（发现/依赖/生命周期/事件）    | `Ledon.Module`                | 被 `Ledon.Web` 自动带入                              | 核心，默认在场                                   |
-| Web 集成（端点/控制器/OpenAPI/规范化） | `Ledon.Web`                   | `builder.AddLedonWeb()`                              | 含 ProblemDetails、关联 ID、统一响应、版本化开关 |
+| Web 集成（端点/控制器/OpenAPI/规范化） | `Ledon.Web`                   | `builder.AddLedonWeb()`                              | 含 ProblemDetails、关联 ID、统一响应、版本化、CORS 开关 |
 | 数据访问（EF Core + 发件箱）           | `Ledon.Data` / `Ledon.Queues` | `AddLedonData()` / `AddLedonOutbox()`                | 自动注册 + 前置自动建库 + 至少一次投递           |
 | 缓存                                   | `Ledon.Caching`               | `AddLedonCaching()` / `AddLedonDistributedCaching()` | 内存（single-flight）/ 分布式（Redis）           |
 | 后台任务                               | `Ledon.Queues`                | `AddLedonQueues()`                                   | Channel 有界 + 多 worker                         |
@@ -114,6 +114,18 @@ public class TodosController(TodoDbContext db) : ControllerBase
 | `UseCorrelationId`   | ✅    | `X-Correlation-Id` 贯穿请求/响应头/日志作用域 |
 | `UseUnifiedResponse` | ❌    | 成功响应包 `{"code":0,"data":...}` 信封       |
 | `UseApiVersioning`   | ❌    | URL 段 `api/v{version}/...`                   |
+| `UseCors`            | ❌    | 跨域：按 `CorsOrigins` 白名单放行             |
+
+前后端分离（SPA）场景开跨域：
+
+```csharp
+builder.AddLedonWeb(o =>
+{
+    o.UseOpenApi = true;
+    o.UseCors = true;
+    o.CorsOrigins = ["https://app.example.com"];   // 空数组 = 允许任意来源（仅建议开发环境）
+});
+```
 
 ## 数据访问
 
@@ -254,6 +266,7 @@ docs/                   文档站（docfx）
 
 ```powershell
 ./run.ps1 check    # scan → build → test
+./run.ps1 docs     # 构建文档站（docfx，产物 _site/）
 ./run.ps1 web      # Web 示例（多程序集 + 全功能链路）
 ./run.ps1 worker   # 工作进程示例（跨程序集事件解耦）
 ./run.ps1 sample   # 控制台零配置示例

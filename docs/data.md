@@ -14,7 +14,7 @@ builder.Services.AddLedonData(o => o.AutoMigrate = false);   // 自己管理 sch
 
 ## 发件箱（Outbox）
 
-跨进程/要求可靠投递的集成事件：
+跨进程/要求可靠投递的集成事件，事件与业务数据同事务落库，调度器随后投递（至少一次语义）：
 
 ```csharp
 public class OrderDbContext : OutboxDbContext;   // 继承即获得 OutboxMessages
@@ -24,35 +24,10 @@ outbox.Add(new OrderPlaced(orderId));
 await db.SaveChangesAsync();
 ```
 
-调度器按轮询间隔投递（至少一次语义）：单条失败记重试不阻塞后续，超重试上限搁置留待人工处理。
+投递语义、重试与搁置策略详见[后台队列与发件箱](~/docs/queues.md)。
 
-```csharp
-public record OrderPlaced(string OrderId) : IIntegrationEvent;
+## 相关主题
 
-public class OrderPlacedHandler : IIntegrationEventHandler<OrderPlaced>
-{
-    public Task HandleAsync(OrderPlaced e, CancellationToken ct = default) { /* ... */ }
-}
-```
-
-## 缓存
-
-```csharp
-builder.Services.AddLedonCaching();                          // 进程内（single-flight）
-builder.Services.AddLedonDistributedCaching(o =>             // 多实例共享
-    o.RedisConnectionString = "localhost:6379");
-```
-
-## 后台队列 / 定时任务
-
-```csharp
-builder.Services.AddLedonQueues(o => o.WorkerCount = 4);
-await queue.EnqueueAsync(async (scope, token) => { /* 独立作用域 */ });
-
-builder.Services.AddLedonScheduling();
-public class CleanupTask : IScheduledTask
-{
-    public string CronExpression => "0 3 * * *";
-    public Task ExecuteAsync(CancellationToken ct = default) { /* ... */ }
-}
-```
+- [缓存](~/docs/caching.md)——读多写少场景的 single-flight 回源
+- [后台队列与发件箱](~/docs/queues.md)——进程内队列与可靠投递
+- [定时任务](~/docs/scheduling.md)——cron 驱动的周期任务

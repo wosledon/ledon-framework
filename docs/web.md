@@ -36,6 +36,19 @@ public class TodosController(TodoDbContext db) : ControllerBase { /* ... */ }
 | `UseCorrelationId`   | ✅    | `X-Correlation-Id` 贯穿请求/响应头/日志作用域 |
 | `UseUnifiedResponse` | ❌    | 成功响应包 `{"code":0,"data":...}` 信封       |
 | `UseApiVersioning`   | ❌    | URL 段 `api/v{version}/...`                   |
+| `UseCors`            | ❌    | 按 `CorsOrigins` 白名单放行跨域               |
+
+## 跨域（CORS）
+
+```csharp
+builder.AddLedonWeb(o =>
+{
+    o.UseCors = true;
+    o.CorsOrigins = ["https://app.example.com"];   // 空数组 = 允许任意来源（仅建议开发环境）
+});
+```
+
+管线顺序：路由 → CORS → 认证授权 → 端点。预检（OPTIONS）自动应答。
 
 ## 认证授权
 
