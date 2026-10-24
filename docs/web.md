@@ -37,6 +37,7 @@ public class TodosController(TodoDbContext db) : ControllerBase { /* ... */ }
 | `UseUnifiedResponse` | ❌    | 成功响应包 `{"code":0,"data":...}` 信封       |
 | `UseApiVersioning`   | ❌    | URL 段 `api/v{version}/...`                   |
 | `UseCors`            | ❌    | 按 `CorsOrigins` 白名单放行跨域               |
+| `UseScalarUi`        | ❌    | Scalar 文档 UI（需 `UseOpenApi`）             |
 
 ## 跨域（CORS）
 
@@ -49,6 +50,18 @@ builder.AddLedonWeb(o =>
 ```
 
 管线顺序：路由 → CORS → 认证授权 → 端点。预检（OPTIONS）自动应答。
+
+## API 文档 UI
+
+OpenAPI 只有 JSON 文档；要可视化调试界面开 Scalar UI：
+
+```csharp
+builder.AddLedonWeb(o =>
+{
+    o.UseOpenApi = true;
+    o.UseScalarUi = true;   // 打开 /scalar（自动指向 OpenAPI 文档）
+});
+```
 
 ## 认证授权
 

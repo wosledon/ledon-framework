@@ -50,6 +50,11 @@ public static class LedonWebServiceCollectionExtensions
 
         var assemblies = LedonAssemblies.Scan();
 
+        // Scalar UI 依赖 OpenAPI 文档：忘开 UseOpenApi 时启动即失败，而不是 UI 打开一片空白
+        if (options.UseScalarUi && !options.UseOpenApi)
+            throw new InvalidOperationException(
+                "AddLedonWeb: UseScalarUi 需要同时开启 UseOpenApi（Scalar UI 是 OpenAPI 文档的可视化）");
+
         // OpenAPI 按需开启（先于 MVC 注册）
         if (options.UseOpenApi)
             builder.Services.AddOpenApi();

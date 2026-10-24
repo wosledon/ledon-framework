@@ -117,6 +117,7 @@ public class TodosController(TodoDbContext db) : ControllerBase
 | `UseUnifiedResponse` | ❌    | 成功响应包 `{"code":0,"data":...}` 信封       |
 | `UseApiVersioning`   | ❌    | URL 段 `api/v{version}/...`                   |
 | `UseCors`            | ❌    | 跨域：按 `CorsOrigins` 白名单放行             |
+| `UseScalarUi`        | ❌    | Scalar API 文档 UI（需同时开 UseOpenApi）     |
 
 前后端分离（SPA）场景开跨域：
 

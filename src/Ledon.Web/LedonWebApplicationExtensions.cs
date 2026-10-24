@@ -1,6 +1,7 @@
 using Ledon.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Scalar.AspNetCore;
 
 namespace Ledon.Web;
 
@@ -45,6 +46,13 @@ public static class LedonWebApplicationExtensions
 
         if (options.UseOpenApi)
             app.MapOpenApi(options.OpenApiPath);
+
+        // Scalar API 文档 UI（按需）
+        if (options.UseScalarUi)
+        {
+            app.MapScalarApiReference(options.ScalarPath, scalar =>
+                scalar.AddDocument("v1", "Ledon API", options.OpenApiPath));
+        }
 
         return app;
     }

@@ -250,6 +250,40 @@ public class WebFrameworkTests : IDisposable
         Assert.False(response.Headers.Contains("Access-Control-Allow-Origin"));
     }
 
+    [Fact]
+    public async Task Scalar_ui_is_served_when_opt_in()
+    {
+        var client = await StartServerAsync(o =>
+        {
+            o.UseOpenApi = true;
+            o.UseScalarUi = true;
+        });
+
+        var response = await client.GetAsync("/scalar/v1");   // /scalar 302 到 /scalar/{documentName}
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
+    public async Task Scalar_ui_is_not_served_by_default()
+    {
+        var client = await StartServerAsync(o => o.UseOpenApi = true);
+
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/scalar")).StatusCode);
+    }
+
+    [Fact]
+    public void Scalar_ui_requires_open_api()
+    {
+        // 忘开 UseOpenApi：启动即失败（明确报错），而不是 UI 打开后一片空白
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+
+        Assert.Throws<InvalidOperationException>(
+            () => builder.AddLedonWeb(o => o.UseScalarUi = true));
+    }
+
     public void Dispose()
     {
         _client?.Dispose();

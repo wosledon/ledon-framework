@@ -12,6 +12,15 @@ public sealed class LedonWebOptions
     /// <summary>OpenAPI 文档路径。</summary>
     public string OpenApiPath { get; set; } = "/openapi/v1.json";
 
+    /// <summary>
+    /// Scalar API 文档 UI（默认关）：开启后 <c>UseLedonWeb</c> 自动映射
+    /// <see cref="ScalarPath"/> 指向 OpenAPI 文档的可视化页面。需同时开启 <see cref="UseOpenApi"/>。
+    /// </summary>
+    public bool UseScalarUi { get; set; }
+
+    /// <summary>Scalar UI 路径，默认 /scalar。</summary>
+    public string ScalarPath { get; set; } = "/scalar";
+
     /// <summary>关联 ID（X-Correlation-Id，贯穿请求头/响应头/日志作用域），默认开。</summary>
     public bool UseCorrelationId { get; set; } = true;
 
