@@ -1,5 +1,6 @@
 using Ledon.Core.Events;
 using Ledon.Module.Abstractions;
+using Ledon.Module.Dependency;
 using Ledon.Module.Tests.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,14 +13,75 @@ namespace Ledon.Module.Tests;
 /// </summary>
 public class ModuleSystemTests
 {
+    // ---------- 零配置自动发现 / 自动注入 ----------
+
+    [Fact]
+    public async Task Zero_config_discovers_modules_and_auto_wires_services_and_events()
+    {
+        Trace.Clear();
+        var services = new ServiceCollection();
+        services.AddSingleton<Recorder>();
+
+        // 零配置：不指定任何程序集，入口程序集（本测试程序集）自动发现
+        // CycleFixture / OrphanFixture / RollbackFixture 标了 DisableAutoDiscovery，
+        // 能被自动发现（没抛循环依赖异常）本身就证明了逃生门生效
+        services.AddLedon();
+        await using var provider = services.BuildServiceProvider();
+
+        // 约定自动注入：IName ↔ Name、自注册
+        Assert.IsType<TestUserService>(provider.GetRequiredService<ITestUserService>());
+        Assert.NotNull(provider.GetRequiredService<PlainService>());
+
+        await provider.InitializeModulesAsync();
+
+        var manager = provider.GetRequiredService<IModuleManager>();
+        Assert.Equal(
+            new[] { "DataModule", "PublisherModule", "UserModule" },
+            manager.Modules.Select(module => module.Name).ToArray());
+        Assert.Equal(
+            new[]
+            {
+                "Data:Configure", "Publisher:Configure", "User:Configure",
+                "Data:Init", "Publisher:Init", "User:Init",
+            },
+            Trace.Snapshot());
+
+        // PublisherModule 初始化时发布 GreetEvent：处理器没有任何手动注册，被自动消费
+        Assert.Equal(new[] { "greet:ledon" }, provider.GetRequiredService<Recorder>().Snapshot());
+    }
+
+    [Fact]
+    public async Task Events_flow_from_publisher_module_to_handlers()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<Recorder>();
+        services.AddLedon(o => o.DisableAutoDiscovery().AddModule<PublisherModule>());
+        await using var provider = services.BuildServiceProvider();
+
+        // 手动发布
+        await provider.GetRequiredService<IEventBus>().PublishAsync(new GreetEvent("manual"));
+
+        // 模块初始化时发布（处理器经约定自动注册，与初始化顺序无关）
+        await provider.InitializeModulesAsync();
+
+        Assert.Equal(
+            new[] { "greet:manual", "greet:ledon" },
+            provider.GetRequiredService<Recorder>().Snapshot());
+    }
+
+    // ---------- 显式模式：生命周期与依赖 ----------
+
     [Fact]
     public async Task Initialize_follows_dependency_order_and_shutdown_reverses()
     {
         Trace.Clear();
         var services = new ServiceCollection();
 
-        // 故意按"反序"注册：发现顺序 User, Data —— 拓扑排序必须把 Data 提到前面
-        services.AddLedon(o => o.AddModule<UserModule>().AddModule<DataModule>());
+        // 显式模式：故意按"反序"注册——发现顺序 User, Data，拓扑排序必须把 Data 提到前面
+        services.AddLedon(o => o
+            .DisableAutoDiscovery()
+            .AddModule<UserModule>()
+            .AddModule<DataModule>());
         await using var provider = services.BuildServiceProvider();
 
         await provider.InitializeModulesAsync();
@@ -46,11 +108,9 @@ public class ModuleSystemTests
     [Fact]
     public void Cycle_dependency_fails_fast_with_path()
     {
-        Trace.Clear();
-        var services = new ServiceCollection();
-
-        var ex = Assert.Throws<LedonModuleException>(() =>
-            services.AddLedon(o => o.AddModule<CycleFixture.A>().AddModule<CycleFixture.B>()));
+        // 依赖图是纯函数，直接单元测试，不必绕道 AddLedon
+        var ex = Assert.Throws<LedonModuleException>(() => ModuleGraph.Build(
+            [typeof(CycleFixture.A), typeof(CycleFixture.B)]));
 
         Assert.Contains("循环依赖", ex.Message);
         Assert.Contains("A -> B -> A", ex.Message);
@@ -59,25 +119,12 @@ public class ModuleSystemTests
     [Fact]
     public void Missing_dependency_fails_with_guidance()
     {
-        var services = new ServiceCollection();
-
-        var ex = Assert.Throws<LedonModuleException>(() =>
-            services.AddLedon(o => o.AddModule<OrphanFixture.Orphan>()));
+        var ex = Assert.Throws<LedonModuleException>(() => ModuleGraph.Build(
+            [typeof(OrphanFixture.Orphan)]));
 
         Assert.Contains("Orphan", ex.Message);
         Assert.Contains("Unregistered", ex.Message);
         Assert.Contains("AddModule", ex.Message);
-    }
-
-    [Fact]
-    public void ConfigureServices_cannot_access_not_yet_built_services()
-    {
-        Trace.Clear();
-        var services = new ServiceCollection();
-
-        services.AddLedon(o => o.AddModule<GuardedModule>());
-
-        Assert.Equal(new[] { "Guarded:throws" }, Trace.Snapshot());
     }
 
     [Fact]
@@ -86,6 +133,7 @@ public class ModuleSystemTests
         Trace.Clear();
         var services = new ServiceCollection();
         services.AddLedon(o => o
+            .DisableAutoDiscovery()
             .AddModule<RollbackFixture.First>()
             .AddModule<RollbackFixture.Second>()
             .AddModule<RollbackFixture.Failer>());
@@ -117,8 +165,8 @@ public class ModuleSystemTests
     public void AddLedon_is_idempotent_and_rejects_unknown_module_lookup()
     {
         var services = new ServiceCollection();
-        services.AddLedon(o => o.AddModule<DataModule>());
-        services.AddLedon(o => o.AddModule<UserModule>()); // 第二次调用被忽略
+        services.AddLedon(o => o.DisableAutoDiscovery().AddModule<DataModule>());
+        services.AddLedon(o => o.DisableAutoDiscovery().AddModule<UserModule>()); // 第二次调用被忽略
 
         using var provider = services.BuildServiceProvider();
         var manager = provider.GetRequiredService<IModuleManager>();
@@ -129,67 +177,14 @@ public class ModuleSystemTests
     }
 
     [Fact]
-    public async Task Assembly_scan_discovers_top_level_modules_only()
-    {
-        Trace.Clear();
-        var services = new ServiceCollection();
-        services.AddSingleton<Recorder>();
-
-        // 显式 + 扫描混合：显式在前，扫描按类型名排序，嵌套类型（环/孤儿夹具）不参与扫描
-        services.AddLedon(o => o.AddModule<DataModule>().AddAssembly(typeof(UserModule).Assembly));
-        await using var provider = services.BuildServiceProvider();
-        await provider.InitializeModulesAsync();
-
-        var manager = provider.GetRequiredService<IModuleManager>();
-        Assert.Equal(
-            new[] { "DataModule", "GuardedModule", "PublisherModule", "UserModule" },
-            manager.Modules.Select(module => module.Name).ToArray());
-        Assert.All(manager.Modules, module => Assert.Equal(ModuleState.Initialized, module.State));
-
-        // PublisherModule 初始化时已通过事件总线发布
-        Assert.Contains("greet:ledon", provider.GetRequiredService<Recorder>().Snapshot());
-    }
-
-    [Fact]
-    public async Task Events_flow_from_publisher_module_to_handlers()
-    {
-        var services = new ServiceCollection();
-        services.AddSingleton<Recorder>();
-        services.AddLedon(o => o.AddModule<PublisherModule>());
-        await using var provider = services.BuildServiceProvider();
-
-        // 手动发布
-        await provider.GetRequiredService<IEventBus>().PublishAsync(new GreetEvent("manual"));
-
-        // 模块初始化时发布（注册发生在 ConfigureServices 阶段，与初始化顺序无关）
-        await provider.InitializeModulesAsync();
-
-        Assert.Equal(
-            new[] { "greet:manual", "greet:ledon" },
-            provider.GetRequiredService<Recorder>().Snapshot());
-    }
-
-    [Fact]
-    public void ScanAssembly_registers_by_convention_and_is_idempotent()
-    {
-        var services = new ServiceCollection();
-        services.ScanAssembly(typeof(ModuleSystemTests).Assembly);
-        services.ScanAssembly(typeof(ModuleSystemTests).Assembly); // TryAdd 幂等
-
-        using var provider = services.BuildServiceProvider();
-
-        Assert.IsType<TestUserService>(provider.GetRequiredService<ITestUserService>());
-        Assert.Single(provider.GetServices<ITestUserService>());
-        Assert.NotNull(provider.GetRequiredService<PlainService>());
-        Assert.Contains(provider.GetServices<IEventHandler<GreetEvent>>(), handler => handler is GreetHandler);
-    }
-
-    [Fact]
     public async Task Generic_host_starts_and_stops_modules_via_hosted_service()
     {
         Trace.Clear();
         var builder = Host.CreateApplicationBuilder();
-        builder.Services.AddLedon(o => o.AddModule<UserModule>().AddModule<DataModule>());
+        builder.Services.AddLedon(o => o
+            .DisableAutoDiscovery()
+            .AddModule<UserModule>()
+            .AddModule<DataModule>());
         using var host = builder.Build();
 
         await host.StartAsync();
@@ -210,5 +205,22 @@ public class ModuleSystemTests
         Assert.False(manager.IsInitialized);
         Assert.Equal(ModuleState.Shutdown, manager.GetModule<DataModule>().State);
         Assert.Equal(ModuleState.Shutdown, manager.GetModule<UserModule>().State);
+    }
+
+    // ---------- 逃生门：手动扫描 API 仍然可用 ----------
+
+    [Fact]
+    public void ScanAssembly_manual_still_works()
+    {
+        var services = new ServiceCollection();
+        services.ScanAssembly(typeof(ModuleSystemTests).Assembly);
+        services.ScanAssembly(typeof(ModuleSystemTests).Assembly); // TryAdd 幂等
+
+        using var provider = services.BuildServiceProvider();
+
+        Assert.IsType<TestUserService>(provider.GetRequiredService<ITestUserService>());
+        Assert.Single(provider.GetServices<ITestUserService>());
+        Assert.NotNull(provider.GetRequiredService<PlainService>());
+        Assert.Contains(provider.GetServices<IEventHandler<GreetEvent>>(), handler => handler is GreetHandler);
     }
 }

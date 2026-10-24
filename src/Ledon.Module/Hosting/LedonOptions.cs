@@ -1,11 +1,16 @@
 using System.Reflection;
 using Ledon.Module.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Ledon.Module.Hosting;
 
 /// <summary>
-/// <c>AddLedon</c> 的配置：指定要扫描的程序集和/或显式注册的模块。
-/// 两者都不指定时回退到入口程序集（<c>Assembly.GetEntryAssembly()</c>）。
+/// <c>AddLedon</c> 的配置。默认全自动（发现 + 注入），下面所有方法都是可选的逃生门：
+/// <code>
+/// builder.Services.AddLedon();                                        // 零配置，日常用法
+/// builder.Services.AddLedon(o => o.DisableAutoDiscovery()             // 关闭全局扫描
+///     .AddModule&lt;UserModule&gt;());                                  // 只注册显式列出的
+/// </code>
 /// </summary>
 public sealed class LedonOptions
 {
@@ -13,7 +18,12 @@ public sealed class LedonOptions
 
     internal List<Type> ExplicitModules { get; } = [];
 
-    /// <summary>添加要扫描模块的程序集（仅扫描顶层非抽象类，嵌套类型请用 <see cref="AddModule{TModule}"/> 显式注册）。</summary>
+    internal bool AutoDiscovery { get; private set; } = true;
+
+    /// <summary>默认服务生命周期（约定注册未显式指定时使用），默认 <see cref="ServiceLifetime.Scoped"/>。</summary>
+    public ServiceLifetime DefaultServiceLifetime { get; set; } = ServiceLifetime.Scoped;
+
+    /// <summary>追加一个要扫描的模块程序集（与自动发现叠加生效）。</summary>
     public LedonOptions AddAssembly(Assembly assembly)
     {
         ArgumentNullException.ThrowIfNull(assembly);
@@ -21,15 +31,25 @@ public sealed class LedonOptions
         return this;
     }
 
-    /// <summary>添加 <typeparamref name="TModule"/> 所在的程序集到扫描列表。</summary>
+    /// <summary>追加 <typeparamref name="TModule"/> 所在的程序集到扫描列表。</summary>
     public LedonOptions AddAssembly<TModule>()
         where TModule : IModule => AddAssembly(typeof(TModule).Assembly);
 
-    /// <summary>显式注册一个模块（优先级高于扫描，可注册嵌套/非公开类型）。</summary>
+    /// <summary>显式注册一个模块（与自动发现叠加；可注册带 <see cref="DisableAutoDiscoveryAttribute"/> 的类型）。</summary>
     public LedonOptions AddModule<TModule>()
         where TModule : IModule
     {
         ExplicitModules.Add(typeof(TModule));
+        return this;
+    }
+
+    /// <summary>
+    /// 关闭"入口程序集及其引用"的自动扫描。此后只处理 <see cref="AddAssembly"/> /
+    /// <see cref="AddModule{TModule}"/> 显式指定的内容。
+    /// </summary>
+    public LedonOptions DisableAutoDiscovery()
+    {
+        AutoDiscovery = false;
         return this;
     }
 }

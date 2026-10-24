@@ -10,31 +10,28 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Ledon.Module;
 
 /// <summary>
-/// 模块系统入口扩展：
+/// 模块系统入口。日常用法一行零配置：
 /// <code>
-/// builder.Services.AddLedon(o =&gt; o.AddAssembly(typeof(UserModule).Assembly));
+/// builder.Services.AddLedon();
 /// </code>
+/// 框架会自动完成：发现模块（入口程序集及其引用）→ 依赖排序 → 约定注入服务与事件处理器
+/// → 按拓扑序注册 → 初始化（经宿主或 <c>InitializeModulesAsync</c>）。
+/// 重复调用会被忽略（幂等）。
 /// </summary>
 public static class LedonServiceCollectionExtensions
 {
-    /// <summary>
-    /// 注册模块系统。执行顺序：发现模块 → 构建依赖图（拓扑排序 + 环检测）→ 实例化 →
-    /// 按序执行各模块 <c>ConfigureServices</c> → 注册模块管理器/事件总线/宿主服务。
-    /// 重复调用会被忽略（幂等）。
-    /// </summary>
     public static IServiceCollection AddLedon(this IServiceCollection services, Action<LedonOptions>? configure = null)
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        // 幂等：已注册过模块管理器则直接返回
         if (services.Any(descriptor => descriptor.ServiceType == typeof(IModuleManager)))
             return services;
 
         var options = new LedonOptions();
         configure?.Invoke(options);
 
-        var moduleTypes = ModuleDiscovery.Discover(options);
-        var descriptors = ModuleGraph.Build(moduleTypes);
+        var discovery = ModuleDiscovery.Discover(options);
+        var descriptors = ModuleGraph.Build(discovery.ModuleTypes);
 
         foreach (var descriptor in descriptors)
         {
@@ -42,14 +39,18 @@ public static class LedonServiceCollectionExtensions
                 ?? throw new LedonModuleException($"无法实例化模块 {descriptor.ModuleType.FullName}。"));
         }
 
+        // 约定自动注入先跑：模块自己的 ConfigureServices 后跑，天然获得覆盖权
+        foreach (var assembly in discovery.Assemblies)
+            services.ScanAssembly(assembly, options.DefaultServiceLifetime);
+
         var manager = new ModuleManager(descriptors);
 
-        // 注册阶段：在宿主 BuildServiceProvider 之前按拓扑序执行各模块的服务注册
+        // 阶段一：在宿主 BuildServiceProvider 之前按拓扑序执行各模块的服务注册
         foreach (var descriptor in descriptors)
         {
             try
             {
-                descriptor.Instance!.ConfigureServices(services, new ModuleContext(descriptor));
+                descriptor.Instance!.ConfigureServices(services);
                 descriptor.State = ModuleState.Registered;
             }
             catch (Exception ex)

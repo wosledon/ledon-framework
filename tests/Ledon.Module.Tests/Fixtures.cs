@@ -46,13 +46,13 @@ public sealed class Recorder
     }
 }
 
-// ---------- 正常模块（顶层类型，参与程序集扫描） ----------
+// ---------- 参与自动发现的正常模块 ----------
 
 /// <summary>依赖 DataModule 的业务模块。</summary>
 [DependsOn(typeof(DataModule))]
 public class UserModule : IModule
 {
-    public void ConfigureServices(IServiceCollection services, ModuleContext context) =>
+    public void ConfigureServices(IServiceCollection services) =>
         Trace.Add("User:Configure");
 
     public Task OnInitializedAsync(ModuleContext context, CancellationToken cancellationToken = default)
@@ -71,7 +71,7 @@ public class UserModule : IModule
 /// <summary>被 UserModule 依赖的底层模块，应先注册、先初始化、后关闭。</summary>
 public class DataModule : IModule
 {
-    public void ConfigureServices(IServiceCollection services, ModuleContext context) =>
+    public void ConfigureServices(IServiceCollection services) =>
         Trace.Add("Data:Configure");
 
     public Task OnInitializedAsync(ModuleContext context, CancellationToken cancellationToken = default)
@@ -87,27 +87,11 @@ public class DataModule : IModule
     }
 }
 
-/// <summary>验证注册阶段 <see cref="ModuleContext.Services"/> 不可访问。</summary>
-public class GuardedModule : IModule
-{
-    public void ConfigureServices(IServiceCollection services, ModuleContext context)
-    {
-        try
-        {
-            _ = context.Services;
-            Trace.Add("Guarded:no-throw");
-        }
-        catch (LedonModuleException)
-        {
-            Trace.Add("Guarded:throws");
-        }
-    }
-}
-
 // ---------- 事件 ----------
 
 public record GreetEvent(string Name);
 
+/// <summary>事件处理器：无需任何手动注册，约定扫描会自动注入容器。</summary>
 public class GreetHandler : IEventHandler<GreetEvent>
 {
     private readonly Recorder _recorder;
@@ -121,11 +105,11 @@ public class GreetHandler : IEventHandler<GreetEvent>
     }
 }
 
-/// <summary>初始化时通过事件总线向其它模块发布事件。</summary>
+/// <summary>初始化时通过事件总线发布事件——发布方不需要知道谁在处理。</summary>
 public class PublisherModule : IModule
 {
-    public void ConfigureServices(IServiceCollection services, ModuleContext context) =>
-        services.AddTransient<IEventHandler<GreetEvent>, GreetHandler>();
+    public void ConfigureServices(IServiceCollection services) =>
+        Trace.Add("Publisher:Configure");
 
     public async Task OnInitializedAsync(ModuleContext context, CancellationToken cancellationToken = default)
     {
@@ -134,7 +118,7 @@ public class PublisherModule : IModule
     }
 }
 
-// ---------- 约定扫描夹具 ----------
+// ---------- 约定注册夹具 ----------
 
 public interface ITestUserService
 {
@@ -148,8 +132,11 @@ public class TestUserService : ITestUserService
 
 public class PlainService;
 
-// ---------- 异常依赖夹具（嵌套类型：不参与程序集扫描，只能显式注册） ----------
+// ---------- 逃生门夹具：标记 DisableAutoDiscovery，只能显式 AddModule 注册 ----------
+// （不标记的话零配置自动发现会把它们也拉进来——循环依赖夹具会让发现直接失败，
+//   而这正是"自动发现是零配置的、逃生门是显式的"这一语义的证明。）
 
+[DisableAutoDiscovery]
 public static class CycleFixture
 {
     [DependsOn(typeof(B))]
@@ -159,6 +146,7 @@ public static class CycleFixture
     public class B : IModule;
 }
 
+[DisableAutoDiscovery]
 public static class OrphanFixture
 {
     [DependsOn(typeof(Unregistered))]
@@ -167,12 +155,12 @@ public static class OrphanFixture
     public class Unregistered : IModule;
 }
 
-/// <summary>初始化失败回滚夹具（嵌套类型：仅显式注册）。Failer 在初始化时抛出，验证已初始化模块被逆序关闭。</summary>
+[DisableAutoDiscovery]
 public static class RollbackFixture
 {
     public class First : IModule
     {
-        public void ConfigureServices(IServiceCollection services, ModuleContext context) =>
+        public void ConfigureServices(IServiceCollection services) =>
             Trace.Add("First:Configure");
 
         public Task OnInitializedAsync(ModuleContext context, CancellationToken cancellationToken = default)
@@ -190,7 +178,7 @@ public static class RollbackFixture
 
     public class Second : IModule
     {
-        public void ConfigureServices(IServiceCollection services, ModuleContext context) =>
+        public void ConfigureServices(IServiceCollection services) =>
             Trace.Add("Second:Configure");
 
         public Task OnInitializedAsync(ModuleContext context, CancellationToken cancellationToken = default)
@@ -208,7 +196,7 @@ public static class RollbackFixture
 
     public class Failer : IModule
     {
-        public void ConfigureServices(IServiceCollection services, ModuleContext context) =>
+        public void ConfigureServices(IServiceCollection services) =>
             Trace.Add("Failer:Configure");
 
         public Task OnInitializedAsync(ModuleContext context, CancellationToken cancellationToken = default)

@@ -3,20 +3,20 @@ using Ledon.Module.Abstractions;
 
 namespace Ledon.Module.Hosting;
 
-/// <summary>模块发现：合并显式注册与程序集扫描，保证顺序确定、结果去重。</summary>
+/// <summary>发现结果：模块类型列表（显式优先，其余按 程序集BFS序 + 类型全名序，结果确定）+ 参与约定注册的程序集。</summary>
+internal sealed class DiscoveryOutcome(IReadOnlyList<Type> moduleTypes, IReadOnlyList<Assembly> assemblies)
+{
+    public IReadOnlyList<Type> ModuleTypes { get; } = moduleTypes;
+
+    public IReadOnlyList<Assembly> Assemblies { get; } = assemblies;
+}
+
+/// <summary>模块发现：合并显式注册与程序集自动扫描，保证顺序确定、结果去重。</summary>
 internal static class ModuleDiscovery
 {
-    public static IReadOnlyList<Type> Discover(LedonOptions options)
+    public static DiscoveryOutcome Discover(LedonOptions options)
     {
-        if (options.Assemblies.Count == 0 && options.ExplicitModules.Count == 0)
-        {
-            var entryAssembly = Assembly.GetEntryAssembly()
-                ?? throw new LedonModuleException(
-                    "未指定模块程序集，且当前环境无法获取入口程序集；" +
-                    "请使用 AddLedon(o => o.AddAssembly(...)) 显式指定。");
-
-            options.Assemblies.Add(entryAssembly);
-        }
+        var scannedAssemblies = AssemblyScanner.ResolveAssemblies(options);
 
         var types = new List<Type>();
         var seen = new HashSet<Type>();
@@ -28,25 +28,58 @@ internal static class ModuleDiscovery
                 types.Add(type);
         }
 
-        // 显式注册优先（顺序 = 调用顺序），扫描结果按类型全名排序保证确定性
+        // 显式注册优先（顺序 = 调用顺序），可注册被标记 DisableAutoDiscovery 的类型
         foreach (var type in options.ExplicitModules)
             Add(type);
 
-        foreach (var assembly in options.Assemblies)
+        if (options.AutoDiscovery)
         {
-            foreach (var type in assembly.GetLoadableTypes()
-                .Where(type => type is { IsClass: true, IsAbstract: false, DeclaringType: null }
-                    && typeof(IModule).IsAssignableFrom(type))
-                .OrderBy(type => type.FullName, StringComparer.Ordinal))
+            foreach (var assembly in scannedAssemblies)
             {
-                Add(type);
+                foreach (var type in assembly.GetLoadableTypes()
+                    .Where(type => type is { IsClass: true, IsAbstract: false }
+                        && typeof(IModule).IsAssignableFrom(type)
+                        && !IsAutoDiscoveryDisabled(type))
+                    .OrderBy(type => type.FullName, StringComparer.Ordinal))
+                {
+                    Add(type);
+                }
             }
         }
 
         if (types.Count == 0)
-            throw new LedonModuleException("未发现任何模块。请检查 AddLedon 的程序集配置或模块是否实现了 IModule。");
+            throw new LedonModuleException(
+                "未发现任何模块。请确认模块实现了 IModule 且所在程序集可被扫描；" +
+                "需要精确控制时用 AddLedon(o => o.AddModule<T>()) 显式注册。");
 
-        return types;
+        // 约定注册的程序集 = 扫描集 ∪ 显式模块所在程序集
+        var conventionAssemblies = scannedAssemblies.ToList();
+        var assemblyNames = new HashSet<string>(
+            conventionAssemblies
+                .Select(assembly => assembly.GetName().Name)
+                .OfType<string>(),
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var type in options.ExplicitModules)
+        {
+            var name = type.Assembly.GetName().Name;
+            if (!string.IsNullOrEmpty(name) && assemblyNames.Add(name))
+                conventionAssemblies.Add(type.Assembly);
+        }
+
+        return new DiscoveryOutcome(types, conventionAssemblies);
+    }
+
+    /// <summary>类型自身或其任一外层容器类标记了 <see cref="DisableAutoDiscoveryAttribute"/>。</summary>
+    private static bool IsAutoDiscoveryDisabled(Type type)
+    {
+        for (var current = type; current is not null; current = current.DeclaringType)
+        {
+            if (current.IsDefined(typeof(DisableAutoDiscoveryAttribute), inherit: false))
+                return true;
+        }
+
+        return false;
     }
 
     private static void ValidateModuleType(Type type)
