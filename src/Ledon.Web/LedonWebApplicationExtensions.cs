@@ -25,6 +25,10 @@ public static class LedonWebApplicationExtensions
 
         app.UseRouting();
 
+        // 跨域：必须在路由之后、认证授权之前（端点元数据上的 [EnableCors] 才能生效）
+        if (options.UseCors)
+            app.UseCors(options.CorsPolicyName);
+
         // 认证授权：检测到任何认证方案（如 Ledon.Security 注册的）时自动接线，
         // 未配置认证时为零开销跳过——不用记"还要加 UseAuthentication"
         if (app.Services.GetService<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>() is not null)

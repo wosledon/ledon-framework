@@ -32,4 +32,18 @@ public sealed class LedonWebOptions
     /// 控制器用 <c>[ApiVersion("1.0")]</c> 标注。
     /// </summary>
     public bool UseApiVersioning { get; set; }
+
+    /// <summary>
+    /// 跨域（CORS）：默认关。开启后按 <see cref="CorsOrigins"/> 注册名为
+    /// <see cref="CorsPolicyName"/> 的默认策略并接入请求管线；
+    /// <see cref="CorsOrigins"/> 为空表示允许任意来源（仅建议开发环境）。
+    /// 需要自定义策略时自行 <c>AddCors</c> 并改 <see cref="CorsPolicyName"/>。
+    /// </summary>
+    public bool UseCors { get; set; }
+
+    /// <summary>UseLedonWeb 接入的 CORS 策略名，默认 ledon-default。</summary>
+    public string CorsPolicyName { get; set; } = "ledon-default";
+
+    /// <summary>允许的跨域来源（精确匹配协议+主机+端口，如 https://app.example.com）。</summary>
+    public string[] CorsOrigins { get; set; } = [];
 }

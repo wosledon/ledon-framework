@@ -63,7 +63,7 @@ public class AssemblyScannerTests
     public void Dependency_context_keeps_unused_project_references()
     {
         // 前提 1：deps.json 记录全部声明的依赖（与代码使用无关）
-        var context = DependencyContext.Load(typeof(AssemblyScannerTests).Assembly);
+        var context = DependencyContext.Load(typeof(AssemblyScannerTests).Assembly)!;
         var dependencyNames = context.RuntimeLibraries
             .SelectMany(library => library.RuntimeAssemblyGroups)
             .SelectMany(group => group.AssetPaths)

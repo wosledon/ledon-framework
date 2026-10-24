@@ -35,7 +35,7 @@ public class ConfigurationTests
 
     private static IConfiguration Config(params (string Key, string Value)[] pairs) =>
         new ConfigurationBuilder()
-            .AddInMemoryCollection(pairs.ToDictionary(pair => pair.Key, pair => pair.Value))
+            .AddInMemoryCollection(pairs.ToDictionary(pair => pair.Key, pair => (string?)pair.Value))
             .Build();
 
     [Fact]

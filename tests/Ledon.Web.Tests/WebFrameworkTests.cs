@@ -183,6 +183,73 @@ public class WebFrameworkTests : IDisposable
         Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/api/v2/versioned")).StatusCode);
     }
 
+    // ---------- 跨域（CORS） ----------
+
+    [Fact]
+    public async Task Cors_allows_configured_origin_on_actual_request()
+    {
+        var client = await StartServerAsync(
+            o =>
+            {
+                o.UseCors = true;
+                o.CorsOrigins = ["https://app.example.com"];
+            },
+            withData: false);
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/hello");
+        request.Headers.Add("Origin", "https://app.example.com");
+        var response = await client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(
+            "https://app.example.com",
+            response.Headers.GetValues("Access-Control-Allow-Origin").Single());
+
+        // 未配置的来源不返回 ACAO 头（浏览器端即被拦截）
+        var other = new HttpRequestMessage(HttpMethod.Get, "/hello");
+        other.Headers.Add("Origin", "https://evil.example.com");
+        var blocked = await client.SendAsync(other);
+
+        Assert.Equal(HttpStatusCode.OK, blocked.StatusCode);
+        Assert.False(blocked.Headers.Contains("Access-Control-Allow-Origin"));
+    }
+
+    [Fact]
+    public async Task Cors_answers_preflight_with_allow_headers()
+    {
+        var client = await StartServerAsync(
+            o =>
+            {
+                o.UseCors = true;
+                o.CorsOrigins = ["https://app.example.com"];
+            },
+            withData: false);
+
+        var preflight = new HttpRequestMessage(HttpMethod.Options, "/hello");
+        preflight.Headers.Add("Origin", "https://app.example.com");
+        preflight.Headers.Add("Access-Control-Request-Method", "GET");
+        preflight.Headers.Add("Access-Control-Request-Headers", "content-type");
+        var response = await client.SendAsync(preflight);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        Assert.Equal(
+            "https://app.example.com",
+            response.Headers.GetValues("Access-Control-Allow-Origin").Single());
+        Assert.Contains("GET", response.Headers.GetValues("Access-Control-Allow-Methods").Single());
+    }
+
+    [Fact]
+    public async Task Cors_is_off_by_default()
+    {
+        var client = await StartServerAsync(withData: false);
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/hello");
+        request.Headers.Add("Origin", "https://app.example.com");
+        var response = await client.SendAsync(request);
+
+        Assert.False(response.Headers.Contains("Access-Control-Allow-Origin"));
+    }
+
     public void Dispose()
     {
         _client?.Dispose();

@@ -12,7 +12,7 @@ public class MultiTenancyTests : IDisposable
 {
     private WebApplication? _app;
 
-    private static async Task<HttpClient> StartAsync()
+    private async Task<HttpClient> StartAsync()
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
@@ -27,6 +27,7 @@ public class MultiTenancyTests : IDisposable
         });
 
         await app.StartAsync();
+        _app = app;
         return app.GetTestClient();
     }
 

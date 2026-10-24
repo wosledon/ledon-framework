@@ -71,6 +71,7 @@ public static class LedonHealthCheckServiceCollectionExtensions
 public static class LedonHealthCheckEndpointExtensions
 {
     /// <summary>映射健康检查端点。</summary>
+    /// <param name="app">Web 应用。</param>
     /// <param name="pattern">路径，默认 /health。</param>
     /// <param name="predicate">过滤条件，如按 tag 区分存活/就绪（默认全部）。</param>
     public static WebApplication MapLedonHealthChecks(

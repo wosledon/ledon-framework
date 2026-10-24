@@ -26,6 +26,7 @@ public static class LedonWebServiceCollectionExtensions
         Action<LedonWebOptions>? configure = null) =>
         builder.AddLedonWeb(configure, null);
 
+    /// <param name="builder">Web 宿主构建器。</param>
     /// <param name="configure">Web 功能开关（控制器/OpenAPI）。</param>
     /// <param name="configureModules">转发给模块系统的逃生门配置（默认自动发现）。</param>
     public static WebApplicationBuilder AddLedonWeb(
@@ -90,6 +91,28 @@ public static class LedonWebServiceCollectionExtensions
                 versioning.AssumeDefaultVersionWhenUnspecified = true;
                 versioning.ApiVersionReader = new UrlSegmentApiVersionReader();
             }).AddMvc();
+        }
+
+        // 跨域（CORS）：按配置的来源注册默认策略（空来源 = 允许任意，仅建议开发环境）
+        if (options.UseCors)
+        {
+            builder.Services.AddCors(cors =>
+            {
+                if (options.CorsOrigins.Length > 0)
+                {
+                    cors.AddPolicy(options.CorsPolicyName, policy => policy
+                        .WithOrigins(options.CorsOrigins)
+                        .AllowAnyHeader()
+                        .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+                }
+                else
+                {
+                    cors.AddPolicy(options.CorsPolicyName, policy => policy
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+                }
+            });
         }
 
         // 端点自动注册：IEndpoint 实现类进容器（单例，启动时统一映射一次）
