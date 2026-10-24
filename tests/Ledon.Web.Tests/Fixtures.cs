@@ -3,6 +3,7 @@ using Ledon.Data;
 using Ledon.Module;
 using Ledon.Module.Abstractions;
 using Ledon.Web;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -114,6 +115,26 @@ public class VersionedController : ControllerBase
 {
     [HttpGet]
     public string Get() => "v1";
+}
+
+// ---------- 认证授权夹具 ----------
+
+/// <summary>受保护端点：JWT 或 API Key 任一方式认证；permission 端点要求 secure.read 权限。</summary>
+[ApiController]
+[Route("api/secure")]
+public class SecureController : ControllerBase
+{
+    [Authorize]
+    [HttpGet("whoami")]
+    public object WhoAmI() => new
+    {
+        User.Identity?.Name,
+        Permissions = User.Claims.Where(claim => claim.Type == "permission").Select(claim => claim.Value),
+    };
+
+    [Authorize(Policy = "secure.read")]
+    [HttpGet("permission")]
+    public string Permission() => "has-permission";
 }
 
 [ApiController]

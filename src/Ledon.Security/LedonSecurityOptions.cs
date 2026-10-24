@@ -1,0 +1,38 @@
+namespace Ledon.Security;
+
+/// <summary>JWT 配置。</summary>
+public sealed class JwtOptions
+{
+    /// <summary>签发者。</summary>
+    public string Issuer { get; set; } = "ledon";
+
+    /// <summary>受众。</summary>
+    public string Audience { get; set; } = "ledon-app";
+
+    /// <summary>签名密钥（至少 32 字符；生产环境从配置/密钥管理注入，切勿硬编码提交）。</summary>
+    public string SigningKey { get; set; } = "ledon-development-signing-key-please-change";
+
+    /// <summary>访问令牌有效期，默认 1 小时。</summary>
+    public TimeSpan Expiration { get; set; } = TimeSpan.FromHours(1);
+}
+
+/// <summary>API Key 配置（服务间调用/内部系统对接的轻量认证）。</summary>
+public sealed class ApiKeyOptions
+{
+    /// <summary>携带 API Key 的请求头，默认 X-Api-Key。</summary>
+    public string HeaderName { get; set; } = "X-Api-Key";
+
+    /// <summary>Key → 持有者名称。为空表示不启用 API Key 认证。</summary>
+    public Dictionary<string, string> Keys { get; set; } = [];
+}
+
+/// <summary>认证授权总配置。</summary>
+public sealed class LedonSecurityOptions
+{
+    public JwtOptions Jwt { get; set; } = new();
+
+    public ApiKeyOptions ApiKey { get; set; } = new();
+
+    /// <summary>权限声明类型（claim type），默认 permission。</summary>
+    public string PermissionClaimType { get; set; } = "permission";
+}

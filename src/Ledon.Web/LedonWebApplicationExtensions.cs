@@ -25,6 +25,14 @@ public static class LedonWebApplicationExtensions
 
         app.UseRouting();
 
+        // 认证授权：检测到任何认证方案（如 Ledon.Security 注册的）时自动接线，
+        // 未配置认证时为零开销跳过——不用记"还要加 UseAuthentication"
+        if (app.Services.GetService<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>() is not null)
+        {
+            app.UseAuthentication();
+            app.UseAuthorization();
+        }
+
         foreach (var endpoint in app.Services.GetServices<IEndpoint>())
             endpoint.Map(app);
 
