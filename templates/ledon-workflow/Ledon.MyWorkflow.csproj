@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Ledon.Module" Version="0.1.0" />
+        <!-- 工作流引擎（定义/步骤自动发现；持久化与恢复随 AddLedonWorkflow 生效） -->
+        <PackageReference Include="Ledon.Workflow" Version="0.1.0" />
+    </ItemGroup>
+
+</Project>

@@ -55,8 +55,20 @@ public static class LedonWorkflowServiceCollectionExtensions
             }
         }
 
-        // 有存储才注册恢复服务与 EF 存储实现
-        services.TryAddScoped<IWorkflowStore, EfWorkflowStore>();
+        // 有存储才注册恢复服务与 EF 存储实现：WorkflowDbContext 未注册时（用户用普通 DbContext）
+        // 不注册 EF 存储，引擎仍可进程内使用（不持久化、不恢复）
+        var hasWorkflowStore = LedonAssemblies.Scan()
+            .SelectMany(assembly => assembly.GetLoadableTypes())
+            .Any(type => type is { IsClass: true, IsAbstract: false }
+                && type != typeof(WorkflowDbContext)
+                && typeof(WorkflowDbContext).IsAssignableFrom(type));
+
+        // 存储：有 WorkflowDbContext 子类（持久化）用 EF 存储，否则用进程内内存存储
+        // （引擎永远可用；无持久化时进程重启后实例丢失——与进程内队列同一语义）
+        if (hasWorkflowStore)
+            services.TryAddScoped<IWorkflowStore, EfWorkflowStore>();
+        else
+            services.TryAddScoped<IWorkflowStore, InMemoryWorkflowStore>();
 
         // 步骤与定义自动发现（引用框架 = 选择加入；手动注册优先）
         foreach (var assembly in LedonAssemblies.Scan())
@@ -74,8 +86,10 @@ public static class LedonWorkflowServiceCollectionExtensions
             }
         }
 
-        // 进程重启后恢复：Running 实例由托管服务继续推进（有界批量）
-        services.AddHostedService<WorkflowRecoveryService>();
+        // 进程重启后恢复：Running 实例由托管服务继续推进（有界批量）。
+        // 仅在配了持久化（WorkflowDbContext 子类被扫描到）时注册——无存储时引擎进程内可用
+        if (hasWorkflowStore)
+            services.AddHostedService<WorkflowRecoveryService>();
 
         return services;
     }

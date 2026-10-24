@@ -60,6 +60,14 @@ public sealed class ManualSchedulerClock : ISchedulerClock
 
             var waiter = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             _waiters.Add(waiter);
+
+            // 已取消：直接移除并返回取消任务（不进 AdvanceTo 的集合）
+            if (cancellationToken.IsCancellationRequested)
+            {
+                _waiters.Remove(waiter);
+                return Task.FromCanceled(cancellationToken);
+            }
+
             return waiter.Task.WaitAsync(cancellationToken);
         }
     }
@@ -67,14 +75,14 @@ public sealed class ManualSchedulerClock : ISchedulerClock
     /// <summary>推进到目标时刻，放行所有等待者（取消的等待者顺带清理）。</summary>
     public void AdvanceTo(DateTimeOffset until)
     {
-        TaskCompletionSource[] pending;
+        List<TaskCompletionSource> pending;
         lock (_gate)
         {
             if (until < _now)
                 throw new ArgumentException("只能向前推进时间", nameof(until));
 
             _now = until;
-            pending = _waiters.ToArray();
+            pending = _waiters.ToList();
             _waiters.Clear();
         }
 

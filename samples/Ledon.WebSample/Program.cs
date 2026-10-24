@@ -7,6 +7,7 @@ using Ledon.Sample.Api;
 using Ledon.Web;
 using Ledon.WebSample;
 using Ledon.WebSample.Grpc;
+using Ledon.Workflow;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,6 +51,7 @@ builder.Services.AddLedonHealthChecks();
 builder.Services.AddLedonScheduling();
 builder.Services.AddLedonSignalR();
 builder.Services.AddLedonGrpc();
+builder.Services.AddLedonWorkflow();   // 工作流引擎（定义/步骤自动发现 + 重启恢复）
 // gRPC 需要 HTTP/2：示例主端口跑 HTTP/1.1（REST 演示），另开一个明文 h2c 端口给 gRPC。
 // 显式 Listen 会覆盖 UseUrls，所以两个端口都在这里声明
 builder.WebHost.ConfigureKestrel(options =>
@@ -180,6 +182,12 @@ await Show("GRPC", $"Demo.Ping → {reply.Reply}");
 var health = new Grpc.Health.V1.Health.HealthClient(channel);
 var healthReply = await health.CheckAsync(new Grpc.Health.V1.HealthCheckRequest { Service = "" });
 await Show("GRPC health", $"grpc.health.v1.Health/Check → {healthReply.Status}");
+
+// 工作流引擎：创建实例 → 运行到完成（步骤/定义自动发现）
+var engine = app.Services.CreateScope().ServiceProvider.GetRequiredService<WorkflowEngine>();
+var orderFlow = await engine.CreateAsync("demo-order", new Dictionary<string, object?> { ["orderId"] = "O-1001" });
+var finished = await engine.RunAsync(orderFlow.Id, CancellationToken.None);
+await Show("WORKFLOW", $"demo-order 实例 {finished.Id.ToString()[..8]} → {finished.Status}（步骤：{string.Join(" → ", finished.CompletedSteps)}）");
 Console.WriteLine("\n正在停止宿主（模块将按初始化逆序自动关闭）...");
 await app.StopAsync();
 

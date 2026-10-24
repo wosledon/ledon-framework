@@ -37,6 +37,30 @@ await queue.EnqueueAsync(async (scope, token) =>
 发件箱把任务/事件写进业务数据库（同事务），由调度器投递——进程重启后待投递消息仍在。
 需要跨服务投递时再加传输包（RabbitMQ/Kafka）。
 
+### 持久化后台队列（重启不丢任务）
+
+既想要"fire-and-forget 的简单 API"，又要求任务不随进程消失——用持久化队列：
+
+```csharp
+builder.Services.AddLedonDurableQueue();   // DbContext 继承 OutboxDbContext 即获得队列表
+
+// 业务代码：与业务数据同事务入队（调用方负责 SaveChanges）
+await durableQueue.EnqueueAsync(new DurableJob("send-email", "{\"to\":\"a@b.c\"}"));
+await durableQueue.EnqueueAsync(new DurableJob("nightly-report", "{}", Delay: TimeSpan.FromHours(6)));
+
+// 处理器（实现类自动发现，按 Name 匹配）
+public class SendEmailHandler : IDurableJobHandler
+{
+    public string Name => "send-email";
+    public Task ExecuteAsync(string payload, CancellationToken ct = default) => /* ... */;
+}
+```
+
+- 任务落库（与发件箱同库的 `QueuedJobs` 表），进程重启后由调度器继续投递；
+- 失败重试至 `MaxRetries`（默认 5），超限搁置（记 Warning，不阻塞后续）；
+- 支持延迟任务（`Delay`）、保留期清理（`Retention`，默认 1 天）；
+- 与发件箱的分工：**发件箱**管"跨服务领域事件"，**持久化队列**管"本服务后台作业"。
+
 ## 发件箱（Outbox）
 
 ```csharp

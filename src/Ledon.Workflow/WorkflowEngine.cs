@@ -33,7 +33,6 @@ public sealed class WorkflowEngine
         _options = options;
         _logger = logger;
     }
-
     /// <summary>步骤名 → 步骤实现（自动发现结果，启动时解析一次）。</summary>
     private Dictionary<string, IWorkflowStep> StepsByName(IEnumerable<IWorkflowStep> steps) =>
         steps.GroupBy(step => step.Name, StringComparer.Ordinal)

@@ -2,6 +2,7 @@ using Ledon.Data;
 using Ledon.Module;
 using Ledon.Module.Abstractions;
 using Ledon.Scheduling;
+using Ledon.Workflow;
 using Ledon.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -145,4 +146,55 @@ public class SchedulerAdminEndpoints : IEndpoint
             return ran ? Results.Ok(new { triggered = name }) : Results.NotFound($"未找到定时任务 {name}");
         });
     }
+}
+
+/// <summary>示例工作流定义：校验 → 处理 → 完成（三步，自动发现）。</summary>
+public class DemoOrderWorkflow : IWorkflowDefinition
+{
+    public string Name => "demo-order";
+    public string InitialStep => "validate";
+    public IReadOnlyDictionary<string, string[]> Transitions => new Dictionary<string, string[]>
+    {
+        ["validate"] = ["process"],
+        ["process"] = ["complete"],
+    };
+}
+
+/// <summary>校验步骤。</summary>
+public class ValidateOrderStep : IWorkflowStep
+{
+    public string Name => "validate";
+
+    public Task<StepOutcome> ExecuteAsync(StepContext context, CancellationToken cancellationToken = default)
+    {
+        context.Data["validated"] = true;
+        return Task.FromResult(StepOutcome.Success);
+    }
+}
+
+/// <summary>处理步骤（可补偿：失败回滚时撤销）。</summary>
+public class ProcessOrderStep : IWorkflowStep, ICompensableStep
+{
+    public string Name => "process";
+
+    public Task<StepOutcome> ExecuteAsync(StepContext context, CancellationToken cancellationToken = default)
+    {
+        context.Data["processed"] = true;
+        return Task.FromResult(StepOutcome.Success);
+    }
+
+    public Task CompensateAsync(StepContext context, CancellationToken cancellationToken = default)
+    {
+        context.Data["processed"] = false;
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>完成步骤（终止步骤：没有出口即结束）。</summary>
+public class CompleteOrderStep : IWorkflowStep
+{
+    public string Name => "complete";
+
+    public Task<StepOutcome> ExecuteAsync(StepContext context, CancellationToken cancellationToken = default) =>
+        Task.FromResult(StepOutcome.Success);
 }

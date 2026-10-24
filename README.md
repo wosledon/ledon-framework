@@ -26,8 +26,7 @@ app.Run();
 | 数据访问（EF Core + 发件箱）           | `Ledon.Data` / `Ledon.Queues` | `AddLedonData()` / `AddLedonOutbox()`                | 自动注册 + 前置自动建库 + 至少一次投递 + 审计/软删除 + 领域事件 + 规约/分页/仓储 |
 | 可靠投递（收件箱去重/死信管理）        | `Ledon.Queues`                | `AddLedonInbox()`                                    | 至少一次投递 + 恰好一次处理；死信查询/重放         |
 | 缓存                                   | `Ledon.Caching`               | `AddLedonCaching()` / `AddLedonDistributedCaching()` / `AddLedonHybridCaching()` | 内存（single-flight）/ 分布式（Redis）/ 混合两级；多租户键自动隔离 |
-| 后台任务                               | `Ledon.Queues`                | `AddLedonQueues()`                                   | Channel 有界 + 多 worker + 停机 drain                 |
-| 消息中间件传输                         | `Ledon.Queues.RabbitMQ` / `Ledon.Queues.Kafka` | `AddLedonRabbitMqTransport()` / `AddLedonKafkaTransport()` | 发件箱 ↔ broker，跨服务投递；Kafka 消费侧带死信主题 |
+| 后台任务                               | `Ledon.Queues`                | `AddLedonQueues()` / `AddLedonDurableQueue()`         | 进程内队列（有界+多 worker+停机 drain）/ 持久化队列（重启不丢） || 消息中间件传输                         | `Ledon.Queues.RabbitMQ` / `Ledon.Queues.Kafka` | `AddLedonRabbitMqTransport()` / `AddLedonKafkaTransport()` | 发件箱 ↔ broker，跨服务投递；Kafka 消费侧带死信主题 |
 | 定时任务                               | `Ledon.Scheduling`            | `AddLedonScheduling()`                               | cron 驱动（5/6 段）+ 执行历史 + 手动触发          |
 | 认证授权                               | `Ledon.Security`              | `AddLedonSecurity()`                                 | JWT + API Key + 权限策略                          |
 | OIDC 服务器                            | `Ledon.OpenIddict`            | `builder.AddLedonOpenIddict()`                       | 标准 /connect/token + 发现文档                    |
@@ -44,7 +43,6 @@ app.Run();
 | 云原生默认值                           | `Ledon.Aspire`                | `AddLedonServiceDefaults()`                          | OTel+健康检查+弹性+服务发现一次装齐              |
 | gRPC 服务间通信                       | `Ledon.Grpc`                  | `AddLedonGrpc()` / `AddLedonGrpcClient<T>()`         | 服务自动发现 + 约定映射 + 强类型客户端 + 健康服务/日志拦截器 |
 | 工作流引擎                            | `Ledon.Workflow`              | `AddLedonWorkflow()`                                 | 多步骤编排 + 重试 + Saga 补偿 + 重启恢复            |
-
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -326,7 +324,7 @@ src/Ledon.Workflow/        工作流引擎（步骤编排 + 重试 + Saga 补偿
 src/Ledon.Workflow/        工作流引擎（步骤编排 + 重试 + Saga 补偿 + 重启恢复）
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（模块 26 + Web 163 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 168 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）
@@ -343,6 +341,9 @@ docs/                   文档站（docfx）
 ./run.ps1 sample   # 控制台零配置示例
 ./run.ps1          # 列出所有任务
 ```
+
+模板：`dotnet new ledon-web`（Web 应用）、`dotnet new ledon-worker`（工作进程）、
+`dotnet new ledon-module`（业务模块）、`dotnet new ledon-workflow`（工作流定义与步骤）。
 
 ## 发布
 

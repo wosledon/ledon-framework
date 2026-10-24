@@ -42,6 +42,9 @@ public abstract class OutboxDbContext : DbContext
     /// <summary>收件箱（消费侧去重）。注册 <see cref="IInboxStore"/> 后生效，表结构随基类一并约定。</summary>
     public DbSet<InboxMessage> InboxMessages => Set<InboxMessage>();
 
+    /// <summary>持久化后台队列（AddLedonDurableQueue 后生效，表结构随基类一并约定）。</summary>
+    public DbSet<QueuedJobMessage> QueuedJobs => Set<QueuedJobMessage>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<OutboxMessage>(entity =>
@@ -61,6 +64,16 @@ public abstract class OutboxDbContext : DbContext
             entity.Property(message => message.MessageId).IsRequired().HasMaxLength(200);
             entity.Property(message => message.EventType).IsRequired().HasMaxLength(500);
             entity.HasIndex(message => message.CompletedAt);
+        });
+
+        modelBuilder.Entity<QueuedJobMessage>(entity =>
+        {
+            entity.HasKey(job => job.Id);
+            entity.Property(job => job.QueueName).IsRequired().HasMaxLength(200);
+            entity.Property(job => job.Payload).IsRequired();
+
+            // 调度器按 未处理 + 可用时刻 取批次
+            entity.HasIndex(job => new { job.ProcessedAt, job.AvailableAt });
         });
 
         base.OnModelCreating(modelBuilder);
