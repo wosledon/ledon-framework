@@ -46,7 +46,9 @@ jobs:
           pct=$(awk "BEGIN {printf \"%.1f\", ${rate:-0} * 100}")
           echo "行覆盖率：${pct}%"
           echo "### 测试覆盖率：行 ${pct}%" >> "$GITHUB_STEP_SUMMARY"
-          awk "BEGIN {exit !(${rate:-0} < 0.5)}" && echo "::warning::行覆盖率 ${pct}% 低于 50%"
+          if awk "BEGIN {exit !(${rate:-0} < 0.5)}"; then
+            echo "::warning::行覆盖率 ${pct}% 低于 50%"
+          fi
 
       - name: 上传测试结果
         if: always()

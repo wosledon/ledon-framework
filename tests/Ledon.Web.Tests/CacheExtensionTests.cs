@@ -13,20 +13,20 @@ public class CacheExtensionTests
     // ---------- 内存缓存 ----------
 
     [Fact]
-    public void Memory_cache_supports_async_set_get_and_remove()
+    public async Task Memory_cache_supports_async_set_get_and_remove()
     {
         var services = new ServiceCollection();
         services.AddLedonCaching();
         using var provider = services.BuildServiceProvider();
         var cache = provider.GetRequiredService<ICacheService>();
 
-        cache.SetAsync("k", "v").GetAwaiter().GetResult();
+        await cache.SetAsync("k", "v");
 
-        Assert.Equal("v", cache.GetAsync<string>("k").GetAwaiter().GetResult());
+        Assert.Equal("v", await cache.GetAsync<string>("k"));
 
-        cache.RemoveAsync("k").GetAwaiter().GetResult();
+        await cache.RemoveAsync("k");
 
-        Assert.Null(cache.GetAsync<string>("k").GetAwaiter().GetResult());
+        Assert.Null(await cache.GetAsync<string>("k"));
     }
 
     [Fact]
@@ -154,5 +154,4 @@ public class CacheExtensionTests
 
         await cache.RemoveAsync("k");
         Assert.Null(await cache.GetAsync<string>("k"));
-    }
-}
+    }}

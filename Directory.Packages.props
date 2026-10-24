@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- 打包（仅 src/ 项目引用） -->
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.402" />
     <!-- 调度领导权选举（Redis 锁） -->
     <PackageVersion Include="OpenIddict.AspNetCore" Version="7.7.2" />
     <PackageVersion Include="OpenIddict.Core" Version="7.7.2" />
@@ -18,11 +18,11 @@
     <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.11.0" />
     <!-- SignalR 多实例 backplane（Redis 广播） -->
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="10.0.13" />
-    <!-- gRPC（服务间高性能通信，按需引入） -->
-    <PackageVersion Include="Grpc.AspNetCore" Version="2.52.0" />
-    <PackageVersion Include="Grpc.Net.ClientFactory" Version="2.52.0" />
+    <!-- gRPC（服务间高性能通信，按需引入；≥2.64 与 Microsoft.Extensions.Http.Resilience 组合无已知问题） -->
+    <PackageVersion Include="Grpc.AspNetCore" Version="2.84.0" />
+    <PackageVersion Include="Grpc.Net.ClientFactory" Version="2.84.0" />
     <!-- gRPC 代码生成（测试夹具用真实生成代码） -->
-    <PackageVersion Include="Grpc.Tools" Version="2.52.0" />
+    <PackageVersion Include="Grpc.Tools" Version="2.84.0" />
     <!-- 基准测试 -->
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
     <!-- Prometheus 抓取端点（OTel 官方该包长期 beta，生产广泛使用） -->
@@ -68,7 +68,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
     <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.12.0" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.20.1" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
