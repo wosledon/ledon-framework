@@ -19,6 +19,8 @@
         <RepositoryUrl>https://github.com/wosledon/ledon-framework</RepositoryUrl>
         <PackageProjectUrl>https://github.com/wosledon/ledon-framework</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <!-- NuGet 发现性标签（与 GitHub topics 对齐） -->
+        <PackageTags>csharp;dotnet;aspnetcore;modular;framework;web;efcore;module-system;dependency-injection;auto-discovery</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <VersionPrefix>0.1.0</VersionPrefix>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
