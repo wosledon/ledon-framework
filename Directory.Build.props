@@ -21,7 +21,9 @@
         <NoWarn>$(NoWarn);CS1591</NoWarn>
 
         <!-- 测试与示例项目不打包 -->
-        <IsPackable Condition="'$(IsPackable)' == '' AND ($(MSBuildProjectDirectory.Contains('\samples\')) OR $(MSBuildProjectDirectory.Contains('\tests\')))">false</IsPackable>
+        <IsPackable
+            Condition="'$(IsPackable)' == '' AND ($(MSBuildProjectDirectory.Contains('\samples\')) OR $(MSBuildProjectDirectory.Contains('\tests\')))">
+            false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>

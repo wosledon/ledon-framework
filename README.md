@@ -15,33 +15,26 @@ app.UseLedonWeb();
 app.Run();
 ```
 
-没有 `AddModule`、没有 `AddControllers`、没有 `AddDbContext`、没有 `MapGet`——模块、服务、事件处理器、端点全部按约定自动接线。完整可运行示例：`./run.ps1 web`。
+没有 `AddModule`、没有 `AddControllers`、没有 `AddDbContext`、没有 `MapGet`——模块、服务、事件处理器、端点全部按约定自动接线。完整可运行示例：`./run.ps1 web`（多程序集布局）、`./run.ps1 worker`（非 Web 工作进程）。
 
 ## 能力矩阵（按需引入）
 
-| 能力                                | 包                    | 引入方式                                   | 说明                                         |
-| ----------------------------------- | --------------------- | ------------------------------------------ | -------------------------------------------- |
-| 模块系统（发现/依赖/生命周期/事件） | `Ledon.Module`        | 被 `Ledon.Web` 自动带入                    | 核心，默认在场                               |
-| Web 集成（端点/控制器/OpenAPI）     | `Ledon.Web`           | `builder.AddLedonWeb()`                    | 控制器默认自动发现                           |
-| 数据访问（EF Core）                 | `Ledon.Data`          | `builder.Services.AddLedonData()`          | 自动注册 + 前置自动建库/迁移                 |
-| 缓存                                | `Ledon.Caching`       | `builder.Services.AddLedonCaching()`       | `ICacheService`，single-flight 回源          |
-| 后台队列                            | `Ledon.Queues`        | `builder.Services.AddLedonQueues()`        | `IBackgroundQueue`，Channel 有界 + 多 worker |
-| 可观测性                            | `Ledon.Observability` | `builder.Services.AddLedonObservability()` | OpenTelemetry 链路/指标 + 健康检查           |
-| OpenAPI 文档                        | （随 `Ledon.Web`）    | `o.UseOpenApi = true`                      | `/openapi/v1.json`                           |
+| 能力 | 包 | 引入方式 | 说明 |
+|---|---|---|---|
+| 模块系统（发现/依赖/生命周期/事件） | `Ledon.Module` | 被 `Ledon.Web` 自动带入 | 核心，默认在场 |
+| Web 集成（端点/控制器/OpenAPI/规范化） | `Ledon.Web` | `builder.AddLedonWeb()` | 含 ProblemDetails、关联 ID、统一响应、版本化开关 |
+| 数据访问（EF Core + 发件箱） | `Ledon.Data` / `Ledon.Queues` | `AddLedonData()` / `AddLedonOutbox()` | 自动注册 + 前置自动建库 + 至少一次投递 |
+| 缓存 | `Ledon.Caching` | `AddLedonCaching()` / `AddLedonDistributedCaching()` | 内存（single-flight）/ 分布式（Redis） |
+| 后台任务 | `Ledon.Queues` | `AddLedonQueues()` | Channel 有界 + 多 worker |
+| 定时任务 | `Ledon.Scheduling` | `AddLedonScheduling()` | cron 驱动（5/6 段） |
+| 认证授权 | `Ledon.Security` | `AddLedonSecurity()` | JWT + API Key + 权限策略 |
+| 可观测性 | `Ledon.Observability` | `AddLedonObservability()` | OTel 链路/指标（含框架自身 span）+ 健康检查 |
+| 弹性策略 | `Ledon.Resilience` | `AddLedonResilience()` | 重试/超时/熔断，接管全部 HttpClient |
+| 强类型配置 | `Ledon.Configuration` | `AddLedonOptions<T>(config)` | 绑定 + 启动校验 |
+| 多租户 | `Ledon.MultiTenancy` | `AddLedonMultiTenancy()` | 租户解析 + 后台穿透 |
+| 测试基建 | `Ledon.Testing` | `LedonWebTestHost` | 一行搭 TestServer + 生命周期断言 |
 
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
-
-### 自动发现规则（允许列表）
-
-一个程序集被扫描，当且仅当它**直接引用了框架程序集**（Ledon.* 功能包）——「引用框架 = 选择加入」。基础设施（EF Core、xUnit、TestPlatform……）不引用框架，天然排除；框架自身包显式排除。
-
-候选来自三个通道（都过同一套允许列表，结果按程序集名排序，跨宿主确定）：
-
-1. **依赖上下文（deps.json）**——记录全部声明的项目/包依赖，**与代码是否使用无关**。这解决了一个隐蔽的坑：项目引用了模块程序集、但入口代码没直接用它的类型时，编译器会删掉该程序集引用、运行库也不会加载它，仅靠引用图会双双错过；
-2. **已加载程序集**；
-3. **已加载且引用框架的程序集的依赖上下文**——覆盖默认上下文指向宿主入口的场景（如 VSTest）。
-
-启动时会在 `Ledon.Module` 日志分类输出诊断：**Information** 报告发现了哪些模块、扫描了哪些程序集；**Debug** 给出被跳过程序集与每条约定注册明细——「我的模块为什么没被发现」不用猜。需要扫描不引用框架的程序集时用 `AddAssembly` 逃生门。
 
 ## 写一个模块
 
@@ -78,8 +71,14 @@ public class WelcomeEmailSender : IEventHandler<UserCreated>
 }
 ```
 
+跨进程/要求可靠投递时用**发件箱**（至少一次）：
+
 ```csharp
-await context.Events.PublishAsync(new UserCreated("alice"));   // 或注入 IEventBus 后发布
+public class OrderDbContext : OutboxDbContext;   // 继承即获得 OutboxMessages
+
+// 业务事务里：事件与数据同一次 SaveChanges
+outbox.Add(new OrderPlaced(orderId));
+await db.SaveChangesAsync();   // 调度器随后投递并标记
 ```
 
 ## Web 开发
@@ -106,190 +105,168 @@ public class TodosController(TodoDbContext db) : ControllerBase
 }
 ```
 
-**OpenAPI**——`o.UseOpenApi = true` 即提供 `/openapi/v1.json`（.NET 10 内置）。
+**API 规范化**（`LedonWebOptions` 控制，均有默认值）：
+
+| 开关 | 默认 | 行为 |
+|---|---|---|
+| `UseProblemDetails` | ✅ | 未处理异常 → RFC 7807（含关联 ID/TraceId） |
+| 模型验证 | ✅ | 失败统一 400 ValidationProblemDetails |
+| `UseCorrelationId` | ✅ | `X-Correlation-Id` 贯穿请求/响应头/日志作用域 |
+| `UseUnifiedResponse` | ❌ | 成功响应包 `{"code":0,"data":...}` 信封 |
+| `UseApiVersioning` | ❌ | URL 段 `api/v{version}/...` |
 
 ## 数据访问
 
-实现 `ILedonDbContext` 即被自动注册，并在启动时（**先于任何模块初始化**）自动建库/迁移：
-
-```csharp
-public class TodoDbContext : DbContext, ILedonDbContext
-{
-    public DbSet<TodoItem> Todos => Set<TodoItem>();
-
-    protected override void OnConfiguring(DbContextOptionsBuilder options) =>
-        options.UseSqlite("Data Source=app.db");
-}
-```
-
-有挂起迁移走 `Migrate`，否则 `EnsureCreated`——两种工作流都无需手动处理。自己管理 schema 时 `AddLedonData(o => o.AutoMigrate = false)`。
+实现 `ILedonDbContext` 即被自动注册，并在启动时（**先于任何模块初始化**）自动建库/迁移；发件箱继承 `OutboxDbContext`。自己管理 schema 时 `AddLedonData(o => o.AutoMigrate = false)`。
 
 ## 缓存
 
 ```csharp
-builder.Services.AddLedonCaching(o => o.DefaultExpiration = TimeSpan.FromMinutes(10));
-
-public class ProductService(ICacheService cache)
-{
-    public Task<Product> GetAsync(int id, CancellationToken ct) =>
-        cache.GetOrCreateAsync($"product:{id}", async token =>
-        {
-            // 未命中才回源；同一 key 的并发未命中共享一次回源（single-flight）
-            return await LoadFromDbAsync(id, token);
-        }, cancellationToken: ct);
-}
+builder.Services.AddLedonCaching();        // 进程内：同 key 并发未命中 single-flight
+// 或多实例共享：
+builder.Services.AddLedonDistributedCaching(o => o.RedisConnectionString = "localhost:6379");
 ```
 
-v1 为进程内内存实现；换分布式缓存（Redis 等）只需替换 `ICacheService` 实现，调用方不变。
-
-## 后台队列
+## 后台队列 / 定时任务
 
 ```csharp
-builder.Services.AddLedonQueues(o => o.WorkerCount = 4);   // 4 个并发 worker
+builder.Services.AddLedonQueues(o => o.WorkerCount = 4);
+await queue.EnqueueAsync(async (scope, token) => { /* 独立作用域 */ });
 
-public class OrderService(IBackgroundQueue queue)
+builder.Services.AddLedonScheduling();
+public class CleanupTask : IScheduledTask
 {
-    public ValueTask SendEmailAsync(int orderId) =>
-        queue.EnqueueAsync(async (scope, ct) =>
-        {
-            // 每个任务都在独立 DI 作用域中执行，可安全解析 Scoped 服务
-            var mailer = scope.GetRequiredService<IMailer>();
-            await mailer.SendAsync(orderId, ct);
-        });
+    public string CronExpression => "0 3 * * *";   // 每天 3 点
+    public Task ExecuteAsync(CancellationToken ct = default) { /* ... */ }
 }
 ```
 
-有界队列提供背压；单个任务失败只记录日志并继续，不会拖垮 worker 或影响后续任务。
+## 认证授权
+
+```csharp
+builder.Services.AddLedonSecurity(o => o.Jwt.SigningKey = Configuration["Jwt:Key"]!);
+// [Authorize]                        → JWT 或 API Key 任一通过
+// [Authorize(Policy = "users.read")]  → 权限策略（策略名即权限名）
+var token = provider.GetRequiredService<IJwtTokenGenerator>().Generate("u1", "alice", ["users.read"]);
+```
 
 ## 可观测性
 
-**框架自身即可观测**——模块生命周期、事件发布、队列处理全部产出 span（`Ledon.Module` / `Ledon.Events` / `Ledon.Queues` 三个 ActivitySource），`AddLedonObservability()` 以 `Ledon` + `Ledon.*` 通配自动收听，"框架帮你做了什么"全程进入链路树：
+**框架自身即可观测**——模块生命周期、事件发布、队列处理全部产出 span，`AddLedonObservability()` 自动收听：
 
 ```csharp
-// 链路 + 指标：ASP.NET Core / HttpClient / 运行时 + 框架自身源自动插桩
 builder.Services.AddLedonObservability(o =>
 {
     o.ServiceName = "my-app";
-    o.OtlpEndpoint = new Uri("http://localhost:4317");   // 不配则读 OTEL_EXPORTER_OTLP_ENDPOINT
-    o.UseConsoleExporter = true;                          // 开发排障：span/指标直接打控制台
+    o.OtlpEndpoint = new Uri("http://localhost:4317");   // 或读 OTEL_EXPORTER_OTLP_ENDPOINT
+    o.UseConsoleExporter = true;                          // 开发排障：span 直接打控制台
 });
 
-// 健康检查：IHealthCheck 实现被自动发现并登记
 builder.Services.AddLedonHealthChecks();
-app.MapLedonLiveness();    // GET /health/live  —— 进程在跑即 200（重启判断）
-app.MapLedonReadiness();   // GET /health/ready —— 聚合全部检查（摘流判断）
+app.MapLedonLiveness();    // /health/live  进程在跑即 200
+app.MapLedonReadiness();   // /health/ready 聚合全部检查
 ```
 
-模块内可发自定义 span（挂在模块初始化 span 之下，自动成树）：
+模块内可发自定义 span：`using var span = ctx.StartActivity("加载配置");`
+
+## 弹性策略 / 配置 / 多租户
 
 ```csharp
-public Task OnInitializedAsync(ModuleContext ctx, CancellationToken ct)
-{
-    using var span = ctx.StartActivity("加载配置");   // Ledon.Module 源下的子 span
-    ...
-}
+builder.Services.AddLedonResilience();                    // 重试+超时+熔断，接管全部 HttpClient
+builder.Services.AddLedonOptions<SmtpOptions>(builder.Configuration);   // 绑定+启动校验
+builder.Services.AddLedonMultiTenancy();                  // X-Tenant-Id 解析 + 后台穿透
+app.UseLedonMultiTenancy();
 ```
 
-**关联 ID**（`Ledon.Web` 默认开启）：请求未带 `X-Correlation-Id` 时生成（优先复用当前 TraceId，与链路 ID 天然对齐），回写响应头并压入日志作用域——同一请求的所有日志自动带上 `CorrelationId`，跨服务排查不用二次映射。不需要时 `o.UseCorrelationId = false`。
+## 自动发现规则（允许列表）
 
-非 Web 应用（工作进程）同样适用：`AddLedonObservability` 不依赖 ASP.NET，AspNetCore 插桩在非 Web 宿主下自动空转。`./run.ps1 worker` 的控制台输出可直接看到模块初始化、事件发布的真实 span。
+一个程序集被扫描，当且仅当它**直接引用了框架程序集**（Ledon.* 功能包）——「引用框架 = 选择加入」。基础设施（EF Core、xUnit、TestPlatform……）不引用框架，天然排除；框架自身包显式排除。候选来自三个通道（都过同一套允许列表，结果按程序集名排序，跨宿主确定）：
+
+1. **依赖上下文（deps.json）**——记录全部声明的依赖，**与代码是否使用无关**（解决"项目引用了模块程序集但代码没直接用其类型"时编译器删引用、运行库不加载导致的静默丢失）；
+2. **已加载程序集**；
+3. **已加载且引用框架的程序集的依赖上下文**——覆盖入口指向宿主的场景（VSTest）。
+
+启动时 `Ledon.Module` 日志分类输出诊断：**Information** 报告模块与扫描集；**Debug** 给出跳过清单与约定注册明细。逃生门：`AddAssembly` / `AddModule<T>()` / `[DisableAutoDiscovery]`。
 
 ## 约定注册规则
 
 扫描到的程序集里，每个具体类按以下规则自动进容器（`TryAdd`，手动注册优先）：
 
-| 规则       | 示例                               | 注册结果                                    |
-| ---------- | ---------------------------------- | ------------------------------------------- |
-| 同名接口   | `class UserService : IUserService` | `IUserService → UserService`（默认 Scoped） |
-| 事件处理器 | `class X : IEventHandler<E>`       | `IEventHandler<E> → X`（Transient）         |
+| 规则 | 示例 | 注册结果 |
+|---|---|---|
+| 同名接口 | `class UserService : IUserService` | `IUserService → UserService`（默认 Scoped） |
+| 事件处理器 | `class X : IEventHandler<E>` | `IEventHandler<E> → X`（Transient） |
 
-**没有接口的类（DTO、控制器、端点）不会被自动注册**——这不仅是减少噪音：把 MVC 动作参数类型注册进容器会让 `[ApiController]` 的隐式 `[FromBody]` 推断失效（退化为查询绑定）。此类类型请显式注册。泛型 arity 会被忽略（`IRepo<T>` ↔ `Repo<T>`）。默认生命周期可用 `o.DefaultServiceLifetime` 调整。
-
-## 逃生门（默认全自动，需要时才用）
-
-```csharp
-// Web 层
-builder.AddLedonWeb(
-    o => o.UseOpenApi = true,                                  // Web 开关
-    m => m.DisableAutoDiscovery().AddModule<UserModule>());    // 转发给模块系统
-
-// 各功能包
-builder.Services.AddLedonData(o => o.AutoMigrate = false);
-builder.Services.AddLedonCaching(o => o.KeyPrefix = "app");
-builder.Services.AddLedonQueues(o => o.WorkerCount = 4);
-```
-
-```csharp
-[DisableAutoDiscovery]   // 标记的类型（含嵌套）不参与自动扫描，只能显式 AddModule
-public class MyFixture { }
-```
+**没有接口的类（DTO、控制器、端点）不会被自动注册**——把 MVC 动作参数类型注册进 DI 会让 `[ApiController]` 的隐式 `[FromBody]` 推断失效。此类类型请显式注册。
 
 ## 生命周期
 
-一个机制、两个阶段。基础设施任务（`ILedonPreInitialization`）是模块生命周期的前置阶段，与模块共用同一套启停语义：
-
 ```
-发现程序集（允许列表：引用框架的程序集；入口引用闭包 ∪ 已加载，按名排序）
+发现程序集（允许列表三通道）
   → 诊断日志（Information：模块与扫描集；Debug：跳过清单与约定注册明细）
-  → 约定注入（服务 + 事件处理器，TryAdd，模块显式注册优先）
+  → 约定注入（服务 + 事件处理器）
   → 各模块 ConfigureServices（拓扑序，容器 Build 之前）
   → host.StartAsync
-      → 阶段一（基础设施）：ILedonPreInitialization 前置任务——如 [Ledon.Data] 建库/迁移
-      → 阶段二（应用）：OnInitializedAsync（拓扑序）→ [Ledon.Queues] worker 启动
-  → 运行期：事件总线通信 / 后台队列处理 / 缓存 / 链路指标
+      → 阶段一（基础设施）：ILedonPreInitialization——如建库/迁移
+      → 阶段二（应用）：OnInitializedAsync（拓扑序）→ 队列 worker / 调度器启动
+  → 运行期：事件 / 队列 / 缓存 / 链路指标
   → host.StopAsync  → OnShutdownAsync（逆序）
 ```
 
-任一阶段失败即中止：阶段二失败时已初始化模块**逆序回滚**，原始异常原样抛出。不用通用主机时：`await provider.InitializeModulesAsync()` / `ShutdownModulesAsync()`。
+初始化失败时已初始化模块**逆序回滚**，原始异常原样抛出。不用通用主机：`await provider.InitializeModulesAsync()`。
+
+## 多程序集布局（真实应用形态）
+
+```
+MyApp.sln
+├─ src/MyApp.Api/               # 宿主（Web/Worker 均可）：AddLedonWeb() 一行接入
+├─ src/Modules/MyApp.Contracts/ # 共享契约（事件 record）——只依赖 Ledon.Core
+├─ src/Modules/MyApp.Users/     # 用户模块：引用 Contracts
+└─ src/Modules/MyApp.Notifications/  # 通知模块：只引用 Contracts，不引用 Users
+```
+
+通知模块通过 `IEventHandler<UserRegistered>` 消费用户模块发布的事件，**两个业务程序集之间没有任何引用**——解耦不是约定俗成，而是编译期强制。示范：`./run.ps1 worker`、`./run.ps1 web`。
 
 ## 项目结构
 
 ```
-src/Ledon.Core/        事件基元（IEventBus / IEventHandler）——与模块系统无关的底层契约
-src/Ledon.Module/      模块系统：契约、依赖图、运行时、宿主接入、约定扫描、程序集扫描
-src/Ledon.Web/         Web 集成：IEndpoint 自动发现、控制器 ApplicationPart、OpenAPI 开关
-src/Ledon.Data/        数据访问：ILedonDbContext 自动注册、DbInitializer 前置建库/迁移
-src/Ledon.Caching/     缓存：ICacheService + 内存实现（single-flight）
-src/Ledon.Queues/      后台队列：IBackgroundQueue + Channel 有界实现 + 多 worker 宿主服务
-src/Ledon.Observability OpenTelemetry 链路/指标 + 健康检查自动发现
-tests/                 xunit 测试（顺序断言钉住生命周期轨迹 + Web 全链路 + 功能包）
-samples/               Ledon.Sample（控制台零配置）/ Ledon.WebSample（Web 全特性）
-scripts/               任务编排：./run.ps1 [scan|build|test|sample|web|check]
+src/Ledon.Core/         事件基元（IEventBus / IEventHandler）
+src/Ledon.Module/       模块系统：契约、依赖图、运行时、约定扫描、程序集扫描
+src/Ledon.Web/          Web 集成：端点、控制器、OpenAPI、API 规范化、关联 ID
+src/Ledon.Data/         数据访问：ILedonDbContext、DbInitializer
+src/Ledon.Caching/      缓存：内存（single-flight）/ 分布式（Redis）
+src/Ledon.Queues/       后台队列 + 发件箱（Outbox）
+src/Ledon.Scheduling/   定时任务（cron）
+src/Ledon.Security/     认证授权（JWT / API Key / 权限策略）
+src/Ledon.Observability OpenTelemetry + 健康检查
+src/Ledon.Resilience/   弹性策略（重试/超时/熔断）
+src/Ledon.Configuration/ 强类型配置约定
+src/Ledon.MultiTenancy/ 多租户
+src/Ledon.Testing/      集成测试基建
+samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
+samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
+tests/                  xunit 测试（34+ 用例，顺序断言 + 变异验证）
+scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check]
+docs/                   文档站（docfx）
 ```
 
 ## 常用命令
 
 ```powershell
 ./run.ps1 check    # scan → build → test
-./run.ps1 web      # 跑 Web 示例（全功能链路）
-./run.ps1 worker   # 跑多程序集工作进程示例（跨程序集发现 + 事件解耦）
-./run.ps1 sample   # 跑控制台零配置示例
+./run.ps1 web      # Web 示例（多程序集 + 全功能链路）
+./run.ps1 worker   # 工作进程示例（跨程序集事件解耦）
+./run.ps1 sample   # 控制台零配置示例
 ./run.ps1          # 列出所有任务
 ```
 
-## 多程序集布局（真实应用形态）
+## 发布
 
-真实项目不会把所有模块塞进一个程序集。推荐布局：**契约独立成集，业务模块各自成集，彼此零引用**：
-
-```
-MyApp.sln
-├─ src/MyApp.Worker/            # 宿主（控制台/Web 均可）：AddLedon() 一行接入
-├─ src/Modules/MyApp.Contracts/ # 共享契约（事件 record）——只依赖 Ledon.Core
-├─ src/Modules/MyApp.Users/     # 用户模块：引用 Contracts
-└─ src/Modules/MyApp.Notifications/  # 通知模块：只引用 Contracts，不引用 Users
-```
-
-通知模块通过 `IEventHandler<UserRegistered>` 消费用户模块发布的事件，**两个业务程序集之间没有任何引用**——解耦不是约定俗成，而是编译期强制。完整可运行示范：`./run.ps1 worker`（含非 Web 宿主 + 队列/缓存/数据）。
-
-## 路线图（v1 之后）
-
-- 分布式缓存实现（Redis：`IDistributedCache` 适配 `ICacheService`）
-- 外部 Broker 队列实现（RabbitMQ / Kafka，替换 `IBackgroundQueue` 实现即可）
-- 认证授权包（JWT / API Key，`Ledon.Security`）
-- 插件热插拔（`AssemblyLoadContext`，发现环节已与加载方式解耦）
+CI（`.github/workflows/ci.yml`）在 push/PR 时 build+test；打 `v*` tag 时按版本打包并推 NuGet.org（需仓库 secret `NUGET_API_KEY`）。本地打包：`dotnet pack -c Release`。
 
 ## 设计边界（v1 明确不做）
 
 - 运行时动态加载 / 插件热插拔（当前为静态引用；发现环节已与加载方式解耦，后续可扩展）
 - 模块级独立 DI 容器（所有模块共享根容器）
 - 每模块独立配置（配置经 `ModuleContext.Configuration` 走宿主配置即可）
+- 多租户的隐式查询过滤（提供上下文与解析，隔离由查询层显式应用——约定显式，避免意外）
