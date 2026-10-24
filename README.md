@@ -303,7 +303,7 @@ src/Ledon.FluentValidation/ FluentValidation 验证器自动发现
 src/Ledon.Queues.RabbitMQ/ RabbitMQ 传输（发件箱 ↔ broker）
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（86 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（94 用例，顺序断言 + 变异验证）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check]
 docs/                   文档站（docfx）
 ```
