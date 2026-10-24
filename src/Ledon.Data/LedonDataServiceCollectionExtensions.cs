@@ -3,6 +3,7 @@ using Ledon;
 using Ledon.Module;
 using Ledon.Module.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -37,6 +38,16 @@ public static class LedonDataServiceCollectionExtensions
             }
         }
 
+        // 审计拦截器（时间戳/操作人自动填充 + 软删除转换）：实现标记接口即生效，
+        // 具体行为由 LedonDataOptions 控制（EnableAuditing / AutoSoftDelete）。
+        // 经 IDbContextOptionsConfiguration<> 接入全部已注册的 DbContext
+        // （用户自己 AddDbContext 配连接串也生效；EF 不会自动发现 DI 里的拦截器）
+        services.TryAddSingleton<LedonAuditInterceptor>();
+        services.TryAdd(new ServiceDescriptor(
+            typeof(IDbContextOptionsConfiguration<>),
+            typeof(LedonAuditOptionsConfiguration<>),
+            ServiceLifetime.Singleton));
+
         // 建库/迁移是前置任务：先于任何模块初始化执行，模块里可安全使用数据库
         services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(ILedonPreInitialization), typeof(DbInitializer)));
 
@@ -52,7 +63,9 @@ public static class LedonDataServiceCollectionExtensions
         && type != typeof(DbContext)
         // ILedonDbContext 是选择加入的标记：只登记实现了它的 DbContext，
         // 否则任意 DbContext（如继承 OutboxDbContext 的）会被误注册为 ILedonDbContext
-        && typeof(ILedonDbContext).IsAssignableFrom(type);
+        && typeof(ILedonDbContext).IsAssignableFrom(type)
+        // [DisableAutoDiscovery] 逃生门：测试夹具/仅手动注册的上下文不参与自动发现
+        && !type.IsDefined(typeof(DisableAutoDiscoveryAttribute), inherit: false);
 
     /// <summary>
     /// 通过反射调用 EF 的 <c>AddDbContext</c>（DbContext 类型是运行时发现的）。

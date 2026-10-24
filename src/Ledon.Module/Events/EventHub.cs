@@ -62,3 +62,4 @@ internal sealed class EventHub : IEventBus
             ExceptionDispatchInfo.Throw(firstFailure);
     }
 }
+
