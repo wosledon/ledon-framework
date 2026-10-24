@@ -14,4 +14,7 @@ public sealed class LedonDistributedCachingOptions
 
     /// <summary>默认过期时间，默认 5 分钟。</summary>
     public TimeSpan DefaultExpiration { get; set; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>默认滑动过期，默认空 = 不用滑动过期。</summary>
+    public TimeSpan? DefaultSlidingExpiration { get; set; }
 }

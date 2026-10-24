@@ -5,8 +5,9 @@ namespace Ledon.Caching;
 
 /// <summary>
 /// 基于 <see cref="IMemoryCache"/> 的 <see cref="ICacheService"/> 实现：
-/// 支持 key 前缀、默认过期时间，以及对同一 key 并发未命中的 single-flight 回源
+/// 支持 key 前缀、默认过期时间、滑动过期，以及对同一 key 并发未命中的 single-flight 回源
 /// （并发调用共享同一个回源 Task，不会重复回源；回源失败时移除在途记录，下次可重试）。
+/// 前缀删除基于进程内 key 索引（随条目逐出/移除同步清理）。
 /// </summary>
 internal sealed class MemoryCacheService : ICacheService
 {
@@ -15,6 +16,9 @@ internal sealed class MemoryCacheService : ICacheService
 
     /// <summary>进行中的回源任务（key 为完整 key）：保证同一 key 只回源一次。</summary>
     private readonly ConcurrentDictionary<string, object> _inFlight = new();
+
+    /// <summary>进程内 key 索引：前缀删除用。条目逐出/移除时经回调清理，不随缓存无限增长。</summary>
+    private readonly ConcurrentDictionary<string, byte> _keys = new();
 
     public MemoryCacheService(IMemoryCache cache, LedonCachingOptions options)
     {
@@ -37,14 +41,26 @@ internal sealed class MemoryCacheService : ICacheService
     public Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default) =>
         Task.FromResult(TryGet<T>(key, out var value) ? value : default);
 
-    public void Set<T>(string key, T value, TimeSpan? expiration = null) =>
-        SetCore(FullKey(key), value, expiration);
+    public void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? slidingExpiration = null) =>
+        SetCore(FullKey(key), value, expiration, slidingExpiration);
+
+    public Task SetAsync<T>(
+        string key,
+        T value,
+        TimeSpan? expiration = null,
+        CancellationToken cancellationToken = default,
+        TimeSpan? slidingExpiration = null)
+    {
+        Set(key, value, expiration, slidingExpiration);
+        return Task.CompletedTask;
+    }
 
     public async Task<T?> GetOrCreateAsync<T>(
         string key,
         Func<CancellationToken, Task<T>> factory,
         TimeSpan? expiration = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        TimeSpan? slidingExpiration = null)
     {
         ArgumentNullException.ThrowIfNull(factory);
 
@@ -70,17 +86,58 @@ internal sealed class MemoryCacheService : ICacheService
                 _inFlight.TryRemove(fullKey, out _);
         }
 
-        SetCore(fullKey, value, expiration);
+        SetCore(fullKey, value, expiration, slidingExpiration);
         return value;
     }
 
-    public void Remove(string key) => _cache.Remove(FullKey(key));
+    public void Remove(string key)
+    {
+        var fullKey = FullKey(key);
+        _keys.TryRemove(fullKey, out _);
+        _cache.Remove(fullKey);
+    }
 
-    private void SetCore<T>(string fullKey, T value, TimeSpan? expiration = null) =>
-        _cache.Set(fullKey, value, new MemoryCacheEntryOptions
+    public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
+    {
+        Remove(key);
+        return Task.CompletedTask;
+    }
+
+    public void RemoveByPrefix(string prefix)
+    {
+        ArgumentNullException.ThrowIfNull(prefix);
+
+        var fullPrefix = FullKey(prefix);
+        foreach (var key in _keys.Keys.Where(k => k.StartsWith(fullPrefix, StringComparison.Ordinal)))
+        {
+            _keys.TryRemove(key, out _);
+            _cache.Remove(key);
+        }
+    }
+
+    public Task RemoveByPrefixAsync(string prefix, CancellationToken cancellationToken = default)
+    {
+        RemoveByPrefix(prefix);
+        return Task.CompletedTask;
+    }
+
+    private void SetCore<T>(string fullKey, T value, TimeSpan? expiration = null, TimeSpan? slidingExpiration = null)
+    {
+        var entryOptions = new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = expiration ?? _options.DefaultExpiration,
+            SlidingExpiration = slidingExpiration ?? _options.DefaultSlidingExpiration,
+        };
+
+        // 索引维护：写入登记、逐出/移除注销——索引不随缓存无限增长
+        entryOptions.PostEvictionCallbacks.Add(new PostEvictionCallbackRegistration
+        {
+            EvictionCallback = (key, _, _, _) => _keys.TryRemove((string)key, out _),
         });
+        _keys[fullKey] = 0;
+
+        _cache.Set(fullKey, value, entryOptions);
+    }
 
     private string FullKey(string key) =>
         string.IsNullOrEmpty(_options.KeyPrefix) ? key : $"{_options.KeyPrefix}:{key}";
