@@ -35,6 +35,7 @@
         <ProjectReference Include="..\..\src\Ledon.Aspire\Ledon.Aspire.csproj" />
         <ProjectReference Include="..\..\src\Ledon.SignalR\Ledon.SignalR.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Configuration.Nacos\Ledon.Configuration.Nacos.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Configuration.Apollo\Ledon.Configuration.Apollo.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Observability\Ledon.Observability.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Security\Ledon.Security.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Scheduling\Ledon.Scheduling.csproj" />

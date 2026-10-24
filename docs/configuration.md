@@ -43,6 +43,17 @@ builder.Configuration.AddLedonNacos(o =>
 - 默认 30s 轮询检测变更并热重载；`AddLedonOptions<T>` 照常绑定（含启动校验）；
 - 开启鉴权时配 `o.UserName`/`o.Password`（401 自动重登）。
 
+Apollo 用户装 `Ledon.Configuration.Apollo`（用法一致）：
+
+```csharp
+builder.Configuration.AddLedonApollo(o =>
+{
+    o.ConfigServer = "http://localhost:8080";
+    o.AppId = "myapp";
+    o.Namespaces = ["application", "database"];   // 多命名空间合并
+});
+```
+
 ## 密钥
 
 签名密钥、连接字符串等机密从环境变量/密钥管理注入（`OTEL_EXPORTER_OTLP_ENDPOINT` 等标准变量自动生效），切勿提交进 appsettings.json。
