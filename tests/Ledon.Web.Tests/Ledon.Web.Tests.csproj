@@ -18,6 +18,9 @@
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+        <!-- OpenIddict.Validation.SystemNetHttp 传递引入 Polly v7（与 Ledon.Resilience 的 Polly.Core v8 同名类型冲突）：
+             加别名隔离，默认查找只看 Polly.Core；polly7 别名保留给传递依赖本身。 -->
+        <PackageReference Include="Polly" Aliases="polly7" />
     </ItemGroup>
 
     <ItemGroup>
@@ -36,6 +39,7 @@
         <ProjectReference Include="..\..\src\Ledon.SignalR\Ledon.SignalR.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Configuration.Nacos\Ledon.Configuration.Nacos.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Configuration.Apollo\Ledon.Configuration.Apollo.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.OpenIddict\Ledon.OpenIddict.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Observability\Ledon.Observability.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Security\Ledon.Security.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Scheduling\Ledon.Scheduling.csproj" />

@@ -1,6 +1,6 @@
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
-using Polly.CircuitBreaker;
+using BrokenCircuitException = Polly.CircuitBreaker.BrokenCircuitException;
 
 namespace Ledon.Web.Tests;
 

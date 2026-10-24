@@ -29,6 +29,7 @@ app.Run();
 | 消息中间件传输                         | `Ledon.Queues.RabbitMQ`       | `AddLedonRabbitMqTransport()`                        | 发件箱 ↔ RabbitMQ，跨服务投递                   |
 | 定时任务                               | `Ledon.Scheduling`            | `AddLedonScheduling()`                               | cron 驱动（5/6 段）                              |
 | 认证授权                               | `Ledon.Security`              | `AddLedonSecurity()`                                 | JWT + API Key + 权限策略                         |
+| OIDC 服务器                            | `Ledon.OpenIddict`            | `builder.AddLedonOpenIddict()`                       | 标准 /connect/token + 发现文档                   |
 | 可观测性                               | `Ledon.Observability`         | `AddLedonObservability()`                            | OTel 链路/指标/日志 + 健康检查 + Prometheus |
 | 结构化日志                             | `Ledon.Serilog`               | `builder.AddLedonSerilog()`                          | Serilog + TraceId/SpanId 富化              |
 | 实时推送                               | `Ledon.SignalR`               | `AddLedonSignalR()`                                 | Hub 自动发现 + 约定路径映射                |
@@ -290,7 +291,8 @@ src/Ledon.Data/         数据访问：ILedonDbContext、DbInitializer
 src/Ledon.Caching/      缓存：内存（single-flight）/ 分布式（Redis）
 src/Ledon.Queues/       后台队列 + 发件箱（Outbox）
 src/Ledon.Scheduling/   定时任务（cron）
-src/Ledon.Security/     认证授权（JWT / API Key / 权限策略）
+src/Ledon.Security/      认证授权（JWT/API Key/权限/刷新令牌）
+src/Ledon.OpenIddict/     OIDC 服务器（标准 /connect/token）
 src/Ledon.Observability OpenTelemetry + 健康检查
 src/Ledon.Resilience/   弹性策略（重试/超时/熔断）
 src/Ledon.Configuration/ 强类型配置约定
@@ -305,7 +307,7 @@ src/Ledon.FluentValidation/ FluentValidation 验证器自动发现
 src/Ledon.Queues.RabbitMQ/ RabbitMQ 传输（发件箱 ↔ broker）
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（94 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（104 用例，顺序断言 + 变异验证）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check]
 docs/                   文档站（docfx）
 ```

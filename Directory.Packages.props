@@ -1,65 +1,70 @@
 <Project>
-    <PropertyGroup>
-        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-        <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-    </PropertyGroup>
-    <ItemGroup>
-        <!-- 打包（仅 src/ 项目引用） -->
-        <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-        <!-- 调度领导权选举（Redis 锁） -->
-        <PackageVersion Include="StackExchange.Redis" Version="2.7.27" />
-        <!-- 消息中间件（按需引入） -->
-        <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
-        <!-- Prometheus 抓取端点（OTel 官方该包长期 beta，生产广泛使用） -->
-        <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.20.1-beta.1" />
-        <!-- 结构化日志（按需引入） -->
-        <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
-        <!-- OpenAPI UI（按需引入） -->
-        <PackageVersion Include="Scalar.AspNetCore" Version="2.18.3" />
-        <!-- Data Protection Redis 密钥环（按需引入） -->
-        <PackageVersion Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.13" />
-        <!-- 验证（按需引入） -->
-        <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
-        <!-- 集成测试基建（Testcontainers 夹具） -->
-        <PackageVersion Include="Testcontainers" Version="4.16.0" />
-        <!-- Aspire 服务编排默认值（按需引入） -->
-        <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.11.0" />
-        <!-- 框架运行期 -->
-        <PackageVersion Include="Cronos" Version="0.13.0" />
-        <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />
-        <PackageVersion Include="Polly.Extensions" Version="8.8.0" />
-        <PackageVersion Include="Asp.Versioning.Http" Version="10.2.3" />
-        <PackageVersion Include="Asp.Versioning.Mvc" Version="10.2.1" />
-        <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions"
-            Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions"
-            Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
-        <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.12.0" />
-        <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
-        <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
-        <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
-        <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
-        <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
-        <!-- 测试 -->
-        <PackageVersion Include="coverlet.collector" Version="6.0.4" />
-        <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.13" />
-        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-        <PackageVersion Include="xunit" Version="2.9.3" />
-        <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
-    </ItemGroup>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- 打包（仅 src/ 项目引用） -->
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <!-- 调度领导权选举（Redis 锁） -->
+    <PackageVersion Include="OpenIddict.AspNetCore" Version="7.7.2" />
+    <PackageVersion Include="OpenIddict.Core" Version="7.7.2" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.7.27" />
+    <!-- 消息中间件（按需引入） -->
+    <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
+    <!-- Prometheus 抓取端点（OTel 官方该包长期 beta，生产广泛使用） -->
+    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.20.1-beta.1" />
+    <!-- 结构化日志（按需引入） -->
+    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
+    <!-- OpenAPI UI（按需引入） -->
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.18.3" />
+    <!-- Data Protection Redis 密钥环（按需引入） -->
+    <PackageVersion Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="10.0.13" />
+    <!-- 验证（按需引入） -->
+    <PackageVersion Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <!-- 集成测试基建（Testcontainers 夹具） -->
+    <PackageVersion Include="Testcontainers" Version="4.16.0" />
+    <!-- Aspire 服务编排默认值（按需引入） -->
+    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.11.0" />
+    <!-- OIDC 服务器（按需引入） -->
+    <PackageVersion Include="OpenIddict.Server.DataProtection" Version="7.7.2" />
+    <PackageVersion Include="OpenIddict.Validation.AspNetCore" Version="7.7.2" />
+    <!-- 测试项目别名隔离用（OpenIddict 传递依赖；与 Polly.Core v8 同名类型消歧） -->
+    <PackageVersion Include="Polly" Version="7.2.4" />
+    <!-- 框架运行期 -->
+    <PackageVersion Include="Cronos" Version="0.13.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />
+    <PackageVersion Include="Polly.Extensions" Version="8.8.0" />
+    <PackageVersion Include="Asp.Versioning.Http" Version="10.2.3" />
+    <PackageVersion Include="Asp.Versioning.Mvc" Version="10.2.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
+    <!-- 测试 -->
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
 </Project>

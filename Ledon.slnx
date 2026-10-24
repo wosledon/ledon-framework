@@ -22,6 +22,7 @@
     <Project Path="src/Ledon.Module/Ledon.Module.csproj" />
     <Project Path="src/Ledon.MultiTenancy/Ledon.MultiTenancy.csproj" />
     <Project Path="src/Ledon.Observability/Ledon.Observability.csproj" />
+    <Project Path="src/Ledon.OpenIddict/Ledon.OpenIddict.csproj" />
     <Project Path="src/Ledon.Queues.RabbitMQ/Ledon.Queues.RabbitMQ.csproj" />
     <Project Path="src/Ledon.Queues/Ledon.Queues.csproj" />
     <Project Path="src/Ledon.Resilience/Ledon.Resilience.csproj" />
