@@ -19,6 +19,7 @@ var tasks = new Dictionary<string, TaskDef>(StringComparer.OrdinalIgnoreCase)
     ["build"] = new("构建解决方案", "dotnet build Ledon.slnx"),
     ["test"] = new("运行测试", "dotnet test Ledon.slnx"),
     ["docs"] = new("构建文档站（docfx，产物在 _site/）", "dotnet tool restore && dotnet docfx docfx.json"),
+    ["bench"] = new("运行基准测试（BenchmarkDotNet，Release；结果在 BenchmarkDotNet.Artifacts/）", "dotnet run --configuration Release --project tests/Ledon.Benchmarks"),
     ["sample"] = new("运行零配置示例（samples/Ledon.Sample）", "dotnet run --project samples/Ledon.Sample"),
     ["web"] = new("运行 Web 示例（samples/Ledon.WebSample）", "dotnet run --project samples/Ledon.WebSample"),
     ["worker"] = new("运行多程序集工作进程示例（samples/Ledon.WorkerSample）", "dotnet run --project samples/Ledon.WorkerSample"),

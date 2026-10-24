@@ -46,33 +46,33 @@ internal sealed class IdempotencyMiddleware
         var cache = context.RequestServices.GetService<IDistributedCache>();
         if (cache is null || string.IsNullOrWhiteSpace(key) || !IsMutating(context.Request.Method))
         {
-            await _next(context);
+            await _next(context).ConfigureAwait(false);
             return;
         }
 
         var cacheKey = BuildCacheKey(context.Request.Method, context.Request.Path, key);
 
         // 重放：命中即返回缓存响应
-        var cached = await ReadAsync(cache, cacheKey, context.RequestAborted);
+        var cached = await ReadAsync(cache, cacheKey, context.RequestAborted).ConfigureAwait(false);
         if (cached is not null)
         {
             _logger.LogDebug("幂等重放（缓存命中）：{Method} {Path}", context.Request.Method, context.Request.Path);
-            await WriteAsync(context, cached);
+            await WriteAsync(context, cached).ConfigureAwait(false);
             return;
         }
 
         // 并发同 Key：等首个执行完（进程内单飞）
         var gate = Gates.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
-        await gate.WaitAsync(context.RequestAborted);
+        await gate.WaitAsync(context.RequestAborted).ConfigureAwait(false);
 
         try
         {
             // 等闸期间可能已被首个执行方写入
-            cached = await ReadAsync(cache, cacheKey, context.RequestAborted);
+            cached = await ReadAsync(cache, cacheKey, context.RequestAborted).ConfigureAwait(false);
             if (cached is not null)
             {
                 _logger.LogDebug("幂等重放（等待并发执行方后命中）：{Method} {Path}", context.Request.Method, context.Request.Path);
-                await WriteAsync(context, cached);
+                await WriteAsync(context, cached).ConfigureAwait(false);
                 return;
             }
 
@@ -82,7 +82,7 @@ internal sealed class IdempotencyMiddleware
 
             try
             {
-                await _next(context);
+                await _next(context).ConfigureAwait(false);
             }
             finally
             {
@@ -107,7 +107,7 @@ internal sealed class IdempotencyMiddleware
                     context.RequestAborted);
             }
 
-            await context.Response.Body.WriteAsync(body, context.RequestAborted);
+            await context.Response.Body.WriteAsync(body, context.RequestAborted).ConfigureAwait(false);
         }
         finally
         {
@@ -136,7 +136,7 @@ internal sealed class IdempotencyMiddleware
     private static async Task<CachedResponse?> ReadAsync(
         IDistributedCache cache, string cacheKey, CancellationToken cancellationToken)
     {
-        var bytes = await cache.GetAsync(cacheKey, cancellationToken);
+        var bytes = await cache.GetAsync(cacheKey, cancellationToken).ConfigureAwait(false);
         return bytes is null ? null : JsonSerializer.Deserialize<CachedResponse>(bytes);
     }
 
@@ -145,7 +145,7 @@ internal sealed class IdempotencyMiddleware
         context.Response.StatusCode = cached.Status;
         context.Response.ContentType = cached.ContentType;
         context.Response.Headers[ReplayedHeaderName] = "true";
-        await context.Response.Body.WriteAsync(cached.Body, context.RequestAborted);
+        await context.Response.Body.WriteAsync(cached.Body, context.RequestAborted).ConfigureAwait(false);
     }
 
     private sealed record CachedResponse(int Status, string? ContentType, byte[] Body);

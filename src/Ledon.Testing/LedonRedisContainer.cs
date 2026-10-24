@@ -23,7 +23,7 @@ public sealed class LedonRedisContainer : IAsyncDisposable
     public async Task<string> StartAsync(CancellationToken cancellationToken = default)
     {
         _container = _builder.Build();
-        await _container.StartAsync(cancellationToken);
+        await _container.StartAsync(cancellationToken).ConfigureAwait(false);
 
         return ConnectionString = $"{_container.Hostname}:{_container.GetMappedPublicPort(6379)}";
     }
@@ -34,6 +34,6 @@ public sealed class LedonRedisContainer : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (_container is not null)
-            await _container.DisposeAsync();
+            await _container.DisposeAsync().ConfigureAwait(false);
     }
 }

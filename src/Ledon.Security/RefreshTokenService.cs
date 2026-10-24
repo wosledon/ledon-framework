@@ -41,12 +41,12 @@ internal sealed class RefreshTokenService(
 
     public async Task<string?> ValidateAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var entry = await store.FindAsync(Hash(refreshToken), cancellationToken);
+        var entry = await store.FindAsync(Hash(refreshToken), cancellationToken).ConfigureAwait(false);
 
         // 重放检测：已吊销令牌被再次使用 → 该用户全部令牌作废（防止窃取的旧令牌继续换新）
         if (entry is { Revoked: true })
         {
-            await store.RevokeAllForUserAsync(entry.UserId, cancellationToken);
+            await store.RevokeAllForUserAsync(entry.UserId, cancellationToken).ConfigureAwait(false);
             return null;
         }
 
@@ -58,12 +58,12 @@ internal sealed class RefreshTokenService(
 
     public async Task<string?> RotateAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var userId = await ValidateAsync(refreshToken, cancellationToken);
+        var userId = await ValidateAsync(refreshToken, cancellationToken).ConfigureAwait(false);
         if (userId is null)
             return null;
 
-        await store.RevokeAsync(Hash(refreshToken), cancellationToken);
-        return await IssueAsync(userId, cancellationToken);
+        await store.RevokeAsync(Hash(refreshToken), cancellationToken).ConfigureAwait(false);
+        return await IssueAsync(userId, cancellationToken).ConfigureAwait(false);
     }
 
     private static string Hash(string token) =>

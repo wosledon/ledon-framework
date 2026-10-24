@@ -10,6 +10,10 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,11 +36,23 @@ jobs:
           --logger trx --results-directory TestResults
           --collect:"XPlat Code Coverage"
 
+      - name: 覆盖率汇总（行覆盖，低于 50% 告警不阻断）
+        if: always()
+        shell: bash
+        run: |
+          file=$(ls TestResults/*/coverage.cobertura.xml 2>/dev/null | head -1)
+          if [ -z "$file" ]; then echo "未找到覆盖率报告"; exit 0; fi
+          rate=$(grep -o 'line-rate="[0-9.]*"' "$file" | head -1 | cut -d'"' -f2)
+          pct=$(awk "BEGIN {printf \"%.1f\", ${rate:-0} * 100}")
+          echo "行覆盖率：${pct}%"
+          echo "### 测试覆盖率：行 ${pct}%" >> "$GITHUB_STEP_SUMMARY"
+          awk "BEGIN {exit !(${rate:-0} < 0.5)}" && echo "::warning::行覆盖率 ${pct}% 低于 50%"
+
       - name: 上传测试结果
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-${{ matrix.os }}
           path: |
             TestResults/**/*.trx
             TestResults/**/coverage.cobertura.xml

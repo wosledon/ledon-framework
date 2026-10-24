@@ -29,6 +29,9 @@ app.Run();
 | [自动发现](~/docs/discovery.md)       | 允许列表规则、约定注册、逃生门             |
 | [Web 开发](~/docs/web.md)             | 端点、控制器、API 规范化、CORS             |
 | [数据与发件箱](~/docs/data.md)        | EF Core、Outbox 至少一次投递               |
+| [可靠投递](~/docs/reliability.md)     | 发件箱清理/死信、收件箱去重                |
+| [gRPC](~/docs/grpc.md)                | 服务间通信：自动发现与约定映射             |
+| [Kafka](~/docs/kafka.md)              | 发件箱 ↔ Kafka 跨服务投递                 |
 | [缓存](~/docs/caching.md)             | 内存 single-flight / 分布式 Redis         |
 | [后台队列](~/docs/queues.md)          | Channel 队列 + 发件箱投递                  || [定时任务](~/docs/scheduling.md)      | cron 驱动（5/6 段）、失败隔离              |
 | [认证授权](~/docs/security.md)        | JWT + API Key + 权限策略                   |
@@ -40,6 +43,6 @@ app.Run();
 
 ## 能力包
 
-模块系统（`Ledon.Module`）、Web（`Ledon.Web`）、数据（`Ledon.Data`）、缓存（`Ledon.Caching`）、队列与发件箱（`Ledon.Queues`）、RabbitMQ 传输（`Ledon.Queues.RabbitMQ`）、定时任务（`Ledon.Scheduling`）、认证授权（`Ledon.Security`）、OIDC 服务器（`Ledon.OpenIddict`）、可观测性（`Ledon.Observability`）、结构化日志（`Ledon.Serilog`）、弹性策略（`Ledon.Resilience`）、配置（`Ledon.Configuration`）、Nacos/Apollo 配置中心（`Ledon.Configuration.Nacos`/`Ledon.Configuration.Apollo`）、多租户（`Ledon.MultiTenancy`）、测试基建（`Ledon.Testing`）、云原生默认值（`Ledon.Aspire`）、实时推送（`Ledon.SignalR`）。
+模块系统（`Ledon.Module`）、Web（`Ledon.Web`）、数据（`Ledon.Data`）、缓存（`Ledon.Caching`）、队列与发件箱（`Ledon.Queues`）、RabbitMQ 传输（`Ledon.Queues.RabbitMQ`）、Kafka 传输（`Ledon.Queues.Kafka`）、定时任务（`Ledon.Scheduling`）、认证授权（`Ledon.Security`）、OIDC 服务器（`Ledon.OpenIddict`）、可观测性（`Ledon.Observability`）、结构化日志（`Ledon.Serilog`）、弹性策略（`Ledon.Resilience`）、配置（`Ledon.Configuration`）、Nacos/Apollo 配置中心（`Ledon.Configuration.Nacos`/`Ledon.Configuration.Apollo`）、多租户（`Ledon.MultiTenancy`）、测试基建（`Ledon.Testing`）、云原生默认值（`Ledon.Aspire`）、实时推送（`Ledon.SignalR`）、gRPC（`Ledon.Grpc`）。
 
 详见 [README](https://github.com/wosledon/ledon-framework) 的能力矩阵。

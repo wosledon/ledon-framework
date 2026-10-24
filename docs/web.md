@@ -38,6 +38,44 @@ public class TodosController(TodoDbContext db) : ControllerBase { /* ... */ }
 | `UseApiVersioning`   | ❌    | URL 段 `api/v{version}/...`                   |
 | `UseCors`            | ❌    | 按 `CorsOrigins` 白名单放行跨域               |
 | `UseScalarUi`        | ❌    | Scalar 文档 UI（需 `UseOpenApi`）             |
+| `UseRateLimiting`    | ❌    | 固定窗口限流（分区键 `X-Api-Key` 或客户端 IP）|
+| `UseResponseCompression` | ❌ | Brotli/Gzip 响应压缩（HTTPS 也启用）        |
+| `UseRequestTimeouts` | ❌    | 请求超时（`RequestTimeoutSeconds`，超时 504） |
+| `UseIdempotency`     | ❌    | `Idempotency-Key` 幂等（需 `IDistributedCache`）|
+
+## 限流
+
+```csharp
+builder.AddLedonWeb(o =>
+{
+    o.UseRateLimiting = true;
+    o.RateLimitPermitLimit = 100;    // 窗口内请求数
+    o.RateLimitWindowSeconds = 60;   // 窗口长度
+});
+```
+
+- 分区键优先取 `X-Api-Key` 请求头（服务间调用按调用方限流），否则按客户端 IP；
+- 超限返回 429 ProblemDetails（带 `retryAfter`）；
+- 管线位置在路由之后、认证之前——超限请求尽早拒绝，不消耗认证/业务资源。
+
+## 响应压缩 / 请求超时
+
+```csharp
+builder.AddLedonWeb(o =>
+{
+    o.UseResponseCompression = true;   // Brotli 优先、Gzip 兜底
+    o.UseRequestTimeouts = true;
+    o.RequestTimeoutSeconds = 30;      // 超时 504
+});
+```
+
+## 启动探针
+
+```csharp
+app.MapLedonStartup();   // /health/startup：宿主启动完成（含模块初始化）后 200，之前 503
+```
+
+供容器/编排系统区分"还在启动"与"启动失败"——启动慢的应用不会被探针误杀。
 
 ## 跨域（CORS）
 
@@ -85,6 +123,17 @@ builder.AddLedonWeb(o =>
     o.UseScalarUi = true;   // 打开 /scalar（自动指向 OpenAPI 文档）
 });
 ```
+
+文档元数据可配（`OpenApiTitle` / `OpenApiDescription`）。检测到 `Ledon.Security` 在场时，文档自动带上 **Bearer 安全方案**，且带 `[Authorize]` 的端点自动带安全要求——Scalar/Swagger UI 的 Authorize 按钮直接可用。
+
+## SignalR 多实例：Redis backplane
+
+```csharp
+builder.Services.AddLedonSignalR(o => o.RedisConnectionString = "localhost:6379");
+app.MapLedonSignalRHubs();   // ChatHub → /hubs/chat
+```
+
+配置后自动挂 StackExchangeRedis backplane：发往任一实例的消息经 Redis 广播给所有实例的客户端（不配则只有本实例的连接能收到）。连接惰性建立，Redis 短暂不在线不阻塞启动。
 
 ## 认证授权
 

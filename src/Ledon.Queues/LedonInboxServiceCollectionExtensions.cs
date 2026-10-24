@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Ledon;
 using Ledon.Module;
 using Ledon.Queues;
@@ -20,6 +21,12 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class LedonInboxServiceCollectionExtensions
 {
+    /// <summary>反射边界说明（裁剪/NativeAOT 警告文案）。</summary>
+    private const string AotBoundary =
+        "Ledon 的自动发现与约定注入基于反射（Assembly.GetTypes / Type.GetType 反序列化）。" +
+        "NativeAOT 或裁剪发布时，集成事件类型必须可在运行时解析（rd.xml / DynamicDependency 保留）。";
+
+    [RequiresDynamicCode(AotBoundary)]
     public static IServiceCollection AddLedonInbox(
         this IServiceCollection services,
         Action<LedonInboxOptions>? configure = null)
@@ -79,7 +86,7 @@ public static class LedonInboxServiceCollectionExtensions
                     if (store is null)
                         return;
 
-                    var deleted = await store.DeleteCompletedAsync(_options.Retention, stoppingToken);
+                    var deleted = await store.DeleteCompletedAsync(_options.Retention, stoppingToken).ConfigureAwait(false);
                     if (deleted > 0)
                     {
                         QueueMetrics.InboxCleaned.Add(deleted);

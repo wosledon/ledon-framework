@@ -60,6 +60,29 @@ internal static class AssemblyScanner
         "Ledon.Grpc",
     };
 
+    /// <summary>
+    /// 依赖上下文（deps.json）声明的程序集缓存。解析一次后进程内不变，
+    /// 而 <c>AddLedon</c> 与各功能包的 <c>LedonAssemblies.Scan()</c> 每次调用都会走这条通道——
+    /// 缓存把"读 deps.json + 逐个 Assembly.Load 尝试"从 O(功能包数) 降为 1 次。
+    /// 已加载程序集通道（B/C）仍每次动态枚举，不缓存（测试宿主会陆续加载程序集）。
+    /// </summary>
+    private static readonly Lock DependencyContextGate = new();
+    private static IReadOnlyList<Assembly>? _dependencyContextAssemblies;
+
+    private static IReadOnlyList<Assembly> CachedDependencyContextAssemblies()
+    {
+        if (_dependencyContextAssemblies is not null)
+            return _dependencyContextAssemblies;
+
+        lock (DependencyContextGate)
+        {
+            _dependencyContextAssemblies ??=
+                GetDependencyContextAssemblies(DependencyContext.Default).ToArray();
+
+            return _dependencyContextAssemblies;
+        }
+    }
+
     public static AssemblyScanResult ResolveAssemblies(LedonOptions options)
     {
         var candidates = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
@@ -87,7 +110,8 @@ internal static class AssemblyScanner
         }
 
         // 通道 A：默认依赖上下文（应用 deps.json）——覆盖"引用了但未加载"的程序集
-        foreach (var assembly in GetDependencyContextAssemblies(DependencyContext.Default))
+        // （解析结果进程内缓存：deps.json 不会变，而多个功能包都会扫描）
+        foreach (var assembly in CachedDependencyContextAssemblies())
             Consider(assembly);
 
         // 通道 B：已加载程序集——覆盖入口不可用的宿主（VSTest 等）

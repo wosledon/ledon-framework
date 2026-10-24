@@ -36,6 +36,7 @@
     <Project Path="src/Ledon.Web/Ledon.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Ledon.Benchmarks/Ledon.Benchmarks.csproj" />
     <Project Path="tests/Ledon.Module.Tests/Ledon.Module.Tests.csproj" />
     <Project Path="tests/Ledon.Web.Tests/Ledon.Web.Tests.csproj" />
   </Folder>

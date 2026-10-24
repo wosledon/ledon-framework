@@ -42,7 +42,7 @@ internal sealed class RedisSchedulerLock : ISchedulerLock
 
     public async ValueTask DisposeAsync()
     {
-        await ReleaseAsync();
-        await _multiplexer.DisposeAsync();
+        await ReleaseAsync().ConfigureAwait(false);
+        await _multiplexer.DisposeAsync().ConfigureAwait(false);
     }
 }

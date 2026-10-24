@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.RateLimiting;
 using Asp.Versioning;
@@ -29,6 +30,12 @@ namespace Ledon.Web;
 /// </summary>
 public static class LedonWebServiceCollectionExtensions
 {
+    /// <summary>反射边界说明（裁剪/NativeAOT 警告文案）。</summary>
+    private const string AotBoundary =
+        "Ledon 的自动发现与约定注入基于反射（Assembly.GetTypes / Activator.CreateInstance）。" +
+        "NativeAOT 或裁剪发布时，业务程序集与事件/处理器类型必须可在运行时解析" +
+        "（保留在 rd.xml / DynamicDependency 中），或用 AddAssembly/AddModule 显式注册并 DisableAutoDiscovery。";
+
     public static WebApplicationBuilder AddLedonWeb(
         this WebApplicationBuilder builder,
         Action<LedonWebOptions>? configure = null) =>
@@ -37,6 +44,7 @@ public static class LedonWebServiceCollectionExtensions
     /// <param name="builder">Web 宿主构建器。</param>
     /// <param name="configure">Web 功能开关（控制器/OpenAPI）。</param>
     /// <param name="configureModules">转发给模块系统的逃生门配置（默认自动发现）。</param>
+    [RequiresDynamicCode(AotBoundary)]
     public static WebApplicationBuilder AddLedonWeb(
         this WebApplicationBuilder builder,
         Action<LedonWebOptions>? configure,
@@ -247,7 +255,7 @@ public static class LedonWebServiceCollectionExtensions
                     }
 
                     context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-                    await context.HttpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
+                    await context.HttpContext.Response.WriteAsJsonAsync(problem, cancellationToken).ConfigureAwait(false);
                 };
             });
         }

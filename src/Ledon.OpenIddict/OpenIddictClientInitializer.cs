@@ -50,17 +50,17 @@ internal sealed class OpenIddictClientInitializer : IHostedService
             // 先设置只读属性（CreateAsync 内部会校验，缺失会空引用）
             await store.SetPermissionsAsync(
                 descriptor, InMemoryApplicationStore.BuildPermissions(_options, client), cancellationToken);
-            await store.SetRequirementsAsync(descriptor, [], cancellationToken);
-            await store.SetRedirectUrisAsync(descriptor, [], cancellationToken);
-            await store.SetPostLogoutRedirectUrisAsync(descriptor, [], cancellationToken);
-            await store.SetSettingsAsync(descriptor, ImmutableDictionary<string, string>.Empty, cancellationToken);
-            await store.SetPropertiesAsync(descriptor, ImmutableDictionary<string, JsonElement>.Empty, cancellationToken);
+            await store.SetRequirementsAsync(descriptor, [], cancellationToken).ConfigureAwait(false);
+            await store.SetRedirectUrisAsync(descriptor, [], cancellationToken).ConfigureAwait(false);
+            await store.SetPostLogoutRedirectUrisAsync(descriptor, [], cancellationToken).ConfigureAwait(false);
+            await store.SetSettingsAsync(descriptor, ImmutableDictionary<string, string>.Empty, cancellationToken).ConfigureAwait(false);
+            await store.SetPropertiesAsync(descriptor, ImmutableDictionary<string, JsonElement>.Empty, cancellationToken).ConfigureAwait(false);
 
             // 机密客户端：密钥经管理器创建（内部哈希）；公共客户端直接创建
             if (!string.IsNullOrEmpty(client.ClientSecret))
-                await manager.CreateAsync(descriptor, client.ClientSecret, cancellationToken);
+                await manager.CreateAsync(descriptor, client.ClientSecret, cancellationToken).ConfigureAwait(false);
             else
-                await manager.CreateAsync(descriptor, cancellationToken);
+                await manager.CreateAsync(descriptor, cancellationToken).ConfigureAwait(false);
         }
     }
 

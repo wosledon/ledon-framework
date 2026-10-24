@@ -20,6 +20,6 @@ internal sealed class ChannelBackgroundQueue : IBackgroundQueue
     {
         ArgumentNullException.ThrowIfNull(workItem);
 
-        await _channel.Writer.WriteAsync(new WorkItem(workItem), cancellationToken);
+        await _channel.Writer.WriteAsync(new WorkItem(workItem), cancellationToken).ConfigureAwait(false);
     }
 }

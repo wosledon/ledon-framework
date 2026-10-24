@@ -8,6 +8,12 @@
   href: web.md
 - name: 数据与发件箱
   href: data.md
+- name: 可靠投递
+  href: reliability.md
+- name: gRPC 服务间通信
+  href: grpc.md
+- name: Kafka 传输
+  href: kafka.md
 - name: 缓存
   href: caching.md
 - name: 后台队列

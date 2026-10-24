@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Ledon;
 using Ledon.Module;
@@ -22,6 +23,12 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class LedonSecurityServiceCollectionExtensions
 {
+    /// <summary>反射边界说明（裁剪/NativeAOT 警告文案）。</summary>
+    private const string AotBoundary =
+        "Ledon 的自动发现基于反射（Assembly.GetTypes）。" +
+        "NativeAOT 或裁剪发布时，登录校验实现类型必须可在运行时解析（rd.xml / DynamicDependency 保留）。";
+
+    [RequiresDynamicCode(AotBoundary)]
     public static IServiceCollection AddLedonSecurity(
         this IServiceCollection services,
         Action<LedonSecurityOptions>? configure = null)

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Ledon;
 using Ledon.Module;
@@ -22,6 +23,12 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class LedonHealthCheckServiceCollectionExtensions
 {
+    /// <summary>反射边界说明（裁剪/NativeAOT 警告文案）。</summary>
+    private const string AotBoundary =
+        "Ledon 的健康检查自动发现基于反射（Assembly.GetTypes）。" +
+        "NativeAOT 或裁剪发布时，检查类型必须可在运行时解析（rd.xml / DynamicDependency 保留）。";
+
+    [RequiresDynamicCode(AotBoundary)]
     public static IServiceCollection AddLedonHealthChecks(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -31,6 +38,7 @@ public static class LedonHealthCheckServiceCollectionExtensions
 
     /// <param name="services">服务集合。</param>
     /// <param name="configure">健康检查参数（如 Redis 连接串）。</param>
+    [RequiresDynamicCode(AotBoundary)]
     public static IServiceCollection AddLedonHealthChecks(
         this IServiceCollection services,
         Action<LedonHealthCheckOptions>? configure)

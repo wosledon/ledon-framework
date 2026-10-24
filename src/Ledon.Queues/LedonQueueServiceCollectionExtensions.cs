@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Channels;
 using Ledon.Queues;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,12 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class LedonQueueServiceCollectionExtensions
 {
+    /// <summary>反射边界说明（裁剪/NativeAOT 警告文案）。</summary>
+    private const string AotBoundary =
+        "Ledon 的自动发现基于反射（Assembly.GetTypes）。" +
+        "NativeAOT 或裁剪发布时，任务类型必须可在运行时解析（rd.xml / DynamicDependency 保留）。";
+
+    [RequiresDynamicCode(AotBoundary)]
     public static IServiceCollection AddLedonQueues(
         this IServiceCollection services,
         Action<LedonQueueOptions>? configure = null)

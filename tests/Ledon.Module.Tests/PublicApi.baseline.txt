@@ -2,7 +2,7 @@
 class Ledon.AssemblyExtensions
   Boolean Equals(System.Object)
   Int32 GetHashCode()
-  System.Collections.Generic.IEnumerable`1[System.Type] GetLoadableTypes(System.Reflection.Assembly)
+  System.Collections.Generic.IReadOnlyList`1[System.Type] GetLoadableTypes(System.Reflection.Assembly)
   System.String ToString()
   System.Type GetType()
 interface Ledon.Core.Events.IEventBus

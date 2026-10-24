@@ -29,7 +29,7 @@ public sealed class LedonPostgresContainer : IAsyncDisposable
     public async Task<string> StartAsync(CancellationToken cancellationToken = default)
     {
         _container = _builder.Build();
-        await _container.StartAsync(cancellationToken);
+        await _container.StartAsync(cancellationToken).ConfigureAwait(false);
 
         var host = _container.Hostname;
         var port = _container.GetMappedPublicPort(Port);
@@ -42,6 +42,6 @@ public sealed class LedonPostgresContainer : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (_container is not null)
-            await _container.DisposeAsync();
+            await _container.DisposeAsync().ConfigureAwait(false);
     }
 }

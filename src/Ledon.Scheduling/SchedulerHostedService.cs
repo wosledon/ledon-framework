@@ -36,7 +36,7 @@ internal sealed class SchedulerHostedService : BackgroundService
         if (leaderLock is null)
         {
             // 未配置领导权选举（默认）：单实例语义，直接调度
-            await RunAllAsync(stoppingToken);
+            await RunAllAsync(stoppingToken).ConfigureAwait(false);
             return;
         }
 
@@ -46,7 +46,7 @@ internal sealed class SchedulerHostedService : BackgroundService
             if (!await leaderLock.AcquireAsync(stoppingToken))
             {
                 _logger.LogDebug("调度领导权被其它实例持有，{Retry} 后重试", _options.LeaderLockExpiry / 3);
-                await Task.Delay(_options.LeaderLockExpiry / 3, stoppingToken);
+                await Task.Delay(_options.LeaderLockExpiry / 3, stoppingToken).ConfigureAwait(false);
                 continue;
             }
 
@@ -58,7 +58,7 @@ internal sealed class SchedulerHostedService : BackgroundService
             {
                 while (!leadership.IsCancellationRequested && !stoppingToken.IsCancellationRequested)
                 {
-                    await Task.Delay(_options.LeaderLockExpiry / 3, stoppingToken);
+                    await Task.Delay(_options.LeaderLockExpiry / 3, stoppingToken).ConfigureAwait(false);
 
                     try
                     {
@@ -71,14 +71,14 @@ internal sealed class SchedulerHostedService : BackgroundService
                     }
 
                     _logger.LogWarning("调度领导权续约失败（锁已被其它实例拿走），停止本实例的任务循环");
-                    await leadership.CancelAsync();
+                    await leadership.CancelAsync().ConfigureAwait(false);
                     return;
                 }
             }, stoppingToken);
 
             try
             {
-                await RunAllAsync(leadership.Token);
+                await RunAllAsync(leadership.Token).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (leadership.IsCancellationRequested && !stoppingToken.IsCancellationRequested)
             {
@@ -86,8 +86,8 @@ internal sealed class SchedulerHostedService : BackgroundService
             }
             finally
             {
-                await leaderLock.ReleaseAsync(stoppingToken);
-                await leadership.CancelAsync();
+                await leaderLock.ReleaseAsync(stoppingToken).ConfigureAwait(false);
+                await leadership.CancelAsync().ConfigureAwait(false);
 
                 // 续约循环可能因宿主持停而取消——吞掉，不影响关停流程
                 try
@@ -111,7 +111,7 @@ internal sealed class SchedulerHostedService : BackgroundService
         _logger.LogInformation("调度器启动：{Count} 个定时任务", tasks.Count);
 
         // 每个任务一个独立循环（按各自 cron 驱动）
-        await Task.WhenAll(tasks.Select(task => RunLoopAsync(task, cancellationToken)));
+        await Task.WhenAll(tasks.Select(task => RunLoopAsync(task, cancellationToken))).ConfigureAwait(false);
     }
 
     private async Task RunLoopAsync(IScheduledTask task, CancellationToken stoppingToken)

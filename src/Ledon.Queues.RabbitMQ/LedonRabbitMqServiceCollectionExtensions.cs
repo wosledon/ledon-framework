@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Ledon.Queues;
 using Ledon.Queues.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,12 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class LedonRabbitMqServiceCollectionExtensions
 {
+    /// <summary>反射边界说明（裁剪/NativeAOT 警告文案）。</summary>
+    private const string AotBoundary =
+        "Ledon 的集成事件反序列化基于反射（Type.GetType）。" +
+        "NativeAOT 或裁剪发布时，事件类型必须可在运行时解析（rd.xml / DynamicDependency 保留）。";
+
+    [RequiresDynamicCode(AotBoundary)]
     public static IServiceCollection AddLedonRabbitMqTransport(
         this IServiceCollection services,
         Action<RabbitMqOptions>? configure = null)

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <!-- 基准是诊断工具，不进常规构建告警门禁 -->
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Ledon.Module\Ledon.Module.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Web\Ledon.Web.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Data\Ledon.Data.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Queues\Ledon.Queues.csproj" />
+    </ItemGroup>
+
+</Project>

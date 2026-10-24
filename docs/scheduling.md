@@ -61,3 +61,33 @@ builder.Services.AddLedonScheduling(o =>
 ## 长周期语义
 
 到点判断基于 `Task.Delay` 到下一个发生时刻，宿主机休眠/挂起错过的时间点**不会补偿触发**（无 misfire 回补）。对"绝不能错过"的周期语义，用外部调度器（系统 cron / K8s CronJob）触发 HTTP 端点更稳妥。
+
+## 执行历史与手动触发
+
+```csharp
+// 历史：进程内有界环形缓冲（默认 100 条），运维排障/重放确认用
+var history = provider.GetRequiredService<IScheduledTaskExecutionHistory>();
+var last = history.Latest(nameof(ReconcileTask));   // TaskName/StartedAt/Duration/Success/Error/Manual
+
+// 手动触发：等不到下一个 cron 触发点时立即执行一次
+var invoker = provider.GetRequiredService<ISchedulerInvoker>();
+await invoker.InvokeAsync<ReconcileTask>(ct);        // 或按名称（大小写不敏感）
+await invoker.InvokeAsync("ReconcileTask", ct);      // 未注册的名称返回 false
+```
+
+- 手动触发与 cron 触发走同一套执行、历史与指标（`Manual = true` 标记）；
+- 多实例部署时各实例只记自己的执行——全局视图接可观测性后端的 span/指标；
+- 典型用法：把触发暴露成受权限保护的运维端点（"立刻重跑失败的对账任务"）。
+
+## 指标
+
+`Ledon.Scheduling` Meter（`AddLedonObservability()` 自动收集）：
+
+| 指标                                        | 含义                                   |
+| ------------------------------------------- | -------------------------------------- |
+| `ledon.scheduler.task.executions`           | 执行次数（tag：task、status）          |
+| `ledon.scheduler.task.missed_triggers`      | 执行耗时跨过触发点、被丢弃的触发数     |
+| `ledon.scheduler.task.manual_invocations`   | 经 `ISchedulerInvoker` 的手动触发次数  |
+| `ledon.scheduler.leadership.lost`           | 多实例部署下领导权让出次数             |
+
+默认（丢弃）模式下，执行耗时跨过下一个触发点会记一次 `missed_triggers` 并打 Warning——这是任务长期超时的告警信号。

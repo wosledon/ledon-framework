@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Ledon.Core.Events;
 using Ledon.Module.Abstractions;
 using Ledon.Module.Dependency;
@@ -20,6 +21,9 @@ namespace Ledon.Module;
 /// </summary>
 public static class LedonServiceCollectionExtensions
 {
+    /// <param name="services">服务集合。</param>
+    /// <param name="configure">模块系统逃生门配置（默认自动发现）。</param>
+    [RequiresDynamicCode("Ledon 的自动发现与约定注入基于反射（Assembly.GetTypes / Activator.CreateInstance）。NativeAOT 或裁剪发布时，业务程序集与事件/处理器类型必须可在运行时解析（保留在 rd.xml / DynamicDependency 中），或用 AddAssembly/AddModule 显式注册并 DisableAutoDiscovery。")]
     public static IServiceCollection AddLedon(this IServiceCollection services, Action<LedonOptions>? configure = null)
     {
         ArgumentNullException.ThrowIfNull(services);

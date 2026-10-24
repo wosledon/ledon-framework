@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Ledon;
 using Ledon.Module;
@@ -16,6 +17,12 @@ namespace Ledon.Data;
 /// </summary>
 public static class LedonDataServiceCollectionExtensions
 {
+    /// <summary>反射边界说明（裁剪/NativeAOT 警告文案）。</summary>
+    private const string AotBoundary =
+        "Ledon 的自动发现与约定注入基于反射（Assembly.GetTypes / Activator.CreateInstance）。" +
+        "NativeAOT 或裁剪发布时，DbContext 与业务类型必须可在运行时解析（rd.xml / DynamicDependency 保留）。";
+
+    [RequiresDynamicCode(AotBoundary)]
     public static IServiceCollection AddLedonData(
         this IServiceCollection services,
         Action<LedonDataOptions>? configure = null)

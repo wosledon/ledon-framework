@@ -100,6 +100,25 @@ builder.Services.AddLedonHealthChecks(o => o.RedisConnectionString = "localhost:
 
 数据库挂了 → `/health/ready` 503（摘流），`/health/live` 仍 200（不重启）。Redis 不配连接串就不登记——没装 Redis 的应用不会因此就绪失败。
 
+## 启动探针
+
+```csharp
+app.MapLedonStartup();   // /health/startup：宿主启动完成（含模块初始化）后 200，之前 503
+```
+
+与存活/就绪探针配合：启动慢的应用在就绪前返回 503，编排系统不会误判为"启动失败"而反复重启。
+
+## 框架指标（Meter）
+
+框架运行期指标走标准 `System.Diagnostics.Metrics`，随 `AddLedonObservability()` 的 MeterProvider 自动收集（Prometheus/OTLP 后端直接可见），也可自行用 `MeterListener` 消费：
+
+| Meter             | 指标（示例）                                              | 出处         |
+| ----------------- | --------------------------------------------------------- | ------------ |
+| `Ledon.Queues`    | `ledon.outbox.dispatched/retried/dead_letters/cleaned`、`ledon.inbox.skipped`、`ledon.queue.processed/failed` | 队列与发件箱 |
+| `Ledon.Scheduling`| `ledon.scheduler.task.executions/missed_triggers/manual_invocations`、`leadership.lost` | 定时任务     |
+
+计数器均带维度 tag（如 `task`、`status`、`event.type`），后端可按任务/事件类型下钻。
+
 ## 接入现有体系
 
 OTLP 端点指向任意兼容后端（Jaeger / Tempo / Grafana Cloud / 阿里云 ARMS……）。开发环境无基础设施时开 `UseConsoleExporter` 直接看 span。

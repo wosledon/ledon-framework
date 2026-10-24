@@ -23,11 +23,11 @@ internal sealed class DbInitializer(IServiceProvider services, LedonDataOptions 
             if (context is not DbContext db)
                 continue;
 
-            var pending = await db.Database.GetPendingMigrationsAsync(cancellationToken);
+            var pending = await db.Database.GetPendingMigrationsAsync(cancellationToken).ConfigureAwait(false);
             if (pending.Any())
-                await db.Database.MigrateAsync(cancellationToken);
+                await db.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
             else
-                await db.Database.EnsureCreatedAsync(cancellationToken);
+                await db.Database.EnsureCreatedAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

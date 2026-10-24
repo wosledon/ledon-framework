@@ -31,23 +31,23 @@ internal sealed class EfOutboxStore(OutboxDbContext context, LedonOutboxOptions 
 
     public async Task MarkProcessedAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var message = await context.OutboxMessages.FindAsync([id], cancellationToken);
+        var message = await context.OutboxMessages.FindAsync([id], cancellationToken).ConfigureAwait(false);
         if (message is not null)
         {
             message.ProcessedAt = DateTime.UtcNow;
             message.Error = null;
-            await context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 
     public async Task MarkFailedAsync(Guid id, string error, CancellationToken cancellationToken = default)
     {
-        var message = await context.OutboxMessages.FindAsync([id], cancellationToken);
+        var message = await context.OutboxMessages.FindAsync([id], cancellationToken).ConfigureAwait(false);
         if (message is not null)
         {
             message.RetryCount++;
             message.Error = error;
-            await context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -71,13 +71,13 @@ internal sealed class EfOutboxStore(OutboxDbContext context, LedonOutboxOptions 
 
     public async Task<bool> ReviveAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var message = await context.OutboxMessages.FindAsync([id], cancellationToken);
+        var message = await context.OutboxMessages.FindAsync([id], cancellationToken).ConfigureAwait(false);
         if (message is null)
             return false;
 
         message.RetryCount = 0;
         message.Error = null;
-        await context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return true;
     }
 }

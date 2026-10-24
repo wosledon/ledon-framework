@@ -42,6 +42,6 @@ internal sealed class CorrelationMiddleware
         using var scope = _logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId });
         System.Diagnostics.Activity.Current?.SetTag("correlation.id", correlationId);
 
-        await _next(context);
+        await _next(context).ConfigureAwait(false);
     }
 }

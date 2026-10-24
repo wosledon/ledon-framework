@@ -21,18 +21,19 @@ app.Run();
 
 | 能力                                   | 包                            | 引入方式                                             | 说明                                             |
 | -------------------------------------- | ----------------------------- | ---------------------------------------------------- | ------------------------------------------------ |
-| 模块系统（发现/依赖/生命周期/事件）    | `Ledon.Module`                | 被 `Ledon.Web` 自动带入                              | 核心，默认在场                                   |
-| Web 集成（端点/控制器/OpenAPI/规范化） | `Ledon.Web`                   | `builder.AddLedonWeb()`                              | 含 ProblemDetails、关联 ID、统一响应、版本化、CORS 开关 |
-| 数据访问（EF Core + 发件箱）           | `Ledon.Data` / `Ledon.Queues` | `AddLedonData()` / `AddLedonOutbox()`                | 自动注册 + 前置自动建库 + 至少一次投递           |
-| 缓存                                   | `Ledon.Caching`               | `AddLedonCaching()` / `AddLedonDistributedCaching()` | 内存（single-flight）/ 分布式（Redis）           |
-| 后台任务                               | `Ledon.Queues`                | `AddLedonQueues()`                                   | Channel 有界 + 多 worker                         |
-| 消息中间件传输                         | `Ledon.Queues.RabbitMQ`       | `AddLedonRabbitMqTransport()`                        | 发件箱 ↔ RabbitMQ，跨服务投递                   |
-| 定时任务                               | `Ledon.Scheduling`            | `AddLedonScheduling()`                               | cron 驱动（5/6 段）                              |
-| 认证授权                               | `Ledon.Security`              | `AddLedonSecurity()`                                 | JWT + API Key + 权限策略                         |
-| OIDC 服务器                            | `Ledon.OpenIddict`            | `builder.AddLedonOpenIddict()`                       | 标准 /connect/token + 发现文档                   |
-| 可观测性                               | `Ledon.Observability`         | `AddLedonObservability()`                            | OTel 链路/指标/日志 + 健康检查 + Prometheus |
+| 模块系统（发现/依赖/生命周期/事件）    | `Ledon.Module`                | 被 `Ledon.Web` 自动带入                              | 核心，默认在场；处理器错误可隔离                   |
+| Web 集成（端点/控制器/OpenAPI/规范化） | `Ledon.Web`                   | `builder.AddLedonWeb()`                              | 含 ProblemDetails、关联 ID、统一响应、版本化、CORS、限流、压缩、请求超时、幂等 |
+| 数据访问（EF Core + 发件箱）           | `Ledon.Data` / `Ledon.Queues` | `AddLedonData()` / `AddLedonOutbox()`                | 自动注册 + 前置自动建库 + 至少一次投递 + 审计/软删除 |
+| 可靠投递（收件箱去重/死信管理）        | `Ledon.Queues`                | `AddLedonInbox()`                                    | 至少一次投递 + 恰好一次处理；死信查询/重放         |
+| 缓存                                   | `Ledon.Caching`               | `AddLedonCaching()` / `AddLedonDistributedCaching()` / `AddLedonHybridCaching()` | 内存（single-flight）/ 分布式（Redis）/ 混合两级 |
+| 后台任务                               | `Ledon.Queues`                | `AddLedonQueues()`                                   | Channel 有界 + 多 worker                          |
+| 消息中间件传输                         | `Ledon.Queues.RabbitMQ` / `Ledon.Queues.Kafka` | `AddLedonRabbitMqTransport()` / `AddLedonKafkaTransport()` | 发件箱 ↔ broker，跨服务投递             |
+| 定时任务                               | `Ledon.Scheduling`            | `AddLedonScheduling()`                               | cron 驱动（5/6 段）+ 执行历史 + 手动触发          |
+| 认证授权                               | `Ledon.Security`              | `AddLedonSecurity()`                                 | JWT + API Key + 权限策略                          |
+| OIDC 服务器                            | `Ledon.OpenIddict`            | `builder.AddLedonOpenIddict()`                       | 标准 /connect/token + 发现文档                    |
+| 可观测性                               | `Ledon.Observability`         | `AddLedonObservability()`                            | OTel 链路/指标/日志 + 健康检查（含启动探针）+ Prometheus |
 | 结构化日志                             | `Ledon.Serilog`               | `builder.AddLedonSerilog()`                          | Serilog + TraceId/SpanId 富化              |
-| 实时推送                               | `Ledon.SignalR`               | `AddLedonSignalR()`                                 | Hub 自动发现 + 约定路径映射                |
+| 实时推送                               | `Ledon.SignalR`               | `AddLedonSignalR()`                                  | Hub 自动发现 + 约定路径映射 + Redis backplane    |
 | 弹性策略                               | `Ledon.Resilience`            | `AddLedonResilience()`                               | 重试/超时/熔断，接管全部 HttpClient              |
 | 强类型配置                             | `Ledon.Configuration`         | `AddLedonOptions<T>(config)`                         | 绑定 + 启动校验                                  |
 | Nacos 配置中心                         | `Ledon.Configuration.Nacos`   | `Configuration.AddLedonNacos()`                      | 远程配置 + 热更新                                |
@@ -41,6 +42,7 @@ app.Run();
 | 多租户                                 | `Ledon.MultiTenancy`          | `AddLedonMultiTenancy()`                             | 租户解析 + 后台穿透                              |
 | 测试基建                               | `Ledon.Testing`               | `LedonWebTestHost`                                   | 一行搭 TestServer + 生命周期断言                 |
 | 云原生默认值                           | `Ledon.Aspire`                | `AddLedonServiceDefaults()`                          | OTel+健康检查+弹性+服务发现一次装齐              |
+| gRPC 服务间通信                       | `Ledon.Grpc`                  | `AddLedonGrpc()` / `AddLedonGrpcClient<T>()`         | 服务自动发现 + 约定映射 + 强类型客户端            |
 
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
@@ -77,6 +79,12 @@ public class WelcomeEmailSender : IEventHandler<UserCreated>
 {
     public Task HandleAsync(UserCreated e, CancellationToken ct = default) { /* 发邮件 */ };
 }
+```
+
+处理器失败默认"失败即停"（异常中断后续并传播）；旁路订阅方（邮件/审计）不想互相拖累时切隔离模式——单个失败被记录后继续其余处理器，全部完成后首个失败原样抛出（不静默）：
+
+```csharp
+builder.Services.AddLedon(o => o.Events.HandlerErrorHandling = EventHandlerErrorHandling.Isolate);
 ```
 
 跨进程/要求可靠投递时用**发件箱**（至少一次）：
@@ -125,6 +133,9 @@ public class TodosController(TodoDbContext db) : ControllerBase
 | `UseCors`            | ❌    | 跨域：按 `CorsOrigins` 白名单放行             |
 | `UseScalarUi`        | ❌    | Scalar API 文档 UI（需同时开 UseOpenApi）     |
 | `UseIdempotency`     | ❌    | `Idempotency-Key` 幂等（需 IDistributedCache）|
+| `UseRateLimiting`    | ❌    | 固定窗口限流（分区键 `X-Api-Key` 或客户端 IP，超限 429）|
+| `UseResponseCompression` | ❌ | Brotli/Gzip 响应压缩                         |
+| `UseRequestTimeouts` | ❌    | 请求超时（`RequestTimeoutSeconds`，超时 504）  |
 
 前后端分离（SPA）场景开跨域：
 
@@ -210,9 +221,12 @@ builder.Services.AddLedonObservability(o =>
 });
 
 builder.Services.AddLedonHealthChecks();
-app.MapLedonLiveness();    // /health/live  进程在跑即 200
-app.MapLedonReadiness();   // /health/ready 聚合全部检查
+app.MapLedonLiveness();    // /health/live   进程在跑即 200
+app.MapLedonReadiness();   // /health/ready  聚合全部检查
+app.MapLedonStartup();     // /health/startup 宿主启动完成后 200（之前 503）
 ```
+
+框架运行期指标（发件箱投递/重试/死信、队列成败、任务执行/错过触发）走 OTel Meter `Ledon.Queues`/`Ledon.Scheduling`，随 `AddLedonObservability()` 自动收集。
 
 模块内可发自定义 span：`using var span = ctx.StartActivity("加载配置");`
 
@@ -305,10 +319,13 @@ src/Ledon.Testing/      集成测试基建
 src/Ledon.Serilog/       Serilog 结构化日志集成
 src/Ledon.FluentValidation/ FluentValidation 验证器自动发现
 src/Ledon.Queues.RabbitMQ/ RabbitMQ 传输（发件箱 ↔ broker）
+src/Ledon.Queues.Kafka/    Kafka 传输（发件箱 ↔ broker）
+src/Ledon.Grpc/            gRPC 服务间通信（自动发现 + 约定映射 + 客户端）
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（104 用例，顺序断言 + 变异验证）
-scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check]
+tests/                  xunit 测试（模块 22 + Web 133 用例，顺序断言 + 变异验证）
+tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
+scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）
 ```
 
@@ -317,6 +334,7 @@ docs/                   文档站（docfx）
 ```powershell
 ./run.ps1 check    # scan → build → test
 ./run.ps1 docs     # 构建文档站（docfx，产物 _site/）
+./run.ps1 bench    # 基准测试（BenchmarkDotNet，Release）
 ./run.ps1 web      # Web 示例（多程序集 + 全功能链路）
 ./run.ps1 worker   # 工作进程示例（跨程序集事件解耦）
 ./run.ps1 sample   # 控制台零配置示例
@@ -327,9 +345,67 @@ docs/                   文档站（docfx）
 
 CI（`.github/workflows/ci.yml`）在 push/PR 时 build+test；打 `v*` tag 时按版本打包并推 NuGet.org（需仓库 secret `NUGET_API_KEY`）。本地打包：`dotnet pack -c Release`。
 
+## 可靠投递：收件箱去重 + 死信管理
+
+消息中间件是至少一次投递。收件箱把重复投递收敛为恰好一次处理；发件箱维护保证表不无限增长、搁置消息有人管：
+
+```csharp
+builder.Services.AddLedonInbox();   // 注册后：重复投递跳过、崩溃残留的陈旧认领超时后可重试
+
+builder.Services.AddLedonOutbox(o =>
+{
+    o.Retention = TimeSpan.FromDays(7);    // 已处理消息保留时长（调度器定期清理）
+    o.CleanupInterval = TimeSpan.FromHours(1);
+});
+
+// 死信（重试超上限）查询与人工重放：
+var dead = await store.GetDeadLettersAsync(50, ct);   // IOutboxStore
+await store.ReviveAsync(dead[0].Id, ct);              // 清零重试计数，重新投递
+```
+
+## gRPC 服务间通信
+
+```csharp
+builder.Services.AddLedonGrpc();     // 自动发现 gRPC 服务实现类（[BindServiceMethod] 判据）
+app.MapLedonGrpcServices();          // 约定映射（幂等）
+
+builder.Services.AddLedonGrpcClient<Greeter.GreeterClient>("https://localhost:7001");   // 强类型客户端
+```
+
+## 缓存扩展与混合两级缓存
+
+```csharp
+builder.Services.AddLedonHybridCaching();   // L1 内存 + L2 分布式（.NET 10 HybridCache）
+
+cache.SetAsync("product:1", product, expiration: TimeSpan.FromMinutes(10), ct);
+await cache.RemoveByPrefixAsync("product:", ct);   // 前缀删除（分布式经 SCAN / 混合经标签）
+cache.Set("session:abc", state, TimeSpan.FromHours(1), slidingExpiration: TimeSpan.FromMinutes(20));
+```
+
+## 数据层约定：审计字段与软删除
+
+```csharp
+public class Order : IAudited { /* CreatedAt/CreatedBy/ModifiedAt/ModifiedBy 自动填充 */ }
+public class Customer : IAudited, ISoftDelete { /* 删除自动转换为 IsDeleted = true */ }
+
+builder.Services.AddLedonData(o => o.EnableAuditing = true);   // 或 o.EnableRetryOnFailure = true（连接弹性）
+// 查询过滤显式启用：modelBuilder.ApplySoftDeleteFilters();
+```
+
+## 定时任务：执行历史与手动触发
+
+```csharp
+var history = provider.GetRequiredService<IScheduledTaskExecutionHistory>();
+history.Latest(nameof(ReconcileTask));     // TaskName/耗时/成败/是否手动
+
+var invoker = provider.GetRequiredService<ISchedulerInvoker>();
+await invoker.InvokeAsync<ReconcileTask>(ct);   // 等不到 cron 立即重跑
+```
+
 ## 设计边界（v1 明确不做）
 
 - 运行时动态加载 / 插件热插拔（当前为静态引用；发现环节已与加载方式解耦，后续可扩展）
 - 模块级独立 DI 容器（所有模块共享根容器）
 - 每模块独立配置（配置经 `ModuleContext.Configuration` 走宿主配置即可）
 - 多租户的隐式查询过滤（提供上下文与解析，隔离由查询层显式应用——约定显式，避免意外）
+- NativeAOT/裁剪开箱支持：自动发现与约定注入基于反射，入口方法已标注 `[RequiresDynamicCode]` 给出裁剪警告；需要 AOT 时保留相关程序集/类型（rd.xml / DynamicDependency）或改显式注册

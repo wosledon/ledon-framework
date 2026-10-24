@@ -38,7 +38,7 @@ internal sealed class BackgroundQueueWorker : BackgroundService
 
             try
             {
-                await item.Execute(scope.ServiceProvider, stoppingToken);
+                await item.Execute(scope.ServiceProvider, stoppingToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {

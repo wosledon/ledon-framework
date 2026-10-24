@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Ledon;
 using Ledon.Module;
@@ -34,12 +35,19 @@ public sealed class LedonSignalROptions
 /// </summary>
 public static class LedonSignalRServiceCollectionExtensions
 {
+    /// <summary>反射边界说明（裁剪/NativeAOT 警告文案）。</summary>
+    private const string AotBoundary =
+        "Ledon 的 Hub 自动发现基于反射（Assembly.GetTypes）。" +
+        "NativeAOT 或裁剪发布时，Hub 类型必须可在运行时解析（rd.xml / DynamicDependency 保留）。";
+
     /// <summary>注册 SignalR 并发现被扫描程序集中的 <see cref="Hub"/> 子类。</summary>
+    [RequiresDynamicCode(AotBoundary)]
     public static IServiceCollection AddLedonSignalR(this IServiceCollection services) =>
         services.AddLedonSignalR(null);
 
     /// <param name="services">服务集合。</param>
     /// <param name="configure">SignalR 配置（如多实例 backplane 的 Redis 连接串）。</param>
+    [RequiresDynamicCode(AotBoundary)]
     public static IServiceCollection AddLedonSignalR(
         this IServiceCollection services,
         Action<LedonSignalROptions>? configure)
@@ -76,6 +84,8 @@ public static class LedonSignalRServiceCollectionExtensions
     /// 映射全部已发现的 Hub：路径 = /hubs/{类型名去 "Hub" 后缀，kebab-case}
     /// （ChatHub → /hubs/chat；无后缀的类名原样 kebab）。
     /// </summary>
+    /// <param name="endpoints">端点路由构建器。</param>
+    [RequiresDynamicCode(AotBoundary)]
     public static IEndpointRouteBuilder MapLedonSignalRHubs(this IEndpointRouteBuilder endpoints)
     {
         ArgumentNullException.ThrowIfNull(endpoints);

@@ -5,6 +5,10 @@
          消费该包（含经 Ledon.Web 间接引用）且使用最小 API 映射的项目必须显式启用。
          打包为 NuGet 时应改由 buildTransitive/Ledon.Web.props 向使用方传递。 -->
         <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.AspNetCore.OpenApi.Generated</InterceptorsNamespaces>
+        <!-- 框架自身大量调用标注了 [RequiresDynamicCode] 的反射入口（AddLedon 等）：
+             这些调用是框架内部行为，不应对框架自身的构建告警；裁剪警告会在
+             **使用方**调用这些入口时出现（预期的边界提示），那里不抑制。 -->
+        <NoWarn>$(NoWarn);IL2026;IL3050</NoWarn>
     </PropertyGroup>
 
     <!-- 打包元数据（测试/示例项目 IsPackable=false，不产出包） -->

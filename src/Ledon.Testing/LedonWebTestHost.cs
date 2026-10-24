@@ -51,7 +51,7 @@ public sealed class LedonWebTestHost : IAsyncDisposable
         else
             configureApp(app);
 
-        await app.StartAsync();
+        await app.StartAsync().ConfigureAwait(false);
 
         return new LedonWebTestHost(app, app.GetTestClient());
     }
@@ -60,13 +60,13 @@ public sealed class LedonWebTestHost : IAsyncDisposable
     public async Task<T> WithScopeAsync<T>(Func<IServiceProvider, Task<T>> action)
     {
         await using var scope = Services.CreateAsyncScope();
-        return await action(scope.ServiceProvider);
+        return await action(scope.ServiceProvider).ConfigureAwait(false);
     }
 
     public async ValueTask DisposeAsync()
     {
-        await _app.StopAsync();
-        await _app.DisposeAsync();
+        await _app.StopAsync().ConfigureAwait(false);
+        await _app.DisposeAsync().ConfigureAwait(false);
     }
 }
 

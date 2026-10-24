@@ -26,7 +26,7 @@ internal sealed class EfInboxStore(OutboxDbContext context, LedonInboxOptions op
 
             try
             {
-                await context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return true;
             }
             catch (DbUpdateException)
@@ -45,7 +45,7 @@ internal sealed class EfInboxStore(OutboxDbContext context, LedonInboxOptions op
         // 陈旧认领（上次处理进程崩溃）：重置认领重试，至少一次语义不被破坏
         existing.ClaimedAt = now;
         existing.ClaimCount++;
-        await context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return true;
     }
 
@@ -57,7 +57,7 @@ internal sealed class EfInboxStore(OutboxDbContext context, LedonInboxOptions op
         if (message is not null)
         {
             message.CompletedAt = DateTime.UtcNow;
-            await context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 

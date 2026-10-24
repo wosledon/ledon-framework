@@ -57,7 +57,7 @@ public sealed class ModuleManager : IModuleManager
             using (LedonActivity.Modules.StartActivity("PreInitialization"))
             {
                 foreach (var task in services.GetServices<ILedonPreInitialization>())
-                    await task.ExecuteAsync(cancellationToken);
+                    await task.ExecuteAsync(cancellationToken).ConfigureAwait(false);
             }
 
             foreach (var descriptor in _modules)
@@ -70,7 +70,7 @@ public sealed class ModuleManager : IModuleManager
 
                 try
                 {
-                    await descriptor.Instance!.OnInitializedAsync(new ModuleContext(descriptor, services), cancellationToken);
+                    await descriptor.Instance!.OnInitializedAsync(new ModuleContext(descriptor, services), cancellationToken).ConfigureAwait(false);
                 }
                 catch
                 {
@@ -91,7 +91,7 @@ public sealed class ModuleManager : IModuleManager
                 var descriptor = initialized[i];
                 try
                 {
-                    await ShutdownCoreAsync(descriptor, services, CancellationToken.None);
+                    await ShutdownCoreAsync(descriptor, services, CancellationToken.None).ConfigureAwait(false);
                     descriptor.State = ModuleState.Shutdown;
                 }
                 catch
@@ -127,7 +127,7 @@ public sealed class ModuleManager : IModuleManager
 
             try
             {
-                await ShutdownCoreAsync(descriptor, services, cancellationToken);
+                await ShutdownCoreAsync(descriptor, services, cancellationToken).ConfigureAwait(false);
                 descriptor.State = ModuleState.Shutdown;
             }
             catch (Exception ex)

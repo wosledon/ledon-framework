@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Ledon.Observability;
 using Ledon.Resilience;
 using Microsoft.AspNetCore.Builder;
@@ -17,10 +18,16 @@ namespace Microsoft.Extensions.Hosting;
 /// </summary>
 public static class LedonServiceDefaultsExtensions
 {
+    /// <summary>反射边界说明（裁剪/NativeAOT 警告文案）。</summary>
+    private const string AotBoundary =
+        "Ledon 的健康检查自动发现基于反射（Assembly.GetTypes）。" +
+        "NativeAOT 或裁剪发布时，检查类型必须可在运行时解析（rd.xml / DynamicDependency 保留）。";
+
     /// <summary>
     /// 装配服务默认值：可观测性（OTLP 端点走 OTEL_EXPORTER_OTLP_ENDPOINT）、
     /// 健康检查、HTTP 弹性管道、服务发现（<c>https+服务名://</c> 寻址）。
     /// </summary>
+    [RequiresDynamicCode(AotBoundary)]
     public static WebApplicationBuilder AddLedonServiceDefaults(this WebApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);

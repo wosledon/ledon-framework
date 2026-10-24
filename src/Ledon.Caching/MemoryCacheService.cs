@@ -77,7 +77,7 @@ internal sealed class MemoryCacheService : ICacheService
         T value;
         try
         {
-            value = await task.WaitAsync(cancellationToken);
+            value = await task.WaitAsync(cancellationToken).ConfigureAwait(false);
         }
         finally
         {

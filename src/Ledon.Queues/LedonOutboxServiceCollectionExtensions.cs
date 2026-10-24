@@ -1,9 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
 using Ledon;
 using Ledon.Module;
 using Ledon.Queues;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -17,6 +20,12 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </summary>
 public static class LedonOutboxServiceCollectionExtensions
 {
+    /// <summary>反射边界说明（裁剪/NativeAOT 警告文案）。</summary>
+    private const string AotBoundary =
+        "Ledon 的自动发现与约定注入基于反射（Assembly.GetTypes / Type.GetType 反序列化）。" +
+        "NativeAOT 或裁剪发布时，集成事件类型必须可在运行时解析（rd.xml / DynamicDependency 保留）。";
+
+    [RequiresDynamicCode(AotBoundary)]
     public static IServiceCollection AddLedonOutbox(
         this IServiceCollection services,
         Action<LedonOutboxOptions>? configure = null)

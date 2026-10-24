@@ -69,7 +69,7 @@ internal sealed class ApolloConfigurationProvider : ConfigurationProvider
         {
             foreach (var @namespace in _options.Namespaces)
             {
-                var config = await FetchAsync(@namespace);
+                var config = await FetchAsync(@namespace).ConfigureAwait(false);
 
                 if (config.ReleaseKey == _releaseKeys[@namespace])
                     continue;
@@ -90,10 +90,10 @@ internal sealed class ApolloConfigurationProvider : ConfigurationProvider
         var url = $"{_options.ConfigServer.TrimEnd('/')}/configs/{Uri.EscapeDataString(_options.AppId)}" +
                   $"/{Uri.EscapeDataString(_options.Cluster)}/{Uri.EscapeDataString(@namespace)}";
 
-        var response = await _http.GetAsync(url);
+        var response = await _http.GetAsync(url).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
-        var payload = await response.Content.ReadAsStringAsync();
+        var payload = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(payload))
             return new ApolloConfigResponse(string.Empty, []);
 

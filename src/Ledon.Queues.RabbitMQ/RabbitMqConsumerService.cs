@@ -37,7 +37,7 @@ internal sealed class RabbitMqConsumerService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var channel = await _connection.CreateChannelAsync(cancellationToken: stoppingToken);
+        var channel = await _connection.CreateChannelAsync(cancellationToken: stoppingToken).ConfigureAwait(false);
 
         await channel.ExchangeDeclareAsync(
             exchange: _options.ExchangeName,
@@ -77,8 +77,8 @@ internal sealed class RabbitMqConsumerService : BackgroundService
         {
             try
             {
-                await HandleAsync(args, stoppingToken);
-                await channel.BasicAckAsync(args.DeliveryTag, multiple: false, stoppingToken);
+                await HandleAsync(args, stoppingToken).ConfigureAwait(false);
+                await channel.BasicAckAsync(args.DeliveryTag, multiple: false, stoppingToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
@@ -99,7 +99,7 @@ internal sealed class RabbitMqConsumerService : BackgroundService
         // 保持服务存活直到宿主持停（消费在事件回调里进行）
         try
         {
-            await Task.Delay(Timeout.Infinite, stoppingToken);
+            await Task.Delay(Timeout.Infinite, stoppingToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -123,7 +123,7 @@ internal sealed class RabbitMqConsumerService : BackgroundService
 
         await using var scope = _services.CreateAsyncScope();
         // MessageId 透传：收件箱去重凭据（broker 重投时跳过已处理的消息）
-        await IntegrationEventDispatcher.DispatchAsync(scope.ServiceProvider, @event, args.BasicProperties.MessageId, cancellationToken);
+        await IntegrationEventDispatcher.DispatchAsync(scope.ServiceProvider, @event, args.BasicProperties.MessageId, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>服务名（队列名默认后缀）：环境变量 LEDON_SERVICE_NAME 优先，其次入口程序集名。</summary>

@@ -37,12 +37,12 @@ public static class LedonAuthEndpointExtensions
             IRefreshTokenService refresh,
             CancellationToken cancellationToken) =>
         {
-            var user = await validator.ValidateAsync(request.UserName, request.Password, cancellationToken);
+            var user = await validator.ValidateAsync(request.UserName, request.Password, cancellationToken).ConfigureAwait(false);
             if (user is null)
                 return Results.Unauthorized();
 
             var access = jwt.Generate(user.UserId, user.UserName, user.Permissions);
-            var refreshToken = await refresh.IssueAsync(user.UserId, cancellationToken);
+            var refreshToken = await refresh.IssueAsync(user.UserId, cancellationToken).ConfigureAwait(false);
 
             return Results.Ok(new TokenResponse(access, refreshToken, (int)options.Jwt.Expiration.TotalSeconds));
         });
@@ -56,18 +56,18 @@ public static class LedonAuthEndpointExtensions
             CancellationToken cancellationToken) =>
         {
             // 校验（含重放检测：已吊销令牌再现 → 吊销全族 → null）
-            var userId = await refresh.ValidateAsync(request.RefreshToken, cancellationToken);
+            var userId = await refresh.ValidateAsync(request.RefreshToken, cancellationToken).ConfigureAwait(false);
             if (userId is null)
                 return Results.Unauthorized();
 
             // 重新签发访问令牌需要身份（权限）——FindByIdAsync 未实现时明确告知
-            var user = await validator.FindByIdAsync(userId, cancellationToken);
+            var user = await validator.FindByIdAsync(userId, cancellationToken).ConfigureAwait(false);
             if (user is null)
                 return Results.Problem(
                     "刷新流程需要实现 ILedonUserValidator.FindByIdAsync（按用户标识重建身份与权限）",
                     statusCode: StatusCodes.Status501NotImplemented);
 
-            var rotated = await refresh.RotateAsync(request.RefreshToken, cancellationToken);
+            var rotated = await refresh.RotateAsync(request.RefreshToken, cancellationToken).ConfigureAwait(false);
             if (rotated is null)
                 return Results.Unauthorized();
 

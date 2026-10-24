@@ -73,7 +73,7 @@ internal sealed class NacosConfigurationProvider : ConfigurationProvider
         {
             foreach (var (dataId, content) in _contents)
             {
-                var latest = await GetConfigAsync(dataId);
+                var latest = await GetConfigAsync(dataId).ConfigureAwait(false);
                 if (latest == content)
                     continue;
 
@@ -96,17 +96,17 @@ internal sealed class NacosConfigurationProvider : ConfigurationProvider
         {
             try
             {
-                var response = await GetWithAuthAsync(BuildConfigUrl(server, dataId, _accessToken));
+                var response = await GetWithAuthAsync(BuildConfigUrl(server, dataId, _accessToken)).ConfigureAwait(false);
 
                 // 401：登录换 token 后重试一次
                 if (response.StatusCode == HttpStatusCode.Unauthorized && !string.IsNullOrEmpty(_options.UserName))
                 {
-                    await LoginAsync(server);
-                    response = await GetWithAuthAsync(BuildConfigUrl(server, dataId, _accessToken));
+                    await LoginAsync(server).ConfigureAwait(false);
+                    response = await GetWithAuthAsync(BuildConfigUrl(server, dataId, _accessToken)).ConfigureAwait(false);
                 }
 
                 if (response.IsSuccessStatusCode)
-                    return await response.Content.ReadAsStringAsync();
+                    return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                 lastError = new HttpRequestException($"Nacos 返回 {(int)response.StatusCode}");
             }
@@ -140,7 +140,7 @@ internal sealed class NacosConfigurationProvider : ConfigurationProvider
 
         response.EnsureSuccessStatusCode();
 
-        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>().ConfigureAwait(false);
         _accessToken = payload.TryGetProperty("accessToken", out var token) ? token.GetString() : null;
     }
 }

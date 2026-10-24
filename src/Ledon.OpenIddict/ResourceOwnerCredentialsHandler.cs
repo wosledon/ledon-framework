@@ -48,7 +48,7 @@ internal sealed class ResourceOwnerCredentialsHandler
                 return;
             }
 
-            var user = await _validator.ValidateAsync(userName, password, context.CancellationToken);
+            var user = await _validator.ValidateAsync(userName, password, context.CancellationToken).ConfigureAwait(false);
             if (user is null)
             {
                 context.Reject(
