@@ -163,18 +163,36 @@ public class OrderService(IBackgroundQueue queue)
 
 ## 可观测性
 
+**框架自身即可观测**——模块生命周期、事件发布、队列处理全部产出 span（`Ledon.Module` / `Ledon.Events` / `Ledon.Queues` 三个 ActivitySource），`AddLedonObservability()` 以 `Ledon` + `Ledon.*` 通配自动收听，"框架帮你做了什么"全程进入链路树：
+
 ```csharp
-// 链路 + 指标：ASP.NET Core / HttpClient / 运行时自动插桩
+// 链路 + 指标：ASP.NET Core / HttpClient / 运行时 + 框架自身源自动插桩
 builder.Services.AddLedonObservability(o =>
 {
     o.ServiceName = "my-app";
     o.OtlpEndpoint = new Uri("http://localhost:4317");   // 不配则读 OTEL_EXPORTER_OTLP_ENDPOINT
+    o.UseConsoleExporter = true;                          // 开发排障：span/指标直接打控制台
 });
 
-// 健康检查：IHealthCheck 实现被自动发现
+// 健康检查：IHealthCheck 实现被自动发现并登记
 builder.Services.AddLedonHealthChecks();
-app.MapLedonHealthChecks();   // GET /health
+app.MapLedonLiveness();    // GET /health/live  —— 进程在跑即 200（重启判断）
+app.MapLedonReadiness();   // GET /health/ready —— 聚合全部检查（摘流判断）
 ```
+
+模块内可发自定义 span（挂在模块初始化 span 之下，自动成树）：
+
+```csharp
+public Task OnInitializedAsync(ModuleContext ctx, CancellationToken ct)
+{
+    using var span = ctx.StartActivity("加载配置");   // Ledon.Module 源下的子 span
+    ...
+}
+```
+
+**关联 ID**（`Ledon.Web` 默认开启）：请求未带 `X-Correlation-Id` 时生成（优先复用当前 TraceId，与链路 ID 天然对齐），回写响应头并压入日志作用域——同一请求的所有日志自动带上 `CorrelationId`，跨服务排查不用二次映射。不需要时 `o.UseCorrelationId = false`。
+
+非 Web 应用（工作进程）同样适用：`AddLedonObservability` 不依赖 ASP.NET，AspNetCore 插桩在非 Web 宿主下自动空转。`./run.ps1 worker` 的控制台输出可直接看到模块初始化、事件发布的真实 span。
 
 ## 约定注册规则
 
