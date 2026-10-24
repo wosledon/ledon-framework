@@ -1,8 +1,12 @@
+using Asp.Versioning;
+using Asp.Versioning.Routing;
 using Ledon;
 using Ledon.Module;
 using Ledon.Module.Hosting;
+using Ledon.Web.ApiConventions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -34,6 +38,11 @@ public static class LedonWebServiceCollectionExtensions
         // 模块系统零配置接入（自动发现/注入/生命周期）
         builder.Services.AddLedon(configureModules);
 
+        // apiVersion 路由约束无条件注册：扫描到的控制器带 {version:apiVersion} 路由时，
+        // 即使没开启版本化也不会在路由构建阶段炸掉（约束映射缺失会 500）
+        builder.Services.Configure<RouteOptions>(options =>
+            options.ConstraintMap["apiVersion"] = typeof(ApiVersionRouteConstraint));
+
         var options = new LedonWebOptions();
         configure?.Invoke(options);
         builder.Services.TryAddSingleton(options);
@@ -48,8 +57,39 @@ public static class LedonWebServiceCollectionExtensions
         if (options.UseControllers)
         {
             var mvc = builder.Services.AddControllers();
+
+            // 模型验证失败统一 400 + ValidationProblemDetails（RFC 7807 格式）
+            builder.Services.Configure<ApiBehaviorOptions>(behavior =>
+                behavior.InvalidModelStateResponseFactory = context =>
+                    new BadRequestObjectResult(new ValidationProblemDetails(context.ModelState)));
+
             foreach (var assembly in assemblies)
                 mvc.AddApplicationPart(assembly);
+
+            // 统一响应包装（可选）
+            if (options.UseUnifiedResponse)
+            {
+                builder.Services.Configure<MvcOptions>(mvcOptions =>
+                    mvcOptions.Filters.Add<ApiResponseWrapperFilter>());
+            }
+        }
+
+        // 全局异常处理（ProblemDetails：含关联 ID 与 TraceId）
+        if (options.UseProblemDetails)
+        {
+            builder.Services.AddProblemDetails();
+            builder.Services.AddExceptionHandler<LedonExceptionHandler>();
+        }
+
+        // API 版本化（URL 段 api/v{version}/...）
+        if (options.UseApiVersioning)
+        {
+            builder.Services.AddApiVersioning(versioning =>
+            {
+                versioning.DefaultApiVersion = new ApiVersion(1, 0);
+                versioning.AssumeDefaultVersionWhenUnspecified = true;
+                versioning.ApiVersionReader = new UrlSegmentApiVersionReader();
+            }).AddMvc();
         }
 
         // 端点自动注册：IEndpoint 实现类进容器（单例，启动时统一映射一次）

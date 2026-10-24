@@ -14,4 +14,22 @@ public sealed class LedonWebOptions
 
     /// <summary>关联 ID（X-Correlation-Id，贯穿请求头/响应头/日志作用域），默认开。</summary>
     public bool UseCorrelationId { get; set; } = true;
+
+    /// <summary>
+    /// 未处理异常转 ProblemDetails（RFC 7807，含关联 ID 与 TraceId），默认开。
+    /// 关闭后异常按默认行为冒泡。
+    /// </summary>
+    public bool UseProblemDetails { get; set; } = true;
+
+    /// <summary>
+    /// 统一响应包装：成功响应包一层 <c>{"code":0,"data":...}</c>，默认关。
+    /// 纯 REST / 开放 API 场景不建议开启。
+    /// </summary>
+    public bool UseUnifiedResponse { get; set; }
+
+    /// <summary>
+    /// API 版本化（URL 段：<c>api/v{version}/controller</c>），默认关。
+    /// 控制器用 <c>[ApiVersion("1.0")]</c> 标注。
+    /// </summary>
+    public bool UseApiVersioning { get; set; }
 }

@@ -124,6 +124,65 @@ public class WebFrameworkTests : IDisposable
         Assert.Equal("upstream-trace-123", echoed.Headers.GetValues("X-Correlation-Id").First());
     }
 
+    // ---------- API 规范化 ----------
+
+    [Fact]
+    public async Task Unhandled_exception_returns_problem_details_with_correlation_id()
+    {
+        var client = await StartServerAsync();
+
+        var response = await client.GetAsync("/throw");
+
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Contains("correlationId", body);
+        Assert.Contains("traceId", body);
+
+        // ProblemDetails 里的关联 ID 与响应头一致
+        var correlationId = response.Headers.GetValues("X-Correlation-Id").First();
+        Assert.Contains(correlationId, body);
+    }
+
+    [Fact]
+    public async Task Invalid_model_returns_validation_problem_details()
+    {
+        var client = await StartServerAsync();
+
+        var response = await client.PostAsJsonAsync("/api/echo", new EchoRequest { Name = "" });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Contains("errors", body);
+        Assert.Contains("Name", body);
+    }
+
+    [Fact]
+    public async Task Unified_response_wraps_payload_when_enabled()
+    {
+        var client = await StartServerAsync(o => o.UseUnifiedResponse = true);
+
+        var response = await client.GetStringAsync("/api/values");
+
+        // 信封结构：{"code":0,"data":{"value":42}}
+        Assert.Contains("\"code\":0", response);
+        Assert.Contains("\"value\":42", response);
+    }
+
+    [Fact]
+    public async Task Api_versioning_routes_by_url_segment()
+    {
+        var client = await StartServerAsync(o => o.UseApiVersioning = true);
+
+        Assert.Equal("v1", await client.GetStringAsync("/api/v1/versioned"));
+
+        // 未定义的版本 → 404（无端点匹配）
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/api/v2/versioned")).StatusCode);
+    }
+
     public void Dispose()
     {
         _client?.Dispose();

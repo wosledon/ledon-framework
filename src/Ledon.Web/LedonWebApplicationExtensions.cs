@@ -19,6 +19,10 @@ public static class LedonWebApplicationExtensions
         if (options.UseCorrelationId)
             app.UseMiddleware<CorrelationMiddleware>();
 
+        // 全局异常处理（ProblemDetails）
+        if (options.UseProblemDetails)
+            app.UseExceptionHandler();
+
         app.UseRouting();
 
         foreach (var endpoint in app.Services.GetServices<IEndpoint>())

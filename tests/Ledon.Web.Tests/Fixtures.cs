@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Ledon.Data;
 using Ledon.Module;
 using Ledon.Module.Abstractions;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.ComponentModel.DataAnnotations;
 
 namespace Ledon.Web.Tests.Fixtures;
 
@@ -54,6 +56,16 @@ public class BrokenHealthCheck : IHealthCheck
 /// <summary>空模块：钩子全用默认实现，供只需一个模块在场的场景使用。</summary>
 public class NoopModule : IModule;
 
+/// <summary>抛异常的端点：验证全局异常处理转 ProblemDetails。</summary>
+public class ThrowEndpoint : IEndpoint
+{
+    public void Map(IEndpointRouteBuilder builder) =>
+        builder.MapGet("/throw", () =>
+        {
+            throw new InvalidOperationException("演示异常");
+        });
+}
+
 public class HelloEndpoint : IEndpoint
 {
     public void Map(IEndpointRouteBuilder builder)
@@ -68,6 +80,40 @@ public class PingController : ControllerBase
 {
     [HttpGet]
     public string Get() => "pong";
+}
+
+/// <summary>模型验证：空 Name 应得到 400 ValidationProblemDetails。</summary>
+public class EchoRequest
+{
+    [Required]
+    public string Name { get; set; } = string.Empty;
+}
+
+[ApiController]
+[Route("api/echo")]
+public class EchoController : ControllerBase
+{
+    [HttpPost]
+    public EchoRequest Post(EchoRequest request) => request;
+}
+
+/// <summary>统一响应包装：启用后返回值包一层 {"code":0,"data":...}。</summary>
+[ApiController]
+[Route("api/values")]
+public class ValuesController : ControllerBase
+{
+    [HttpGet]
+    public object Get() => new { Value = 42 };
+}
+
+/// <summary>API 版本化：URL 段 api/v{version}/versioned。</summary>
+[ApiController]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/versioned")]
+public class VersionedController : ControllerBase
+{
+    [HttpGet]
+    public string Get() => "v1";
 }
 
 [ApiController]

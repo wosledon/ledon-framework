@@ -15,6 +15,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Asp.Versioning.Http" />
+        <PackageReference Include="Asp.Versioning.Mvc" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     </ItemGroup>
 
