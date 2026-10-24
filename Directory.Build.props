@@ -14,6 +14,18 @@
         <Description>.NET 10 模块化 Web 开发框架：解耦优先，自动发现与自动注入，能力按需引入。</Description>
         <RepositoryUrl>https://github.com/wosledon/ledon-framework</RepositoryUrl>
         <PackageProjectUrl>https://github.com/wosledon/ledon-framework</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <VersionPrefix>0.1.0</VersionPrefix>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+        <!-- 测试与示例项目不打包 -->
+        <IsPackable Condition="'$(IsPackable)' == '' AND ($(MSBuildProjectDirectory.Contains('\samples\')) OR $(MSBuildProjectDirectory.Contains('\tests\')))">false</IsPackable>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 
 </Project>

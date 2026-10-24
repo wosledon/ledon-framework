@@ -22,6 +22,7 @@ public static class ConventionScanner
     /// <param name="services">服务集合。</param>
     /// <param name="assembly">要扫描的程序集。</param>
     /// <param name="lifetime">无接口类/同名接口类的默认生命周期，默认 <see cref="ServiceLifetime.Scoped"/>。</param>
+    /// <param name="log">可选的诊断收集器：记录每条约定注册，便于回答"这个服务是谁注册的"。</param>
     public static IServiceCollection ScanAssembly(
         this IServiceCollection services,
         Assembly assembly,
