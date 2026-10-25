@@ -1,8 +1,15 @@
 # 流媒体：推流 / 拉流 / 转流 / 双工
 
-`Ledon.Streaming` 负责流媒体的**控制面**：鉴权、在线状态、事件、转流、录制、WHIP/WHEP 信令。
-媒体面（转发、转码、录制）交给媒体服务器（SRS / ZLMediaKit）——框架不重复造媒体内核，
-但把"接一个流媒体服务"需要的周边能力一次配齐。
+`Ledon.Streaming` 分两层，**媒体面是真的协议栈，不是壳**：
+
+| 层 | 内容 | 位置 |
+| --- | --- | --- |
+| **媒体面** | RTMP 服务端（握手 / 分块流 / 命令 / 媒体转发）、HTTP-FLV 播放、HLS 实时切片、FLV 封装、AMF0 编解码、TS 复用 | `Rtmp/` `Playback/` `Hls/` `Media/` |
+| **控制面** | 推拉流令牌鉴权、播放地址协商、在线状态、事件、转流/录制控制、WHIP/WHEP 信令 | 包根目录 |
+
+媒体面直接在进程内跑：OBS / ffmpeg 推 `rtmp://host:1935/live/name`，
+观众用 `http://host/live/name.flv`（flv.js）或 `http://host/live/name.m3u8`（Safari）即可播放。
+控制面负责把"接一个外部媒体服务器"（SRS / ZLMediaKit）需要的周边能力一次配齐。
 
 ## 快速搭起来
 
@@ -10,16 +17,64 @@
 builder.Services.AddLedonStreaming(o =>
 {
     o.Secret = "<从配置中心注入>";              // 推拉流令牌签名密钥
-    o.ServerApiUrl = "http://127.0.0.1:1985"; // SRS OpenAPI
+    o.ServerApiUrl = "http://127.0.0.1:1985"; // SRS OpenAPI（控制面用）
     o.PublicRtmpUrl = "rtmp://media.example.com";
     o.PublicHttpUrl = "http://media.example.com";
     o.PublicWebRtcUrl = "webrtc://media.example.com/live";
 });
+
+// 媒体面：RTMP 监听（默认 1935），可按配置中心覆盖
+builder.Services.Configure<RtmpServerOptions>(o =>
+{
+    o.Address = "0.0.0.0";
+    o.Port = 1935;
+    o.OutgoingChunkSize = 4096;      // 我们发给对端的块大小
+});
 ```
 
-配好媒体服务器的 webhook 指向 `POST /streaming/hooks`，剩下的（鉴权、状态、事件）框架接管。
+`AddLedonStreaming` 会一并注册 `RtmpServer` / `HlsSegmenter`（都是 `IHostedService`），
+宿主启动即监听；HTTP-FLV / HLS 端点随 `UseLedonWeb()` 自动映射。
 
-## 鉴权：一把令牌管推流和拉流
+## 媒体面：RTMP 推流 / 拉流
+
+`RtmpServer` 是完整的 RTMP 协议栈（不是转发壳）：
+
+- **握手**：C0/C1/C2 ↔ S0/S1/S2（1537 + 1536 字节），简单模式下回显对端随机数；
+- **分块流**：fmt 0/1/2/3 全格式解码、按 chunk size 重组、扩展时间戳（≥ 0xFFFFFF）、
+  重组状态按 chunk stream id 隔离（规范允许不同 csid 的 Chunk 交错）；
+- **命令**：`connect` / `releaseStream` / `FCPublish` / `createStream` / `publish` /
+  `play` / `FCUnpublish` / `deleteStream` / `closeStream`，返回 `_result` 与 `onStatus`；
+- **协议控制消息**：`SetChunkSize` / `WindowAcknowledgementSize` / `SetPeerBandwidth` / `UserControl`；
+- **媒体转发**：发布者的音视频写入 `StreamHub`，订阅者读回并编码成 RTMP 分块流。
+
+```text
+OBS/ffmpeg ──RTMP(1935)──▶ RtmpServer ──▶ StreamHub ──▶ HTTP-FLV (/live/x.flv)
+                                     └──▶ HLS 切片 (/live/x.m3u8 + .ts)
+                                     └──▶ RTMP 拉流（另一个连接 play）
+```
+
+`StreamHub` / `MediaStream` 是分发核心，两个关键设计：
+
+- **GOP 缓存**：新订阅者立即补发最近一个 GOP（含序列头），起播不等下一个关键帧；
+- **背压**：每个订阅者有界队列，慢观众丢最旧的帧而不是拖垮发布者；
+- 慢订阅者断开只影响自己；退订在连接关闭 / 响应结束时释放（不泄漏订阅者）。
+
+## 媒体面：HTTP-FLV 与 HLS
+
+```bash
+# HTTP-FLV：chunked 输出，flv.js 直接播
+curl -N http://127.0.0.1:8080/live/live/cam-01.flv
+
+# HLS：实时切片 + 播放列表
+curl http://127.0.0.1:8080/live/live/cam-01.m3u8
+curl http://127.0.0.1:8080/live/live/cam-01/0.ts
+```
+
+- HTTP-FLV 首字节就是 FLV 头，随后是 Tag 流；GOP 补发由订阅机制保证；
+- HLS 按 `HlsOptions.SegmentSeconds`（默认 2 秒）切 TS，播放列表保留最近 N 个分片；
+- 两者共用同一条 `MediaStream`，一路推流同时供 FLV / HLS / RTMP 三种拉流。
+
+## 控制面：一把令牌管推流和拉流
 
 ```csharp
 public class StreamTokenController(IStreamTokenService tokens, StreamUrlBuilder urls)
@@ -46,7 +101,7 @@ public class StreamTokenController(IStreamTokenService tokens, StreamUrlBuilder 
 - 推流令牌不能拉流、A 流的令牌不能看 B 流；
 - 自定义策略：实现 `IStreamAuthorizer`（接自己的用户/付费/租户体系）。
 
-## 播放：FLV / HLS / WebRTC 一套接口
+## 控制面：播放地址协商
 
 `GET /streaming/playback/{app}/{name}` 返回这条流的全部可用协议与带令牌地址，
 前端不必知道媒体服务器的地址结构：
@@ -65,7 +120,7 @@ public class StreamTokenController(IStreamTokenService tokens, StreamUrlBuilder 
 }
 ```
 
-## 双工通信（WebRTC）
+## 双工通信（WebRTC 信令）
 
 - **WHIP（推流）**：浏览器 `POST /streaming/whip/{app}/{name}` 带 SDP Offer → 201 + SDP Answer；
 - **WHEP（拉流）**：浏览器 `POST /streaming/whep/{app}/{name}` 带 SDP Offer → 201 + SDP Answer；
@@ -74,7 +129,7 @@ public class StreamTokenController(IStreamTokenService tokens, StreamUrlBuilder 
 - SDP 交换由媒体服务器完成（`IMediaServerClient` 实现 `IWhilpExchange`；未实现返回 502 而不是假装成功）；
 - 数据面双工（信令、聊天、白板、弹幕）用 `Ledon.SignalR`，媒体面用本包。
 
-## 转流 / 转码 / 录制
+## 转流 / 转码 / 录制（外部媒体服务器）
 
 ```csharp
 public class StreamOps(IMediaServerClient server)
@@ -113,8 +168,8 @@ public class StreamNotifier : IStreamEventHandler
 
 ## 边界（明确不做）
 
-- 不内置 SFU/MCU：媒体转发交给 SRS/ZLMediaKit，框架只做控制面与信令；
-- 不实现 RTMP/WebRTC 的媒体编解码：那是媒体服务器的职责；
+- 不内置 SFU/MCU：多人实时互动（多路转发/混流）交给 SRS/ZLMediaKit，框架只做控制面与信令；
+- 不实现音视频编解码器（H.264/AAC/Opus 的 encode/decode）：那是媒体服务器的职责；
 - 录制文件管理（检索、播放、删除）由媒体服务器的存储与你的业务层负责。
 
 完整文档：<https://github.com/wosledon/ledon-framework>

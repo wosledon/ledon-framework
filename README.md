@@ -59,7 +59,7 @@ app.Run();
 | SIP 协议解析                           | `Ledon.Sip`                   | `SipParser` / `SdpParser`                           | RFC 3261 消息 + SDP 解析（纯解析，零依赖） |
 | SIP 服务端                             | `Ledon.Sip.Server`            | `AddLedonSipServer()`                               | 基于 Socket 库：UDP/TCP 监听 + 应答 + Content-Length 切帧 |
 | SIP 客户端                             | `Ledon.Sip.Client`            | `AddLedonSipClient()`                               | 基于 Socket 库：事务匹配 + 重传 + 超时 |
-| 流媒体（推/拉流、鉴权、转流、双工）      | `Ledon.Streaming`             | `AddLedonStreaming()`                              | 令牌鉴权 + 在线状态 + 事件 + 转流/录制 + WHIP/WHEP |
+| 流媒体（推/拉流、鉴权、转流、双工）      | `Ledon.Streaming`             | `AddLedonStreaming()`                              | RTMP 服务端 + HTTP-FLV/HLS 播放 + 令牌鉴权 + 转流/录制 + WHIP/WHEP |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -354,10 +354,10 @@ src/Ledon.Sockets.Server/   Socket 服务端：监听/连接管理/类型化分�
 src/Ledon.Sip/              SIP/SDP 协议解析（纯解析）
 src/Ledon.Sip.Server/        SIP 服务端（基于 Socket 库）
 src/Ledon.Sip.Client/        SIP 客户端（基于 Socket 库）
-src/Ledon.Streaming/       流媒体控制面：推/拉流鉴权、事件、转流、WHIP/WHEP 双工
+src/Ledon.Streaming/       流媒体：RTMP 服务端 + HTTP-FLV/HLS 播放 + 推拉流鉴权、事件、WHIP/WHEP 双工
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（模块 26 + Web 341 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 366 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

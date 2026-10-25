@@ -1,7 +1,9 @@
 using Ledon.Streaming;
+using Ledon.Streaming.Rtmp;
 using Ledon.Web;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -61,6 +63,19 @@ public static class LedonStreamingServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IEndpoint, StreamWebhookEndpoint>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IEndpoint, WhipWhepEndpoints>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IEndpoint, StreamPlaybackEndpoints>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IEndpoint, HttpFlvEndpoints>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IEndpoint, HlsEndpoints>());
+
+        // 媒体面：RTMP 推流/拉流服务器 + 流枢纽 + HLS 分片
+        services.TryAddSingleton<Ledon.Streaming.Playback.StreamHub>();
+        services.AddOptions();
+        // 选项经 IOptions 解析：调用方的 Configure<T> / 配置文件都能覆盖默认值
+        services.TryAddSingleton<RtmpServerOptions>(provider =>
+            provider.GetRequiredService<IOptions<RtmpServerOptions>>().Value);
+        services.AddHostedService<RtmpServer>();
+        services.TryAddSingleton<HlsOptions>(provider =>
+            provider.GetRequiredService<IOptions<HlsOptions>>().Value);
+        services.AddHostedService<HlsSegmenter>();
 
         return services;
     }
