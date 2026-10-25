@@ -52,6 +52,9 @@ app.Run();
 | 操作审计                             | `Ledon.AuditLog`              | `AddLedonAudit()` / `AddLedonAudit<TContext>()`      | 谁何时改了什么（属性级 before/after）+ 保留策略 |
 | 应用层管线（CQRS）                   | `Ledon.Application`           | `AddLedonApplication()`                              | ICommand/IQuery + 验证/日志/事务/缓存 behaviors |
 | 统一运维端点                         | `Ledon.Admin`                 | `AddLedonAdmin()`                                    | 发件箱/死信/队列指标/工作流/定时任务一页总览 |
+| 飞书（通知 + 事件回调）               | `Ledon.Notifications.Feishu`  | `AddLedonFeishu()`                                  | 机器人/应用发消息 + URL 校验/解密/事件分发 |
+| TCP/UDP 服务端 + 帧/包编解码          | `Ledon.Protocols`             | `AddLedonTcpServer()` / `AddLedonUdpEndpoint()`     | 长度前缀/分隔符/定长切帧 + 文本/结构化二进制包 |
+| SIP 协议                              | `Ledon.Protocols.Sip`         | `AddLedonSip()`                                     | RFC 3261 消息解析 + SDP 解析 + 自动应答端点 |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -339,9 +342,12 @@ src/Ledon.Localization/    多语言与请求文化解析
 src/Ledon.AuditLog/        操作审计流水（属性级 before/after）
 src/Ledon.Application/     应用层管线（ICommand/IQuery + 验证/日志/事务/缓存）
 src/Ledon.Admin/           统一运维端点（队列/死信/工作流/定时任务总览）
+src/Ledon.Notifications.Feishu/ 飞书：通知渠道 + 事件回调（校验/解密/分发）
+src/Ledon.Protocols/        TCP/UDP 服务端 + 帧/包编解码（协议解析）
+src/Ledon.Protocols.Sip/   SIP 消息/SDP 解析 + 自动应答端点
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（模块 26 + Web 252 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 291 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

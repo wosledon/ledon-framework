@@ -61,6 +61,9 @@
     <ProjectReference Include="..\..\src\Ledon.AuditLog\Ledon.AuditLog.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Application\Ledon.Application.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Admin\Ledon.Admin.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Notifications.Feishu\Ledon.Notifications.Feishu.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Protocols\Ledon.Protocols.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Protocols.Sip\Ledon.Protocols.Sip.csproj" />
     </ItemGroup>
 
     <ItemGroup>

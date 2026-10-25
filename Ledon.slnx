@@ -19,6 +19,9 @@
     <Project Path="src/Ledon.AuditLog/Ledon.AuditLog.csproj" />
     <Project Path="src/Ledon.Application/Ledon.Application.csproj" />
     <Project Path="src/Ledon.Admin/Ledon.Admin.csproj" />
+    <Project Path="src/Ledon.Notifications.Feishu/Ledon.Notifications.Feishu.csproj" />
+    <Project Path="src/Ledon.Protocols/Ledon.Protocols.csproj" />
+    <Project Path="src/Ledon.Protocols.Sip/Ledon.Protocols.Sip.csproj" />
     <Project Path="src/Ledon.Locking/Ledon.Locking.csproj" />
     <Project Path="src/Ledon.Caching/Ledon.Caching.csproj" />
     <Project Path="src/Ledon.Configuration.Apollo/Ledon.Configuration.Apollo.csproj" />

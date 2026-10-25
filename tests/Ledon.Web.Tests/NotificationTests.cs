@@ -8,10 +8,10 @@ namespace Ledon.Web.Tests;
 public class NotificationTests
 {
     private static ChannelRoutingNotificationSender Build(
-        INotificationSender channel,
+        INotificationChannel channel,
         int maxRetries = 1,
         INotificationLog? log = null) =>
-        new(channel, new LedonNotificationOptions { MaxRetries = maxRetries }, log ?? new InMemoryNotificationLog(), NullLogger<ChannelRoutingNotificationSender>.Instance);
+        new([channel], new LedonNotificationOptions { MaxRetries = maxRetries }, log ?? new InMemoryNotificationLog(), NullLogger<ChannelRoutingNotificationSender>.Instance);
 
     [Fact]
     public async Task Email_channel_is_used_for_email_notifications()
@@ -130,13 +130,15 @@ public class NotificationTests
         Assert.False(result.Accepted);
     }
 
-    private sealed class FakeChannel(string channel, int failuresBeforeSuccess = 0) : INotificationSender
+    private sealed class FakeChannel(string channel, int failuresBeforeSuccess = 0) : INotificationChannel
     {
         private int _failures;
 
         public int Attempts { get; private set; }
 
         public int Sent { get; private set; }
+
+        public string Channel => channel;
 
         public Task<NotificationResult> SendAsync(Notification notification, CancellationToken cancellationToken = default)
         {

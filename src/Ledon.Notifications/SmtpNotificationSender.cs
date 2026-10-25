@@ -1,22 +1,26 @@
 using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Logging;
-
+using Microsoft.Extensions.Logging.Abstractions;
 namespace Ledon.Notifications;
 
 /// <summary>
 /// SMTP 邮件发送（渠道实现之一）。短信/推送网关按同样模式实现
 /// <see cref="INotificationSender"/> 或直接以 <c>Channel</c> 分支接入。
 /// </summary>
-public sealed class SmtpNotificationSender : INotificationSender
+public sealed class SmtpNotificationSender : INotificationSender, INotificationChannel
 {
-    private readonly LedonNotificationOptions _options;
-    private readonly ILogger<SmtpNotificationSender> _logger;
+    /// <inheritdoc />
+    public string Channel => "email";
 
-    public SmtpNotificationSender(LedonNotificationOptions options, ILogger<SmtpNotificationSender> logger)
+    private readonly LedonNotificationOptions _options;
+    private readonly ILogger _logger;
+
+    // 日志可选：宿主没接日志时静默跳过（与模块系统一致）
+    public SmtpNotificationSender(LedonNotificationOptions options, ILogger<SmtpNotificationSender>? logger = null)
     {
         _options = options;
-        _logger = logger;
+        _logger = logger ?? NullLogger<SmtpNotificationSender>.Instance;
     }
 
     public async Task<NotificationResult> SendAsync(

@@ -2,7 +2,6 @@ using Ledon.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -37,18 +36,12 @@ public static class LedonNotificationServiceCollectionExtensions
         services.TryAddSingleton(options);
         services.TryAddSingleton<INotificationLog, InMemoryNotificationLog>();
 
-        // 渠道实现按渠道名分发：默认 SMTP；短信/推送可再注册 INotificationSender
-        services.TryAddSingleton<INotificationSender>(provider =>
-        {
-            var resolved = provider.GetRequiredService<LedonNotificationOptions>();
-            var loggerFactory = provider.GetService<ILoggerFactory>() ?? NullLoggerFactory.Instance;
+        // SMTP 渠道（内置）：实现 INotificationChannel 即被路由纳入
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<INotificationChannel, SmtpNotificationSender>());
 
-            return new ChannelRoutingNotificationSender(
-                new SmtpNotificationSender(resolved, loggerFactory.CreateLogger<SmtpNotificationSender>()),
-                resolved,
-                provider.GetService<INotificationLog>() ?? new InMemoryNotificationLog(),
-                loggerFactory.CreateLogger<ChannelRoutingNotificationSender>());
-        });
+        // 路由：按渠道名分发 + 统一重试与发送记录。
+        // 渠道集合经独立的 INotificationChannel 解析——避免"在自己的工厂里解析自己"造成递归
+        services.TryAddSingleton<INotificationSender, ChannelRoutingNotificationSender>();
 
         return services;
     }

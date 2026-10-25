@@ -56,6 +56,10 @@ public class ArchitectureTests
         ["Ledon.Application"] = ["Ledon.Caching", "Ledon.Transactions"],
         // 组合型：运维端点聚合队列/调度/工作流状态
         ["Ledon.Admin"] = ["Ledon.Queues", "Ledon.Scheduling", "Ledon.Workflow", "Ledon.Web"],
+        // 协议/套接字：通知渠道接入 Web 端点与通知路由
+        ["Ledon.Notifications.Feishu"] = ["Ledon.Notifications", "Ledon.Web"],
+        ["Ledon.Protocols"] = [],
+        ["Ledon.Protocols.Sip"] = ["Ledon.Protocols"],
     };
 
     [Fact]

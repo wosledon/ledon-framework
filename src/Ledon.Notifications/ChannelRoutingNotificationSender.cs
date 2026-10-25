@@ -1,28 +1,31 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Ledon.Notifications;
 
 /// <summary>
-/// 多渠道路由发送器：按 <see cref="Notification.Channel"/> 选渠道实现，
+/// 多渠道路由发送器：按 <see cref="Notification.Channel"/> 选渠道实现
+/// （渠道实现 <see cref="INotificationChannel"/> 声明自己处理哪个渠道），
 /// 并统一记录发送日志、按 <see cref="LedonNotificationOptions.MaxRetries"/> 重试。
+/// 新渠道（飞书/短信/推送）实现 <see cref="INotificationChannel"/> 并注册进容器，路由无需改动。
 /// </summary>
 public sealed class ChannelRoutingNotificationSender : INotificationSender
 {
-    private readonly INotificationSender _email;
+    private readonly IReadOnlyList<INotificationChannel> _channels;
     private readonly LedonNotificationOptions _options;
     private readonly INotificationLog _log;
-    private readonly ILogger<ChannelRoutingNotificationSender> _logger;
+    private readonly ILogger _logger;
 
     public ChannelRoutingNotificationSender(
-        INotificationSender email,
+        IEnumerable<INotificationChannel> channels,
         LedonNotificationOptions options,
         INotificationLog log,
-        ILogger<ChannelRoutingNotificationSender> logger)
+        ILogger<ChannelRoutingNotificationSender>? logger = null)
     {
-        _email = email;
+        _channels = channels.ToArray();
         _options = options;
         _log = log;
-        _logger = logger;
+        _logger = logger ?? NullLogger<ChannelRoutingNotificationSender>.Instance;
     }
 
     public async Task<NotificationResult> SendAsync(
@@ -31,7 +34,8 @@ public sealed class ChannelRoutingNotificationSender : INotificationSender
         var channel = ResolveChannel(notification.Channel);
         if (channel is null)
         {
-            var unknown = NotificationResult.Fail($"未注册的渠道：{notification.Channel}");
+            var unknown = NotificationResult.Fail(
+                $"未注册的渠道：{notification.Channel}（已注册：{string.Join(", ", RegisteredChannels())}）");
             _log.Record(notification, unknown, 0);
             return unknown;
         }
@@ -70,6 +74,13 @@ public sealed class ChannelRoutingNotificationSender : INotificationSender
         return results;
     }
 
-    private INotificationSender? ResolveChannel(string channel) =>
-        string.Equals(channel, "email", StringComparison.OrdinalIgnoreCase) ? _email : null;
+    private INotificationSender? ResolveChannel(string channel)
+    {
+        // 渠道名精确匹配；未注册的渠道直接失败（fail-closed，不静默走错渠道）
+        return _channels.FirstOrDefault(candidate =>
+            string.Equals(candidate.Channel, channel, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IEnumerable<string> RegisteredChannels() =>
+        _channels.Select(channel => channel.Channel);
 }
