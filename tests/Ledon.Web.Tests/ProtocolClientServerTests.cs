@@ -121,6 +121,34 @@ public class ProtocolClientServerTests : IAsyncDisposable
             hosted.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
             _services.Add(hosted);
         }
+
+        // BackgroundService.StartAsync 立即返回，ExecuteAsync 在别的线程上跑：
+        // 端口绑定/监听有延迟，不等待就直接连会撞上 "Connection refused"
+        WaitUntilPortAcceptsAsync(_port, TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
+    }
+
+    /// <summary>等待端口真正可连接（探测连接成功后由服务端自行处理空闲连接）。</summary>
+    private static async Task WaitUntilPortAcceptsAsync(int port, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+
+        while (true)
+        {
+            try
+            {
+                using var probe = new TcpClient();
+                await probe.ConnectAsync(IPAddress.Loopback, port).ConfigureAwait(false);
+
+                return;
+            }
+            catch (SocketException)
+            {
+                if (DateTime.UtcNow >= deadline)
+                    throw new InvalidOperationException($"服务端在 {timeout.TotalSeconds} 秒内仍未监听 {port}");
+
+                await Task.Delay(20).ConfigureAwait(false);
+            }
+        }
     }
 
     private TcpProtocolClient CreateClient(IFrameCodec codec, IClientHandler handler)
