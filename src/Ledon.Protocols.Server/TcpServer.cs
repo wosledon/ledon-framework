@@ -1,12 +1,12 @@
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Ledon.Protocols;
+namespace Ledon.Protocols.Server;
 
 /// <summary>TCP 服务端选项。</summary>
 public sealed class TcpServerOptions
@@ -22,13 +22,20 @@ public sealed class TcpServerOptions
 
     /// <summary>积压队列，默认 128。</summary>
     public int Backlog { get; set; } = 128;
+
+    /// <summary>半包拼接缓冲区上限，默认 1MB（超出视为对端异常，断开）。</summary>
+    public int MaxPendingBytes { get; set; } = 1024 * 1024;
 }
 
 /// <summary>
 /// TCP 服务端：监听 → 接受连接 → 按 <see cref="IFrameCodec"/> 切帧 → 分发给
-/// <see cref="IConnectionHandler"/>。每连接一个独立读取循环，互不阻塞；
-/// 帧按到达顺序处理（协议语义要求顺序），单个帧处理失败只记录不断开；
-/// 协议错误（<see cref="ProtocolException"/>）断开该连接，不影响其他连接。
+/// <see cref="IConnectionHandler"/>。
+/// <list type="bullet">
+///   <item>每连接一个独立读取循环 + 独立 DI 作用域，互不阻塞；</item>
+///   <item>帧按到达顺序处理；单帧处理失败只记录不断开；</item>
+///   <item><see cref="ProtocolException"/>（协议不同步）断开该连接，不影响其他连接；</item>
+///   <item>半包自动拼接；缓冲溢出保护（对端持续发不完整帧时断开而不是 OOM）。</item>
+/// </list>
 /// </summary>
 public sealed class TcpServer : BackgroundService
 {
@@ -63,6 +70,22 @@ public sealed class TcpServer : BackgroundService
 
     /// <summary>当前全部连接（运维/广播用）。</summary>
     public IReadOnlyCollection<ConnectionContext> Connections => _connections.Values.ToArray();
+
+    /// <summary>向全部连接广播原始字节。</summary>
+    public async Task BroadcastAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    {
+        foreach (var connection in _connections.Values)
+        {
+            try
+            {
+                await connection.SendAsync(data, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "广播到连接 {Id} 失败", connection.Id);
+            }
+        }
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -106,7 +129,7 @@ public sealed class TcpServer : BackgroundService
 
         _connections[id] = connection;
 
-        // 日志装饰：连接生命周期与帧大小可观测（业务处理器只写业务）
+        // 日志装饰：连接生命周期可观测（业务处理器只写业务）
         var handler = new LoggingConnectionHandler(
             _handler,
             (loggerFactory ?? NullLoggerFactory.Instance).CreateLogger<LoggingConnectionHandler>());
@@ -137,7 +160,7 @@ public sealed class TcpServer : BackgroundService
         CancellationToken stoppingToken)
     {
         var buffer = new byte[_options.BufferSize];
-        var pending = new byte[_options.BufferSize * 4];
+        var pending = new byte[_options.MaxPendingBytes];
         var pendingLength = 0;
 
         await using var stream = client.GetStream();
@@ -149,7 +172,7 @@ public sealed class TcpServer : BackgroundService
                 return;   // 对端关闭
 
             if (pendingLength + read > pending.Length)
-                throw new ProtocolException("帧缓冲区溢出：对端可能持续发送不完整的超长帧");
+                throw new ProtocolException($"帧缓冲超过上限 {pending.Length} 字节：对端可能持续发送不完整帧");
 
             buffer.AsSpan(0, read).CopyTo(pending.AsSpan(pendingLength));
             pendingLength += read;

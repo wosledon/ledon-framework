@@ -52,7 +52,7 @@ public class MessageHandler : IFeishuEventHandler
 - 自定义机器人签名 = `Base64(HMAC-SHA256(key: "{timestamp}\n{secret}", msg: ""))`；
 - Lark 国际版把 `BaseUrl` 改成 `https://open.larksuite.com`。
 
-## Ledon.Protocols —— TCP/UDP + 协议解析
+## Ledon.Protocols —— 协议解析（单独库）
 
 ```csharp
 // 帧编解码（第一层：字节流 → 完整包）
@@ -64,18 +64,15 @@ IFrameCodec fixedSize = new FixedSizeFrameCodec(32);     // 定长
 var binary = new BinaryPacketCodec(magic: 0x4C42, version: 1);   // 魔数/版本校验
 var text = new TextPacketCodec();
 
-// 服务端
-builder.Services.AddLedonTcpServer(o => o.Port = 9000, new LengthPrefixedFrameCodec(), new MyHandler());
-builder.Services.AddLedonUdpEndpoint(o => o.Port = 9001, new MyDatagramHandler());
-
-public class MyHandler : ConnectionHandlerBase
+// 结构体映射：一份结构体就是协议契约
+public struct LoginRequest
 {
-    public override async Task OnFrameAsync(ConnectionContext connection, ReadOnlyMemory<byte> frame, CancellationToken ct)
-    {
-        var packet = new BinaryPacketCodec(0x4C42, 1).Decode(frame.Span);
-        await connection.SendAsync(LengthPrefixedFrameCodec.Encode(frame.Span), ct);   // 回显
-    }
+    [PacketField(0, PacketFieldKind.UInt32)] public uint Version;
+    [PacketField(1, PacketFieldKind.Utf8String)] public string? User;
 }
+
+var bytes = PacketSerializer<LoginRequest>.Serialize(new LoginRequest { Version = 3, User = "alice" });
+var request = PacketSerializer<LoginRequest>.Deserialize(bytes);
 ```
 
 - 每连接一个独立读取循环 + 独立 DI 作用域（`connection.Services` 拿 DbContext/仓储）；

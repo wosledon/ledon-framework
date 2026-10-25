@@ -1,74 +1,56 @@
 # Ledon.Protocols
 
-TCP/UDP 服务端 + 帧/包编解码：接硬件、接私有协议、接游戏/物联网网关，不用从零写粘包处理。
+协议解析库（零依赖）：帧编解码、二进制读写、**结构体映射**。
+客户端与服务端是独立包：`Ledon.Protocols.Client` / `Ledon.Protocols.Server`。
 
-## 帧编解码（第一层：字节流 → 完整包）
-
-```csharp
-// 长度前缀（最通用）：[长度(4)][载荷]
-IFrameCodec codec = new LengthPrefixedFrameCodec();
-
-// 分隔符（文本协议）：按 0x0A 切行
-IFrameCodec lines = new DelimiterFrameCodec((byte)'\n');
-
-// 定长（老旧硬件）：每帧 32 字节
-IFrameCodec fixedSize = new FixedSizeFrameCodec(32);
-```
-
-## 包编解码（第二层：包 → 对象）
+## 结构体映射（核心）
 
 ```csharp
-// 文本
-var text = new TextPacketCodec();
-
-// 结构化二进制：[魔数(2)][版本(1)][类型(1)][序列号(4)][长度(4)][载荷]
-var binary = new BinaryPacketCodec(magic: 0x4C42, version: 1);
-var frame = binary.Encode(new BinaryPacket(type: 1, sequence: 42, payload));
-var packet = binary.Decode(frame);   // 魔数/版本不匹配抛 ProtocolException
-```
-
-## TCP 服务端
-
-```csharp
-builder.Services.AddLedonTcpServer(
-    o => { o.Port = 9000; o.BufferSize = 8192; },
-    new LengthPrefixedFrameCodec(),
-    new MyHandler());   // IConnectionHandler：只重写关心的事件
-
-public class MyHandler : ConnectionHandlerBase
+public struct LoginRequest
 {
-    private readonly BinaryPacketCodec _codec = new(0x4C42, 1);
-
-    public override async Task OnFrameAsync(ConnectionContext connection, ReadOnlyMemory<byte> frame, CancellationToken ct)
-    {
-        var packet = _codec.Decode(frame.Span);
-
-        if (packet.Type == 1)   // 回显
-            await connection.SendAsync(_codec.Encode(new BinaryPacket(1, packet.Sequence, packet.Payload)), ct);
-    }
+    [PacketField(0, PacketFieldKind.UInt32)] public uint Version;
+    [PacketField(1, PacketFieldKind.Utf8String)] public string? User;
+    [PacketField(2, PacketFieldKind.Bool)] public bool Remember;
 }
+
+var bytes = PacketSerializer<LoginRequest>.Serialize(new LoginRequest { Version = 3, User = "alice", Remember = true });
+var request = PacketSerializer<LoginRequest>.Deserialize(bytes);
 ```
 
-- 每连接一个独立读取循环 + 独立 DI 作用域（`connection.Services` 拿 DbContext/仓储）；
-- 帧按到达顺序处理；单帧处理失败只记录不断开；`ProtocolException`（协议不同步）断开该连接；
-- 半包自动拼接：一次 `ReadAsync` 没收全的帧会等下次数据到达；
-- 缓冲区溢出保护（对端持续发不完整帧时断开而不是 OOM）。
+**布局即契约**：两端各写一份结构体就能通信，不需要 IDL / schema 文件。
 
-## UDP 端点
+性能设计：
+- 首次使用时为每个成员**编译强类型访问器**（表达式树），之后零反射、零装箱；
+- 读写在 `PacketReader` / `PacketWriter`（ref struct）上进行，无中间数组；
+- 定长布局可预计算大小（`PacketSerializer<T>.Size`），变长布局用 `Measure`；
+- 实测单次解析几十纳秒级（测试里有性能守卫，回归成反射会直接失败）。
+
+支持的字段类型：`Bool` `Int8/UInt8` `Int16/UInt16` `Int32/UInt32` `Int64/UInt64`
+`Float32` `Double` `Utf8String` `FixedString` `Bytes` `FixedBytes` `Struct`（嵌套）
+`Array`（数组）；枚举按底层类型走。默认小端，`bigEndian: true` 或字段级
+`[PacketField(0, Kind = PacketFieldKind.Int32, BigEndian = true)]` 切大端。
+
+## 帧编解码（字节流 → 完整包）
 
 ```csharp
-builder.Services.AddLedonUdpEndpoint(o => o.Port = 9001, new MyDatagramHandler());
-
-public class MyDatagramHandler : IUdpHandler
-{
-    public Task OnDatagramAsync(UdpContext datagram, CancellationToken ct = default)
-    {
-        // UDP 无连接、无顺序保证：本方法并发调用，实现须线程安全
-        return Task.CompletedTask;
-    }
-}
+IFrameCodec codec = new LengthPrefixedFrameCodec();      // [长度(4)][载荷]
+IFrameCodec lines = new DelimiterFrameCodec((byte)'\n'); // 换行分隔（也支持 "\r\n"）
+IFrameCodec fixedSize = new FixedSizeFrameCodec(32);     // 定长
 ```
 
-SIP（RFC 3261）消息解析见 `Ledon.Protocols.Sip`。
+## 二进制读写（手动场景）
+
+```csharp
+var buffer = new ArrayBufferWriter<byte>();
+var writer = new PacketWriter(buffer, bigEndian: true);
+writer.WriteUInt32(0x11223344);
+writer.WriteUtf8String("hi");
+
+var reader = new PacketReader(buffer.WrittenSpan, bigEndian: true);
+var magic = reader.ReadUInt32();
+var text = reader.ReadUtf8String();
+```
+
+协议不同步/帧损坏抛 `ProtocolException`（与普通 IO 错误区分，调用方可决定是否断开连接）。
 
 完整文档：<https://github.com/wosledon/ledon-framework>

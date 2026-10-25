@@ -70,6 +70,8 @@ internal static class AssemblyScanner
         "Ledon.Admin",
         "Ledon.Notifications.Feishu",
         "Ledon.Protocols",
+        "Ledon.Protocols.Client",
+        "Ledon.Protocols.Server",
         "Ledon.Protocols.Sip",
         "Ledon.Streaming",
     };

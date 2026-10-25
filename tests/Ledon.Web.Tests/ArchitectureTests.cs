@@ -59,7 +59,9 @@ public class ArchitectureTests
         // 协议/套接字：通知渠道接入 Web 端点与通知路由
         ["Ledon.Notifications.Feishu"] = ["Ledon.Notifications", "Ledon.Web"],
         ["Ledon.Protocols"] = [],
-        ["Ledon.Protocols.Sip"] = ["Ledon.Protocols"],
+        ["Ledon.Protocols.Client"] = ["Ledon.Protocols"],
+        ["Ledon.Protocols.Server"] = ["Ledon.Protocols", "Ledon.Module"],
+        ["Ledon.Protocols.Sip"] = ["Ledon.Protocols", "Ledon.Protocols.Server"],
         // 流媒体控制面：端点与 webhook 走 Web
         ["Ledon.Streaming"] = ["Ledon.Web"],
     };

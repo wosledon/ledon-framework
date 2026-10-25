@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Ledon.Protocols\Ledon.Protocols.csproj" />
+        <ProjectReference Include="..\Ledon.Protocols.Server\Ledon.Protocols.Server.csproj" />
     </ItemGroup>
 
 </Project>

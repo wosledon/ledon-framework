@@ -3,31 +3,30 @@ using System.Net.Sockets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Ledon.Protocols;
+namespace Ledon.Protocols.Server;
 
-/// <summary>UDP 端点选项。</summary>
-public sealed class UdpEndpointOptions
+/// <summary>UDP 服务端选项。</summary>
+public sealed class UdpServerOptions
 {
     /// <summary>绑定地址，默认 <c>0.0.0.0</c>。</summary>
     public string Address { get; set; } = "0.0.0.0";
 
     /// <summary>绑定端口。</summary>
     public int Port { get; set; }
-
-    /// <summary>接收缓冲区，默认 64KB（UDP 数据报上限）。</summary>
-    public int BufferSize { get; set; } = 65536;
 }
 
-/// <summary>UDP 数据报上下文（无连接，每次都是独立数据报）。</summary>
+/// <summary>UDP 数据报上下文（无连接，每次都是独立数据报；可回包）。</summary>
 public sealed class UdpContext
 {
-    internal UdpContext(ReadOnlyMemory<byte> data, IPEndPoint remote, IServiceProvider services)
+    private readonly UdpServer _server;
+
+    internal UdpContext(ReadOnlyMemory<byte> data, IPEndPoint remote, IServiceProvider services, UdpServer server)
     {
         Data = data;
         Remote = remote;
         Services = services;
+        _server = server;
     }
 
     /// <summary>数据报内容。</summary>
@@ -38,6 +37,19 @@ public sealed class UdpContext
 
     /// <summary>请求作用域服务。</summary>
     public IServiceProvider Services { get; }
+
+    /// <summary>回包给来源（请求/响应式协议用）。</summary>
+    public Task ReplyAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default) =>
+        _server.SendAsync(data, Remote, cancellationToken);
+
+    /// <summary>按 <see cref="IPacketCodec{TPacket}"/> 编码后回包。</summary>
+    public Task ReplyPacketAsync<TPacket>(TPacket packet, CancellationToken cancellationToken = default)
+    {
+        var codec = Services.GetService<IPacketCodec<TPacket>>()
+            ?? throw new InvalidOperationException($"未注册 IPacketCodec<{typeof(TPacket).Name}>");
+
+        return ReplyAsync(codec.Encode(packet), cancellationToken);
+    }
 }
 
 /// <summary>UDP 数据报处理器。</summary>
@@ -48,22 +60,22 @@ public interface IUdpHandler
 }
 
 /// <summary>
-/// UDP 端点：接收数据报并分发给 <see cref="IUdpHandler"/>。
+/// UDP 服务端：接收数据报并分发给 <see cref="IUdpHandler"/>。
 /// UDP 无连接、无顺序保证，处理器天然并发调用——实现须线程安全。
 /// </summary>
-public sealed class UdpEndpoint : BackgroundService
+public sealed class UdpServer : BackgroundService
 {
-    private readonly UdpEndpointOptions _options;
+    private readonly UdpServerOptions _options;
     private readonly IUdpHandler _handler;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILogger<UdpEndpoint> _logger;
+    private readonly ILogger<UdpServer> _logger;
     private readonly UdpClient _client;
 
-    public UdpEndpoint(
-        UdpEndpointOptions options,
+    public UdpServer(
+        UdpServerOptions options,
         IUdpHandler handler,
         IServiceScopeFactory scopeFactory,
-        ILogger<UdpEndpoint> logger)
+        ILogger<UdpServer> logger)
     {
         _options = options;
         _handler = handler;
@@ -79,14 +91,13 @@ public sealed class UdpEndpoint : BackgroundService
     /// <summary>主动发送数据报（应答/探测用）。</summary>
     public Task SendAsync(ReadOnlyMemory<byte> data, IPEndPoint remote, CancellationToken cancellationToken = default)
     {
-        // UDP 发送不进内核阻塞路径：同步 Send 即可（语义与异步等价）
         _client.Send(data.ToArray(), data.Length, remote);
         return Task.CompletedTask;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("UDP 端点已绑定 {Address}:{Port}", _options.Address, BoundPort);
+        _logger.LogInformation("UDP 服务端已绑定 {Address}:{Port}", _options.Address, BoundPort);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -113,7 +124,7 @@ public sealed class UdpEndpoint : BackgroundService
                 try
                 {
                     await _handler.OnDatagramAsync(
-                        new UdpContext(result.Buffer, result.RemoteEndPoint, scope.ServiceProvider),
+                        new UdpContext(result.Buffer, result.RemoteEndPoint, scope.ServiceProvider, this),
                         CancellationToken.None).ConfigureAwait(false);
                 }
                 catch (Exception ex)

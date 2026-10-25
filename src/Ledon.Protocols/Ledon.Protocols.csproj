@@ -4,14 +4,8 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <IsPackable>true</IsPackable>
+        <Description>Ledon 协议解析：帧编解码、二进制读写、结构体映射（高性能）。</Description>
     </PropertyGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\Ledon.Module\Ledon.Module.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    </ItemGroup>
 
 </Project>

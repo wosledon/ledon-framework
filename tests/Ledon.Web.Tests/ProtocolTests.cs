@@ -3,7 +3,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Ledon.Protocols;
+using Ledon.Protocols.Server;
 using Microsoft.Extensions.DependencyInjection;
+
 using Microsoft.Extensions.Hosting;
 
 namespace Ledon.Web.Tests;
@@ -246,7 +248,7 @@ public class TcpServerTests : IAsyncDisposable
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddLedonTcpServer(o => o.Port = _port, codec, handler);
+        services.AddLedonProtocolServer(o => o.Port = _port, codec, handler);
 
         var provider = services.BuildServiceProvider();
 

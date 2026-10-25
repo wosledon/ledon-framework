@@ -37,6 +37,8 @@ public static class LedonSipServiceCollectionExtensions
 
         services.TryAddSingleton(options);
         services.TryAddSingleton<ISipHandler, SipResponder>();
+        // SIP 端点构建在 UDP 服务端之上（处理器由容器解析）
+        services.AddLedonProtocolUdpServer<SipHandler>(o => o.Port = options.Port);
 
         return services;
     }
@@ -62,7 +64,7 @@ public sealed class LedonSipOptions
 public interface ISipHandler
 {
     /// <summary>收到一条 SIP 消息；返回要发回的响应（<c>null</c> = 不应答）。</summary>
-    Task<SipMessage?> HandleAsync(SipMessage message, SipEndpoint endpoint, CancellationToken cancellationToken = default);
+    Task<SipMessage?> HandleAsync(SipMessage message, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -72,7 +74,7 @@ public interface ISipHandler
 public sealed class SipResponder(LedonSipOptions options) : ISipHandler
 {
     public Task<SipMessage?> HandleAsync(
-        SipMessage message, SipEndpoint endpoint, CancellationToken cancellationToken = default)
+        SipMessage message, CancellationToken cancellationToken = default)
     {
         if (message.Type != SipMessageType.Request || message.Method is null)
             return Task.FromResult<SipMessage?>(null);
@@ -106,81 +108,38 @@ public sealed class SipResponder(LedonSipOptions options) : ISipHandler
 
 /// <summary>
 /// SIP 端点（UDP）：收报文 → 解析 → 交给 <see cref="ISipHandler"/> → 发回响应。
-/// 帧边界按 <c>Content-Length</c> 切（UDP 数据报天然就是一条消息）。
+/// 构建在 <see cref="Ledon.Protocols.Server.UdpServer"/> 之上：协议实现只关心 SIP 语义，
+/// 不管套接字、作用域与并发。
 /// </summary>
-public sealed class SipEndpoint : BackgroundService
+public sealed class SipHandler : Ledon.Protocols.Server.IUdpHandler
 {
-    private readonly LedonSipOptions _options;
     private readonly ISipHandler _handler;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILogger<SipEndpoint> _logger;
-    private readonly System.Net.Sockets.UdpClient _client;
+    private readonly Microsoft.Extensions.Logging.ILogger<SipHandler> _logger;
 
-    public SipEndpoint(
-        LedonSipOptions options,
-        ISipHandler handler,
-        IServiceScopeFactory scopeFactory,
-        ILogger<SipEndpoint> logger)
+    public SipHandler(ISipHandler handler, Microsoft.Extensions.Logging.ILogger<SipHandler> logger)
     {
-        _options = options;
         _handler = handler;
-        _scopeFactory = scopeFactory;
         _logger = logger;
-
-        _client = new System.Net.Sockets.UdpClient(options.Port);
     }
 
-    /// <summary>当前绑定端口。</summary>
-    public int BoundPort => ((System.Net.IPEndPoint)_client.Client.LocalEndPoint!).Port;
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task OnDatagramAsync(Ledon.Protocols.Server.UdpContext datagram, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("SIP 端点已监听 UDP {Port}（User-Agent={UserAgent}）", BoundPort, _options.UserAgent);
-
-        while (!stoppingToken.IsCancellationRequested)
+        try
         {
-            System.Net.Sockets.UdpReceiveResult received;
-            try
-            {
-                received = await _client.ReceiveAsync(stoppingToken).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
+            var message = SipParser.Parse(datagram.Data.Span);
 
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    var message = SipParser.Parse(received.Buffer);
+            _logger.LogDebug("SIP {Type} {Method}{StatusCode} 来自 {Remote}",
+                message.Type, message.Method ?? "", message.StatusCode, datagram.Remote);
 
-                    _logger.LogDebug("SIP {Type} {Method}{StatusCode} 来自 {Remote}",
-                        message.Type, message.Method ?? "", message.StatusCode, received.RemoteEndPoint);
+            var response = await _handler.HandleAsync(message, cancellationToken).ConfigureAwait(false);
 
-                    await using var scope = _scopeFactory.CreateAsyncScope();
-                    var handler = scope.ServiceProvider.GetRequiredService<ISipHandler>();
-
-                    var response = await handler.HandleAsync(message, this, CancellationToken.None).ConfigureAwait(false);
-
-                    if (response is not null)
-                        await ReplyAsync(response, received.RemoteEndPoint).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    // 解析失败只记录：UDP 无连接，不能"断开"任何人
-                    _logger.LogWarning(ex, "SIP 报文处理失败（{Remote}）", received.RemoteEndPoint);
-                }
-            }, CancellationToken.None);
+            if (response is not null)
+                await datagram.ReplyAsync(response.ToBytes(), cancellationToken).ConfigureAwait(false);
         }
-
-        _client.Dispose();
-    }
-
-    /// <summary>发回一条 SIP 消息。</summary>
-    public Task ReplyAsync(SipMessage message, System.Net.IPEndPoint remote, CancellationToken cancellationToken = default)
-    {
-        _client.Send(message.ToBytes(), message.ToBytes().Length, remote);
-        return Task.CompletedTask;
+        catch (Exception ex)
+        {
+            // 解析失败只记录：UDP 无连接，不能"断开"任何人
+            _logger.LogWarning(ex, "SIP 报文处理失败（{Remote}）", datagram.Remote);
+        }
     }
 }

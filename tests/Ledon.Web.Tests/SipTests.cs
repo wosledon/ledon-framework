@@ -170,7 +170,7 @@ public class SipTests
 
             """);
 
-        var response = await responder.HandleAsync(request, null!, CancellationToken.None);
+        var response = await responder.HandleAsync(request, CancellationToken.None);
 
         Assert.NotNull(response);
         Assert.Equal(200, response!.StatusCode);
@@ -185,7 +185,7 @@ public class SipTests
     {
         var responder = new SipResponder(new LedonSipOptions());
 
-        var response = await responder.HandleAsync(SipParser.Parse(Invite), null!, CancellationToken.None);
+        var response = await responder.HandleAsync(SipParser.Parse(Invite), CancellationToken.None);
 
         Assert.Null(response);
     }
@@ -196,7 +196,6 @@ public class SipTests
         var responder = new SipResponder(new LedonSipOptions { AutoAnswerOptions = true });
         var response = await responder.HandleAsync(
             SipParser.CreateResponse(200, "OK", new Dictionary<string, string>()),
-            null!,
             CancellationToken.None);
 
         Assert.Null(response);

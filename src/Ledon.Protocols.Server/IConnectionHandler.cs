@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 
-namespace Ledon.Protocols;
+namespace Ledon.Protocols.Server;
 
-/// <summary>连接事件（连上/断开/收到帧）。</summary>
+/// <summary>连接事件（连上/收到帧/断开）。</summary>
 public interface IConnectionHandler
 {
     /// <summary>新连接建立。</summary>
@@ -13,47 +13,6 @@ public interface IConnectionHandler
 
     /// <summary>连接断开（客户端主动断或异常都在这里，资源清理点）。</summary>
     Task OnDisconnectedAsync(ConnectionContext connection, Exception? exception, CancellationToken cancellationToken = default);
-}
-
-/// <summary>连接上下文：发送、远端地址、附加状态。</summary>
-public sealed class ConnectionContext
-{
-    private readonly Func<ReadOnlyMemory<byte>, CancellationToken, Task> _send;
-
-    internal ConnectionContext(
-        string id,
-        string remoteEndPoint,
-        Func<ReadOnlyMemory<byte>, CancellationToken, Task> send,
-        Action onClose,
-        IServiceProvider services)
-    {
-        Id = id;
-        RemoteEndPoint = remoteEndPoint;
-        _send = send;
-        _onClose = onClose;
-        Services = services;
-    }
-
-    private readonly Action _onClose;
-
-    /// <summary>连接标识（服务端分配，日志/排查用）。</summary>
-    public string Id { get; }
-
-    /// <summary>远端地址（IP:Port）。</summary>
-    public string RemoteEndPoint { get; }
-
-    /// <summary>请求作用域服务（按连接解析，如 DbContext/仓储）。</summary>
-    public IServiceProvider Services { get; }
-
-    /// <summary>附加状态（业务自用，如登录态、缓冲区）。</summary>
-    public IDictionary<object, object?> Items { get; } = new Dictionary<object, object?>();
-
-    /// <summary>发送原始字节（已按框架的帧编码规则组帧）。</summary>
-    public Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default) =>
-        _send(data, cancellationToken);
-
-    /// <summary>主动关闭连接。</summary>
-    public void Close() => _onClose();
 }
 
 /// <summary>处理器基类：只重写关心的事件。</summary>
