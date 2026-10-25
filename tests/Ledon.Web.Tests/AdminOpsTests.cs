@@ -120,6 +120,13 @@ public class AdminOpsTests
         public Task<IReadOnlyList<OutboxMessage>> GetPendingAsync(int batchSize, CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<OutboxMessage>>(Pending.Take(batchSize).ToArray());
 
+        public Task<IReadOnlyList<OutboxMessage>> ClaimAsync(
+            int batchSize, string owner, TimeSpan lease, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<OutboxMessage>>(Pending.Take(batchSize).ToArray());
+
+        public Task<int> CountPendingAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(Pending.Count);
+
         public Task MarkProcessedAsync(Guid id, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         public Task MarkFailedAsync(Guid id, string error, CancellationToken cancellationToken = default) => Task.CompletedTask;

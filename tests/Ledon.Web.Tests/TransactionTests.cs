@@ -26,15 +26,21 @@ public class TransactionTests : IDisposable
     private async Task<WebApplication> StartAsync(
         string dbPath,
         bool withOutbox = false,
-        Action<LedonTransactionOptions>? configure = null)
+        Action<LedonTransactionOptions>? configure = null,
+        Action<LedonSagaOptions>? configureSaga = null)
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
-        builder.Services.AddLedonTransactions(configure);
+        builder.Services.AddLedonTransactions(configure, configureSaga);
+        if (configureSaga is not null)
+            builder.Services.Configure(configureSaga);
         if (withOutbox)
             builder.Services.AddLedonOutbox(o => o.PollingInterval = TimeSpan.FromHours(1));   // 不起投递
         builder.Services.AddDbContext<TxTestDbContext>(options =>
             options.UseSqlite($"Data Source={dbPath};Cache=Shared"));
+        builder.Services.AddDbContext<SagaTestDbContext>(options =>
+            options.UseSqlite(
+                $"Data Source={dbPath.Replace(".db", "-saga.db", StringComparison.OrdinalIgnoreCase)};Cache=Shared"));
 
         var app = builder.Build();
         _app = app;
@@ -43,10 +49,91 @@ public class TransactionTests : IDisposable
         {
             var db = scope.ServiceProvider.GetRequiredService<TxTestDbContext>();
             await db.Database.EnsureCreatedAsync();
+
+            var sagaDb = scope.ServiceProvider.GetRequiredService<SagaTestDbContext>();
+            await sagaDb.Database.EnsureCreatedAsync();
+
+            // 顺带确认 SagaDbContext 基类型能被解析（EfSagaStore 靠它）
+            Assert.NotNull(scope.ServiceProvider.GetRequiredService<SagaDbContext>());
         }
 
         await app.StartAsync();
         return app;
+    }
+
+    [Fact]
+    public async Task Saga_is_idempotent_by_key()
+    {
+        var app = await StartAsync(NewDb("saga-idem"));
+
+        using var scope = app.Services.CreateScope();
+        var saga = scope.ServiceProvider.GetRequiredService<ISagaFactory>();
+
+        // 同一个幂等键提交两次：第二步不会把业务跑两遍
+        await saga.For("order", "order-1001")
+            .Step("reserve", (ctx, ct) => Task.CompletedTask)
+            .Step("charge", (ctx, ct) => Task.CompletedTask)
+            .RunAsync();
+
+        await saga.For("order", "order-1001")
+            .Step("reserve", (ctx, ct) => Task.CompletedTask)
+            .Step("charge", (ctx, ct) => Task.CompletedTask)
+            .RunAsync();
+
+        var store = scope.ServiceProvider.GetRequiredService<ISagaStore>();
+        var instance = await store.GetByIdempotencyKeyAsync("order-1001");
+
+        Assert.NotNull(instance);
+        Assert.Equal(SagaStatus.Completed, instance!.Status);
+        Assert.Equal(["reserve", "charge"], instance.CompletedSteps);
+    }
+
+    [Fact]
+    public async Task Saga_persists_steps_and_survives_a_restart()
+    {
+        var app = await StartAsync(NewDb("saga-resume"));
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var saga = scope.ServiceProvider.GetRequiredService<ISagaFactory>();
+
+            var ex = await Assert.ThrowsAsync<SagaExecutionException>(() => saga.For("order", "order-2002")
+                .Step("reserve", (ctx, ct) => Task.CompletedTask)
+                .Step("charge", (ctx, ct) => throw new InvalidOperationException("boom"))
+                .RunAsync());
+
+            Assert.Equal("charge", ex.Step);
+        }
+
+        // 换一个作用域（模拟进程重启后从存储恢复）：已完成步骤不会被重复执行
+        using var resumed = app.Services.CreateScope();
+        var store = resumed.ServiceProvider.GetRequiredService<ISagaStore>();
+        var instance = await store.GetByIdempotencyKeyAsync("order-2002");
+
+        Assert.NotNull(instance);
+        Assert.Equal(SagaStatus.Compensated, instance!.Status);
+        Assert.Contains("reserve", instance.CompletedSteps);
+
+        // 步骤清单随实例持久化：恢复路径不需要调用方重新提供
+        Assert.Equal(["reserve", "charge"], instance.Steps);
+    }
+
+    [Fact]
+    public async Task Saga_step_timeout_is_enforced()
+    {
+        var app = await StartAsync(
+            NewDb("saga-timeout"),
+            configureSaga: o => o.StepTimeout = TimeSpan.FromMilliseconds(200));
+
+        using var scope = app.Services.CreateScope();
+        var saga = scope.ServiceProvider.GetRequiredService<ISagaFactory>();
+
+        // 步骤不观察取消令牌：超时看门狗也必须让它失败并进入补偿
+        var ex = await Assert.ThrowsAsync<SagaExecutionException>(() => saga.For("order", "order-3003")
+            .Step("slow", (ctx, ct) => Task.Delay(TimeSpan.FromSeconds(30), ct))
+            .RunAsync());
+
+        Assert.Equal("slow", ex.Step);
     }
 
     // ---------- 本地事务 ----------
@@ -240,13 +327,13 @@ public class TransactionTests : IDisposable
         await saga.For("order")
             .Step("reserve", (ctx, ct) =>
             {
-                ctx.Data["reserved"] = true;
+                ctx.Data["reserved"] = "true";
                 return Task.CompletedTask;
             })
             .Step("charge", (ctx, ct) =>
             {
-                Assert.Equal(true, ctx.Data["reserved"]);   // 跨步骤共享数据
-                ctx.Data["charged"] = true;
+                Assert.Equal("true", ctx.Data["reserved"]);   // 跨步骤共享数据
+                ctx.Data["charged"] = "true";
                 return Task.CompletedTask;
             })
             .RunAsync();
@@ -371,4 +458,10 @@ public class TxTestDbContext(DbContextOptions<TxTestDbContext> options)
     : OutboxDbContext(options), ILedonDbContext
 {
     public DbSet<Account> Accounts => Set<Account>();
+}
+
+/// <summary>Saga 持久化测试用的上下文（继承 SagaDbContext 即获得实例表）。</summary>
+public class SagaTestDbContext(DbContextOptions<SagaTestDbContext> options)
+    : SagaDbContext(options)
+{
 }

@@ -20,6 +20,15 @@ public class OutboxMessage
     public int RetryCount { get; set; }
 
     public string? Error { get; set; }
+
+    /// <summary>
+    /// 认领者标识（哪个实例正在投递）。多实例部署时靠它保证同一条消息
+    /// 同一时刻只有一个实例在投——否则每个实例都会把全部待投递消息投一遍（N 倍重复）。
+    /// </summary>
+    public string? LeasedBy { get; set; }
+
+    /// <summary>认领租约到期时刻；null 或已过期 = 可被重新认领（节点崩溃后的接管路径）。</summary>
+    public DateTime? LeasedUntil { get; set; }
 }
 
 /// <summary>
@@ -53,6 +62,7 @@ public abstract class OutboxDbContext : DbContext
             entity.Property(message => message.Type).IsRequired().HasMaxLength(500);
             entity.Property(message => message.Payload).IsRequired();
             entity.HasIndex(message => message.ProcessedAt);
+            entity.HasIndex(message => message.LeasedUntil);
         });
 
         modelBuilder.Entity<InboxMessage>(entity =>
@@ -72,8 +82,9 @@ public abstract class OutboxDbContext : DbContext
             entity.Property(job => job.QueueName).IsRequired().HasMaxLength(200);
             entity.Property(job => job.Payload).IsRequired();
 
-            // 调度器按 未处理 + 可用时刻 取批次
+            // 调度器按 未处理 + 可用时刻 + 未认领 取批次
             entity.HasIndex(job => new { job.ProcessedAt, job.AvailableAt });
+            entity.HasIndex(job => job.LeasedUntil);
         });
 
         base.OnModelCreating(modelBuilder);

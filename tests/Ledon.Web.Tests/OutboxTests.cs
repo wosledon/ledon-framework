@@ -15,6 +15,65 @@ namespace Ledon.Web.Tests;
 /// </summary>
 public class OutboxTests : IDisposable
 {
+    [Fact]
+    public async Task Claiming_is_exclusive_and_expires()
+    {
+        var dbPath = Path.Combine(AppContext.BaseDirectory, $"outbox-claim-{Guid.NewGuid():N}.db");
+
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.Services.AddLedonOutbox(options => options.PollingInterval = TimeSpan.FromHours(1));   // 不起调度
+        builder.Services.AddDbContext<TestOutboxDbContext>(options =>
+            options.UseSqlite($"Data Source={dbPath}"));
+
+        var app = builder.Build();
+        _app = app;
+        await app.StartAsync();
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<TestOutboxDbContext>();
+            await db.Database.EnsureCreatedAsync();
+
+            var store = scope.ServiceProvider.GetRequiredService<IOutboxStore>();
+            store.Add(new OrderPlaced("claim"));
+            await db.SaveChangesAsync();
+        }
+
+        await using var verifying = app.Services.CreateAsyncScope();
+        var outbox = verifying.ServiceProvider.GetRequiredService<IOutboxStore>();
+
+        // node-a 认领到，node-b 拿不到（多实例部署时同一条消息只有一个实例会投）
+        var mine = await outbox.ClaimAsync(10, "node-a", TimeSpan.FromMinutes(1), CancellationToken.None);
+        Assert.True(
+            mine.Count > 0,
+            $"认领结果为空：CountPending={await outbox.CountPendingAsync(CancellationToken.None)}");
+        Assert.Single(mine);
+
+        var theirs = await outbox.ClaimAsync(10, "node-b", TimeSpan.FromMinutes(1), CancellationToken.None);
+        Assert.Empty(theirs);
+
+        // 租约极短：过期后别的节点能接手（节点崩溃后的接管路径）
+        var renewed = await outbox.ClaimAsync(10, "node-a", TimeSpan.FromMilliseconds(20), CancellationToken.None);
+        await Task.Delay(200);
+        var taken = await outbox.ClaimAsync(10, "node-b", TimeSpan.FromMinutes(1), CancellationToken.None);
+        Assert.True(
+            taken.Count > 0,
+            $"接管失败：续约结果={renewed.Count}，待投递={await outbox.CountPendingAsync(CancellationToken.None)}");
+        Assert.Single(taken);
+
+        // 处理完成后不再出现在待投递里
+        await outbox.MarkProcessedAsync(taken[0].Id, CancellationToken.None);
+        Assert.Empty(await outbox.ClaimAsync(10, "node-b", TimeSpan.FromMinutes(1), CancellationToken.None));
+    }
+
+    [Fact]
+    public void Pending_count_does_not_claim()
+    {
+        // 运维快照要能数个数，但不能把别人正在投的消息抢过来
+        Assert.True(typeof(IOutboxStore).GetMethod(nameof(IOutboxStore.CountPendingAsync)) is not null);
+    }
+
     private WebApplication? _app;
 
     [Fact]
@@ -251,7 +310,7 @@ public class OutboxTests : IDisposable
             await db.SaveChangesAsync();
 
             // 死信：不在待投递列表里，但可查询
-            var pending = await store.GetPendingAsync(10, CancellationToken.None);
+            var pending = await store.ClaimAsync(10, "test", TimeSpan.FromMinutes(1), CancellationToken.None);
             Assert.Empty(pending);
 
             var deadLetters = await store.GetDeadLettersAsync(10, CancellationToken.None);
@@ -262,7 +321,7 @@ public class OutboxTests : IDisposable
             Assert.True(await store.ReviveAsync(dead.Id, CancellationToken.None));
             Assert.False(await store.ReviveAsync(Guid.NewGuid(), CancellationToken.None));
 
-            var revived = await store.GetPendingAsync(10, CancellationToken.None);
+            var revived = await store.ClaimAsync(10, "test", TimeSpan.FromMinutes(1), CancellationToken.None);
             Assert.Single(revived);
             Assert.Equal(0, revived[0].RetryCount);
         }

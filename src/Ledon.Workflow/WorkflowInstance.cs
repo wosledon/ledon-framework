@@ -76,6 +76,20 @@ public sealed class WorkflowInstance
 
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
+    /// <summary>
+    /// 乐观并发令牌。每次保存由存储生成新值，UPDATE 时作为 WHERE 条件——
+    /// 两个节点同时改同一实例时后提交的那个会拿到
+    /// <see cref="Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException"/>，
+    /// 而不是静默覆盖对方刚写入的 <see cref="CompletedSteps"/>（丢更新）。
+    /// </summary>
+    public string ConcurrencyToken { get; set; } = Guid.NewGuid().ToString("N");
+
+    /// <summary>当前持有租约的节点标识（恢复服务认领用）。</summary>
+    public string? ClaimedBy { get; set; }
+
+    /// <summary>租约到期时间（UTC）；null 或已过期 = 可被重新认领。</summary>
+    public DateTimeOffset? ClaimedUntilUtc { get; set; }
+
     /// <summary>跨步骤共享数据（随实例持久化）。</summary>
     public IDictionary<string, object?> Data => _data;
 

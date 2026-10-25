@@ -22,33 +22,88 @@ internal sealed class EfOutboxStore(OutboxDbContext context, LedonOutboxOptions 
         });
     }
 
-    public async Task<IReadOnlyList<OutboxMessage>> GetPendingAsync(int batchSize, CancellationToken cancellationToken = default) =>
-        await context.OutboxMessages
-            .Where(message => message.ProcessedAt == null && message.RetryCount < options.MaxRetries)
+    public async Task<IReadOnlyList<OutboxMessage>> ClaimAsync(
+        int batchSize, string owner, TimeSpan lease, CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        var until = now.Add(lease);
+
+        // 候选：未处理、未超重试、且没人认领（或租约已过期，或本来就是自己认领的——
+        // 最后一条让持有者能续约，否则长任务会在租约中途被别的节点接手）
+        var candidates = await context.OutboxMessages
+            .AsNoTracking()
+            .Where(message => message.ProcessedAt == null
+                && message.RetryCount < options.MaxRetries
+                && (message.LeasedUntil == null
+                    || message.LeasedUntil < now
+                    || message.LeasedBy == owner))
             .OrderBy(message => message.CreatedAt)
             .Take(batchSize)
-            .ToListAsync(cancellationToken);
+            .Select(message => message.Id)
+            .ToArrayAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (candidates.Length == 0)
+            return [];
+
+        // 逐条条件认领：WHERE 里带上租约条件，所以只有真正抢到的行才会被算进来。
+        // 并发部署下两个实例可能同时看上同一条，这里保证只有一个能改成功
+        var owned = new List<Guid>(candidates.Length);
+
+        foreach (var id in candidates)
+        {
+            var rows = await context.OutboxMessages
+                .Where(message => message.Id == id
+                    && (message.LeasedUntil == null
+                        || message.LeasedUntil < now
+                        || message.LeasedBy == owner))
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(message => message.LeasedBy, owner)
+                    .SetProperty(message => message.LeasedUntil, until),
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            if (rows == 1)
+                owned.Add(id);
+        }
+
+        if (owned.Count == 0)
+            return [];
+
+        return await context.OutboxMessages
+            .AsNoTracking()
+            .Where(message => owned.Contains(message.Id))
+            .OrderBy(message => message.CreatedAt)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
 
     public async Task MarkProcessedAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var message = await context.OutboxMessages.FindAsync([id], cancellationToken).ConfigureAwait(false);
-        if (message is not null)
-        {
-            message.ProcessedAt = DateTime.UtcNow;
-            message.Error = null;
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
+        // 条件更新：只认自己认领过的行（别人的租约内不去动）
+        await context.OutboxMessages
+            .Where(message => message.Id == id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(message => message.ProcessedAt, DateTime.UtcNow)
+                .SetProperty(message => message.Error, (string?)null)
+                .SetProperty(message => message.LeasedBy, (string?)null)
+                .SetProperty(message => message.LeasedUntil, (DateTime?)null),
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public async Task MarkFailedAsync(Guid id, string error, CancellationToken cancellationToken = default)
     {
-        var message = await context.OutboxMessages.FindAsync([id], cancellationToken).ConfigureAwait(false);
-        if (message is not null)
-        {
-            message.RetryCount++;
-            message.Error = error;
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
+        // 释放认领让下轮能重试；重试计数 +1
+        await context.OutboxMessages
+            .Where(message => message.Id == id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(message => message.RetryCount, message => message.RetryCount + 1)
+                .SetProperty(message => message.Error, error)
+                .SetProperty(message => message.LeasedBy, (string?)null)
+                .SetProperty(message => message.LeasedUntil, (DateTime?)null),
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public async Task<int> DeleteProcessedAsync(TimeSpan retention, CancellationToken cancellationToken = default)
@@ -71,13 +126,22 @@ internal sealed class EfOutboxStore(OutboxDbContext context, LedonOutboxOptions 
 
     public async Task<bool> ReviveAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var message = await context.OutboxMessages.FindAsync([id], cancellationToken).ConfigureAwait(false);
-        if (message is null)
-            return false;
+        var rows = await context.OutboxMessages
+            .Where(message => message.Id == id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(message => message.RetryCount, 0)
+                .SetProperty(message => message.Error, (string?)null)
+                .SetProperty(message => message.LeasedBy, (string?)null)
+                .SetProperty(message => message.LeasedUntil, (DateTime?)null),
+                cancellationToken)
+            .ConfigureAwait(false);
 
-        message.RetryCount = 0;
-        message.Error = null;
-        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return true;
+        return rows > 0;
     }
+
+    public async Task<int> CountPendingAsync(CancellationToken cancellationToken = default) =>
+        await context.OutboxMessages
+            .Where(message => message.ProcessedAt == null && message.RetryCount < options.MaxRetries)
+            .CountAsync(cancellationToken)
+            .ConfigureAwait(false);
 }

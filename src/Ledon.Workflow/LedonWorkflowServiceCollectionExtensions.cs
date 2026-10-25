@@ -107,6 +107,12 @@ internal sealed class WorkflowRecoveryService(
     private static readonly TimeSpan PollingInterval = TimeSpan.FromSeconds(30);
     private const int BatchSize = 20;
 
+    /// <summary>认领租约时长：节点崩溃后最多这么久就有别的节点接手。</summary>
+    private static readonly TimeSpan Lease = TimeSpan.FromMinutes(2);
+
+    /// <summary>本节点标识（同机多实例可区分）。</summary>
+    private static readonly string Owner = $"{Environment.MachineName}:{Environment.ProcessId}";
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // 启动即恢复一次（崩溃恢复的主路径）
@@ -130,6 +136,7 @@ internal sealed class WorkflowRecoveryService(
             }
         }
     }
+
     private async Task RecoverAsync(CancellationToken cancellationToken)
     {
         await using var scope = services.CreateAsyncScope();
@@ -154,10 +161,17 @@ internal sealed class WorkflowRecoveryService(
         if (resumable.Count == 0)
             return;
 
-        logger.LogInformation("工作流恢复：继续推进 {Count} 个运行中实例", resumable.Count);
+        var claimed = 0;
 
         foreach (var instance in resumable)
         {
+            // 原子认领：多节点部署时只有一个节点能恢复同一个实例。
+            // 没有这一步，每个节点都会把同一批 Running 实例跑一遍——步骤副作用双跑
+            if (!await store.ClaimAsync(instance.Id, Owner, Lease, cancellationToken).ConfigureAwait(false))
+                continue;
+
+            claimed++;
+
             try
             {
                 var engine = scope.ServiceProvider.GetRequiredService<WorkflowEngine>();
@@ -169,5 +183,8 @@ internal sealed class WorkflowRecoveryService(
                 logger.LogWarning(ex, "工作流实例 {Instance} 恢复失败（稍后重试）", instance.Id);
             }
         }
+
+        if (claimed > 0)
+            logger.LogInformation("工作流恢复：认领并继续推进 {Claimed}/{Total} 个运行中实例", claimed, resumable.Count);
     }
 }

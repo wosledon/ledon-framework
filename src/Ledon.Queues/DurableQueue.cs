@@ -27,6 +27,15 @@ public class QueuedJobMessage
 
     /// <summary>可用时刻（延迟任务用；立即任务等于 CreatedAt）。</summary>
     public DateTime AvailableAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// 认领者标识（哪个实例正在处理）。多实例部署时靠它保证同一个任务
+    /// 同一时刻只有一个实例在执行——否则每个实例都会执行全部待处理任务（N 倍重复）。
+    /// </summary>
+    public string? LeasedBy { get; set; }
+
+    /// <summary>认领租约到期时刻；null 或已过期 = 可被重新认领（节点崩溃后的接管路径）。</summary>
+    public DateTime? LeasedUntil { get; set; }
 }
 
 /// <summary>队列默认参数（持久化部分）。</summary>
@@ -43,6 +52,12 @@ public sealed class LedonDurableQueueOptions
 
     /// <summary>已完成任务保留时长（默认 1 天；TimeSpan.Zero = 不清理）。</summary>
     public TimeSpan Retention { get; set; } = TimeSpan.FromDays(1);
+
+    /// <summary>
+    /// 单条任务的认领租约，默认 1 分钟：节点崩溃后最多这么久就有别的实例接手。
+    /// 调大可以减少"执行慢于租约"时的重复执行，但崩溃恢复会变慢。
+    /// </summary>
+    public TimeSpan Lease { get; set; } = TimeSpan.FromMinutes(1);
 }
 
 /// <summary>
@@ -70,13 +85,21 @@ public interface IDurableQueue
     /// <summary>入队（与业务数据同事务时由调用方负责 SaveChanges）。</summary>
     Task EnqueueAsync(DurableJob job, CancellationToken cancellationToken = default);
 
-    /// <summary>取一批待处理任务。</summary>
-    Task<IReadOnlyList<QueuedJobMessage>> DequeueAsync(int batchSize, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// 取一批待处理任务**并原子认领**：只有第一个认领的实例能拿到
+    /// （多实例部署时同一个任务不会被每个实例各执行一遍）。
+    /// </summary>
+    /// <param name="batchSize">单轮最多认领多少个任务。</param>
+    /// <param name="owner">认领者标识（实例唯一）。</param>
+    /// <param name="lease">租约时长；到期未处理完别的实例可接手（节点崩溃兜底）。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    Task<IReadOnlyList<QueuedJobMessage>> ClaimAsync(
+        int batchSize, string owner, TimeSpan lease, CancellationToken cancellationToken = default);
 
-    /// <summary>标记完成。</summary>
+    /// <summary>标记完成（同时释放认领）。</summary>
     Task MarkProcessedAsync(Guid id, CancellationToken cancellationToken = default);
 
-    /// <summary>标记失败（重试计数 +1）。</summary>
+    /// <summary>标记失败（重试计数 +1，同时释放认领以便下轮重试）。</summary>
     Task MarkFailedAsync(Guid id, string error, CancellationToken cancellationToken = default);
 
     /// <summary>清理超保留期的已完成任务。</summary>
@@ -102,36 +125,84 @@ internal sealed class EfDurableQueue(OutboxDbContext context) : IDurableQueue
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<QueuedJobMessage>> DequeueAsync(
+    public async Task<IReadOnlyList<QueuedJobMessage>> ClaimAsync(
         int batchSize,
-        CancellationToken cancellationToken = default) =>
-        await context.QueuedJobs
-            .Where(job => job.ProcessedAt == null && job.AvailableAt <= DateTime.UtcNow)
+        string owner,
+        TimeSpan lease,
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+        var until = now.Add(lease);
+
+        var candidates = await context.QueuedJobs
+            .Where(job => job.ProcessedAt == null
+                && job.AvailableAt <= now
+                && (job.LeasedUntil == null
+                    || job.LeasedUntil < now
+                    || job.LeasedBy == owner))
             .OrderBy(job => job.CreatedAt)
             .Take(batchSize)
+            .Select(job => job.Id)
+            .ToArrayAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (candidates.Length == 0)
+            return [];
+
+        // 逐条条件认领：并发部署下只有一个实例能改成功
+        var owned = new List<Guid>(candidates.Length);
+
+        foreach (var id in candidates)
+        {
+            var rows = await context.QueuedJobs
+                .Where(job => job.Id == id
+                    && (job.LeasedUntil == null
+                        || job.LeasedUntil < now
+                        || job.LeasedBy == owner))
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(job => job.LeasedBy, owner)
+                    .SetProperty(job => job.LeasedUntil, until),
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            if (rows == 1)
+                owned.Add(id);
+        }
+
+        if (owned.Count == 0)
+            return [];
+
+        return await context.QueuedJobs
+            .Where(job => owned.Contains(job.Id))
+            .OrderBy(job => job.CreatedAt)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
+    }
 
     public async Task MarkProcessedAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var job = await context.QueuedJobs.FindAsync([id], cancellationToken);
-        if (job is not null)
-        {
-            job.ProcessedAt = DateTime.UtcNow;
-            job.Error = null;
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
+        await context.QueuedJobs
+            .Where(job => job.Id == id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(job => job.ProcessedAt, DateTime.UtcNow)
+                .SetProperty(job => job.Error, (string?)null)
+                .SetProperty(job => job.LeasedBy, (string?)null)
+                .SetProperty(job => job.LeasedUntil, (DateTime?)null),
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public async Task MarkFailedAsync(Guid id, string error, CancellationToken cancellationToken = default)
     {
-        var job = await context.QueuedJobs.FindAsync([id], cancellationToken);
-        if (job is not null)
-        {
-            job.RetryCount++;
-            job.Error = error;
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
+        await context.QueuedJobs
+            .Where(job => job.Id == id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(job => job.RetryCount, job => job.RetryCount + 1)
+                .SetProperty(job => job.Error, error)
+                .SetProperty(job => job.LeasedBy, (string?)null)
+                .SetProperty(job => job.LeasedUntil, (DateTime?)null),
+                cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public async Task<int> DeleteProcessedAsync(TimeSpan retention, CancellationToken cancellationToken = default)

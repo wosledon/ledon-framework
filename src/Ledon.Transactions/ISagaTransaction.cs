@@ -11,7 +11,7 @@ public sealed class SagaStepContext
         string sagaName,
         string stepName,
         IServiceProvider services,
-        IDictionary<string, object?> data,
+        IDictionary<string, string> data,
         IUnitOfWork unitOfWork)
     {
         SagaName = sagaName;
@@ -30,8 +30,11 @@ public sealed class SagaStepContext
     /// <summary>本步骤的服务提供器（独立作用域）。</summary>
     public IServiceProvider Services { get; }
 
-    /// <summary>Saga 共享数据（跨步骤传递）。</summary>
-    public IDictionary<string, object?> Data { get; }
+    /// <summary>
+    /// Saga 共享数据（跨步骤传递，随实例持久化）。
+    /// 值是字符串形态——崩溃恢复后步骤从这里读上次写进去的值。
+    /// </summary>
+    public IDictionary<string, string> Data { get; }
 
     /// <summary>统一事务入口：步骤内的写操作与本地事务同一套 API。</summary>
     public IUnitOfWork UnitOfWork { get; }
@@ -70,6 +73,10 @@ public interface ISagaTransaction
     /// <summary>
     /// 顺序执行全部步骤。任一步骤失败：已完成步骤按逆序补偿，
     /// 最终抛出 <see cref="SagaExecutionException"/>（含失败步骤与补偿结果）。
+    /// <para>
+    /// 已持久化并标记完成的步骤**不会重复执行**——进程崩溃后由
+    /// <c>SagaRecoveryService</c> 认领同一个实例接着跑。
+    /// </para>
     /// </summary>
     Task RunAsync(CancellationToken cancellationToken = default);
 }

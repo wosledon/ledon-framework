@@ -81,6 +81,9 @@ public static class LedonDurableQueueServiceCollectionExtensions
 /// </summary>
 internal sealed class DurableBackgroundQueueDispatcher : BackgroundService
 {
+    /// <summary>本实例标识（同机多进程可区分）。</summary>
+    private static readonly string Owner = $"{Environment.MachineName}:{Environment.ProcessId}";
+
     private readonly IServiceProvider _services;
     private readonly LedonDurableQueueOptions _options;
     private readonly ILogger<DurableBackgroundQueueDispatcher> _logger;
@@ -136,7 +139,9 @@ internal sealed class DurableBackgroundQueueDispatcher : BackgroundService
         List<QueuedJobMessage> jobs;
         try
         {
-            jobs = (await queue.DequeueAsync(_options.BatchSize, cancellationToken).ConfigureAwait(false)).ToList();
+            // 认领制：多实例部署时同一个任务只有一个实例会执行
+            jobs = (await queue.ClaimAsync(_options.BatchSize, Owner, _options.Lease, cancellationToken)
+                .ConfigureAwait(false)).ToList();
         }
         catch (Exception ex)
         {

@@ -17,6 +17,12 @@ namespace Ledon.Workflow;
 /// </summary>
 public sealed class WorkflowEngine
 {
+    /// <summary>恢复服务的认领者标识（引擎续约时沿用，避免把自己认领的实例让给别人）。</summary>
+    internal static string RecoveryOwner = $"{Environment.MachineName}:{Environment.ProcessId}";
+
+    /// <summary>恢复服务的租约时长（引擎续约时沿用）。</summary>
+    internal static readonly TimeSpan RecoveryLease = TimeSpan.FromMinutes(2);
+
     private readonly IServiceProvider _services;
     private readonly IWorkflowStore _store;
     private readonly WorkflowOptions _options;
@@ -78,9 +84,23 @@ public sealed class WorkflowEngine
         var current = instance.CurrentStep ?? definition.InitialStep;
         instance.Status = WorkflowStatus.Running;
         instance.CurrentStep = current;
+
+        // 认领续约：恢复服务认领后，引擎每次推进都顺带把租约往后推，
+        // 别的节点不会在我们跑的过程中把同一个实例捞走。
+        // 注意不能写 ??=——那会让第一次之后再也不续约，长流程跑到一半租约就过期了
+        instance.ClaimedBy ??= WorkflowEngine.RecoveryOwner;
+        instance.ClaimedUntilUtc = DateTimeOffset.UtcNow.Add(WorkflowEngine.RecoveryLease);
+
         await _store.SaveAsync(instance, cancellationToken).ConfigureAwait(false);
 
+        // 跨调用补偿的关键：executed 必须从实例**已完成的步骤**播种。
+        // 否则恢复后再失败，只补偿本次执行的步骤——上一轮已完成步骤的副作用不回滚
         var executed = new List<(IWorkflowStep Step, StepContext Context)>();
+        foreach (var completed in instance.CompletedSteps)
+        {
+            if (steps.TryGetValue(completed, out var previous))
+                executed.Add((previous, new StepContext(instance, scope.ServiceProvider, cancellationToken)));
+        }
 
         while (true)
         {

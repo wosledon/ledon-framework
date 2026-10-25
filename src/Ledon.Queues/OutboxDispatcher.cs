@@ -20,6 +20,9 @@ internal sealed class OutboxDispatcher : BackgroundService
 {
     private static readonly JsonSerializerOptions SerializerOptions = new();
 
+    /// <summary>本实例标识（同机多进程可区分）。</summary>
+    private static readonly string Owner = $"{Environment.MachineName}:{Environment.ProcessId}";
+
     private readonly IServiceProvider _services;
     private readonly LedonOutboxOptions _options;
     private readonly ILogger<OutboxDispatcher> _logger;
@@ -80,7 +83,10 @@ internal sealed class OutboxDispatcher : BackgroundService
         await using var scope = _services.CreateAsyncScope();
         var store = scope.ServiceProvider.GetRequiredService<IOutboxStore>();
 
-        var pending = await store.GetPendingAsync(_options.BatchSize, cancellationToken).ConfigureAwait(false);
+        // 认领制：多实例部署时同一条消息只有一个实例会投
+        var pending = await store.ClaimAsync(_options.BatchSize, Owner, _options.Lease, cancellationToken)
+            .ConfigureAwait(false);
+
         if (pending.Count == 0)
             return;
 

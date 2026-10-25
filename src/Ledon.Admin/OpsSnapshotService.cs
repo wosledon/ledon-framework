@@ -60,9 +60,9 @@ public sealed class OpsSnapshotService(
         OutboxStats? outbox = null;
         if (outboxStore is not null)
         {
-            var pending = await outboxStore.GetPendingAsync(1000, cancellationToken).ConfigureAwait(false);
+            // 只数个数，不认领：运维快照不该把消息的租约抢过来
             var dead = await outboxStore.GetDeadLettersAsync(1000, cancellationToken).ConfigureAwait(false);
-            outbox = new OutboxStats(pending.Count, dead.Count);
+            outbox = new OutboxStats(await outboxStore.CountPendingAsync(cancellationToken), dead.Count);
         }
 
         WorkflowStats? workflows = null;

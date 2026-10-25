@@ -20,4 +20,10 @@ public sealed class LedonOutboxOptions
 
     /// <summary>清理与死信检查的间隔，默认 1 小时。</summary>
     public TimeSpan CleanupInterval { get; set; } = TimeSpan.FromHours(1);
+
+    /// <summary>
+    /// 单条消息的认领租约，默认 1 分钟：节点崩溃后最多这么久就有别的实例接手。
+    /// 调大可以减少"处理慢于租约"时的重复投递，但崩溃恢复会变慢。
+    /// </summary>
+    public TimeSpan Lease { get; set; } = TimeSpan.FromMinutes(1);
 }
