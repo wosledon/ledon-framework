@@ -56,6 +56,14 @@ public sealed class MediaStream
     /// <summary>发布者信息。</summary>
     public string? PublisherId { get; private set; }
 
+    /// <summary>停止发布时间（UTC）；未停止为 null。过期清扫靠它判断。</summary>
+    public DateTimeOffset? UnpublishedAtUtc { get; private set; }
+
+    /// <summary>累计写入的媒体字节数（负载，不含封装头）。</summary>
+    public long TotalBytes => Interlocked.Read(ref _totalBytes);
+
+    private long _totalBytes;
+
     /// <summary>标记为已发布。</summary>
     public void Publish(string? publisherId)
     {
@@ -64,6 +72,7 @@ public sealed class MediaStream
             IsPublished = true;
             PublisherId = publisherId;
             PublishedAtUtc = DateTimeOffset.UtcNow;
+            UnpublishedAtUtc = null;
             _gopCache.Clear();
             _sequenceHeader = null;
         }
@@ -78,6 +87,7 @@ public sealed class MediaStream
         {
             IsPublished = false;
             PublisherId = null;
+            UnpublishedAtUtc = DateTimeOffset.UtcNow;
         }
 
         _logger.LogInformation("流 {Stream} 停止发布", Identity);
@@ -88,6 +98,7 @@ public sealed class MediaStream
     {
         Interlocked.Increment(ref _tagCount);
         Interlocked.Exchange(ref _lastTimestamp, tag.TimestampMs);
+        Interlocked.Add(ref _totalBytes, tag.Data.Length);
 
         lock (_gate)
         {
@@ -147,7 +158,8 @@ public sealed class MediaStream
         TagCount,
         LastTimestampMs,
         PublishedAtUtc,
-        Interlocked.Read(ref _droppedForSlow));
+        Interlocked.Read(ref _droppedForSlow),
+        TotalBytes);
 
     internal void ReportDrop() => Interlocked.Increment(ref _droppedForSlow);
 
@@ -217,4 +229,5 @@ public sealed record MediaStreamStats(
     long Tags,
     uint LastTimestampMs,
     DateTimeOffset? PublishedAtUtc,
-    long DroppedForSlow);
+    long DroppedForSlow,
+    long TotalBytes = 0);

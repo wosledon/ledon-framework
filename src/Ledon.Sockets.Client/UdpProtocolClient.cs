@@ -17,8 +17,12 @@ public sealed class UdpProtocolClient : IProtocolClient
     private readonly IClientHandler _handler;
     private readonly ILogger<UdpProtocolClient> _logger;
     private readonly UdpClient _client;
+    private readonly IPEndPoint _remote;
     private readonly CancellationTokenSource _lifetime = new();
+    private readonly SemaphoreSlim _sendGate = new(1, 1);
+
     private Task? _pump;
+    private int _connected;
 
     public UdpProtocolClient(
         ProtocolClientOptions options,
@@ -31,7 +35,8 @@ public sealed class UdpProtocolClient : IProtocolClient
         _handler = handler;
         _logger = logger ?? NullLogger<UdpProtocolClient>.Instance;
 
-        _client = new UdpClient();
+        _remote = new IPEndPoint(IPAddress.Parse(options.Host), options.Port);
+        _client = new UdpClient(AddressFamily.InterNetwork);
     }
 
     /// <summary>
@@ -46,40 +51,71 @@ public sealed class UdpProtocolClient : IProtocolClient
     {
     }
 
+    /// <summary>本地绑定端口（<see cref="ProtocolClientOptions.LocalPort"/> 配 0 时由系统分配）。</summary>
+    public int LocalPort => ((IPEndPoint)_client.Client.LocalEndPoint!).Port;
+
     /// <inheritdoc />
-    public bool IsConnected => _pump is not null && !_pump.IsCompleted;
+    public bool IsConnected => Volatile.Read(ref _connected) != 0;
 
     /// <inheritdoc />
     public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
-        if (_pump is not null)
+        if (IsConnected)
             return;
 
-        // UDP 无需握手：绑定本地端口并启动接收循环
-        _client.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
+        // SIP 这类协议要把本地端口写进 Via/Contact：必须支持固定端口，不能用随机 ephemeral
+        _client.Client.Bind(new IPEndPoint(
+            _options.LocalBindAddress is null ? IPAddress.Any : IPAddress.Parse(_options.LocalBindAddress),
+            _options.LocalPort));
 
-        _logger.LogInformation("UDP 客户端已就绪（目标 {Host}:{Port}）", _options.Host, _options.Port);
+        _logger.LogInformation("UDP 客户端已就绪（本地 {Local}，目标 {Remote}）", LocalPort, _remote);
+
+        Volatile.Write(ref _connected, 1);
 
         await _handler.OnConnectedAsync(cancellationToken).ConfigureAwait(false);
 
-        _pump = Task.Run(() => PumpAsync(_lifetime.Token), CancellationToken.None);
+        _pump ??= Task.Run(() => PumpAsync(_lifetime.Token), CancellationToken.None);
     }
 
     /// <inheritdoc />
-    public Task CloseAsync(CancellationToken cancellationToken = default)
+    public async Task CloseAsync(CancellationToken cancellationToken = default)
     {
-        _lifetime.Cancel();
+        Volatile.Write(ref _connected, 0);
+
+        await _lifetime.CancelAsync().ConfigureAwait(false);
+
+        var pump = _pump;
+        _pump = null;
+
+        if (pump is not null)
+        {
+            try
+            {
+                await pump.ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogDebug("接收循环退出：{Message}", ex.Message);
+            }
+        }
+
         _client.Close();
-
-        return Task.CompletedTask;
     }
 
     /// <inheritdoc />
-    public Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    public async Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
     {
-        _client.Send(data.ToArray(), data.Length, new IPEndPoint(IPAddress.Parse(_options.Host), _options.Port));
+        // UdpClient 的同步 Send 内部有锁，但显式串行更直观，也避免和接收侧相互抢锁
+        await _sendGate.WaitAsync(cancellationToken).ConfigureAwait(false);
 
-        return Task.CompletedTask;
+        try
+        {
+            await _client.SendAsync(data, _remote, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _sendGate.Release();
+        }
     }
 
     /// <inheritdoc />
@@ -118,6 +154,8 @@ public sealed class UdpProtocolClient : IProtocolClient
     public async ValueTask DisposeAsync()
     {
         await CloseAsync().ConfigureAwait(false);
+
+        _sendGate.Dispose();
         _lifetime.Dispose();
         _client.Dispose();
     }

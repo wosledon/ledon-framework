@@ -15,11 +15,20 @@ public sealed class ProtocolClientOptions
     /// <summary>服务器端口。</summary>
     public int Port { get; set; }
 
-    /// <summary>连接失败重试间隔，默认 2 秒。</summary>
+    /// <summary>连接失败重试间隔（退避起点），默认 2 秒。</summary>
     public TimeSpan ReconnectDelay { get; set; } = TimeSpan.FromSeconds(2);
 
-    /// <summary>是否自动重连，默认 <c>true</c>（断线后按 <see cref="ReconnectDelay"/> 重试）。</summary>
+    /// <summary>退避上限，默认 30 秒（指数增长封顶，避免越等越久）。</summary>
+    public TimeSpan MaxReconnectDelay { get; set; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// 是否自动重连，默认 <c>true</c>：断开后按指数退避（带抖动）重试，
+    /// 每次成功都触发 <see cref="IClientHandler.OnConnectedAsync"/>。
+    /// </summary>
     public bool AutoReconnect { get; set; } = true;
+
+    /// <summary>单次连接尝试的超时，默认 10 秒（不依赖操作系统默认的 2 分钟）。</summary>
+    public TimeSpan ConnectTimeout { get; set; } = TimeSpan.FromSeconds(10);
 
     /// <summary>单次读取缓冲区，默认 8KB。</summary>
     public int BufferSize { get; set; } = 8192;
@@ -29,6 +38,21 @@ public sealed class ProtocolClientOptions
 
     /// <summary>发送超时，默认 10 秒。</summary>
     public TimeSpan SendTimeout { get; set; } = TimeSpan.FromSeconds(10);
+
+    /// <summary>是否关闭 Nagle 算法（小帧低延迟），默认 <c>true</c>。</summary>
+    public bool NoDelay { get; set; } = true;
+
+    /// <summary>TCP keepalive 间隔，默认 30 秒；<see cref="TimeSpan.Zero"/> 表示不启用。</summary>
+    public TimeSpan KeepAliveInterval { get; set; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// UDP 本地绑定端口，默认 0（系统分配）。SIP 这类要把本地端口写进
+    /// Via/Contact 的协议必须指定固定端口，否则对端回不到这里。
+    /// </summary>
+    public int LocalPort { get; set; }
+
+    /// <summary>UDP 本地绑定地址，默认 <c>null</c>（<see cref="IPAddress.Any"/>）。</summary>
+    public string? LocalBindAddress { get; set; }
 }
 
 /// <summary>客户端事件。</summary>

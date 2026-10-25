@@ -12,7 +12,7 @@ namespace Ledon.Web.Tests;
 /// <summary>SIP Server/Client 联调：基于 Socket 库的真实 UDP 收发。</summary>
 public class SipServerClientTests : IAsyncDisposable
 {
-    private readonly int _port = GetFreePort();
+    private readonly int _port = TestPorts.Next();
     private readonly List<IHostedService> _services = [];
     private readonly List<SipClient> _clients = [];
 
@@ -174,19 +174,6 @@ public class SipServerClientTests : IAsyncDisposable
             ["Call-ID"] = Guid.NewGuid().ToString("N") + "@127.0.0.1",
             ["CSeq"] = "1 OPTIONS",
         });
-
-    private static int GetFreePort()
-    {
-        var socket = new System.Net.Sockets.Socket(
-            System.Net.Sockets.AddressFamily.InterNetwork,
-            System.Net.Sockets.SocketType.Dgram,
-            System.Net.Sockets.ProtocolType.Udp);
-        socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
-        var port = ((IPEndPoint)socket.LocalEndPoint!).Port;
-        socket.Dispose();
-
-        return port;
-    }
 
     public async ValueTask DisposeAsync()
     {

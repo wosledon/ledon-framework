@@ -68,7 +68,12 @@ public static class LedonStreamingServiceCollectionExtensions
 
         // 媒体面：RTMP 推流/拉流服务器 + 流枢纽 + HLS 分片
         services.TryAddSingleton<Ledon.Streaming.Playback.StreamHub>();
+        services.TryAddSingleton<Ledon.Streaming.Playback.StreamHubOptions>(
+            _ => new Ledon.Streaming.Playback.StreamHubOptions());
         services.AddOptions();
+
+        // 过期流清扫：停止发布超过保留时长的流从字典里删掉，否则内存只涨不跌
+        services.AddHostedService<StreamHubSweeper>();
         // 选项经 IOptions 解析：调用方的 Configure<T> / 配置文件都能覆盖默认值
         services.TryAddSingleton<RtmpServerOptions>(provider =>
             provider.GetRequiredService<IOptions<RtmpServerOptions>>().Value);
@@ -78,6 +83,43 @@ public static class LedonStreamingServiceCollectionExtensions
         services.AddHostedService<HlsSegmenter>();
 
         return services;
+    }
+}
+
+/// <summary>
+/// 过期流清扫：定时把"停止发布超过保留时长"的流从 <see cref="Ledon.Streaming.Playback.StreamHub"/>
+/// 里删掉。没有这一步，每条播过的流都会永远占着内存。
+/// </summary>
+internal sealed class StreamHubSweeper(
+    Ledon.Streaming.Playback.StreamHub hub,
+    Ledon.Streaming.Playback.StreamHubOptions options,
+    ILogger<StreamHubSweeper> logger) : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        if (!options.SweepExpired)
+            return;
+
+        var interval = TimeSpan.FromTicks(Math.Max(options.UnpublishedRetention.Ticks / 2, TimeSpan.FromSeconds(1).Ticks));
+
+        using var timer = new PeriodicTimer(interval);
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false);
+
+            try
+            {
+                var removed = hub.SweepExpired();
+
+                if (removed > 0)
+                    logger.LogInformation("清扫了 {Count} 条过期流（当前 {Total} 条）", removed, hub.Streams.Count);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "过期流清扫失败（下次继续）");
+            }
+        }
     }
 }
 

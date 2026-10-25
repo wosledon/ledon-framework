@@ -80,7 +80,10 @@ var request = PacketSerializer<LoginRequest>.Deserialize(bytes);
 - 每连接一个独立读取循环 + 独立 DI 作用域（`connection.Services` 拿 DbContext/仓储）；
 - **半包自动拼接**、多帧一次读取全部分发、缓冲区溢出保护；
 - 帧按到达顺序处理；单帧失败只记录不断开；`ProtocolException`（协议不同步）断开该连接；
-- UDP 无连接，处理器并发调用（须线程安全）。
+- **发送串行 + 发送超时**：同一连接的并发写不会把帧交叉成乱码，慢读者不会挂住处理器；
+- **空闲超时 + 连接数上限**：静默连接和洪水连接都不会耗尽文件描述符；
+- 接受循环容错：单次 accept 失败只记录，监听器不会毫无提示地停摆；
+- UDP 无连接，处理器并发调用（须线程安全）；派发是**有界并发**的，洪水数据报不会每个都起任务。
 
 ## Ledon.Sip —— SIP 协议解析（纯解析）
 
@@ -89,7 +92,16 @@ var message = SipParser.Parse(text);   // 或 Parse(bytes)
 message.Method;      // INVITE / ACK / BYE / REGISTER / OPTIONS
 message.CallId;      // 对话标识
 message.From; message.To; message.Via;
-message.Body;        // 通常是 SDP
+
+// 类型化头：不用自己切字符串
+message.FromAddress?.Tag;        // From 的 tag
+message.CSeqValue?.Number;       // CSeq 序号
+message.CSeqValue?.Method;       // CSeq 方法
+message.TopVia?.Branch;          // 事务键
+message.TopVia?.Received;        // NAT 场景对端观察到的地址
+
+// 同名多值保序（Via 的顺序就是响应的回程路径）
+foreach (var via in message.HeaderValues("Via")) { ... }
 
 var sdp = SdpParser.Parse(message.Body);
 sdp.Media[0].Media;      // audio / video
@@ -108,30 +120,43 @@ public class MySipHandler : ISipHandler
 SIP 有自己的 Server/Client 包，**构建在 Socket 库之上**（解析在 `Ledon.Sip`，传输在 `Ledon.Sockets.*`）：
 
 ```csharp
-// 服务端：UDP 监听 + 应答（也可 TCP + Content-Length 切帧）
+// 服务端：UDP + TCP（默认都开），带完整事务层
 builder.Services.AddLedonSipServer(o =>
 {
     o.Port = 5060;
+    o.TcpPort = 5060;      // TCP 与 UDP 同端口，符合规范做法
     o.AutoAnswerOptions = true;
 });
 builder.Services.AddSingleton<ISipHandler, MySipHandler>();
 
-// 客户端：事务匹配 + 重传 + 超时
+// 客户端：事务 + 对话 + ACK/CANCEL
 builder.Services.AddLedonSipClient(o => { o.Host = "pbx.example.com"; o.Port = 5060; });
 
 var client = provider.GetRequiredService<SipClient>();
 await client.ConnectAsync();
-var response = await client.SendRequestAsync(request);   // 等最终响应（2xx-6xx）
+
+// 只要方法和 URI：Via/branch/Call-ID/CSeq/Contact 全部自动生成
+var response = await client.SendAsync("OPTIONS", "sip:pbx.example.com");
+
+// INVITE：2xx 返回对话；非 2xx 客户端自动补 ACK（规范 17.1.1.2 强制）
+var (dialog, inviteResponse) = await client.InviteAsync("sip:bob@example.com", sdp);
+await client.AckAsync(request, inviteResponse);
+await client.ByeAsync(dialog);
+await client.CancelAsync(request);
 ```
 
-- 服务端只依赖 `Ledon.Sockets.Server`（socket/作用域/并发）+ `Ledon.Sip`（解析/应答）；
-- 客户端只依赖 `Ledon.Sockets.Client`（连接/重连）+ `Ledon.Sip`（解析/应答）；
-- 客户端按 Via branch 匹配响应（RFC 3261），1xx 不完成事务，UDP 上指数退避重传；
-- TCP 传输用 `SipTcpFrameCodec`（按 Content-Length 切帧，RFC 3261 §18.3）。
+- 服务端**事务层**：UDP 上按 T1 指数重发最终响应，直到收到 ACK 或 Timer H；
+  同 branch 的重复请求重发上次的响应而不重复执行业务；
+- 事务键 = `branch + 方法`：CANCEL 与它取消的 INVITE 共用 branch（规范 9.1），必须分开；
+- 客户端按 Via branch + CSeq 方法匹配响应，1xx 不完成事务，UDP 上指数退避重传；
+- 可靠传输（TCP/TLS）不重传，只等定时器；
+- 响应自动带 To tag / Contact / Server / Content-Length——缺 To tag 的真实 UAC 会直接判为非法。
 
-- RFC 3261 请求/状态行、头字段（大小写不敏感、同名多值拼接）、body；
+- RFC 3261 请求/状态行、头字段（大小写不敏感、同名多值保序）、body；
+- 行 continuation（obs-fold，规范 7.3.1）解析时展开；
+- 消息大小上限 + 必备头校验：缺头的消息没法回包，早失败比晚失败好排查；
+- Content-Length 按 body 字节数自动计算（少写它，TCP 对端会一直等 body 收完）；
 - SDP 解析：会话名/连接信息/媒体流/载荷格式/属性；
-- 序列化回线上字节（CRLF 行尾）；
 - 解析失败只记录不崩（UDP 无连接，不能"断开"任何人）。
 
 完整文档：<https://github.com/wosledon/ledon-framework>

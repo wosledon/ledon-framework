@@ -171,7 +171,7 @@ public class FrameCodecTests
 /// <summary>TCP 服务端：真实连接、粘包处理、回显、断开清理。</summary>
 public class TcpServerTests : IAsyncDisposable
 {
-    private readonly int _port = GetFreePort();
+    private readonly int _port = TestPorts.Next();
     private readonly List<IHostedService> _services = [];
 
     [Fact]
@@ -305,16 +305,6 @@ public class TcpServerTests : IAsyncDisposable
         var deadline = DateTime.UtcNow + timeout;
         while (!condition() && DateTime.UtcNow < deadline)
             await Task.Delay(20);
-    }
-
-    private static int GetFreePort()
-    {
-        var listener = new TcpListener(IPAddress.Loopback, 0);
-        listener.Start();
-        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-        listener.Stop();
-
-        return port;
     }
 
     public async ValueTask DisposeAsync()

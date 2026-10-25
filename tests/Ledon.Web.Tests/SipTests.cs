@@ -117,12 +117,14 @@ public class SipTests
     }
 
     [Fact]
-    public void Merges_multi_valued_headers()
+    public void Keeps_multi_valued_headers_in_order()
     {
         const string withMultipleVia = """
             OPTIONS sip:bob@example.com SIP/2.0
             Via: SIP/2.0/UDP first.example.com
             Via: SIP/2.0/UDP second.example.com
+            From: <sip:a@example.com>;tag=1
+            To: <sip:b@example.com>
             Call-ID: x@y
             CSeq: 1 OPTIONS
 
@@ -130,8 +132,15 @@ public class SipTests
 
         var message = SipParser.Parse(withMultipleVia);
 
-        Assert.Contains("first.example.com", message.Via!);
-        Assert.Contains("second.example.com", message.Via!);
+        // 同名多值必须保序（Via 的顺序就是响应的回程路径），不能拼成一个字符串
+        var vias = message.HeaderValues("Via");
+
+        Assert.Equal(2, vias.Count);
+        Assert.Contains("first.example.com", vias[0], StringComparison.Ordinal);
+        Assert.Contains("second.example.com", vias[1], StringComparison.Ordinal);
+
+        // 便捷属性取第一个（我们收到的入口）
+        Assert.Contains("first.example.com", message.Via!, StringComparison.Ordinal);
     }
 
     [Theory]

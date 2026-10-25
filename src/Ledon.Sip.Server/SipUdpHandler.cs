@@ -1,4 +1,6 @@
+using System.Net;
 using Ledon.Protocols;
+using Ledon.Sip;
 using Ledon.Sockets.Server;
 using Microsoft.Extensions.Logging;
 
@@ -6,22 +8,26 @@ namespace Ledon.Sip.Server;
 
 /// <summary>
 /// SIP over UDP 处理器：把 <see cref="Ledon.Sockets.Server.UdpServer"/> 收到的数据报
-/// 解析成 <see cref="SipMessage"/>，交给 <see cref="ISipHandler"/>，并把响应发回来源。
+/// 解析成 <see cref="SipMessage"/>，经 <see cref="SipTransactionLayer"/> 交给
+/// <see cref="ISipHandler"/>，并把响应发回来源。
 /// <para>
-/// 设计：协议语义（解析/应答）在 <c>Ledon.Sip</c>，传输（socket/作用域/并发）
-/// 在 <c>Ledon.Sockets.Server</c>——本类只是两者之间的适配器，约 40 行。
+/// 设计：协议语义（解析/应答/事务）在 <c>Ledon.Sip</c>，传输（socket/作用域/并发）
+/// 在 <c>Ledon.Sockets.Server</c>——本类只是两者之间的适配器。
 /// </para>
 /// </summary>
 public sealed class SipUdpHandler : IUdpHandler
 {
     private readonly ISipHandler _handler;
-    private readonly SipServerOptions _options;
+    private readonly SipTransactionLayer _transactions;
     private readonly ILogger<SipUdpHandler> _logger;
 
-    public SipUdpHandler(ISipHandler handler, SipServerOptions options, ILogger<SipUdpHandler> logger)
+    public SipUdpHandler(
+        ISipHandler handler,
+        SipTransactionLayer transactions,
+        ILogger<SipUdpHandler> logger)
     {
         _handler = handler;
-        _options = options;
+        _transactions = transactions;
         _logger = logger;
     }
 
@@ -34,10 +40,12 @@ public sealed class SipUdpHandler : IUdpHandler
             _logger.LogDebug("SIP {Type} {Method}{StatusCode} 来自 {Remote}",
                 request.Type, request.Method ?? "", request.StatusCode, datagram.Remote);
 
-            var response = await _handler.HandleAsync(request, cancellationToken).ConfigureAwait(false);
-
-            if (response is not null)
-                await datagram.ReplyAsync(response.ToBytes(), cancellationToken).ConfigureAwait(false);
+            // 当前数据报的来源就是响应的去处；事务层的重传也走同一个通道
+            await _transactions.HandleAsync(
+                request,
+                (payload, ct) => datagram.ReplyAsync(payload, ct),
+                (message, ct) => _handler.HandleAsync(message, ct),
+                cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -47,58 +55,55 @@ public sealed class SipUdpHandler : IUdpHandler
     }
 }
 
-/// <summary>SIP over TCP 的帧编解码：按 Content-Length 切帧（RFC 3261 §18.3）。</summary>
-public sealed class SipTcpFrameCodec : IFrameCodec
+/// <summary>
+/// SIP over TCP 处理器：按 <see cref="SipTcpFrameCodec"/> 切帧后走同一个事务层。
+/// TCP 是可靠传输，事务层不会重传响应。
+/// </summary>
+public sealed class SipTcpHandler : IConnectionHandler
 {
-    /// <inheritdoc />
-    public int TryReadFrames(scoped Span<byte> buffer, int length, Action<ReadOnlySpan<byte>> onFrame)
-    {
-        var offset = 0;
+    private readonly ISipHandler _handler;
+    private readonly SipTransactionLayer _transactions;
+    private readonly ILogger<SipTcpHandler> _logger;
 
-        while (offset < length)
+    public SipTcpHandler(
+        ISipHandler handler,
+        SipTransactionLayer transactions,
+        ILogger<SipTcpHandler> logger)
+    {
+        _handler = handler;
+        _transactions = transactions;
+        _logger = logger;
+    }
+
+    public Task OnConnectedAsync(ConnectionContext connection, CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
+
+    public async Task OnFrameAsync(
+        ConnectionContext connection,
+        ReadOnlyMemory<byte> frame,
+        CancellationToken cancellationToken = default)
+    {
+        try
         {
-            // 1) 找头部结束（\r\n\r\n）
-            var window = buffer.Slice(offset, length - offset);
-            var headerEnd = window.IndexOf("\r\n\r\n"u8);
-            if (headerEnd < 0)
-                break;   // 头部还没收全
+            var request = SipParser.Parse(frame.Span);
 
-            var bodyStart = headerEnd + 4;
+            _logger.LogDebug("SIP/TCP {Method} 来自 {Remote}", request.Method ?? "", connection.RemoteEndPoint);
 
-            // 2) 从头部解析 Content-Length
-            var contentLength = ParseContentLength(window.Slice(0, headerEnd));
-
-            // 3) 判断 body 是否收全
-            if (length - offset - bodyStart < contentLength)
-                break;
-
-            var total = bodyStart + contentLength;
-            onFrame(window.Slice(0, total));
-            offset += total;
+            // 事务层经 Sender 把响应写回这条连接（TCP 可靠，不需要端点）
+            await _transactions.HandleAsync(
+                request,
+                (payload, ct) => connection.SendAsync(payload, ct),
+                (message, ct) => _handler.HandleAsync(message, ct),
+                cancellationToken).ConfigureAwait(false);
         }
-
-        if (offset > 0)
-            buffer.Slice(offset, length - offset).CopyTo(buffer);
-
-        return length - offset;
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "SIP/TCP 报文处理失败（{Remote}）", connection.RemoteEndPoint);
+        }
     }
 
-    private static int ParseContentLength(ReadOnlySpan<byte> header)
-    {
-        var marker = "Content-Length:"u8;
-        var index = header.IndexOf(marker);
-
-        if (index < 0)
-            return 0;
-
-        var value = header.Slice(index + marker.Length);
-        var end = value.IndexOf((byte)'\r');
-        if (end < 0)
-            end = value.IndexOf((byte)'\n');
-        if (end >= 0)
-            value = value.Slice(0, end);
-
-        // 头字段值是 ASCII 数字：直接转字符串解析（比手写数字解析更直观，且只在切帧时执行一次）
-        return int.TryParse(System.Text.Encoding.ASCII.GetString(value).Trim(), out var length) ? length : 0;
-    }
+    public Task OnDisconnectedAsync(
+        ConnectionContext connection,
+        Exception? exception,
+        CancellationToken cancellationToken = default) => Task.CompletedTask;
 }

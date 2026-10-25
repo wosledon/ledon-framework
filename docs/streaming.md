@@ -32,8 +32,8 @@ builder.Services.Configure<RtmpServerOptions>(o =>
 });
 ```
 
-`AddLedonStreaming` 会一并注册 `RtmpServer` / `HlsSegmenter`（都是 `IHostedService`），
-宿主启动即监听；HTTP-FLV / HLS 端点随 `UseLedonWeb()` 自动映射。
+`AddLedonStreaming` 会一并注册 `RtmpServer` / `HlsSegmenter` / `StreamHubSweeper`
+（都是 `IHostedService`），宿主启动即监听；HTTP-FLV / HLS 端点随 `UseLedonWeb()` 自动映射。
 
 ## 媒体面：RTMP 推流 / 拉流
 
@@ -45,6 +45,11 @@ builder.Services.Configure<RtmpServerOptions>(o =>
 - **命令**：`connect` / `releaseStream` / `FCPublish` / `createStream` / `publish` /
   `play` / `FCUnpublish` / `deleteStream` / `closeStream`，返回 `_result` 与 `onStatus`；
 - **协议控制消息**：`SetChunkSize` / `WindowAcknowledgementSize` / `SetPeerBandwidth` / `UserControl`；
+- **保活**：定期 `PingRequest`，对端的 `PingRequest` 也回 `PingResponse`——拔网线的对端
+  不会走 TCP 关闭流程，只有心跳能发现；
+- **空闲超时 + 连接上限**：只连上不发命令的连接（扫描器常用）不会永远占资源；
+- **推拉流鉴权**：`RequirePublishToken` / `RequirePlayToken` 打开后，令牌从推流地址查询串
+  或 `connect` 命令对象里取，交给 `IRtmpAuthenticator` 校验，不过回 `NetStream.Failed`；
 - **媒体转发**：发布者的音视频写入 `StreamHub`，订阅者读回并编码成 RTMP 分块流。
 
 ```text
@@ -53,10 +58,29 @@ OBS/ffmpeg ──RTMP(1935)──▶ RtmpServer ──▶ StreamHub ──▶ HT
                                      └──▶ RTMP 拉流（另一个连接 play）
 ```
 
-`StreamHub` / `MediaStream` 是分发核心，两个关键设计：
+```csharp
+builder.Services.Configure<RtmpServerOptions>(o =>
+{
+    o.Address = "0.0.0.0";
+    o.Port = 1935;
+    o.OutgoingChunkSize = 4096;
+    o.PingInterval = TimeSpan.FromSeconds(30);   // 保活（0 = 关闭）
+    o.IdleTimeout = TimeSpan.FromMinutes(2);     // 空闲超时
+    o.MaxConnections = 2000;                     // 连接上限
+    o.RequirePublishToken = true;                // 生产必须开
+});
+
+// 鉴权策略（默认 AllowAllRtmpAuthenticator）
+builder.Services.AddSingleton<IRtmpAuthenticator, MyRtmpAuthenticator>();
+```
+
+`StreamHub` / `MediaStream` 是分发核心，几个关键设计：
 
 - **GOP 缓存**：新订阅者立即补发最近一个 GOP（含序列头），起播不等下一个关键帧；
 - **背压**：每个订阅者有界队列，慢观众丢最旧的帧而不是拖垮发布者；
+- **生命周期**：停止发布后保留 `StreamHubOptions.UnpublishedRetention`（默认 10 秒），
+  到期由 `StreamHubSweeper` 清扫——没有这一步，每条播过的流都永远占着内存；
+- **统计**：Tag 数 / 字节数 / 观众数 / 丢帧数，`hub.Stats()` 一屏看完；
 - 慢订阅者断开只影响自己；退订在连接关闭 / 响应结束时释放（不泄漏订阅者）。
 
 ## 媒体面：HTTP-FLV 与 HLS

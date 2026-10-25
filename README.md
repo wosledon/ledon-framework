@@ -54,12 +54,12 @@ app.Run();
 | 统一运维端点                         | `Ledon.Admin`                 | `AddLedonAdmin()`                                    | 发件箱/死信/队列指标/工作流/定时任务一页总览 |
 | 飞书（通知 + 事件回调）               | `Ledon.Notifications.Feishu`  | `AddLedonFeishu()`                                  | 机器人/应用发消息 + URL 校验/解密/事件分发 |
 | 协议解析（帧/包/结构体映射）           | `Ledon.Protocols`             | `PacketSerializer<T>`                               | 编译式结构体映射（零反射零装箱）+ 帧编解码 |
-| Socket 客户端                          | `Ledon.Sockets.Client`      | `AddLedonSocketClient()`                          | TCP/UDP 连接 + 断线重连 + 类型化收发 |
-| Socket 服务端                          | `Ledon.Sockets.Server`      | `AddLedonSocketServer()`                          | TCP/UDP 监听 + 连接管理 + 类型化分发 |
-| SIP 协议解析                           | `Ledon.Sip`                   | `SipParser` / `SdpParser`                           | RFC 3261 消息 + SDP 解析（纯解析，零依赖） |
-| SIP 服务端                             | `Ledon.Sip.Server`            | `AddLedonSipServer()`                               | 基于 Socket 库：UDP/TCP 监听 + 应答 + Content-Length 切帧 |
-| SIP 客户端                             | `Ledon.Sip.Client`            | `AddLedonSipClient()`                               | 基于 Socket 库：事务匹配 + 重传 + 超时 |
-| 流媒体（推/拉流、鉴权、转流、双工）      | `Ledon.Streaming`             | `AddLedonStreaming()`                              | RTMP 服务端 + HTTP-FLV/HLS 播放 + 令牌鉴权 + 转流/录制 + WHIP/WHEP |
+| Socket 客户端                          | `Ledon.Sockets.Client`      | `AddLedonSocketClient()`                          | TCP/UDP 连接 + 断线指数退避重连 + 类型化收发 |
+| Socket 服务端                          | `Ledon.Sockets.Server`      | `AddLedonSocketServer()`                          | TCP/UDP 监听 + 发送串行/超时 + 空闲超时 + 连接上限 |
+| SIP 协议解析                           | `Ledon.Sip`                   | `SipParser` / `SdpParser`                         | RFC 3261 消息（obs-fold/多值保序）+ SDP + 类型化头 |
+| SIP 服务端                             | `Ledon.Sip.Server`            | `AddLedonSipServer()`                             | 基于 Socket 库：UDP/TCP + 事务层（响应重传/ACK/定时器） |
+| SIP 客户端                             | `Ledon.Sip.Client`            | `AddLedonSipClient()`                             | 基于 Socket 库：事务 + 对话 + ACK/CANCEL + 重传超时 |
+| 流媒体（推/拉流、鉴权、转流、双工）      | `Ledon.Streaming`             | `AddLedonStreaming()`                              | RTMP 服务端（保活/鉴权/过期回收）+ HTTP-FLV/HLS + 令牌鉴权 + WHIP/WHEP |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -349,15 +349,15 @@ src/Ledon.Application/     应用层管线（ICommand/IQuery + 验证/日志/事
 src/Ledon.Admin/           统一运维端点（队列/死信/工作流/定时任务总览）
 src/Ledon.Notifications.Feishu/ 飞书：通知渠道 + 事件回调（校验/解密/分发）
 src/Ledon.Protocols/        协议解析：帧编解码 + 结构体映射（零依赖，高性能）
-src/Ledon.Sockets.Client/   Socket 客户端：连接/断线重连/类型化收发
-src/Ledon.Sockets.Server/   Socket 服务端：监听/连接管理/类型化分发
-src/Ledon.Sip/              SIP/SDP 协议解析（纯解析）
-src/Ledon.Sip.Server/        SIP 服务端（基于 Socket 库）
-src/Ledon.Sip.Client/        SIP 客户端（基于 Socket 库）
-src/Ledon.Streaming/       流媒体：RTMP 服务端 + HTTP-FLV/HLS 播放 + 推拉流鉴权、事件、WHIP/WHEP 双工
+src/Ledon.Sockets.Client/   Socket 客户端：连接/断线指数退避重连/类型化收发
+src/Ledon.Sockets.Server/   Socket 服务端：监听/发送串行/空闲超时/连接上限/类型化分发
+src/Ledon.Sip/              SIP/SDP 协议解析（纯解析，obs-fold + 多值头 + 类型化头）
+src/Ledon.Sip.Server/       SIP 服务端（基于 Socket 库，UDP/TCP + 事务层）
+src/Ledon.Sip.Client/       SIP 客户端（基于 Socket 库，事务 + 对话 + ACK/CANCEL）
+src/Ledon.Streaming/       流媒体：RTMP 服务端（保活/鉴权/过期回收）+ HTTP-FLV/HLS + 推拉流鉴权、WHIP/WHEP
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（模块 26 + Web 366 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 394 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

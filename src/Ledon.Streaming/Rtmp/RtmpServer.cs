@@ -25,6 +25,77 @@ public sealed class RtmpServerOptions
 
     /// <summary>接收窗口（字节），默认 2500000。</summary>
     public int WindowAcknowledgementSize { get; set; } = 2_500_000;
+
+    /// <summary>
+    /// 保活间隔，默认 30 秒：定期发 PingRequest 并等 PingResponse。
+    /// 拔网线/进程被杀的对端不会走 TCP 关闭流程，只有心跳能发现——否则连接永远挂着。
+    /// 设为 <see cref="TimeSpan.Zero"/> 关闭。
+    /// </summary>
+    public TimeSpan PingInterval { get; set; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// 空闲超时，默认 90 秒：多久没收到任何字节就断开。
+    /// 只连上不发命令的连接（扫描器常用）不该永远占资源。
+    /// </summary>
+    public TimeSpan IdleTimeout { get; set; } = TimeSpan.FromSeconds(90);
+
+    /// <summary>最大并发连接数，默认 1000；超出直接拒绝新连接。</summary>
+    public int MaxConnections { get; set; } = 1000;
+
+    /// <summary>
+    /// 是否要求推流令牌，默认 <c>false</c>（与 SRS/ZLMediaKit 的默认行为一致，
+    /// 开箱即可用）。**生产环境必须显式打开**，否则任何人都能往你的流上推。
+    /// 令牌从推流 URL 的查询串或 connect 命令对象里取，交给
+    /// <see cref="IRtmpAuthenticator"/> 校验；校验不过回 NetStream.Failed 并断开。
+    /// </summary>
+    public bool RequirePublishToken { get; set; }
+
+    /// <summary>是否要求拉流令牌，默认 <c>false</c>（内网/公开直播可关）。</summary>
+    public bool RequirePlayToken { get; set; }
+}
+
+/// <summary>
+/// RTMP 鉴权钩子：推流/拉流前的最后一道关。
+/// 默认 <see cref="AllowAllRtmpAuthenticator"/>（不鉴权）；业务实现
+/// <see cref="IRtmpAuthenticator"/> 并注册进容器即可接管。
+/// </summary>
+public interface IRtmpAuthenticator
+{
+    /// <summary>校验推流。返回 false 时连接会被拒绝。</summary>
+    ValueTask<bool> AuthorizePublishAsync(RtmpAuthContext context, CancellationToken cancellationToken = default);
+
+    /// <summary>校验拉流。返回 false 时连接会被拒绝。</summary>
+    ValueTask<bool> AuthorizePlayAsync(RtmpAuthContext context, CancellationToken cancellationToken = default);
+}
+
+/// <summary>一次鉴权的上下文（连接信息 + 令牌来源）。</summary>
+public sealed class RtmpAuthContext
+{
+    /// <summary>应用名（rtmp://host/{app}/{name} 的 app 部分）。</summary>
+    public required string App { get; init; }
+
+    /// <summary>流名（不含 app 前缀）。</summary>
+    public required string StreamName { get; init; }
+
+    /// <summary>令牌（URL 查询串或 connect 对象里的 token 字段；没有则空串）。</summary>
+    public string Token { get; init; } = "";
+
+    /// <summary>远端地址。</summary>
+    public string? RemoteEndPoint { get; init; }
+
+    /// <summary>connect 命令对象里的全部字段（app/tcUrl/flashVer/...）。</summary>
+    public IReadOnlyDictionary<string, string> ConnectionProperties { get; init; } =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+}
+
+/// <summary>默认鉴权器：全部放行（仅用于内网/测试）。</summary>
+public sealed class AllowAllRtmpAuthenticator : IRtmpAuthenticator
+{
+    public ValueTask<bool> AuthorizePublishAsync(RtmpAuthContext context, CancellationToken cancellationToken = default) =>
+        ValueTask.FromResult(true);
+
+    public ValueTask<bool> AuthorizePlayAsync(RtmpAuthContext context, CancellationToken cancellationToken = default) =>
+        ValueTask.FromResult(true);
 }
 
 /// <summary>
@@ -66,6 +137,9 @@ public sealed class RtmpServer : BackgroundService
     /// <summary>当前连接数。</summary>
     public int ConnectionCount => _connections.Count;
 
+    /// <summary>累计拒绝的连接数（超过 <see cref="RtmpServerOptions.MaxConnections"/>）。</summary>
+    public long RejectedConnections { get; private set; }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _listener.Start(128);
@@ -75,20 +149,55 @@ public sealed class RtmpServer : BackgroundService
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var client = await _listener.AcceptTcpClientAsync(stoppingToken).ConfigureAwait(false);
+                TcpClient client;
+
+                try
+                {
+                    client = await _listener.AcceptTcpClientAsync(stoppingToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;   // 宿主持停
+                }
+                catch (Exception ex)
+                {
+                    // accept 失败不能让监听器停摆，否则服务端会毫无提示地永久停止接受
+                    _logger.LogError(ex, "RTMP 接受连接失败（继续监听）");
+                    await Task.Delay(TimeSpan.FromMilliseconds(100), stoppingToken).ConfigureAwait(false);
+
+                    continue;
+                }
+
+                if (_connections.Count >= _options.MaxConnections)
+                {
+                    RejectedConnections++;
+                    _logger.LogWarning("RTMP 连接数已达上限 {Max}，拒绝 {Remote}",
+                        _options.MaxConnections, client.Client.RemoteEndPoint);
+
+                    client.Dispose();
+
+                    continue;
+                }
 
                 var id = Interlocked.Increment(ref _connectionSeq);
-                var connection = new RtmpConnection(id, client, _options, _hub, _scopeFactory, _logger);
+
+                // 每连接一个 DI 作用域：鉴权/业务处理器可以按连接解析（连接结束时释放）
+                var scope = _scopeFactory.CreateAsyncScope();
+                var authenticator = scope.ServiceProvider.GetService<IRtmpAuthenticator>()
+                    ?? new AllowAllRtmpAuthenticator();
+
+                var connection = new RtmpConnection(id, client, _options, _hub, scope, authenticator, _logger);
 
                 if (_connections.TryAdd(id, connection))
+                {
                     _ = Task.Run(() => connection.ServeAsync(stoppingToken), CancellationToken.None);
+                }
                 else
+                {
                     client.Dispose();
+                    _ = scope.DisposeAsync();
+                }
             }
-        }
-        catch (OperationCanceledException)
-        {
-            // 宿主持停
         }
         finally
         {
@@ -114,8 +223,10 @@ internal sealed class RtmpConnection
     private readonly TcpClient _client;
     private readonly RtmpServerOptions _options;
     private readonly StreamHub _hub;
-    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly AsyncServiceScope _scope;
+    private readonly IRtmpAuthenticator _authenticator;
     private readonly ILogger _logger;
+    private readonly string _remote;
 
     private readonly RtmpChunkDecoder _decoder = new();
     private readonly Lock _sendGate = new();
@@ -126,44 +237,90 @@ internal sealed class RtmpConnection
     private StreamIdentity? _publishing;
     private StreamIdentity? _playing;
     private Guid _playingSubscription;
+    private IReadOnlyDictionary<string, string> _connectionProperties = new Dictionary<string, string>();
+
+    /// <summary>去掉流名上的查询串（live/cam?token=x → live/cam）。</summary>
+    private static string StripQuery(string streamName)
+    {
+        var query = streamName.IndexOf('?');
+        return query < 0 ? streamName : streamName[..query];
+    }
+
+    private RtmpAuthContext NewContext(StreamIdentity identity, string token) => new()
+    {
+        App = identity.App,
+        StreamName = identity.Name,
+        Token = token,
+        RemoteEndPoint = _remote,
+        ConnectionProperties = _connectionProperties,
+    };
 
     public RtmpConnection(
         int id,
         TcpClient client,
         RtmpServerOptions options,
         StreamHub hub,
-        IServiceScopeFactory scopeFactory,
+        AsyncServiceScope scope,
+        IRtmpAuthenticator authenticator,
         ILogger logger)
     {
         _id = id;
         _client = client;
         _options = options;
         _hub = hub;
-        _scopeFactory = scopeFactory;
+        _scope = scope;
+        _authenticator = authenticator;
         _logger = logger;
+        _remote = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
     }
 
     public async Task ServeAsync(CancellationToken cancellationToken)
     {
-        var remote = _client.Client.RemoteEndPoint?.ToString() ?? "unknown";
+        // 连接级生命周期：空闲超时/保活失败只取消这一条连接
+        using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         try
         {
             await using var stream = _client.GetStream();
 
             // 1) 握手
-            await HandshakeAsync(stream, cancellationToken).ConfigureAwait(false);
+            await HandshakeAsync(stream, lifetime.Token).ConfigureAwait(false);
 
-            _logger.LogInformation("RTMP 连接 {Id} 握手成功（{Remote}）", _id, remote);
+            _logger.LogInformation("RTMP 连接 {Id} 握手成功（{Remote}）", _id, _remote);
 
-            // 2) 分块流循环
+            // 2) 保活：定期 PingRequest，拔网线的对端只有心跳能发现
+            using var pingTimer = _options.PingInterval > TimeSpan.Zero
+                ? new PeriodicTimer(_options.PingInterval)
+                : null;
+
+            _ = pingTimer is null
+                ? Task.CompletedTask
+                : Task.Run(() => PingLoopAsync(stream, pingTimer, lifetime), CancellationToken.None);
+
+            // 3) 分块流循环
             var buffer = new byte[8192];
             var pending = new byte[1024 * 1024];
             var pendingLength = 0;
 
-            while (!cancellationToken.IsCancellationRequested)
+            while (!lifetime.IsCancellationRequested)
             {
-                var read = await stream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+                // 空闲超时：每次读前重新武装
+                using var idle = _options.IdleTimeout > TimeSpan.Zero
+                    ? CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token)
+                    : null;
+
+                idle?.CancelAfter(_options.IdleTimeout);
+
+                int read;
+                try
+                {
+                    read = await stream.ReadAsync(buffer, idle?.Token ?? lifetime.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+                {
+                    throw new TimeoutException($"连接空闲超过 {_options.IdleTimeout.TotalSeconds} 秒");
+                }
+
                 if (read == 0)
                     break;
 
@@ -177,9 +334,9 @@ internal sealed class RtmpConnection
                 pendingLength = _decoder.Decode(pending, pendingLength, messages.Add);
 
                 foreach (var message in messages)
-                    await HandleMessageAsync(message, cancellationToken).ConfigureAwait(false);
+                    await HandleMessageAsync(message, lifetime.Token).ConfigureAwait(false);
 
-                await FlushAsync(stream, cancellationToken).ConfigureAwait(false);
+                await FlushAsync(stream, lifetime.Token).ConfigureAwait(false);
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -190,6 +347,40 @@ internal sealed class RtmpConnection
         {
             Cleanup();
             _client.Dispose();
+            _ = _scope.DisposeAsync();
+        }
+    }
+
+    /// <summary>保活循环：定时发 PingRequest。写失败（对端已消失）就取消连接生命周期。</summary>
+    private async Task PingLoopAsync(NetworkStream stream, PeriodicTimer timer, CancellationTokenSource lifetime)
+    {
+        try
+        {
+            while (await timer.WaitForNextTickAsync(lifetime.Token).ConfigureAwait(false))
+            {
+                var payload = new byte[6];
+                System.Buffers.Binary.BinaryPrimitives.WriteUInt16BigEndian(payload, 6);   // PingRequest
+                System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(payload.AsSpan(2, 4), Environment.TickCount);
+
+                Send(new RtmpMessage
+                {
+                    MessageType = RtmpMessageType.UserControl,
+                    StreamId = 0,
+                    TimestampMs = 0,
+                    Payload = payload,
+                });
+
+                await FlushAsync(stream, lifetime.Token).ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // 宿主持停或连接已结束
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug("RTMP 连接 {Id} 保活失败：{Message}", _id, ex.Message);
+            await lifetime.CancelAsync().ConfigureAwait(false);
         }
     }
 
@@ -271,10 +462,42 @@ internal sealed class RtmpConnection
                 HandleMedia(message);
                 return;
 
+            case RtmpMessageType.UserControl:
+                HandleUserControl(message);
+                return;
+
             case RtmpMessageType.DataAmf0:
                 HandleData(message);
                 return;
         }
+    }
+
+    /// <summary>
+    /// 用户控制消息：对端的 PingRequest 必须回 PingResponse，否则对端按超时掐断我们。
+    /// </summary>
+    private void HandleUserControl(RtmpMessage message)
+    {
+        if (message.Payload.Length < 2)
+            return;
+
+        var eventType = System.Buffers.Binary.BinaryPrimitives.ReadUInt16BigEndian(message.Payload);
+
+        if (eventType != 6)   // PingRequest
+            return;
+
+        var payload = new byte[6];
+        System.Buffers.Binary.BinaryPrimitives.WriteUInt16BigEndian(payload, 7);   // PingResponse
+
+        // 回显对端的时间戳（规范 6.3.1）
+        message.Payload.AsSpan(2, 4).CopyTo(payload.AsSpan(2));
+
+        Send(new RtmpMessage
+        {
+            MessageType = RtmpMessageType.UserControl,
+            StreamId = 0,
+            TimestampMs = 0,
+            Payload = payload,
+        });
     }
 
     private async Task HandleCommandAsync(RtmpMessage message, CancellationToken cancellationToken)
@@ -283,13 +506,16 @@ internal sealed class RtmpConnection
         var command = reader.ReadValue() as string ?? "";
         // 命令布局统一为：命令名, transactionId, commandObject(通常 null), ...具体参数
         var transactionId = ReadNumber(ref reader);
-        reader.ReadValue();   // command object（连接信息/发布参数都在这里，或为 null）
+
+        // command object：connect 带 app/tcUrl/token 等，publish/play 也可能带
+        var commandObject = reader.ReadValue();
+        var properties = ReadProperties(commandObject);
 
         switch (command)
         {
             case "connect":
                 // Amf0Reader 是 ref struct：不能作为异步方法参数，先同步取出需要的信息
-                HandleConnect(message.StreamId, transactionId);
+                HandleConnect(message.StreamId, transactionId, properties);
                 break;
 
             case "releaseStream":
@@ -302,12 +528,12 @@ internal sealed class RtmpConnection
                 break;
 
             case "publish":
-                HandlePublish(reader);
-                SendStatus(message.StreamId, "NetStream.Publish.Start", "Publishing");
+                await HandlePublishAsync(
+                    ReadPublishName(reader), properties, message.StreamId, cancellationToken).ConfigureAwait(false);
                 break;
 
             case "play":
-                HandlePlay(ReadPlayName(reader), message.StreamId);
+                await HandlePlayAsync(ReadPlayName(reader), properties, message.StreamId, cancellationToken).ConfigureAwait(false);
                 break;
 
             case "FCUnpublish":
@@ -323,8 +549,43 @@ internal sealed class RtmpConnection
         }
     }
 
-    private void HandleConnect(int streamId, double transactionId)
+    /// <summary>把 AMF0 命令对象读成字典（取 app/token 等用）。</summary>
+    private static Dictionary<string, string> ReadProperties(object? commandObject) =>
+        commandObject is Dictionary<string, object?> map
+            ? map.Where(pair => pair.Value is not null)
+                .ToDictionary(pair => pair.Key, pair => pair.Value!.ToString() ?? "", StringComparer.OrdinalIgnoreCase)
+            : [];
+
+    /// <summary>从连接属性/流名里取令牌：URL 查询串（app?token=x）或独立 token 字段都认。</summary>
+    private static string ReadToken(IReadOnlyDictionary<string, string> properties, string? streamName)
     {
+        if (properties.TryGetValue("token", out var token) && !string.IsNullOrEmpty(token))
+            return token;
+
+        foreach (var value in new[] { properties.GetValueOrDefault("app"), streamName })
+        {
+            if (value is null)
+                continue;
+
+            var query = value.Split('?', 2);
+            if (query.Length < 2)
+                continue;
+
+            foreach (var pair in query[1].Split('&', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var parts = pair.Split('=', 2);
+                if (parts.Length == 2 && parts[0].Equals("token", StringComparison.OrdinalIgnoreCase))
+                    return Uri.UnescapeDataString(parts[1]);
+            }
+        }
+
+        return "";
+    }
+
+    private void HandleConnect(int streamId, double transactionId, IReadOnlyDictionary<string, string> properties)
+    {
+        _connectionProperties = properties;
+
         // 窗口确认
         SendControl(RtmpMessageType.WindowAcknowledgementSize, _options.WindowAcknowledgementSize);
         SendControl(RtmpMessageType.SetPeerBandwidth, _options.WindowAcknowledgementSize);
@@ -345,15 +606,41 @@ internal sealed class RtmpConnection
         SendResult(streamId, transactionId, client: "FMS/3,5,7,7009");
     }
 
-    private void HandlePublish(Amf0Reader reader)
+    private async Task HandlePublishAsync(
+        string streamName,
+        IReadOnlyDictionary<string, string> properties,
+        int streamId,
+        CancellationToken cancellationToken)
     {
-        // reader 已越过命令名/transactionId/commandObject，正对发布名
-        var streamName = reader.ReadValue() as string ?? "";   // 发布名（{app}/{name}）
+        // 发布名形如 {app}/{name} 或 {app}/{name}?token=x（令牌也可以是 connect 对象里的字段）
+        var identity = StreamIdentity.Parse(StripQuery(streamName));
 
-        _publishing = StreamIdentity.Parse(streamName);
+        if (_options.RequirePublishToken)
+        {
+            var authorized = await _authenticator.AuthorizePublishAsync(
+                NewContext(identity, ReadToken(properties, streamName)), cancellationToken).ConfigureAwait(false);
+
+            if (!authorized)
+            {
+                _logger.LogWarning("RTMP 连接 {Id} 推流 {Stream} 鉴权失败", _id, streamName);
+                SendStatus(streamId, "NetStream.Failed", "error", "鉴权失败：无效的推流令牌");
+
+                return;
+            }
+        }
+
+        _publishing = identity;
         _hub.Publish(_publishing, $"rtmp:{_id}");
 
         _logger.LogInformation("RTMP 连接 {Id} 发布 {Stream}", _id, streamName);
+        SendStatus(streamId, "NetStream.Publish.Start", "Publishing");
+    }
+
+    /// <summary>从 publish 命令里取出发布名（同步：ref struct 不能进异步方法）。</summary>
+    private static string ReadPublishName(Amf0Reader reader)
+    {
+        // reader 已越过命令名/transactionId/commandObject，正对发布名
+        return reader.ReadValue() as string ?? "";
     }
 
     /// <summary>从 play 命令里取出流名（同步：ref struct 不能进异步方法）。</summary>
@@ -368,9 +655,13 @@ internal sealed class RtmpConnection
         return streamName;
     }
 
-    private void HandlePlay(string streamName, int streamId)
+    private async Task HandlePlayAsync(
+        string streamName,
+        IReadOnlyDictionary<string, string> properties,
+        int streamId,
+        CancellationToken cancellationToken)
     {
-        _playing = StreamIdentity.Parse(streamName);
+        _playing = StreamIdentity.Parse(StripQuery(streamName));
         _playingSubscription = Guid.Empty;
 
         // StreamBegin 用户控制
@@ -379,6 +670,20 @@ internal sealed class RtmpConnection
         // NetStream.Play.Reset + NetStream.Play.Start
         SendStatus(streamId, "NetStream.Play.Reset", "Playing");
         SendStatus(streamId, "NetStream.Play.Start", "Playing");
+
+        if (_options.RequirePlayToken)
+        {
+            var authorized = await _authenticator.AuthorizePlayAsync(
+                NewContext(_playing, ReadToken(properties, streamName)), cancellationToken).ConfigureAwait(false);
+
+            if (!authorized)
+            {
+                _logger.LogWarning("RTMP 连接 {Id} 拉流 {Stream} 鉴权失败", _id, streamName);
+                SendStatus(streamId, "NetStream.Failed", "error", "鉴权失败：无效的拉流令牌");
+
+                return;
+            }
+        }
 
         var stream = _hub.Find(_playing);
         if (stream is null || !stream.IsPublished)
@@ -547,7 +852,7 @@ internal sealed class RtmpConnection
         });
     }
 
-    private void SendStatus(int streamId, string code, string level)
+    private void SendStatus(int streamId, string code, string level, string? description = null)
     {
         var buffer = new ArrayBufferWriter<byte>();
         var writer = new Amf0Writer(buffer);
@@ -558,7 +863,7 @@ internal sealed class RtmpConnection
         writer.WriteObjectStart();
         writer.WriteProperty("level", level);
         writer.WriteProperty("code", code);
-        writer.WriteProperty("description", code);
+        writer.WriteProperty("description", description ?? code);
         writer.WriteObjectEnd();
 
         Send(new RtmpMessage

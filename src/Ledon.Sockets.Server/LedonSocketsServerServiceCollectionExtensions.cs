@@ -6,6 +6,7 @@ using Ledon.Protocols;
 using Ledon.Sockets.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -38,6 +39,36 @@ public static class LedonSocketsServerServiceCollectionExtensions
         services.TryAddSingleton(codec);
         services.TryAddSingleton(handler);
         services.AddHostedService<TcpServer>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// 注册 TCP 服务端，处理器由容器延迟解析（处理器依赖其它服务时用，
+    /// 避免注册期构建 ServiceProvider）。
+    /// </summary>
+    public static IServiceCollection AddLedonSocketServer(
+        this IServiceCollection services,
+        Action<TcpServerOptions> configure,
+        IFrameCodec codec,
+        Func<IServiceProvider, IConnectionHandler> handlerFactory)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configure);
+        ArgumentNullException.ThrowIfNull(codec);
+        ArgumentNullException.ThrowIfNull(handlerFactory);
+
+        var options = new TcpServerOptions();
+        configure(options);
+
+        services.TryAddSingleton(options);
+        services.TryAddSingleton(codec);
+        services.AddHostedService<TcpServer>(provider => new TcpServer(
+            provider.GetRequiredService<TcpServerOptions>(),
+            codec,
+            handlerFactory(provider),
+            provider.GetRequiredService<IServiceScopeFactory>(),
+            provider.GetRequiredService<ILogger<TcpServer>>()));
 
         return services;
     }

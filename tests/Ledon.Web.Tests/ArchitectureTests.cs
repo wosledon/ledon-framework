@@ -62,7 +62,7 @@ public class ArchitectureTests
         ["Ledon.Sockets.Client"] = ["Ledon.Protocols"],
         ["Ledon.Sockets.Server"] = ["Ledon.Protocols", "Ledon.Module"],
         ["Ledon.Sip"] = ["Ledon.Protocols"],
-        ["Ledon.Sip.Client"] = ["Ledon.Sip", "Ledon.Sockets.Client"],
+        ["Ledon.Sip.Client"] = ["Ledon.Sip", "Ledon.Sockets.Client", "Ledon.Protocols"],
         // SIP over TCP 的 Content-Length 切帧实现 IFrameCodec（协议层能力）
         ["Ledon.Sip.Server"] = ["Ledon.Sip", "Ledon.Sockets.Server", "Ledon.Protocols"],
         // 流媒体控制面：端点与 webhook 走 Web

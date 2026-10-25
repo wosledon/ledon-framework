@@ -13,7 +13,7 @@ namespace Ledon.Web.Tests;
 /// <summary>客户端 ↔ 服务端联调：真实连接、类型化收发、断线重连。</summary>
 public class ProtocolClientServerTests : IAsyncDisposable
 {
-    private readonly int _port = GetFreePort();
+    private readonly int _port = TestPorts.Next();
     private readonly List<IHostedService> _services = [];
     private readonly List<TcpProtocolClient> _clients = [];
 
@@ -177,16 +177,6 @@ public class ProtocolClientServerTests : IAsyncDisposable
         var deadline = DateTime.UtcNow + timeout;
         while (!condition() && DateTime.UtcNow < deadline)
             await Task.Delay(20);
-    }
-
-    private static int GetFreePort()
-    {
-        var listener = new TcpListener(IPAddress.Loopback, 0);
-        listener.Start();
-        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
-        listener.Stop();
-
-        return port;
     }
 
     public async ValueTask DisposeAsync()

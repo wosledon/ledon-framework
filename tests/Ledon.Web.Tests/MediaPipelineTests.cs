@@ -3,6 +3,7 @@ using System.Buffers.Binary;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using Ledon.Streaming;
 using Ledon.Streaming.Hls;
 using Ledon.Streaming.Media;
@@ -253,6 +254,96 @@ public class MediaPipelineTests
         stopwatch.Stop();
 
         Assert.True(stopwatch.ElapsedMilliseconds < 2000, $"发布被慢订阅者阻塞：{stopwatch.ElapsedMilliseconds} ms");
+    }
+
+    [Fact]
+    public void Unpublished_streams_are_swept_after_retention()
+    {
+        var hub = new StreamHub(NullLogger<StreamHub>.Instance, new StreamHubOptions
+        {
+            UnpublishedRetention = TimeSpan.FromMilliseconds(50),
+        });
+
+        var identity = StreamIdentity.Parse("live/sweep");
+        hub.Publish(identity);
+        Assert.NotNull(hub.Find(identity));
+
+        hub.Unpublish(identity);
+
+        // 刚停播还在：观众重连/HLS 追赶要靠这段缓冲
+        Assert.Equal(0, hub.SweepExpired());
+        Assert.NotNull(hub.Find(identity));
+
+        // 超过保留时长：必须删掉，否则每条播过的流都永远占内存
+        Thread.Sleep(120);
+        Assert.Equal(1, hub.SweepExpired());
+        Assert.Null(hub.Find(identity));
+
+        // 再扫一次是幂等的
+        Assert.Equal(0, hub.SweepExpired());
+    }
+
+    [Fact]
+    public void Published_stream_is_never_swept()
+    {
+        var hub = new StreamHub(NullLogger<StreamHub>.Instance, new StreamHubOptions
+        {
+            UnpublishedRetention = TimeSpan.FromMilliseconds(10),
+        });
+
+        var identity = StreamIdentity.Parse("live/live");
+        hub.Publish(identity);
+
+        Thread.Sleep(60);
+
+        Assert.Equal(0, hub.SweepExpired());
+        Assert.NotNull(hub.Find(identity));
+    }
+
+    [Fact]
+    public void Republish_resets_the_retention_clock()
+    {
+        var hub = new StreamHub(NullLogger<StreamHub>.Instance, new StreamHubOptions
+        {
+            UnpublishedRetention = TimeSpan.FromMilliseconds(80),
+        });
+
+        var identity = StreamIdentity.Parse("live/republish");
+
+        hub.Publish(identity);
+        hub.Unpublish(identity);
+        Thread.Sleep(40);
+        hub.Publish(identity);   // 断线重连：重新发布
+
+        Thread.Sleep(60);        // 距上次停止已过保留时长，但重新发布过
+        Assert.Equal(0, hub.SweepExpired());
+        Assert.NotNull(hub.Find(identity));
+    }
+
+    [Fact]
+    public void Stats_track_bytes_and_tags()
+    {
+        var hub = new StreamHub(NullLogger<StreamHub>.Instance);
+        var identity = StreamIdentity.Parse("live/stats-bytes");
+
+        hub.Publish(identity);
+        hub.Write(identity, Tag(FlvTagType.Video, 0, new byte[100]));
+        hub.Write(identity, Tag(FlvTagType.Video, 33, new byte[50]));
+
+        var stats = Assert.Single(hub.Stats());
+
+        Assert.Equal(2, stats.Tags);
+        Assert.Equal(150, stats.TotalBytes);
+    }
+
+    [Fact]
+    public void Publish_beyond_max_streams_is_rejected()
+    {
+        var hub = new StreamHub(NullLogger<StreamHub>.Instance, new StreamHubOptions { MaxStreams = 1 });
+
+        hub.Publish(StreamIdentity.Parse("live/one"));
+
+        Assert.Throws<InvalidOperationException>(() => hub.Publish(StreamIdentity.Parse("live/two")));
     }
 
     private static FlvTag Tag(FlvTagType type, uint timestamp, byte[] data) => new()
