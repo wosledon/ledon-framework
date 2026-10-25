@@ -178,8 +178,7 @@ public class TcpServerTests : IAsyncDisposable
         var recorder = new FrameRecorder();
         StartServer(new LengthPrefixedFrameCodec(), recorder);
 
-        using var client = new TcpClient();
-        await client.ConnectAsync(IPAddress.Loopback, _port);
+        using var client = await ConnectWithRetryAsync(_port, TimeSpan.FromSeconds(10));
 
         await using var stream = client.GetStream();
         await stream.WriteAsync(LengthPrefixedFrameCodec.Encode("ping"u8));
@@ -194,8 +193,7 @@ public class TcpServerTests : IAsyncDisposable
     {
         StartServer(new LengthPrefixedFrameCodec(), new FrameRecorder());
 
-        using var client = new TcpClient();
-        await client.ConnectAsync(IPAddress.Loopback, _port);
+        using var client = await ConnectWithRetryAsync(_port, TimeSpan.FromSeconds(10));
         await using var stream = client.GetStream();
 
         var wire = LengthPrefixedFrameCodec.Encode("hello"u8);
@@ -218,8 +216,7 @@ public class TcpServerTests : IAsyncDisposable
     {
         StartServer(new LengthPrefixedFrameCodec(), new FrameRecorder());
 
-        using var client = new TcpClient();
-        await client.ConnectAsync(IPAddress.Loopback, _port);
+        using var client = await ConnectWithRetryAsync(_port, TimeSpan.FromSeconds(10));
         await using var stream = client.GetStream();
 
         var wire = LengthPrefixedFrameCodec.Encode("a"u8)
@@ -238,8 +235,7 @@ public class TcpServerTests : IAsyncDisposable
         var recorder = new FrameRecorder();
         StartServer(new LengthPrefixedFrameCodec(), recorder);
 
-        var client = new TcpClient();
-        await client.ConnectAsync(IPAddress.Loopback, _port);
+        var client = await ConnectWithRetryAsync(_port, TimeSpan.FromSeconds(10));
         client.Close();
 
         await WaitUntilAsync(() => recorder.Disconnected > 0, TimeSpan.FromSeconds(5));
@@ -259,6 +255,31 @@ public class TcpServerTests : IAsyncDisposable
             hosted.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
             _services.Add(hosted);
         }
+    }
+
+    /// <summary>连接并重试：服务端监听就绪前连接会被拒，等它就绪即可。</summary>
+    private static async Task<TcpClient> ConnectWithRetryAsync(int port, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        Exception? last = null;
+
+        while (DateTime.UtcNow < deadline)
+        {
+            var client = new TcpClient();
+            try
+            {
+                await client.ConnectAsync(IPAddress.Loopback, port);
+                return client;
+            }
+            catch (Exception ex)
+            {
+                last = ex;
+                client.Dispose();
+                await Task.Delay(50);
+            }
+        }
+
+        throw new TimeoutException($"连接 127.0.0.1:{port} 超时：{last?.Message}");
     }
 
     private static async Task<byte[]> ReadFrameAsync(Stream stream)
