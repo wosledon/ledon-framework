@@ -21,9 +21,11 @@
     <Project Path="src/Ledon.Admin/Ledon.Admin.csproj" />
     <Project Path="src/Ledon.Notifications.Feishu/Ledon.Notifications.Feishu.csproj" />
     <Project Path="src/Ledon.Protocols/Ledon.Protocols.csproj" />
-    <Project Path="src/Ledon.Protocols.Client/Ledon.Protocols.Client.csproj" />
-    <Project Path="src/Ledon.Protocols.Server/Ledon.Protocols.Server.csproj" />
-    <Project Path="src/Ledon.Protocols.Sip/Ledon.Protocols.Sip.csproj" />
+    <Project Path="src/Ledon.Sockets.Client/Ledon.Sockets.Client.csproj" />
+    <Project Path="src/Ledon.Sockets.Server/Ledon.Sockets.Server.csproj" />
+    <Project Path="src/Ledon.Sip/Ledon.Sip.csproj" />
+    <Project Path="src/Ledon.Sip.Client/Ledon.Sip.Client.csproj" />
+    <Project Path="src/Ledon.Sip.Server/Ledon.Sip.Server.csproj" />
     <Project Path="src/Ledon.Streaming/Ledon.Streaming.csproj" />
     <Project Path="src/Ledon.Locking/Ledon.Locking.csproj" />
     <Project Path="src/Ledon.Caching/Ledon.Caching.csproj" />

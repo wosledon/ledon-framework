@@ -3,8 +3,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Ledon.Protocols;
-using Ledon.Protocols.Client;
-using Ledon.Protocols.Server;
+using Ledon.Sockets.Client;
+using Ledon.Sockets.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -112,7 +112,7 @@ public class ProtocolClientServerTests : IAsyncDisposable
     {
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddLedonProtocolServer(o => o.Port = _port, codec, handler);
+        services.AddLedonSocketServer(o => o.Port = _port, codec, handler);
 
         var provider = services.BuildServiceProvider();
 

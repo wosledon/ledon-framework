@@ -3,7 +3,7 @@ using System.Reflection;
 using Ledon;
 using Ledon.Module;
 using Ledon.Protocols;
-using Ledon.Protocols.Server;
+using Ledon.Sockets.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -12,15 +12,15 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// <summary>
 /// 协议服务端入口：
 /// <code>
-/// builder.Services.AddLedonProtocolServer(o =&gt; o.Port = 9000, new LengthPrefixedFrameCodec());
-/// builder.Services.AddLedonProtocolUdpServer(o =&gt; o.Port = 9001);
+/// builder.Services.AddLedonSocketServer(o =&gt; o.Port = 9000, new LengthPrefixedFrameCodec());
+/// builder.Services.AddLedonSocketUdpServer(o =&gt; o.Port = 9001);
 /// </code>
 /// 帧编解码（长度前缀/分隔符/定长）与包编解码（结构体映射）可自由组合。
 /// </summary>
-public static class LedonProtocolsServerServiceCollectionExtensions
+public static class LedonSocketsServerServiceCollectionExtensions
 {
     /// <summary>注册 TCP 服务端（帧编解码与处理器由调用方提供）。</summary>
-    public static IServiceCollection AddLedonProtocolServer(
+    public static IServiceCollection AddLedonSocketServer(
         this IServiceCollection services,
         Action<TcpServerOptions> configure,
         IFrameCodec codec,
@@ -43,7 +43,7 @@ public static class LedonProtocolsServerServiceCollectionExtensions
     }
 
     /// <summary>注册 UDP 服务端。</summary>
-    public static IServiceCollection AddLedonProtocolUdpServer(
+    public static IServiceCollection AddLedonSocketUdpServer(
         this IServiceCollection services,
         Action<UdpServerOptions> configure,
         IUdpHandler handler)
@@ -63,7 +63,7 @@ public static class LedonProtocolsServerServiceCollectionExtensions
     }
 
     /// <summary>注册 UDP 服务端（处理器由容器解析，避免注册期构建 ServiceProvider）。</summary>
-    public static IServiceCollection AddLedonProtocolUdpServer<THandler>(
+    public static IServiceCollection AddLedonSocketUdpServer<THandler>(
         this IServiceCollection services,
         Action<UdpServerOptions> configure)
         where THandler : class, IUdpHandler

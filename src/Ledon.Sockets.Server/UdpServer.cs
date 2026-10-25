@@ -1,10 +1,11 @@
+using Ledon.Protocols;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Ledon.Protocols.Server;
+namespace Ledon.Sockets.Server;
 
 /// <summary>UDP 服务端选项。</summary>
 public sealed class UdpServerOptions

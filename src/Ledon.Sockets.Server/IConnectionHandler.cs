@@ -1,6 +1,7 @@
+using Ledon.Protocols;
 using Microsoft.Extensions.Logging;
 
-namespace Ledon.Protocols.Server;
+namespace Ledon.Sockets.Server;
 
 /// <summary>连接事件（连上/收到帧/断开）。</summary>
 public interface IConnectionHandler

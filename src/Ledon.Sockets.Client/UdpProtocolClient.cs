@@ -1,8 +1,10 @@
+using Ledon.Protocols;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Ledon.Protocols.Client;
+namespace Ledon.Sockets.Client;
 
 /// <summary>
 /// UDP 协议客户端：无连接，每次发送都是一个数据报；接收按数据报分发。
@@ -11,7 +13,7 @@ namespace Ledon.Protocols.Client;
 public sealed class UdpProtocolClient : IProtocolClient
 {
     private readonly ProtocolClientOptions _options;
-    private readonly IPacketCodec<object> _codec;
+    private readonly IPacketCodec<object>? _codec;
     private readonly IClientHandler _handler;
     private readonly ILogger<UdpProtocolClient> _logger;
     private readonly UdpClient _client;
@@ -20,16 +22,28 @@ public sealed class UdpProtocolClient : IProtocolClient
 
     public UdpProtocolClient(
         ProtocolClientOptions options,
-        IPacketCodec<object> codec,
         IClientHandler handler,
-        ILogger<UdpProtocolClient> logger)
+        IPacketCodec<object> codec,
+        ILogger<UdpProtocolClient>? logger = null)
     {
         _options = options;
         _codec = codec;
         _handler = handler;
-        _logger = logger;
+        _logger = logger ?? NullLogger<UdpProtocolClient>.Instance;
 
         _client = new UdpClient();
+    }
+
+    /// <summary>
+    /// 数据报即消息的客户端（SIP/DNS 风格）：不需要包编解码，
+    /// 直接用 <see cref="SendAsync"/> 发原始字节。
+    /// </summary>
+    public UdpProtocolClient(
+        ProtocolClientOptions options,
+        IClientHandler handler,
+        ILogger<UdpProtocolClient>? logger = null)
+        : this(options, handler, codec: null!, logger)
+    {
     }
 
     /// <inheritdoc />
@@ -71,8 +85,10 @@ public sealed class UdpProtocolClient : IProtocolClient
     /// <inheritdoc />
     public Task SendPacketAsync<TPacket>(TPacket packet, CancellationToken cancellationToken = default)
     {
+        // 包编解码是可选的：数据报即消息的协议（SIP/DNS 风格）不需要它
         var codec = _codec as IPacketCodec<TPacket>
-            ?? throw new InvalidOperationException($"客户端编解码器不匹配：需要 IPacketCodec<{typeof(TPacket).Name}>");
+            ?? throw new InvalidOperationException(
+                $"未注册 IPacketCodec<{typeof(TPacket).Name}>（数据报即消息的协议请用 SendAsync 发原始字节）");
 
         return SendAsync(codec.Encode(packet), cancellationToken);
     }

@@ -54,6 +54,8 @@ public class MessageHandler : IFeishuEventHandler
 
 ## Ledon.Protocols —— 协议解析（单独库）
 
+> 传输层是独立包：`Ledon.Sockets.Client` / `Ledon.Sockets.Server`。
+
 ```csharp
 // 帧编解码（第一层：字节流 → 完整包）
 IFrameCodec codec = new LengthPrefixedFrameCodec();     // [长度(4)][载荷]
@@ -80,15 +82,9 @@ var request = PacketSerializer<LoginRequest>.Deserialize(bytes);
 - 帧按到达顺序处理；单帧失败只记录不断开；`ProtocolException`（协议不同步）断开该连接；
 - UDP 无连接，处理器并发调用（须线程安全）。
 
-## Ledon.Protocols.Sip —— SIP
+## Ledon.Sip —— SIP 协议解析（纯解析）
 
 ```csharp
-builder.Services.AddLedonSip(o =>
-{
-    o.Port = 5060;
-    o.AutoAnswerOptions = true;    // OPTIONS 保活自动 200 OK
-});
-
 var message = SipParser.Parse(text);   // 或 Parse(bytes)
 message.Method;      // INVITE / ACK / BYE / REGISTER / OPTIONS
 message.CallId;      // 对话标识
@@ -100,12 +96,38 @@ sdp.Media[0].Media;      // audio / video
 sdp.Media[0].Port;
 sdp.Media[0].Formats;    // 编码/DTMF 事件号（0=PCMU, 101=telephone-event）
 
-// 自定义处理：返回 null = 不应答
+// 自定义应答：返回 null = 不应答
 public class MySipHandler : ISipHandler
 {
-    public Task<SipMessage?> HandleAsync(SipMessage message, SipEndpoint endpoint, CancellationToken ct) { ... }
+    public Task<SipMessage?> HandleAsync(SipMessage message, CancellationToken ct) { ... }
 }
 ```
+
+## Ledon.Sip.Server / Ledon.Sip.Client —— 基于 Socket 库
+
+SIP 有自己的 Server/Client 包，**构建在 Socket 库之上**（解析在 `Ledon.Sip`，传输在 `Ledon.Sockets.*`）：
+
+```csharp
+// 服务端：UDP 监听 + 应答（也可 TCP + Content-Length 切帧）
+builder.Services.AddLedonSipServer(o =>
+{
+    o.Port = 5060;
+    o.AutoAnswerOptions = true;
+});
+builder.Services.AddSingleton<ISipHandler, MySipHandler>();
+
+// 客户端：事务匹配 + 重传 + 超时
+builder.Services.AddLedonSipClient(o => { o.Host = "pbx.example.com"; o.Port = 5060; });
+
+var client = provider.GetRequiredService<SipClient>();
+await client.ConnectAsync();
+var response = await client.SendRequestAsync(request);   // 等最终响应（2xx-6xx）
+```
+
+- 服务端只依赖 `Ledon.Sockets.Server`（socket/作用域/并发）+ `Ledon.Sip`（解析/应答）；
+- 客户端只依赖 `Ledon.Sockets.Client`（连接/重连）+ `Ledon.Sip`（解析/应答）；
+- 客户端按 Via branch 匹配响应（RFC 3261），1xx 不完成事务，UDP 上指数退避重传；
+- TCP 传输用 `SipTcpFrameCodec`（按 Content-Length 切帧，RFC 3261 §18.3）。
 
 - RFC 3261 请求/状态行、头字段（大小写不敏感、同名多值拼接）、body；
 - SDP 解析：会话名/连接信息/媒体流/载荷格式/属性；

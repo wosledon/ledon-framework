@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Ledon.Protocols.Sip;
+namespace Ledon.Sip;
 
 /// <summary>SIP 解析异常（协议不同步/消息不合法）。</summary>
 public sealed class SipParseException(string message) : Exception(message);

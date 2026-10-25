@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Ledon.Protocols.Sip;
+namespace Ledon.Sip;
 
 /// <summary>SIP 消息类型。</summary>
 public enum SipMessageType

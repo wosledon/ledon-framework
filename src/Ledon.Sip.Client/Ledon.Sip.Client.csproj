@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Description>Ledon SIP 客户端：基于 Socket 库的事务用户（重传/超时/响应匹配）。</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Ledon.Sip\Ledon.Sip.csproj" />
+        <ProjectReference Include="..\Ledon.Sockets.Client\Ledon.Sockets.Client.csproj" />
+    </ItemGroup>
+
+</Project>

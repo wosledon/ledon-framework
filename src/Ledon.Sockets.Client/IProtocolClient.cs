@@ -1,9 +1,10 @@
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.DependencyInjection;
+using Ledon.Protocols;
 using Microsoft.Extensions.Logging;
 
-namespace Ledon.Protocols.Client;
+namespace Ledon.Sockets.Client;
 
 /// <summary>客户端选项。</summary>
 public sealed class ProtocolClientOptions

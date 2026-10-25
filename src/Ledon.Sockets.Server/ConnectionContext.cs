@@ -1,7 +1,8 @@
+using Ledon.Protocols;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Ledon.Protocols.Server;
+namespace Ledon.Sockets.Server;
 
 /// <summary>连接上下文：发送、远端地址、附加状态。</summary>
 public sealed class ConnectionContext

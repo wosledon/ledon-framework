@@ -1,10 +1,10 @@
-# Ledon.Protocols.Client
+# Ledon.Sockets.Client
 
 协议客户端：TCP/UDP 连接、断线自动重连、类型化收发。与 `Ledon.Protocols`（解析）、
-`Ledon.Protocols.Server`（服务端）分开——按需引用。
+`Ledon.Sockets.Server`（服务端）分开——按需引用。
 
 ```csharp
-builder.Services.AddLedonProtocolClient(
+builder.Services.AddLedonSocketClient(
     o =>
     {
         o.Host = "127.0.0.1";
@@ -53,7 +53,7 @@ public class MyClientHandler : ClientHandlerBase
 ## UDP 客户端
 
 ```csharp
-builder.Services.AddLedonProtocolUdpClient(
+builder.Services.AddLedonSocketUdpClient(
     o => { o.Host = "127.0.0.1"; o.Port = 9001; },
     codec,
     new MyClientHandler());

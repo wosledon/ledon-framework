@@ -1,3 +1,4 @@
+using Ledon.Protocols;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Ledon.Protocols.Server;
+namespace Ledon.Sockets.Server;
 
 /// <summary>TCP 服务端选项。</summary>
 public sealed class TcpServerOptions

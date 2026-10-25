@@ -70,16 +70,16 @@ internal static class AssemblyScanner
         "Ledon.Admin",
         "Ledon.Notifications.Feishu",
         "Ledon.Protocols",
-        "Ledon.Protocols.Client",
-        "Ledon.Protocols.Server",
-        "Ledon.Protocols.Sip",
+        "Ledon.Sockets.Client",
+        "Ledon.Sockets.Server",
+        "Ledon.Sip",
+        "Ledon.Sip.Client",
+        "Ledon.Sip.Server",
         "Ledon.Streaming",
     };
 
     /// <summary>
     /// 依赖上下文（deps.json）声明的程序集缓存。解析一次后进程内不变，
-    /// 而 <c>AddLedon</c> 与各功能包的 <c>LedonAssemblies.Scan()</c> 每次调用都会走这条通道——
-    /// 缓存把"读 deps.json + 逐个 Assembly.Load 尝试"从 O(功能包数) 降为 1 次。
     /// 已加载程序集通道（B/C）仍每次动态枚举，不缓存（测试宿主会陆续加载程序集）。
     /// </summary>
     private static readonly Lock DependencyContextGate = new();

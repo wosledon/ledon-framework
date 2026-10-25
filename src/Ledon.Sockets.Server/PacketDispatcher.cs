@@ -1,6 +1,7 @@
+using Ledon.Protocols;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Ledon.Protocols.Server;
+namespace Ledon.Sockets.Server;
 
 /// <summary>标记协议包的类型标识（用于按类型路由到处理器）。</summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]

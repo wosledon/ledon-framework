@@ -63,9 +63,11 @@
     <ProjectReference Include="..\..\src\Ledon.Admin\Ledon.Admin.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Notifications.Feishu\Ledon.Notifications.Feishu.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Protocols\Ledon.Protocols.csproj" />
-    <ProjectReference Include="..\..\src\Ledon.Protocols.Client\Ledon.Protocols.Client.csproj" />
-    <ProjectReference Include="..\..\src\Ledon.Protocols.Server\Ledon.Protocols.Server.csproj" />
-    <ProjectReference Include="..\..\src\Ledon.Protocols.Sip\Ledon.Protocols.Sip.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Sockets.Client\Ledon.Sockets.Client.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Sockets.Server\Ledon.Sockets.Server.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Sip\Ledon.Sip.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Sip.Client\Ledon.Sip.Client.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Sip.Server\Ledon.Sip.Server.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Streaming\Ledon.Streaming.csproj" />
     </ItemGroup>
 

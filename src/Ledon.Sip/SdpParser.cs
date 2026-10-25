@@ -1,4 +1,4 @@
-namespace Ledon.Protocols.Sip;
+namespace Ledon.Sip;
 
 /// <summary>SDP（RFC 4566）解析结果：会话描述的关键字段。</summary>
 public sealed class Sdp

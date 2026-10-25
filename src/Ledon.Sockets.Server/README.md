@@ -1,10 +1,10 @@
-# Ledon.Protocols.Server
+# Ledon.Sockets.Server
 
 协议服务端：TCP/UDP 监听、连接管理、类型化分发。与 `Ledon.Protocols`（解析）、
-`Ledon.Protocols.Client`（客户端）分开——按需引用，互不拖累。
+`Ledon.Sockets.Client`（客户端）分开——按需引用，互不拖累。
 
 ```csharp
-builder.Services.AddLedonProtocolServer(
+builder.Services.AddLedonSocketServer(
     o => { o.Port = 9000; o.BufferSize = 8192; },
     new LengthPrefixedFrameCodec(),
     new MyHandler());
@@ -53,7 +53,7 @@ public class LoginRequestHandler : IPacketHandler<LoginRequest>
 }
 
 // 启动时
-builder.Services.AddLedonProtocolServer(o => o.Port = 9000, new LengthPrefixedFrameCodec(), new LoggingConnectionHandler(...));
+builder.Services.AddLedonSocketServer(o => o.Port = 9000, new LengthPrefixedFrameCodec(), new LoggingConnectionHandler(...));
 builder.Services.AddLedonPacketHandlers();   // 扫描 + 注册 + 编译解码委托
 ```
 
@@ -62,7 +62,7 @@ builder.Services.AddLedonPacketHandlers();   // 扫描 + 注册 + 编译解码�
 ## UDP 服务端
 
 ```csharp
-builder.Services.AddLedonProtocolUdpServer(o => o.Port = 9001, new MyDatagramHandler());
+builder.Services.AddLedonSocketUdpServer(o => o.Port = 9001, new MyDatagramHandler());
 
 public class MyDatagramHandler : IUdpHandler
 {

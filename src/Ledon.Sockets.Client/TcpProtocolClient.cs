@@ -1,8 +1,9 @@
+using Ledon.Protocols;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
 
-namespace Ledon.Protocols.Client;
+namespace Ledon.Sockets.Client;
 
 /// <summary>
 /// TCP 协议客户端：连接 + 断线自动重连 + 帧切分 + 类型化发送。

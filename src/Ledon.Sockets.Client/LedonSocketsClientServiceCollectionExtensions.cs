@@ -1,5 +1,5 @@
 using Ledon.Protocols;
-using Ledon.Protocols.Client;
+using Ledon.Sockets.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -8,7 +8,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// <summary>
 /// 协议客户端入口：
 /// <code>
-/// builder.Services.AddLedonProtocolClient(o =&gt;
+/// builder.Services.AddLedonSocketClient(o =&gt;
 /// {
 ///     o.Host = "127.0.0.1";
 ///     o.Port = 9000;
@@ -17,10 +17,10 @@ namespace Microsoft.Extensions.DependencyInjection;
 /// </code>
 /// 客户端随宿主启动自动连接，断线自动重连，收到的帧分发给 <see cref="IClientHandler"/>。
 /// </summary>
-public static class LedonProtocolsClientServiceCollectionExtensions
+public static class LedonSocketsClientServiceCollectionExtensions
 {
     /// <summary>注册 TCP 客户端（含托管连接循环）。</summary>
-    public static IServiceCollection AddLedonProtocolClient(
+    public static IServiceCollection AddLedonSocketClient(
         this IServiceCollection services,
         Action<ProtocolClientOptions> configure,
         IFrameCodec codec,
@@ -43,7 +43,7 @@ public static class LedonProtocolsClientServiceCollectionExtensions
     }
 
     /// <summary>注册 UDP 客户端。</summary>
-    public static IServiceCollection AddLedonProtocolUdpClient(
+    public static IServiceCollection AddLedonSocketUdpClient(
         this IServiceCollection services,
         Action<ProtocolClientOptions> configure,
         IPacketCodec<object> codec,
@@ -59,6 +59,26 @@ public static class LedonProtocolsClientServiceCollectionExtensions
 
         services.TryAddSingleton(options);
         services.TryAddSingleton(codec);
+        services.TryAddSingleton(handler);
+        services.AddHostedService<UdpClientHostedService>();
+
+        return services;
+    }
+
+    /// <summary>注册 UDP 客户端（无包编解码：数据报即消息的协议，如 SIP/DNS）。</summary>
+    public static IServiceCollection AddLedonSocketUdpClient(
+        this IServiceCollection services,
+        Action<ProtocolClientOptions> configure,
+        IClientHandler handler)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configure);
+        ArgumentNullException.ThrowIfNull(handler);
+
+        var options = new ProtocolClientOptions();
+        configure(options);
+
+        services.TryAddSingleton(options);
         services.TryAddSingleton(handler);
         services.AddHostedService<UdpClientHostedService>();
 
@@ -116,7 +136,7 @@ internal sealed class UdpClientHostedService(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var client = new UdpProtocolClient(options, codec, handler, logger);
+        var client = new UdpProtocolClient(options, handler, codec, logger);
 
         await client.ConnectAsync(stoppingToken).ConfigureAwait(false);
 
