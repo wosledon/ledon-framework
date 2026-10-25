@@ -60,6 +60,8 @@ public class ArchitectureTests
         ["Ledon.Notifications.Feishu"] = ["Ledon.Notifications", "Ledon.Web"],
         ["Ledon.Protocols"] = [],
         ["Ledon.Protocols.Sip"] = ["Ledon.Protocols"],
+        // 流媒体控制面：端点与 webhook 走 Web
+        ["Ledon.Streaming"] = ["Ledon.Web"],
     };
 
     [Fact]

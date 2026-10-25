@@ -55,6 +55,7 @@ app.Run();
 | 飞书（通知 + 事件回调）               | `Ledon.Notifications.Feishu`  | `AddLedonFeishu()`                                  | 机器人/应用发消息 + URL 校验/解密/事件分发 |
 | TCP/UDP 服务端 + 帧/包编解码          | `Ledon.Protocols`             | `AddLedonTcpServer()` / `AddLedonUdpEndpoint()`     | 长度前缀/分隔符/定长切帧 + 文本/结构化二进制包 |
 | SIP 协议                              | `Ledon.Protocols.Sip`         | `AddLedonSip()`                                     | RFC 3261 消息解析 + SDP 解析 + 自动应答端点 |
+| 流媒体（推/拉流、鉴权、转流、双工）      | `Ledon.Streaming`             | `AddLedonStreaming()`                              | 令牌鉴权 + 在线状态 + 事件 + 转流/录制 + WHIP/WHEP |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -345,9 +346,10 @@ src/Ledon.Admin/           统一运维端点（队列/死信/工作流/定时�
 src/Ledon.Notifications.Feishu/ 飞书：通知渠道 + 事件回调（校验/解密/分发）
 src/Ledon.Protocols/        TCP/UDP 服务端 + 帧/包编解码（协议解析）
 src/Ledon.Protocols.Sip/   SIP 消息/SDP 解析 + 自动应答端点
+src/Ledon.Streaming/       流媒体控制面：推/拉流鉴权、事件、转流、WHIP/WHEP 双工
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（模块 26 + Web 291 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 309 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

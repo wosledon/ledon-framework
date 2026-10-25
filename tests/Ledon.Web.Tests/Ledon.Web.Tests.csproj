@@ -64,6 +64,7 @@
     <ProjectReference Include="..\..\src\Ledon.Notifications.Feishu\Ledon.Notifications.Feishu.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Protocols\Ledon.Protocols.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Protocols.Sip\Ledon.Protocols.Sip.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Streaming\Ledon.Streaming.csproj" />
     </ItemGroup>
 
     <ItemGroup>

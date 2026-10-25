@@ -40,3 +40,5 @@
   href: platform-services.md
 - name: 飞书/Socket/SIP
   href: realtime-protocols.md
+- name: 流媒体
+  href: streaming.md
