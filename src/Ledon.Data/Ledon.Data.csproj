@@ -15,4 +15,9 @@
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
     </ItemGroup>
 
+    <ItemGroup>
+        <!-- 测试需要验证启动迁移策略的内部实现（DbStructureInitializer） -->
+        <InternalsVisibleTo Include="Ledon.Web.Tests" />
+    </ItemGroup>
+
 </Project>

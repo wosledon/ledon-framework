@@ -44,4 +44,11 @@ public sealed class LedonDataOptions
     /// 关掉时直接注入 DbContext（框架不强制仓储层）。
     /// </summary>
     public bool UseRepositories { get; set; }
+
+    /// <summary>
+    /// 启动时的库结构策略，默认 <see cref="LedonMigrationStrategy.Auto"/>。
+    /// 生产环境如果由部署流水线管理 schema，设为 <see cref="LedonMigrationStrategy.None"/>——
+    /// 应用启动不再碰库结构（多实例同时启动时也不会抢迁移）。
+    /// </summary>
+    public LedonMigrationStrategy MigrationStrategy { get; set; } = LedonMigrationStrategy.Auto;
 }

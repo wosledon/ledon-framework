@@ -21,6 +21,7 @@
     <ProjectReference Include="..\..\src\Ledon.Scheduling\Ledon.Scheduling.csproj" />
     <ProjectReference Include="..\..\src\Ledon.SignalR\Ledon.SignalR.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Grpc\Ledon.Grpc.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Admin\Ledon.Admin.csproj" />
     </ItemGroup>
 
     <ItemGroup>

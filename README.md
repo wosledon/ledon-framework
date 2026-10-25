@@ -44,6 +44,14 @@ app.Run();
 | gRPC 服务间通信                       | `Ledon.Grpc`                  | `AddLedonGrpc()` / `AddLedonGrpcClient<T>()`         | 服务自动发现 + 约定映射 + 强类型客户端 + 健康服务/日志拦截器 |
 | 工作流引擎                            | `Ledon.Workflow`              | `AddLedonWorkflow()`                                 | 多步骤编排 + 重试 + Saga 补偿 + 重启恢复            |
 | 统一事务入口                         | `Ledon.Transactions`          | `AddLedonTransactions()`                             | IUnitOfWork（本地事务）+ Saga（分布式补偿），同一种写法 |
+| 分布式锁                             | `Ledon.Locking`               | `AddLedonLocking()`                                  | 进程内 / Redis 互斥（防重、资源独占），到期自动释放 |
+| 功能开关 / 灰度                      | `Ledon.FeatureManagement`     | `AddLedonFeatureManagement()`                        | 开关 + 租户/用户白名单 + 百分比灰度 + 配置热更新 |
+| 文件 / 对象存储                      | `Ledon.BlobStorage`           | `AddLedonBlobStorage()`                              | IFileStorage（本地/内存）+ 租户目录隔离 + 类型/大小校验 |
+| 通知发送                             | `Ledon.Notifications`         | `AddLedonNotifications()`                            | 邮件/短信/推送统一入口 + 模板 + 重试 + 发送记录 |
+| 多语言 / 请求文化                    | `Ledon.Localization`          | `AddLedonLocalization()`                             | 查询串/Cookie/Accept-Language 解析 + JSON 文案 |
+| 操作审计                             | `Ledon.AuditLog`              | `AddLedonAudit()` / `AddLedonAudit<TContext>()`      | 谁何时改了什么（属性级 before/after）+ 保留策略 |
+| 应用层管线（CQRS）                   | `Ledon.Application`           | `AddLedonApplication()`                              | ICommand/IQuery + 验证/日志/事务/缓存 behaviors |
+| 统一运维端点                         | `Ledon.Admin`                 | `AddLedonAdmin()`                                    | 发件箱/死信/队列指标/工作流/定时任务一页总览 |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -323,9 +331,17 @@ src/Ledon.Queues.Kafka/    Kafka 传输（发件箱 ↔ broker）
 src/Ledon.Grpc/            gRPC 服务间通信（自动发现 + 约定映射 + 客户端）
 src/Ledon.Workflow/        工作流引擎（步骤编排 + 重试 + Saga 补偿 + 重启恢复）
 src/Ledon.Transactions/    统一事务入口（IUnitOfWork + Saga，本地/分布式同一种写法）
+src/Ledon.Locking/         分布式锁（进程内 / Redis 互斥）
+src/Ledon.FeatureManagement/ 功能开关与灰度（白名单 + 百分比 + 配置热更新）
+src/Ledon.BlobStorage/     文件/对象存储抽象（本地/内存，租户目录隔离）
+src/Ledon.Notifications/   通知发送（邮件/短信/推送统一入口 + 重试 + 记录）
+src/Ledon.Localization/    多语言与请求文化解析
+src/Ledon.AuditLog/        操作审计流水（属性级 before/after）
+src/Ledon.Application/     应用层管线（ICommand/IQuery + 验证/日志/事务/缓存）
+src/Ledon.Admin/           统一运维端点（队列/死信/工作流/定时任务总览）
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（模块 26 + Web 177 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 252 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

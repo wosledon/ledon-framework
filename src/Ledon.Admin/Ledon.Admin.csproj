@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Ledon.Queues\Ledon.Queues.csproj" />
+        <ProjectReference Include="..\Ledon.Scheduling\Ledon.Scheduling.csproj" />
+        <ProjectReference Include="..\Ledon.Web\Ledon.Web.csproj" />
+        <ProjectReference Include="..\Ledon.Workflow\Ledon.Workflow.csproj" />
+    </ItemGroup>
+
+</Project>

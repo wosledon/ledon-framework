@@ -52,7 +52,16 @@
         <ProjectReference Include="..\..\src\Ledon.MultiTenancy\Ledon.MultiTenancy.csproj" />
         <ProjectReference Include="..\..\src\Ledon.Testing\Ledon.Testing.csproj" />    
         <ProjectReference Include="..\..\src\Ledon.Workflow\Ledon.Workflow.csproj" />    
-        <ProjectReference Include="..\..\src\Ledon.Transactions\Ledon.Transactions.csproj" /></ItemGroup>
+        <ProjectReference Include="..\..\src\Ledon.Transactions\Ledon.Transactions.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Locking\Ledon.Locking.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.FeatureManagement\Ledon.FeatureManagement.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.BlobStorage\Ledon.BlobStorage.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Notifications\Ledon.Notifications.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Localization\Ledon.Localization.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.AuditLog\Ledon.AuditLog.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Application\Ledon.Application.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Admin\Ledon.Admin.csproj" />
+    </ItemGroup>
 
     <ItemGroup>
         <!-- gRPC 测试夹具：真实 protoc 生成代码（验证服务发现与约定映射） -->

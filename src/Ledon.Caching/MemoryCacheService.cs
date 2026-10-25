@@ -146,6 +146,25 @@ internal sealed class MemoryCacheService : ICacheService
         _cache.Set(fullKey, value, entryOptions);
     }
 
+    /// <summary>收到其它实例的广播：删本进程对应键（含静态前缀的完整键）。</summary>
+    private void ApplyRemoteKeyRemoval(string key)
+    {
+        var fullKey = FullKey(key);
+        _keys.TryRemove(fullKey, out _);
+        _cache.Remove(fullKey);
+    }
+
+    /// <summary>收到其它实例的广播：删本进程该前缀下全部键。</summary>
+    private void ApplyRemotePrefixRemoval(string prefix)
+    {
+        var fullPrefix = FullKey(prefix);
+        foreach (var key in _keys.Keys.Where(k => k.StartsWith(fullPrefix, StringComparison.Ordinal)))
+        {
+            _keys.TryRemove(key, out _);
+            _cache.Remove(key);
+        }
+    }
+
     private string FullKey(string key)
     {
         var prefix = _prefixProvider?.GetKeyPrefix();

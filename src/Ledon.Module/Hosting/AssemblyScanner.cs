@@ -60,6 +60,14 @@ internal static class AssemblyScanner
         "Ledon.Grpc",
         "Ledon.Workflow",
         "Ledon.Transactions",
+        "Ledon.Locking",
+        "Ledon.FeatureManagement",
+        "Ledon.BlobStorage",
+        "Ledon.Notifications",
+        "Ledon.Localization",
+        "Ledon.AuditLog",
+        "Ledon.Application",
+        "Ledon.Admin",
     };
 
     /// <summary>

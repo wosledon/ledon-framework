@@ -43,6 +43,19 @@ public class ArchitectureTests
         ["Ledon.Serilog"] = [],
         // 组合型：统一事务入口依赖数据层 + 队列（发件箱）
         ["Ledon.Transactions"] = ["Ledon.Data", "Ledon.Queues"],
+        // 灰度主体取自多租户上下文
+        ["Ledon.FeatureManagement"] = ["Ledon.MultiTenancy"],
+        ["Ledon.Locking"] = [],
+        // 租户路径前缀隔离
+        ["Ledon.BlobStorage"] = ["Ledon.MultiTenancy"],
+        ["Ledon.Notifications"] = [],
+        ["Ledon.Localization"] = [],
+        // 复用 EF 拦截器机制与 IDbContextOptionsConfiguration
+        ["Ledon.AuditLog"] = ["Ledon.Data"],
+        // 组合型：应用层管线复用缓存与统一事务入口
+        ["Ledon.Application"] = ["Ledon.Caching", "Ledon.Transactions"],
+        // 组合型：运维端点聚合队列/调度/工作流状态
+        ["Ledon.Admin"] = ["Ledon.Queues", "Ledon.Scheduling", "Ledon.Workflow", "Ledon.Web"],
     };
 
     [Fact]

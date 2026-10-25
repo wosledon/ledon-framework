@@ -17,6 +17,12 @@
         <ProjectReference Include="..\..\..\src\Ledon.Scheduling\Ledon.Scheduling.csproj" />
         <ProjectReference Include="..\..\..\src\Ledon.Workflow\Ledon.Workflow.csproj" />
         <ProjectReference Include="..\..\..\src\Ledon.Transactions\Ledon.Transactions.csproj" />
+    <ProjectReference Include="..\..\..\src\Ledon.BlobStorage\Ledon.BlobStorage.csproj" />
+    <ProjectReference Include="..\..\..\src\Ledon.Application\Ledon.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Ledon.Notifications\Ledon.Notifications.csproj" />
+    <ProjectReference Include="..\..\..\src\Ledon.Localization\Ledon.Localization.csproj" />
+    <ProjectReference Include="..\..\..\src\Ledon.FeatureManagement\Ledon.FeatureManagement.csproj" />
+    <ProjectReference Include="..\..\..\src\Ledon.Locking\Ledon.Locking.csproj" />
     </ItemGroup>
 
     <ItemGroup>

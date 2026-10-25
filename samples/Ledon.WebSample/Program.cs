@@ -33,6 +33,9 @@ const int restPort = 5180;
 const int grpcPort = 5181;
 
 var builder = WebApplication.CreateBuilder(args);
+// 把应用层校验异常映射为 400（先于框架的 500 处理器注册，链上优先）
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+
 builder.AddLedonWeb(o =>
 {
     o.UseOpenApi = true;
@@ -54,6 +57,28 @@ builder.Services.AddLedonSignalR();
 builder.Services.AddLedonGrpc();
 builder.Services.AddLedonWorkflow();   // 工作流引擎（定义/步骤自动发现 + 重启恢复）
 builder.Services.AddLedonTransactions();   // 统一事务入口（本地/分布式同一种写法）
+builder.Services.AddLedonLocking();        // 分布式锁（进程内）
+builder.Services.AddLedonFeatureManagement();   // 功能开关（读 Features 配置段）
+builder.Services.AddLedonLocalization(o =>    // 多语言（查询串/Cookie/Accept-Language）
+{
+    o.DefaultCulture = "zh-CN";
+    o.SupportedCultures.Add("en-US");
+});
+builder.Services.AddLedonNotifications(o =>    // 通知（未配 SMTP 时记录失败结果，不发真实邮件）
+{
+    o.FromAddress = "noreply@ledon.dev";
+});
+builder.Services.AddLedonApplication(o =>      // 应用层管线：验证 → 日志 → 事务
+{
+    o.UseValidation();
+    o.UseLogging();
+    o.UseTransactions();
+});
+builder.Services.AddLedonBlobStorage(o =>      // 文件存储（本地目录）
+{
+    o.RootPath = Path.Combine(AppContext.BaseDirectory, "App_Data", "blobs");
+});
+builder.Services.AddLedonAdmin();              // 统一运维端点 /admin/ops
 // gRPC 需要 HTTP/2：示例主端口跑 HTTP/1.1（REST 演示），另开一个明文 h2c 端口给 gRPC。
 // 显式 Listen 会覆盖 UseUrls，所以两个端口都在这里声明
 builder.WebHost.ConfigureKestrel(options =>
@@ -65,6 +90,7 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 var app = builder.Build();
+app.UseLedonRequestLocalization();   // 请求文化（路由之前）
 app.UseLedonWeb();
 app.MapLedonHealthChecks();   // GET /health
 app.MapLedonStartup();        // GET /health/startup（宿主启动完成后 200）
@@ -209,6 +235,23 @@ catch (SagaExecutionException ex)
 {
     await Show("SAGA", $"步骤 {ex.Step} 失败 → 已逆序补偿（SagaExecutionException）");
 }
+// 平台服务：CQRS 管线（验证 → 日志 → 事务）+ 功能开关 + 分布式锁 + 运维端点
+var orderClient = new HttpClient { BaseAddress = new Uri(url) };
+var createdOrder = await orderClient.PostAsJsonAsync("/demo/orders", new { sku = "SKU-1", qty = 2 });
+await Show("CQRS", $"POST /demo/orders → HTTP {(int)createdOrder.StatusCode}（命令经验证/日志/事务管线）");
+
+var rejected = await orderClient.PostAsJsonAsync("/demo/orders", new { sku = "SKU-1", qty = 0 });
+await Show("CQRS", $"POST /demo/orders(qty=0) → HTTP {(int)rejected.StatusCode}（校验行为拦截，不进处理器）");
+
+var beta = await orderClient.GetAsync("/demo/beta");
+await Show("FEATURE", $"GET /demo/beta → HTTP {(int)beta.StatusCode}（开关未启用 = 404）");
+
+var paid = await orderClient.PostAsync("/demo/pay/O-1001", null);
+await Show("LOCK", $"POST /demo/pay/O-1001 → HTTP {(int)paid.StatusCode}（分布式锁串行化同一订单）");
+
+var ops = await orderClient.GetAsync("/admin/ops/summary");
+await Show("ADMIN", $"GET /admin/ops/summary → HTTP {(int)ops.StatusCode}（发件箱/队列/工作流/调度一页总览）");
+
 Console.WriteLine("\n正在停止宿主（模块将按初始化逆序自动关闭）...");
 await app.StopAsync();
 
@@ -226,4 +269,36 @@ static async Task WaitUntil(Func<bool> condition, TimeSpan timeout)
 
     if (!condition())
         throw new TimeoutException("等待条件超时");
+}
+
+/// <summary>ValidationException → 400 ProblemDetails（校验失败是客户端问题，不是服务器错误）。</summary>
+internal sealed class ValidationExceptionHandler(
+    Microsoft.AspNetCore.Http.IProblemDetailsService problemDetails) : Microsoft.AspNetCore.Diagnostics.IExceptionHandler
+{
+    public async ValueTask<bool> TryHandleAsync(
+        Microsoft.AspNetCore.Http.HttpContext context,
+        Exception exception,
+        CancellationToken cancellationToken)
+    {
+        if (exception is not Ledon.Application.ValidationException validation)
+            return false;   // 不是校验异常：交给链上下一个处理器（框架的 500 处理器）
+
+        var problem = new Microsoft.AspNetCore.Mvc.ProblemDetails
+        {
+            Status = Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest,
+            Title = "请求校验失败",
+            Detail = exception.Message,
+            Instance = $"{context.Request.Method} {context.Request.Path}",
+        };
+        problem.Extensions["errors"] = validation.Errors;
+
+        context.Response.StatusCode = Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest;
+
+        return await problemDetails.TryWriteAsync(new Microsoft.AspNetCore.Http.ProblemDetailsContext
+        {
+            HttpContext = context,
+            Exception = exception,
+            ProblemDetails = problem,
+        });
+    }
 }
