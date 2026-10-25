@@ -118,18 +118,11 @@ public sealed class SipTransactionLayer : IHostedService
             return;
         }
 
-        // 重复请求（客户端没收到响应所以重发）：原样重发上次的响应，不重复执行业务
+        // 重复请求（客户端没收到响应所以重发）：原样重发上次的响应，不重复执行业务。
+        // 并发到达的重复请求也走这里：TryAdd 失败的等赢家把响应做出来再原样发一份
         if (_transactions.TryGetValue(key, out var existing))
         {
-            if (existing.LastResponse is { } previous)
-            {
-                RetransmittedResponses++;
-
-                if (!reliable)
-                    await send(previous.ToBytes(), cancellationToken).ConfigureAwait(false);
-
-                _logger.LogDebug("SIP 事务 {Branch} 重发上次的响应（对端重传了请求）", branch);
-            }
+            await ResendAsync(existing, send, cancellationToken).ConfigureAwait(false);
 
             return;
         }
@@ -143,7 +136,15 @@ public sealed class SipTransactionLayer : IHostedService
         }
 
         var transaction = new ServerTransaction(key, reliable, _options, _logger);
-        _transactions[key] = transaction;
+
+        // 原子占位：同一 branch 的重复请求并发到达时，只有一个能建事务、
+        // 只有一个会执行业务（否则一次 INVITE 会被处理两遍）
+        if (!_transactions.TryAdd(key, transaction))
+        {
+            await ResendAsync(_transactions[key], send, cancellationToken).ConfigureAwait(false);
+
+            return;
+        }
 
         SipMessage? response;
 
@@ -163,7 +164,7 @@ public sealed class SipTransactionLayer : IHostedService
             return;
         }
 
-        transaction.LastResponse = response;
+        transaction.SetResponse(response);
         transaction.BindSender(send);
 
         await send(response.ToBytes(), cancellationToken).ConfigureAwait(false);
@@ -193,6 +194,35 @@ public sealed class SipTransactionLayer : IHostedService
         _transactions.Clear();
     }
 
+    /// <summary>
+    /// 原样重发某个事务上次的响应。响应还没做出来时先等它就绪
+    /// （并发重复请求的场景），等不到就丢掉——客户端会再重传。
+    /// </summary>
+    private async Task ResendAsync(
+        ServerTransaction transaction,
+        Func<byte[], CancellationToken, Task> send,
+        CancellationToken cancellationToken)
+    {
+        if (transaction.LastResponse is null)
+        {
+            // Task.WaitAsync 只保证"等到或抛异常"，这里要区分"等到了"和"超时了"
+            var finished = await Task
+                .WhenAny(transaction.ResponseReady, Task.Delay(TimeSpan.FromSeconds(5), cancellationToken))
+                .ConfigureAwait(false);
+
+            if (finished != transaction.ResponseReady)
+                return;   // 赢家还没做完：客户端会再重传
+        }
+
+        if (transaction.LastResponse is not { } previous)
+            return;
+
+        RetransmittedResponses++;
+        await send(previous.ToBytes(), cancellationToken).ConfigureAwait(false);
+
+        _logger.LogDebug("SIP 事务重发上次的响应（对端重传了请求）");
+    }
+
     private sealed class ServerTransaction : IDisposable
     {
         private readonly string _branch;
@@ -201,6 +231,7 @@ public sealed class SipTransactionLayer : IHostedService
         private readonly ILogger _logger;
         private readonly CancellationTokenSource _lifetime = new();
         private readonly SemaphoreSlim _writeGate = new(1, 1);
+        private readonly TaskCompletionSource _responseReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         public ServerTransaction(
             string branch,
@@ -215,7 +246,17 @@ public sealed class SipTransactionLayer : IHostedService
         }
 
         /// <summary>最近一次发出的响应（重传/重复请求用）。</summary>
-        public SipMessage? LastResponse { get; set; }
+        public SipMessage? LastResponse { get; private set; }
+
+        /// <summary>响应就绪信号（并发重复请求等它，然后原样转发）。</summary>
+        public Task ResponseReady => _responseReady.Task;
+
+        /// <summary>记录响应并唤醒等待者。</summary>
+        public void SetResponse(SipMessage response)
+        {
+            LastResponse = response;
+            _responseReady.TrySetResult();
+        }
 
         /// <summary>发送钩子（建事务后由事务层绑定）。</summary>
         public Func<byte[], CancellationToken, Task>? Send { get; private set; }

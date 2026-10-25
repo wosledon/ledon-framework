@@ -179,6 +179,35 @@ public class SipProductionTests : IAsyncDisposable
     }
 
     [Fact]
+    public async Task Concurrent_duplicate_requests_invoke_the_handler_once()
+    {
+        // UDP 服务端是并发派发的：同一 branch 的重复请求可能同时到达。
+        // 事务层必须保证业务只跑一次（否则一次 INVITE 会被处理两遍）
+        var handler = new CountingHandler();
+        StartServer(handler);
+
+        using var socket = new System.Net.Sockets.Socket(
+            System.Net.Sockets.AddressFamily.InterNetwork,
+            System.Net.Sockets.SocketType.Dgram,
+            System.Net.Sockets.ProtocolType.Udp);
+        socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+
+        var payload = Options("sip:test@127.0.0.1").ToBytes();
+        var endpoint = new IPEndPoint(IPAddress.Loopback, _port);
+
+        var sends = Enumerable.Range(0, 10)
+            .Select(_ => socket.SendToAsync(payload, endpoint))
+            .ToArray();
+
+        await Task.WhenAll(sends);
+
+        // 等响应稳定下来：业务只应被调用一次
+        await Task.Delay(TimeSpan.FromSeconds(1));
+
+        Assert.Equal(1, handler.Invocations);
+    }
+
+    [Fact]
     public async Task Duplicated_request_gets_the_same_response_without_reinvoking_the_handler()
     {
         var handler = new CountingHandler();
