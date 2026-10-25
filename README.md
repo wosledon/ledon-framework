@@ -43,6 +43,7 @@ app.Run();
 | 云原生默认值                           | `Ledon.Aspire`                | `AddLedonServiceDefaults()`                          | OTel+健康检查+弹性+服务发现一次装齐              |
 | gRPC 服务间通信                       | `Ledon.Grpc`                  | `AddLedonGrpc()` / `AddLedonGrpcClient<T>()`         | 服务自动发现 + 约定映射 + 强类型客户端 + 健康服务/日志拦截器 |
 | 工作流引擎                            | `Ledon.Workflow`              | `AddLedonWorkflow()`                                 | 多步骤编排 + 重试 + Saga 补偿 + 重启恢复            |
+| 统一事务入口                         | `Ledon.Transactions`          | `AddLedonTransactions()`                             | IUnitOfWork（本地事务）+ Saga（分布式补偿），同一种写法 |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -321,10 +322,10 @@ src/Ledon.Queues.RabbitMQ/ RabbitMQ 传输（发件箱 ↔ broker）
 src/Ledon.Queues.Kafka/    Kafka 传输（发件箱 ↔ broker）
 src/Ledon.Grpc/            gRPC 服务间通信（自动发现 + 约定映射 + 客户端）
 src/Ledon.Workflow/        工作流引擎（步骤编排 + 重试 + Saga 补偿 + 重启恢复）
-src/Ledon.Workflow/        工作流引擎（步骤编排 + 重试 + Saga 补偿 + 重启恢复）
+src/Ledon.Transactions/    统一事务入口（IUnitOfWork + Saga，本地/分布式同一种写法）
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（模块 26 + Web 168 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 177 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）
@@ -352,7 +353,37 @@ CI（`.github/workflows/ci.yml`）在 push/PR 时 build+test；打 `v*` tag 时�
 每次推送到 main 还会跑 `Preview Packages` 工作流：产出 `{VersionPrefix}-preview.{run_number}` 的预览包并作为构件保留 14 天（不推 NuGet.org，不污染正式源）。
 
 ## 可靠投递：收件箱去重 + 死信管理
+## 统一事务入口：本地/分布式同一种写法
 
+`IUnitOfWork` 封装事务生命周期，用户不写 `BeginTransaction`/`Commit`/回滚样板：
+
+```csharp
+public class OrderService(IUnitOfWork uow)
+{
+    public async Task CreateAsync(CreateOrder cmd, CancellationToken ct) =>
+        await uow.ExecuteAsync(async token =>
+        {
+            var order = new Order(cmd);
+            order.Create();                                     // 领域事件（提交后才分发）
+            uow.AddIntegrationEvent(new OrderPlaced(order.Id));  // 跨服务事件
+            await uow.SaveChangesAsync(token);
+        }, ct);
+}
+```
+
+- **本地事务**：自动开事务/保存/提交，异常自动回滚；领域事件提交成功后才分发；
+- **集成事件一种写法两种形态**：配 `AddLedonOutbox()` → 与业务数据原子落库、可靠投递（可跨服务）；没配 → 提交后进程内分发；
+- **分布式（Saga）**：跨服务长流程每步独立事务、失败逆序补偿：
+
+```csharp
+var saga = provider.GetRequiredService<ISagaFactory>();
+await saga.For("order-fulfillment")
+    .Step("reserve", async (ctx, ct) => { /* 占库存 */ }, async (ctx, ct) => { /* 释放 */ })
+    .Step("charge",  async (ctx, ct) => { /* 扣款   */ }, async (ctx, ct) => { /* 退款 */ })
+    .RunAsync(ct);
+```
+
+详见[统一事务入口文档](docs/transactions.md)。
 消息中间件是至少一次投递。收件箱把重复投递收敛为恰好一次处理；发件箱维护保证表不无限增长、搁置消息有人管：
 
 ```csharp

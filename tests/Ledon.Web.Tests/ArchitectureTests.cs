@@ -41,6 +41,8 @@ public class ArchitectureTests
         ["Ledon.Configuration.Nacos"] = [],
         ["Ledon.Configuration.Apollo"] = [],
         ["Ledon.Serilog"] = [],
+        // 组合型：统一事务入口依赖数据层 + 队列（发件箱）
+        ["Ledon.Transactions"] = ["Ledon.Data", "Ledon.Queues"],
     };
 
     [Fact]

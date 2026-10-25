@@ -3,6 +3,7 @@ using Ledon.Module;
 using Ledon.Module.Abstractions;
 using Ledon.Module.Diagnostics;
 using Ledon.Queues;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -40,17 +41,21 @@ public static class LedonDurableQueueServiceCollectionExtensions
 
         services.TryAddScoped<IDurableQueue, EfDurableQueue>();
 
-        // OutboxDbContext 子类自动发现（持久化队列与发件箱同库）
-        foreach (var assembly in LedonAssemblies.Scan())
-        {
-            foreach (var type in assembly.GetLoadableTypes()
-                .Where(type => type is { IsClass: true, IsAbstract: false }
-                    && type != typeof(OutboxDbContext)
-                    && typeof(OutboxDbContext).IsAssignableFrom(type)))
-            {
-                services.TryAddScoped(typeof(OutboxDbContext), provider => provider.GetRequiredService(type));
-            }
-        }
+        // OutboxDbContext 子类自动发现（持久化队列与发件箱同库）。
+        // 多个候选时取"第一个能解析的"——测试场景可能只注册了其中一个
+        var durableContexts = LedonAssemblies.Scan()
+            .SelectMany(assembly => assembly.GetLoadableTypes())
+            .Where(type => type is { IsClass: true, IsAbstract: false }
+                && type != typeof(OutboxDbContext)
+                && typeof(OutboxDbContext).IsAssignableFrom(type))
+            .OrderBy(type => type.FullName, StringComparer.Ordinal)
+            .ToArray();
+
+        services.TryAddScoped(typeof(OutboxDbContext), provider =>
+            durableContexts.Select(type => provider.GetService(type) as DbContext).FirstOrDefault(context => context is not null)
+            ?? throw new InvalidOperationException(
+                $"未注册任何 OutboxDbContext 子类（候选：{string.Join(", ", durableContexts.Select(t => t.Name))}）。" +
+                "请 AddDbContext 注册其中一个，或自行注册 IDurableQueue。"));
 
         // 处理器自动发现（按名字索引；[DisableAutoDiscovery] 的类型不参与——手动注册优先）
         foreach (var assembly in LedonAssemblies.Scan())

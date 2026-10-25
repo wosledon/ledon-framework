@@ -59,6 +59,7 @@ internal static class AssemblyScanner
         "Ledon.Testing",
         "Ledon.Grpc",
         "Ledon.Workflow",
+        "Ledon.Transactions",
     };
 
     /// <summary>

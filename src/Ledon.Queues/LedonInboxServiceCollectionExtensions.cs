@@ -39,17 +39,21 @@ public static class LedonInboxServiceCollectionExtensions
 
         services.TryAddScoped<IInboxStore, EfInboxStore>();
 
-        // OutboxDbContext 子类自动发现：把具体类型注册为基类型（EfInboxStore 依赖基类型解析）
-        foreach (var assembly in LedonAssemblies.Scan())
-        {
-            foreach (var type in assembly.GetLoadableTypes()
-                .Where(type => type is { IsClass: true, IsAbstract: false }
-                    && type != typeof(OutboxDbContext)
-                    && typeof(OutboxDbContext).IsAssignableFrom(type)))
-            {
-                services.TryAddScoped(typeof(OutboxDbContext), provider => provider.GetRequiredService(type));
-            }
-        }
+        // OutboxDbContext 子类自动发现：把具体类型注册为基类型（EfInboxStore 依赖基类型解析）。
+        // 多个候选时取"第一个能解析的"——测试场景可能只注册了其中一个
+        var inboxContexts = LedonAssemblies.Scan()
+            .SelectMany(assembly => assembly.GetLoadableTypes())
+            .Where(type => type is { IsClass: true, IsAbstract: false }
+                && type != typeof(OutboxDbContext)
+                && typeof(OutboxDbContext).IsAssignableFrom(type))
+            .OrderBy(type => type.FullName, StringComparer.Ordinal)
+            .ToArray();
+
+        services.TryAddScoped(typeof(OutboxDbContext), provider =>
+            inboxContexts.Select(type => provider.GetService(type) as DbContext).FirstOrDefault(context => context is not null)
+            ?? throw new InvalidOperationException(
+                $"未注册任何 OutboxDbContext 子类（候选：{string.Join(", ", inboxContexts.Select(t => t.Name))}）。" +
+                "请 AddDbContext 注册其中一个，或自行注册 IInboxStore。"));
 
         services.AddHostedService<InboxCleanupService>();
 

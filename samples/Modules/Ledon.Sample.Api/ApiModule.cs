@@ -1,8 +1,11 @@
 using Ledon.Data;
 using Ledon.Module;
+using Ledon.Core.Events;
 using Ledon.Module.Abstractions;
 using Ledon.Scheduling;
+using Ledon.Queues;
 using Ledon.Workflow;
+using Ledon.Transactions;
 using Ledon.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -145,6 +148,43 @@ public class SchedulerAdminEndpoints : IEndpoint
             var ran = await invoker.InvokeAsync(name, ct);
             return ran ? Results.Ok(new { triggered = name }) : Results.NotFound($"未找到定时任务 {name}");
         });
+    }
+}
+
+/// <summary>
+/// 统一事务入口演示：本地事务 + 集成事件（一种写法）。
+/// 配了 AddLedonOutbox → 原子落库可靠投递；没配 → 提交后进程内分发。
+/// </summary>
+public interface IAccountService
+{
+    Task OpenAsync(string name, CancellationToken cancellationToken = default);
+}
+
+/// <summary>实现同名接口 <see cref="IAccountService"/> → 约定扫描自动注册。</summary>
+public class AccountService(IUnitOfWork uow, TodoDbContext db) : IAccountService
+{
+    public async Task OpenAsync(string name, CancellationToken cancellationToken = default) =>
+        await uow.ExecuteAsync(async token =>
+        {
+            db.Notes.Add(new Note { Text = $"account:{name}" });
+
+            uow.AddIntegrationEvent(new AccountOpened(name));
+            await uow.SaveChangesAsync(token);
+        }, cancellationToken);
+}
+
+public record AccountOpened(string Name) : IIntegrationEvent;
+
+public class AccountOpenedHandler : IEventHandler<AccountOpened>
+{
+    private readonly ILogger<AccountOpenedHandler> _logger;
+
+    public AccountOpenedHandler(ILogger<AccountOpenedHandler> logger) => _logger = logger;
+
+    public Task HandleAsync(AccountOpened @event, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("账户 {Name} 已开通（事件驱动，发布方不关心谁在处理）", @event.Name);
+        return Task.CompletedTask;
     }
 }
 

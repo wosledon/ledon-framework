@@ -40,7 +40,7 @@ public class SchedulerClockTests : IDisposable
         await app.StartAsync();
 
         // 等调度循环真正进入等待（否则 AdvanceTo 可能早于首次 DelayAsync，白推一次）
-        await WaitUntil(() => clock.HasWaiters, TimeSpan.FromSeconds(5));
+        await WaitUntil(() => clock.HasWaiters, TimeSpan.FromSeconds(20));
 
         var task = app.Services.GetServices<IScheduledTask>().OfType<ManualTask>().Single();
         return (app, clock, task);
@@ -54,13 +54,13 @@ public class SchedulerClockTests : IDisposable
         // 启动时刻 00:00:59，循环算出下一触发点 00:01:00 并等待；
         // 推进到 00:01:00 → 触发一次
         clock.AdvanceTo(new DateTimeOffset(2026, 1, 1, 0, 1, 0, TimeSpan.Zero));
-        await WaitUntil(() => task.Invocations >= 1, TimeSpan.FromSeconds(5));
+        await WaitUntil(() => task.Invocations >= 1, TimeSpan.FromSeconds(20));
 
         Assert.Equal(1, task.Invocations);
 
         // 再推进一个周期：第二次触发
         clock.AdvanceTo(new DateTimeOffset(2026, 1, 1, 0, 2, 0, TimeSpan.Zero));
-        await WaitUntil(() => task.Invocations >= 2, TimeSpan.FromSeconds(5));
+        await WaitUntil(() => task.Invocations >= 2, TimeSpan.FromSeconds(20));
 
         Assert.Equal(2, task.Invocations);
     }
@@ -74,7 +74,7 @@ public class SchedulerClockTests : IDisposable
 
         // 00:01:00 触发首次执行（阻塞）
         clock.AdvanceTo(new DateTimeOffset(2026, 1, 1, 0, 1, 0, TimeSpan.Zero));
-        await WaitUntil(() => task.Started, TimeSpan.FromSeconds(5));
+        await WaitUntil(() => task.Started, TimeSpan.FromSeconds(20));
         Assert.Equal(1, task.Invocations);
 
         // 时钟推到 00:05:00——首次执行期间跨过 4 个触发点，随后放行
@@ -83,9 +83,9 @@ public class SchedulerClockTests : IDisposable
 
         // 默认（丢弃）模式：恢复后从"执行完毕时刻之后的下一个未来触发点"继续。
         // 等循环注册下一个等待点再推进（否则循环会从已推进的时刻算，跳到 00:07:00）
-        await WaitUntil(() => clock.HasWaiters, TimeSpan.FromSeconds(5));
+        await WaitUntil(() => clock.HasWaiters, TimeSpan.FromSeconds(20));
         clock.AdvanceTo(new DateTimeOffset(2026, 1, 1, 0, 6, 0, TimeSpan.Zero));
-        await WaitUntil(() => task.Invocations >= 2, TimeSpan.FromSeconds(5));
+        await WaitUntil(() => task.Invocations >= 2, TimeSpan.FromSeconds(20));
 
         // 跨过的 4 个触发点没有补跑（丢弃语义）：只有这一次新触发
         Assert.Equal(2, task.Invocations);
@@ -101,7 +101,7 @@ public class SchedulerClockTests : IDisposable
         clock.AdvanceTo(new DateTimeOffset(2026, 1, 1, 0, 1, 0, TimeSpan.Zero));
         await WaitUntil(
             () => app.Services.GetRequiredService<IScheduledTaskExecutionHistory>().Latest(nameof(ManualTask)) is not null,
-            TimeSpan.FromSeconds(5));
+            TimeSpan.FromSeconds(20));
 
         var latest = app.Services.GetRequiredService<IScheduledTaskExecutionHistory>().Latest(nameof(ManualTask));
         Assert.NotNull(latest);

@@ -8,6 +8,7 @@ using Ledon.Web;
 using Ledon.WebSample;
 using Ledon.WebSample.Grpc;
 using Ledon.Workflow;
+using Ledon.Transactions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,6 +53,7 @@ builder.Services.AddLedonScheduling();
 builder.Services.AddLedonSignalR();
 builder.Services.AddLedonGrpc();
 builder.Services.AddLedonWorkflow();   // 工作流引擎（定义/步骤自动发现 + 重启恢复）
+builder.Services.AddLedonTransactions();   // 统一事务入口（本地/分布式同一种写法）
 // gRPC 需要 HTTP/2：示例主端口跑 HTTP/1.1（REST 演示），另开一个明文 h2c 端口给 gRPC。
 // 显式 Listen 会覆盖 UseUrls，所以两个端口都在这里声明
 builder.WebHost.ConfigureKestrel(options =>
@@ -188,6 +190,25 @@ var engine = app.Services.CreateScope().ServiceProvider.GetRequiredService<Workf
 var orderFlow = await engine.CreateAsync("demo-order", new Dictionary<string, object?> { ["orderId"] = "O-1001" });
 var finished = await engine.RunAsync(orderFlow.Id, CancellationToken.None);
 await Show("WORKFLOW", $"demo-order 实例 {finished.Id.ToString()[..8]} → {finished.Status}（步骤：{string.Join(" → ", finished.CompletedSteps)}）");
+
+// 统一事务入口：本地事务 + 集成事件（一种写法；此处未配发件箱 → 提交后进程内分发）
+var accountService = app.Services.CreateScope().ServiceProvider.GetRequiredService<IAccountService>();
+await accountService.OpenAsync("alice", CancellationToken.None);
+await Show("TRANSACTION", "AccountService.OpenAsync 经 IUnitOfWork 提交（领域/集成事件自动分发）");
+
+// Saga：步骤失败逆序补偿（ship 步骤故意失败）
+var saga = app.Services.CreateScope().ServiceProvider.GetRequiredService<ISagaFactory>();
+try
+{
+    await saga.For("demo-saga")
+        .Step("reserve", (ctx, ct) => Task.CompletedTask, compensate: (ctx, ct) => Task.CompletedTask)
+        .Step("ship", (ctx, ct) => throw new InvalidOperationException("no-stock"))
+        .RunAsync();
+}
+catch (SagaExecutionException ex)
+{
+    await Show("SAGA", $"步骤 {ex.Step} 失败 → 已逆序补偿（SagaExecutionException）");
+}
 Console.WriteLine("\n正在停止宿主（模块将按初始化逆序自动关闭）...");
 await app.StopAsync();
 
