@@ -12,6 +12,9 @@ namespace Ledon.Caching;
 /// </summary>
 internal sealed class MemoryCacheService : ICacheService
 {
+    /// <summary>负缓存哨兵值（放进单独的 miss key，避免污染正常缓存值）。</summary>
+    private const string MissMarker = "\u0000miss";
+
     private readonly IMemoryCache _cache;
     private readonly LedonCachingOptions _options;
     private readonly ICacheKeyPrefixProvider? _prefixProvider;
@@ -75,6 +78,10 @@ internal sealed class MemoryCacheService : ICacheService
         if (_cache.TryGetValue(fullKey, out var cached))
             return cached is T hit ? hit : default;
 
+        // 负缓存哨兵：刚才有人回源拿到 null，直接复用结论不再回源
+        if (cached is null && _cache.TryGetValue(MissKey(fullKey), out _))
+            return default;
+
         // single-flight：并发未命中共享同一个回源 Task（无锁，不会锁住异步）
         // 回源使用 CancellationToken.None——共享任务不绑定任何单个调用者，
         // 否则一个调用者取消会杀掉其他所有等待者的回源；
@@ -93,7 +100,18 @@ internal sealed class MemoryCacheService : ICacheService
                 _inFlight.TryRemove(fullKey, out _);
         }
 
-        SetCore(fullKey, value, expiration, slidingExpiration);
+        // 回源拿到 null：写负缓存哨兵（防穿透）；关闭负缓存时什么都不写——
+        // 绝不能把 null 当正常值缓存，否则后续查询全部"命中 null"再也不回源
+        if (value is null)
+        {
+            if (_options.NegativeExpiration > TimeSpan.Zero)
+                SetCore(MissKey(fullKey), MissMarker, _options.NegativeExpiration, null);
+        }
+        else
+        {
+            SetCore(fullKey, value, expiration, slidingExpiration);
+        }
+
         return value;
     }
 
@@ -102,6 +120,11 @@ internal sealed class MemoryCacheService : ICacheService
         var fullKey = FullKey(key);
         _keys.TryRemove(fullKey, out _);
         _cache.Remove(fullKey);
+
+        // 负缓存哨兵一起清：显式失效就该让下次真的回源
+        var missKey = MissKey(fullKey);
+        _keys.TryRemove(missKey, out _);
+        _cache.Remove(missKey);
     }
 
     public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
@@ -173,4 +196,7 @@ internal sealed class MemoryCacheService : ICacheService
 
         return string.IsNullOrEmpty(prefix) ? key : $"{prefix}:{key}";
     }
+
+    /// <summary>负缓存哨兵的 key（与正常 key 分开，Remove 正常 key 时不会误删）。</summary>
+    private static string MissKey(string fullKey) => $"{fullKey}\u0000miss";
 }

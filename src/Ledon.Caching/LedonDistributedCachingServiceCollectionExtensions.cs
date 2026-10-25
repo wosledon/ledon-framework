@@ -41,7 +41,12 @@ public static class LedonDistributedCachingServiceCollectionExtensions
             services.AddDistributedMemoryCache();
         }
 
-        services.Replace(ServiceDescriptor.Singleton<ICacheService, DistributedCacheService>());
+        services.Replace(ServiceDescriptor.Singleton<ICacheService>(provider => new DistributedCacheService(
+            provider.GetRequiredService<IDistributedCache>(),
+            options,
+            provider.GetService<IConnectionMultiplexer>(),
+            provider.GetService<ICacheKeyPrefixProvider>(),
+            provider.GetService<JsonSerializerOptions>())));
 
         return services;
     }

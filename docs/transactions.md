@@ -74,7 +74,27 @@ await saga.For("order-fulfillment")
 - 每步在**独立 DI 作用域**执行，步内照常用 `ctx.UnitOfWork` 写本地数据；
 - 任一步失败：已完成步骤按**逆序补偿**，最终抛 `SagaExecutionException`（含失败步骤）；
 - 未提供补偿的步骤记录警告并继续补偿其余步骤（人工介入信号）；
-- `ctx.Data` 跨步骤共享数据。
+- `ctx.Data` 跨步骤共享数据（随实例持久化，恢复后步骤仍读得到上次写进去的值）。
+
+### 持久化与崩溃恢复
+
+让 DbContext 继承 `SagaDbContext` 即获得实例表（与 `WorkflowDbContext` 同一风格）：
+
+```csharp
+public class OrderDbContext(DbContextOptions<OrderDbContext> options) : SagaDbContext(options);
+```
+
+之后 Saga 具备：
+
+- **每步完成即落库**：进程在步骤之间崩溃，重启后由 `SagaRecoveryService` 认领同一个实例接着跑，
+  已完成的步骤**不会重复执行**（这是崩溃恢复的关键）；
+- **步骤清单随实例持久化**：恢复路径上没有构建器，实例里存的步骤名就够了；
+- **幂等键**：`saga.For(name, idempotencyKey)` 相同则复用同一实例，重复提交不会把业务跑两遍；
+- **单步超时**：`AddLedonTransactions(configureSaga: o => o.StepTimeout = ...)`，
+  步骤不观察取消令牌也不会把 Saga 永久卡住；
+- **多节点认领**：`LeasedBy` + `LeasedUntil` 保证同一实例只有一个节点在恢复；
+  乐观并发令牌让两个节点同时保存时后提交的那个抛 `DbUpdateConcurrencyException`，
+  而不是静默覆盖对方的 `CompletedSteps`（丢更新）。
 
 ### 步骤里发跨服务事件
 

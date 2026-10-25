@@ -11,6 +11,10 @@ namespace Ledon.Notifications;
 /// </summary>
 public sealed class ChannelRoutingNotificationSender : INotificationSender
 {
+    /// <summary>已发送过的去重键 → 发送时刻（进程内；多实例部署需换共享存储）。</summary>
+    private readonly Dictionary<string, DateTimeOffset> _sent = new(StringComparer.Ordinal);
+    private readonly Lock _dedupeGate = new();
+
     private readonly IReadOnlyList<INotificationChannel> _channels;
     private readonly LedonNotificationOptions _options;
     private readonly INotificationLog _log;
@@ -31,6 +35,15 @@ public sealed class ChannelRoutingNotificationSender : INotificationSender
     public async Task<NotificationResult> SendAsync(
         Notification notification, CancellationToken cancellationToken = default)
     {
+        // 去重：同一业务键只发一次（兜住"渠道已送达但返回失败"造成的重复）
+        if (_options.DeduplicationKey is { } keyOf && IsDuplicate(keyOf(notification)))
+        {
+            _logger.LogDebug("通知去重命中（{Channel} → {Recipient}），跳过重复发送",
+                notification.Channel, notification.Recipient);
+
+            return NotificationResult.Ok();
+        }
+
         var channel = ResolveChannel(notification.Channel);
         if (channel is null)
         {
@@ -41,8 +54,11 @@ public sealed class ChannelRoutingNotificationSender : INotificationSender
         }
 
         NotificationResult result = NotificationResult.Fail("未发送");
+        var attempts = 0;
+
         for (var attempt = 1; attempt <= Math.Max(1, _options.MaxRetries); attempt++)
         {
+            attempts = attempt;
             result = await channel.SendAsync(notification, cancellationToken).ConfigureAwait(false);
 
             if (result.Accepted)
@@ -54,24 +70,99 @@ public sealed class ChannelRoutingNotificationSender : INotificationSender
                     "通知发送失败（{Channel} → {Recipient}，第 {Attempt} 次）：{Error}",
                     notification.Channel, notification.Recipient, attempt, result.Error);
 
-                // 指数退避：1s、2s、4s……渠道抖动通常几次内恢复
-                await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt - 1)), cancellationToken).ConfigureAwait(false);
+                await Task.Delay(Backoff(attempt), cancellationToken).ConfigureAwait(false);
             }
         }
 
-        _log.Record(notification, result, _options.MaxRetries);
+        // 记录真实尝试次数（之前恒为 MaxRetries，首次成功也记 3，排查时没法判断）
+        _log.Record(notification, result, attempts);
+
+        if (result.Accepted && _options.DeduplicationKey is { } succeeded && succeeded(notification) is { } key)
+            MarkSent(key);
+
         return result;
     }
 
     public async Task<IReadOnlyList<NotificationResult>> SendAsync(
         IReadOnlyCollection<Notification> notifications, CancellationToken cancellationToken = default)
     {
-        var results = new List<NotificationResult>(notifications.Count);
+        ArgumentNullException.ThrowIfNull(notifications);
 
-        foreach (var notification in notifications)
-            results.Add(await SendAsync(notification, cancellationToken).ConfigureAwait(false));
+        var results = new NotificationResult[notifications.Count];
+
+        // 有界并发：通知是 IO 密集型，串行发送 100 条要约 100 倍延迟
+        var concurrency = Math.Max(1, _options.BatchConcurrency);
+
+        if (concurrency == 1)
+        {
+            var index = 0;
+            foreach (var notification in notifications)
+                results[index++] = await SendAsync(notification, cancellationToken).ConfigureAwait(false);
+
+            return results;
+        }
+
+        using var gate = new SemaphoreSlim(concurrency, concurrency);
+
+        var tasks = notifications.Select(async notification =>
+        {
+            await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                return await SendAsync(notification, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                gate.Release();
+            }
+        }).ToArray();
+
+        await Task.WhenAll(tasks).ConfigureAwait(false);
+
+        for (var i = 0; i < results.Length; i++)
+            results[i] = tasks[i].Result;
 
         return results;
+    }
+
+    /// <summary>指数退避（封顶）+ 可选抖动。</summary>
+    private TimeSpan Backoff(int attempt)
+    {
+        var ticks = _options.RetryBaseDelay.Ticks * (1L << Math.Min(attempt - 1, 16));
+        var delay = TimeSpan.FromTicks(Math.Min(ticks, _options.RetryMaxDelay.Ticks));
+
+        if (!_options.RetryJitter)
+            return delay;
+
+        var jitter = 0.75 + (Random.Shared.NextDouble() * 0.5);   // ±25%
+
+        return TimeSpan.FromTicks((long)(delay.Ticks * jitter));
+    }
+
+    private bool IsDuplicate(string? key)
+    {
+        if (string.IsNullOrEmpty(key))
+            return false;
+
+        var cutoff = DateTimeOffset.UtcNow - _options.DeduplicationWindow;
+
+        lock (_dedupeGate)
+        {
+            if (_sent.TryGetValue(key, out var sentAt) && sentAt >= cutoff)
+                return true;
+
+            // 顺手清理过期项，避免字典无限增长
+            foreach (var stale in _sent.Where(pair => pair.Value < cutoff).Select(pair => pair.Key).ToArray())
+                _sent.Remove(stale);
+
+            return false;
+        }
+    }
+
+    private void MarkSent(string key)
+    {
+        lock (_dedupeGate)
+            _sent[key] = DateTimeOffset.UtcNow;
     }
 
     private INotificationSender? ResolveChannel(string channel)

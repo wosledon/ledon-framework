@@ -15,23 +15,30 @@ namespace Ledon.Caching;
 /// </summary>
 internal sealed class DistributedCacheService : ICacheService
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new();
+    /// <summary>负缓存哨兵：与 <c>null</c> 区分开（JSON null 也是合法缓存值）。</summary>
+    private const string MissSentinel = "\"\u0000ledon:miss\"";
 
     private readonly IDistributedCache _cache;
     private readonly LedonDistributedCachingOptions _options;
     private readonly IConnectionMultiplexer? _multiplexer;
     private readonly ICacheKeyPrefixProvider? _prefixProvider;
+    private readonly JsonSerializerOptions _serializerOptions;
 
     public DistributedCacheService(
         IDistributedCache cache,
         LedonDistributedCachingOptions options,
         IConnectionMultiplexer? multiplexer = null,
-        ICacheKeyPrefixProvider? prefixProvider = null)
+        ICacheKeyPrefixProvider? prefixProvider = null,
+        JsonSerializerOptions? serializerOptions = null)
     {
         _cache = cache;
         _options = options;
         _multiplexer = multiplexer;
         _prefixProvider = prefixProvider;
+
+        // 序列化选项可注入：命名策略/多态/自定义转换器都由调用方定。
+        // 硬编码 new JsonSerializerOptions() 会让跨服务的事件载荷演化失去弹性
+        _serializerOptions = serializerOptions ?? new JsonSerializerOptions();
     }
 
     public bool TryGet<T>(string key, out T? value)
@@ -43,7 +50,14 @@ internal sealed class DistributedCacheService : ICacheService
             return false;
         }
 
-        value = JsonSerializer.Deserialize<T>(bytes, SerializerOptions);
+        if (bytes == MissSentinel)
+        {
+            // 负缓存命中：按"未命中"处理，但不回源（防穿透）
+            value = default;
+            return false;
+        }
+
+        value = JsonSerializer.Deserialize<T>(bytes, _serializerOptions);
         return true;
     }
 
@@ -51,7 +65,7 @@ internal sealed class DistributedCacheService : ICacheService
         Task.FromResult(TryGet<T>(key, out var value) ? value : default);
 
     public void Set<T>(string key, T value, TimeSpan? expiration = null, TimeSpan? slidingExpiration = null) =>
-        _cache.SetString(FullKey(key), JsonSerializer.Serialize(value, SerializerOptions), BuildOptions(expiration, slidingExpiration));
+        _cache.SetString(FullKey(key), JsonSerializer.Serialize(value, _serializerOptions), BuildOptions(expiration, slidingExpiration));
 
     public Task SetAsync<T>(
         string key,
@@ -61,7 +75,7 @@ internal sealed class DistributedCacheService : ICacheService
         TimeSpan? slidingExpiration = null) =>
         _cache.SetStringAsync(
             FullKey(key),
-            JsonSerializer.Serialize(value, SerializerOptions),
+            JsonSerializer.Serialize(value, _serializerOptions),
             BuildOptions(expiration, slidingExpiration),
             cancellationToken);
 
@@ -74,11 +88,23 @@ internal sealed class DistributedCacheService : ICacheService
     {
         ArgumentNullException.ThrowIfNull(factory);
 
+        var fullKey = FullKey(key);
+
         if (TryGet<T>(key, out var hit))
             return hit;
 
+        // 负缓存哨兵还在：说明刚才有人回源拿到 null，直接复用结论，不再打底层存储
+        if (_cache.GetString(fullKey) == MissSentinel)
+            return default;
+
         var value = await factory(cancellationToken).ConfigureAwait(false);
-        await SetAsync(key, value, expiration, cancellationToken, slidingExpiration).ConfigureAwait(false);
+
+        if (value is null && _options.NegativeExpiration > TimeSpan.Zero)
+            await _cache.SetStringAsync(fullKey, MissSentinel, BuildOptions(_options.NegativeExpiration, null), cancellationToken)
+                .ConfigureAwait(false);
+        else if (value is not null)
+            await SetAsync(key, value, expiration, cancellationToken, slidingExpiration).ConfigureAwait(false);
+
         return value;
     }
 

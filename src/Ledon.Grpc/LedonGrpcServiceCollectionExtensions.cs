@@ -24,6 +24,20 @@ public sealed class LedonGrpcOptions
     /// gRPC 调用不再只在链路里可见，应用日志同样可观测。
     /// </summary>
     public bool UseLoggingInterceptor { get; set; } = true;
+
+    /// <summary>
+    /// 注册异常映射拦截器（默认开）：业务异常转成对应的 gRPC 状态码
+    /// （ArgumentException → InvalidArgument、KeyNotFound → NotFound……），
+    /// 而不是一律 Unknown + 堆栈。自定义映射实现 <see cref="IGrpcExceptionMapper"/>
+    /// 并注册进容器即可。
+    /// </summary>
+    public bool UseErrorInterceptor { get; set; } = true;
+
+    /// <summary>
+    /// 客户端没传 deadline 时的兜底上限，默认 30 秒。
+    /// 没有它，一个不观察取消令牌的处理器会把连接永久占住。
+    /// </summary>
+    public static TimeSpan DefaultDeadline { get; set; } = TimeSpan.FromSeconds(30);
 }
 
 /// <summary>
@@ -74,10 +88,18 @@ public static class LedonGrpcServiceCollectionExtensions
             discovered.Add(typeof(HealthServiceImpl));
         }
 
+        // 异常映射表：在 AddGrpc 之外注册（options lambda 是延迟执行的，
+        // 写在里面会导致解析 IGrpcExceptionMapper 时还没注册）
+        if (options.UseErrorInterceptor)
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IGrpcExceptionMapper, DefaultGrpcExceptionMapper>());
+
         var grpc = services.AddGrpc(o =>
         {
             if (options.UseLoggingInterceptor)
                 o.Interceptors.Add<LedonGrpcLoggingInterceptor>();
+
+            if (options.UseErrorInterceptor)
+                o.Interceptors.Add<LedonGrpcErrorInterceptor>();
         });
 
         services.AddSingleton(new DiscoveredGrpcServices(discovered));
@@ -87,7 +109,12 @@ public static class LedonGrpcServiceCollectionExtensions
 
     /// <summary>
     /// 注册强类型 gRPC 客户端（gRPC channel + 客户端工厂，地址配置驱动）。
-    /// 已注册 <c>Ledon.Resilience</c> 时自动获得重试/超时/熔断。
+    /// <para>
+    /// 注意：<c>Ledon.Resilience</c> 的策略挂在 HttpClient 管道上（只认
+    /// <see cref="System.Net.Http.HttpRequestException"/> 与 5xx），**不会**自动套到
+    /// gRPC 调用上——gRPC 失败抛的是 <c>RpcException</c>。需要重试/熔断时请自行配置
+    /// <c>GrpcClientFactoryOptions</c> 或按 <c>RpcException.Status.StatusCode</c> 自建策略。
+    /// </para>
     /// </summary>
     /// <param name="services">服务集合。</param>
     /// <typeparam name="TClient">protoc 生成的客户端类（如 <c>Greeter.GreeterClient</c>）。</typeparam>

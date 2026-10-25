@@ -10,8 +10,94 @@ public class NotificationTests
     private static ChannelRoutingNotificationSender Build(
         INotificationChannel channel,
         int maxRetries = 1,
-        INotificationLog? log = null) =>
-        new([channel], new LedonNotificationOptions { MaxRetries = maxRetries }, log ?? new InMemoryNotificationLog(), NullLogger<ChannelRoutingNotificationSender>.Instance);
+        INotificationLog? log = null,
+        Action<LedonNotificationOptions>? configure = null)
+    {
+        var options = new LedonNotificationOptions { MaxRetries = maxRetries };
+        configure?.Invoke(options);
+
+        return new ChannelRoutingNotificationSender(
+            [channel], options, log ?? new InMemoryNotificationLog(), NullLogger<ChannelRoutingNotificationSender>.Instance);
+    }
+
+    [Fact]
+    public async Task Attempts_records_the_real_try_count()
+    {
+        var log = new InMemoryNotificationLog();
+        var sender = Build(new FakeChannel("email"), log: log);
+
+        // 首次成功：之前恒记 MaxRetries（3），排查时没法判断到底试了几次
+        await sender.SendAsync(new Notification("email", "a@b.c", "s", "b"));
+
+        Assert.Equal(1, log.Recent()[0].Attempts);
+    }
+
+    [Fact]
+    public async Task Duplicate_notifications_are_sent_once()
+    {
+        var fake = new FakeChannel("email");
+        var sender = Build(fake, configure: o =>
+            o.DeduplicationKey = notification => $"{notification.Channel}:{notification.Recipient}:{notification.Subject}");
+
+        await sender.SendAsync(new Notification("email", "a@b.c", "same", "b"));
+        await sender.SendAsync(new Notification("email", "a@b.c", "same", "b"));
+        await sender.SendAsync(new Notification("email", "a@b.c", "same", "b"));
+
+        Assert.Equal(1, fake.Sent);
+    }
+
+    [Fact]
+    public async Task Deduplication_can_be_disabled()
+    {
+        var fake = new FakeChannel("email");
+        var sender = Build(fake);   // 不设 DeduplicationKey
+
+        await sender.SendAsync(new Notification("email", "a@b.c", "same", "b"));
+        await sender.SendAsync(new Notification("email", "a@b.c", "same", "b"));
+
+        Assert.Equal(2, fake.Sent);
+    }
+
+    [Fact]
+    public async Task Batch_send_runs_concurrently()
+    {
+        var fake = new SlowChannel("email");
+        var sender = Build(fake, configure: o => o.BatchConcurrency = 4);
+
+        var notifications = Enumerable.Range(0, 8)
+            .Select(i => new Notification("email", $"u{i}@b.c", "s", "b"))
+            .ToArray();
+
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        var results = await sender.SendAsync(notifications);
+        stopwatch.Stop();
+
+        Assert.Equal(8, results.Count);
+        Assert.All(results, result => Assert.True(result.Accepted));
+        Assert.Equal(8, fake.Sent);
+
+        // 每条 200ms：串行要约 1.6s，4 并发应该明显更快（留足余量避免 CI 抖动）
+        Assert.True(stopwatch.ElapsedMilliseconds < 1200,
+            $"批量发送耗时 {stopwatch.ElapsedMilliseconds} ms，疑似退化成串行");
+    }
+
+    [Fact]
+    public async Task Retry_backoff_respects_configured_base_and_max()
+    {
+        // 退避参数化：不再硬编码 1s/2s/4s（测试里等不起）
+        var fake = new FakeChannel("email", failuresBeforeSuccess: 2);
+        var sender = Build(fake, maxRetries: 3, configure: o =>
+        {
+            o.RetryBaseDelay = TimeSpan.FromMilliseconds(20);
+            o.RetryMaxDelay = TimeSpan.FromMilliseconds(30);
+            o.RetryJitter = false;   // 关掉抖动才能算准总时长
+        });
+
+        var result = await sender.SendAsync(new Notification("email", "a@b.c", "s", "b"));
+
+        Assert.True(result.Accepted);
+        Assert.Equal(3, fake.Attempts);   // 2 次失败 + 1 次成功
+    }
 
     [Fact]
     public async Task Email_channel_is_used_for_email_notifications()
@@ -152,6 +238,28 @@ public class NotificationTests
 
             Sent++;
             return Task.FromResult(NotificationResult.Ok("msg-1"));
+        }
+
+        public Task<IReadOnlyList<NotificationResult>> SendAsync(
+            IReadOnlyCollection<Notification> notifications, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+    }
+
+    /// <summary>每条都固定延迟的渠道（验证批量并发真的并发）。</summary>
+    private sealed class SlowChannel(string channel) : INotificationChannel
+    {
+        private int _sent;
+
+        public int Sent => Volatile.Read(ref _sent);
+
+        public string Channel => channel;
+
+        public async Task<NotificationResult> SendAsync(Notification notification, CancellationToken cancellationToken = default)
+        {
+            await Task.Delay(200, cancellationToken).ConfigureAwait(false);
+            Interlocked.Increment(ref _sent);
+
+            return NotificationResult.Ok("msg-1");
         }
 
         public Task<IReadOnlyList<NotificationResult>> SendAsync(

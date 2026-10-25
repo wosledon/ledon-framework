@@ -17,4 +17,16 @@ public sealed class LedonDistributedCachingOptions
 
     /// <summary>默认滑动过期，默认空 = 不用滑动过期。</summary>
     public TimeSpan? DefaultSlidingExpiration { get; set; }
+
+    /// <summary>
+    /// 负缓存（防穿透）：回源返回 <c>null</c> 时，按此时长缓存一个"未命中"哨兵，
+    /// 让同一 key 的并发请求直接命中哨兵而不打到底层存储。
+    /// 默认 30 秒；设为 <see cref="TimeSpan.Zero"/> 关闭。
+    /// <para>
+    /// 热点 key 过期 + 慢回源时，没有负缓存会让所有并发请求同时穿透到 DB
+    /// （缓存击穿）。代价是：写入后最长这么久内新 key 仍读到 null——
+    /// 所以只对"读多写少、允许秒级延迟"的 key 开启。
+    /// </para>
+    /// </summary>
+    public TimeSpan NegativeExpiration { get; set; } = TimeSpan.FromSeconds(30);
 }

@@ -24,4 +24,12 @@ public sealed class LedonCachingOptions
 
     /// <summary>跨实例失效用的 Redis 连接串（<see cref="CrossInstanceInvalidation"/> 为 true 时必填）。</summary>
     public string? RedisConnectionString { get; set; }
+
+    /// <summary>
+    /// 负缓存（防穿透）：回源返回 <c>null</c> 时按此时长缓存"未命中"，
+    /// 让同一 key 的后续请求直接返回 null 而不再回源。默认 30 秒；
+    /// <see cref="TimeSpan.Zero"/> 关闭。内存实现本身已有 single-flight，
+    /// 这里主要防"key 反复过期后的重复回源"。
+    /// </summary>
+    public TimeSpan NegativeExpiration { get; set; } = TimeSpan.FromSeconds(30);
 }

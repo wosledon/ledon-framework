@@ -47,6 +47,42 @@ builder.Services.AddLedonFeatureManagement();
 - 百分比分桶稳定：同一主体判定不变——用 FNV-1a 对 `开关名:主体键` 取模，
   **跨进程/跨重启一致**（`HashCode.Combine` 每进程随机种子，会让同一用户在不同实例落到不同桶）。
 
+## Ledon.MultiTenancy —— 多租户
+
+```csharp
+builder.Services.AddLedonMultiTenancy(o =>
+{
+    o.RequireTenant = true;    // 强租户模式：漏带 X-Tenant-Id 直接 400，不按单租户放行
+    o.TenantValidator = new MyTenantValidator();   // 可选：校验租户 ID 真实存在/启用
+});
+app.UseLedonMultiTenancy();
+```
+
+- 解析来源：请求头 / 查询串 / 用户声明 / Host 子域名（`TenantSource`）；
+- **`RequireTenant`**：多租户 SaaS 应该打开。否则漏带头的请求会静默看到全量数据
+  （跨租户泄漏），而且日志里只有一行 Debug，极难发现；
+- **`TenantValidator`**：不信任请求里的租户 ID，否则客户端可以枚举；
+- 环境租户随请求管线流动（`AsyncLocal`），后台任务也拿得到；
+- 缓存键自动按租户加前缀（配了缓存包时），不配则租户间互串。
+
+## Ledon.SignalR —— 实时推送
+
+```csharp
+builder.Services.AddLedonSignalR(o => o.RedisConnectionString = "localhost:6379");
+app.MapLedonSignalRHubs();   // ChatHub → /hubs/chat
+
+// 在线状态自动维护：Hub 继承 OnlineAwareHub 即可，不用手写 OnConnectedAsync
+public class ChatHub : OnlineAwareHub
+{
+    public Task Send(string text) => Clients.All.SendAsync("recv", text);
+}
+```
+
+- Hub 自动发现 + 约定路径映射；多实例部署挂 Redis backplane（跨实例广播）；
+- 在线注册表：配了 Redis 就用 Redis 实现（全局在线视图 + 跨实例踢下线）；
+  未配则进程内（只覆盖本实例连接）；
+- 连接登记带 TTL 兜底：进程被杀时 `OnDisconnectedAsync` 不会执行，靠过期自动清理。
+
 ## Ledon.BlobStorage —— 文件/对象存储
 
 ```csharp
@@ -83,7 +119,11 @@ await sender.SendAsync(new Notification("email", "a@b.c", "欢迎注册", "感�
 ```
 
 - 渠道可替换（实现 `INotificationSender` 即接入短信/推送）；
-- 失败自动重试（默认 3 次，指数退避）；`INotificationLog` 可查发送记录与成功率。
+- 失败自动重试（`MaxRetries` 默认 3 次，指数退避：`RetryBaseDelay × 2^(n-1)`，
+  封顶 `RetryMaxDelay`，可选 ±25% 抖动——批量同时失败时不挤在同一时刻重试）；
+- 批量发送有界并发（`BatchConcurrency` 默认 8；串行发送 100 条要约 100 倍延迟）；
+- 消息去重（`DeduplicationKey`）：渠道实际送达但返回失败时不会让用户收到重复通知；
+- `INotificationLog` 可查发送记录与成功率（`Attempts` 记真实尝试次数）。
 
 ## Ledon.Localization —— 多语言
 

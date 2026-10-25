@@ -22,6 +22,22 @@ public class CatalogService(ICacheService cache)
 
 同一 key 的并发未命中会共享同一次回源（single-flight）——缓存击穿时数据库只被压一次。某个调用方取消只影响它自己，不会杀掉共享回源。
 
+## 负缓存（防穿透）
+
+```csharp
+builder.Services.AddLedonCaching(o =>
+{
+    o.NegativeExpiration = TimeSpan.FromSeconds(30);   // TimeSpan.Zero 关闭
+});
+```
+
+回源返回 `null` 时按短 TTL 缓存一个"未命中"哨兵，让同一 key 的后续请求直接返回 null
+而不再打到底层存储。热点 key 过期 + 慢回源时，没有负缓存会让所有并发请求同时穿透到 DB。
+
+代价：写入后最长 `NegativeExpiration` 内新 key 仍读到 null——只对"读多写少、
+允许秒级延迟"的 key 开启。回源拿到 null 时**不会**把 null 当正常值缓存
+（否则后续查询全部"命中 null"再也不回源）。
+
 ## 两种实现，一个契约
 
 | 注册方式                    | 实现                       | 适用场景                       |

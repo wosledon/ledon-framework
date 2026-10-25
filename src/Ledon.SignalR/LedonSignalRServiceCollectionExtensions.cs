@@ -86,6 +86,13 @@ public static class LedonSignalRServiceCollectionExtensions
 
         services.AddSingleton(new DiscoveredHubs(hubs));   // 供 MapLedonSignalRHubs 映射
 
+        // 在线状态注册表：多实例部署时进程内字典只覆盖本实例。
+        // 配了 Redis backplane 就用 Redis 实现（全局在线视图 + 跨实例踢下线），否则进程内
+        services.AddLedonOnlineUserRegistry();
+
+        if (!string.IsNullOrWhiteSpace(options.RedisConnectionString))
+            services.AddLedonOnlineUserRegistryRedis(o => o.RedisConnectionString = options.RedisConnectionString);
+
         return services;
     }
 

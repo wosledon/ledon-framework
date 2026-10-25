@@ -123,6 +123,57 @@ public class MultiTenancyTests : IDisposable
     }
 
     [Fact]
+    public async Task Missing_tenant_is_rejected_when_required()
+    {
+        using var client = await StartAsync(o => o.RequireTenant = true);
+
+        // 漏带 X-Tenant-Id：400，而不是静默按单租户放行（那会让请求看到全量数据）
+        var response = await client.GetAsync("/whoami");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Contains("missing_tenant", await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Unknown_tenant_is_rejected_by_validator()
+    {
+        using var client = await StartAsync(o => o.TenantValidator = new AllowListValidator("tenant-a"));
+
+        var ok = new HttpRequestMessage(HttpMethod.Get, "/whoami");
+        ok.Headers.Add("X-Tenant-Id", "tenant-a");
+        var okResponse = await client.SendAsync(ok);
+        Assert.Equal(HttpStatusCode.OK, okResponse.StatusCode);
+
+        // 目录里没有的租户 ID：拒绝（否则客户端可以枚举租户）
+        var bad = new HttpRequestMessage(HttpMethod.Get, "/whoami");
+        bad.Headers.Add("X-Tenant-Id", "tenant-zzz");
+        var rejected = await client.SendAsync(bad);
+
+        Assert.Equal(HttpStatusCode.BadRequest, rejected.StatusCode);
+        Assert.Contains("unknown_tenant", await rejected.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Custom_status_code_for_missing_tenant()
+    {
+        using var client = await StartAsync(o =>
+        {
+            o.RequireTenant = true;
+            o.MissingTenantStatusCode = 401;
+        });
+
+        var response = await client.GetAsync("/whoami");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    private sealed class AllowListValidator(params string[] allowed) : ITenantValidator
+    {
+        public ValueTask<bool> IsValidAsync(string tenantId, CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult(allowed.Contains(tenantId, StringComparer.Ordinal));
+    }
+
+    [Fact]
     public void Ambient_tenant_flows_into_background_work()
     {
         // 后台任务：入队时捕获环境租户，执行期间可见（Web 请求外不下文也不丢）

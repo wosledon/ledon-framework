@@ -78,6 +78,9 @@ catch (WorkflowExecutionException ex)
 | 重试       | 单步骤失败重试至 `WorkflowOptions.MaxRetriesPerStep`（默认 3）        |
 | 补偿       | 重试耗尽后**逆序**补偿已执行步骤（Saga）；补偿失败只记录不阻断其余    |
 | 并发       | 引擎是 Scoped：同一实例不要并发 `RunAsync`（持久化非行级锁保护）      |
+| 多实例部署 | 恢复前先**原子认领**实例（`LeasedBy`/`LeasedUntil`），只有一个节点会恢复同一个实例 |
+| 并发写保护 | 实例带乐观并发令牌：两个节点同时保存时后提交的抛 `DbUpdateConcurrencyException`，不静默覆盖 |
+| 跨调用补偿 | `RunAsync` 从实例的 `CompletedSteps` 播种已执行集：恢复后再失败，上一轮的步骤也一起补偿 |
 | 长时任务   | 步骤内长时间等待建议改为"写状态 → 外部事件驱动再推进"，别占着执行线程 |
 
 ## 与其它能力的关系

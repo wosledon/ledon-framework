@@ -1,8 +1,9 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -71,6 +72,42 @@ internal sealed class OnlineUserRegistry : IOnlineUserRegistry
     private sealed record ConnectionEntry(Type HubType, string? UserId);
 }
 
+/// <summary>
+/// Hub 基类：连接建立/断开时自动登记在线状态，业务 Hub 不用手写 OnConnectedAsync。
+/// <code>
+/// public class ChatHub : OnlineAwareHub   // 在线状态自动维护
+/// {
+///     public Task Send(string text) => Clients.All.SendAsync("recv", text);
+/// }
+/// </code>
+/// 用户标识默认取 <see cref="HubConnectionContext.UserIdentifier"/>（登录用户）；
+/// 匿名连接 userId 为 null（仍会登记，便于按 connectionId 查）。
+/// </summary>
+public abstract class OnlineAwareHub : Hub
+{
+    private IOnlineUserRegistry? _registry;
+
+    /// <summary>在线注册表（懒解析：Hub 可能是每连接构造的，构造期容器还没就绪）。</summary>
+    protected virtual IOnlineUserRegistry Registry =>
+        _registry ??= Context.GetHttpContext()?.RequestServices.GetService<IOnlineUserRegistry>()
+            ?? throw new InvalidOperationException(
+                "未注册 IOnlineUserRegistry。调用 AddLedonOnlineUserRegistry()（AddLedonSignalR 已默认注册）。");
+
+    public override Task OnConnectedAsync()
+    {
+        Registry.Add(GetType(), Context.ConnectionId, Context.UserIdentifier);
+
+        return base.OnConnectedAsync();
+    }
+
+    public override Task OnDisconnectedAsync(Exception? exception)
+    {
+        Registry.Remove(Context.ConnectionId);
+
+        return base.OnDisconnectedAsync(exception);
+    }
+}
+
 /// <summary>在线注册表的 DI 扩展。</summary>
 public static class OnlineUserRegistryExtensions
 {
@@ -81,5 +118,164 @@ public static class OnlineUserRegistryExtensions
 
         services.TryAddSingleton<IOnlineUserRegistry, OnlineUserRegistry>();
         return services;
+    }
+
+    /// <summary>
+    /// 用 Redis 实现在线注册表（多实例部署的全局在线视图）。
+    /// 覆盖 <see cref="AddLedonOnlineUserRegistry"/> 注册的进程内实现。
+    /// <code>
+    /// builder.Services.AddLedonSignalR(o =&gt; o.RedisConnectionString = "localhost:6379");
+    /// // ↑ 内部会自动调用本方法
+    /// </code>
+    /// </summary>
+    public static IServiceCollection AddLedonOnlineUserRegistryRedis(
+        this IServiceCollection services,
+        Action<LedonOnlineUserRegistryRedisOptions> configure)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var options = new LedonOnlineUserRegistryRedisOptions();
+        configure(options);
+
+        services.Replace(ServiceDescriptor.Singleton<IOnlineUserRegistry>(provider =>
+            new RedisOnlineUserRegistry(
+                StackExchange.Redis.ConnectionMultiplexer.Connect(options.RedisConnectionString),
+                options)));
+
+        return services;
+    }
+}
+
+/// <summary>Redis 在线注册表选项。</summary>
+public sealed class LedonOnlineUserRegistryRedisOptions
+{
+    /// <summary>Redis 连接串。</summary>
+    public string RedisConnectionString { get; set; } = "localhost:6379";
+
+    /// <summary>key 前缀（多套应用共享 Redis 时区分），默认 ledon:signalr:online:。</summary>
+    public string KeyPrefix { get; set; } = "ledon:signalr:online:";
+
+    /// <summary>
+    /// 连接登记的有效期，默认 5 分钟。它是兜底：连接异常断开（进程被杀）时
+    /// OnDisconnectedAsync 不会执行，靠过期自动清理，避免在线状态永远停在"在线"。
+    /// </summary>
+    public TimeSpan EntryTtl { get; set; } = TimeSpan.FromMinutes(5);
+}
+
+/// <summary>
+/// 基于 Redis 的在线注册表：Hash 存"连接 → 用户"，Set 存"用户 → 连接集合"。
+/// 多实例部署下全局在线视图、跨实例踢下线都成立。
+/// </summary>
+internal sealed class RedisOnlineUserRegistry : IOnlineUserRegistry
+{
+    /// <summary>连接 → 用户（Hash field 为 connectionId）。</summary>
+    private const string ConnectionsKey = "connections";
+
+    private readonly StackExchange.Redis.IConnectionMultiplexer _multiplexer;
+    private readonly LedonOnlineUserRegistryRedisOptions _options;
+
+    public RedisOnlineUserRegistry(
+        StackExchange.Redis.IConnectionMultiplexer multiplexer,
+        LedonOnlineUserRegistryRedisOptions options)
+    {
+        _multiplexer = multiplexer;
+        _options = options;
+    }
+
+    private StackExchange.Redis.IDatabase Database => _multiplexer.GetDatabase();
+
+    private string HubKey(Type hubType) => $"{_options.KeyPrefix}{hubType.Name}:";
+
+    private string UserSetKey(Type hubType, string userId) => $"{HubKey(hubType)}user:{userId}";
+
+    public void Add(Type hubType, string connectionId, string? userId)
+    {
+        ArgumentNullException.ThrowIfNull(hubType);
+        ArgumentException.ThrowIfNullOrEmpty(connectionId);
+
+        var db = Database;
+
+        // 连接 → 用户 + 用户 → 连接集合（两处都要写，查询才不用扫全表）
+        db.HashSet($"{HubKey(hubType)}{ConnectionsKey}", connectionId, userId ?? "");
+        if (userId is not null)
+            db.SetAdd(UserSetKey(hubType, userId), connectionId);
+
+        db.KeyExpire(UserSetKey(hubType, userId ?? ""), _options.EntryTtl);
+        db.KeyExpire($"{HubKey(hubType)}{ConnectionsKey}", _options.EntryTtl);
+    }
+
+    public void Remove(string connectionId)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(connectionId);
+
+        var db = Database;
+        var hubKeyPrefixLength = _options.KeyPrefix.Length;
+
+        // 先查出这条连接属于哪个用户/哪个 Hub，才能从用户集合里摘掉
+        foreach (var server in _multiplexer.GetServers())
+        {
+            var found = false;
+
+            foreach (var key in server.KeysAsync(pattern: $"{_options.KeyPrefix}*:{ConnectionsKey}").ToBlockingEnumerable())
+            {
+                var userId = db.HashGet(key, connectionId);
+                if (userId.IsNull)
+                    continue;
+
+                db.HashDelete(key, connectionId);
+
+                if (!userId.IsNull)
+                {
+                    // key = {prefix}{hub}:connections → 用户集合 key = {prefix}{hub}:user:{userId}
+                    var hubPart = key.ToString().AsSpan(hubKeyPrefixLength);
+                    var colon = hubPart.IndexOf(':');
+                    if (colon > 0)
+                        db.SetRemove($"{_options.KeyPrefix}{hubPart[..colon]}:user:{userId}", connectionId);
+                }
+
+                found = true;
+                break;
+            }
+
+            if (found)
+                return;
+        }
+    }
+
+    public bool IsOnline(string userId)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(userId);
+
+        foreach (var server in _multiplexer.GetServers())
+            foreach (var key in server.KeysAsync(pattern: $"{_options.KeyPrefix}*:user:{userId}").ToBlockingEnumerable())
+                if (Database.SetLength(key) > 0)
+                    return true;
+
+        return false;
+    }
+
+    public IReadOnlyList<string> GetConnections(string userId)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(userId);
+
+        var result = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var server in _multiplexer.GetServers())
+            foreach (var key in server.KeysAsync(pattern: $"{_options.KeyPrefix}*:user:{userId}").ToBlockingEnumerable())
+                foreach (var member in Database.SetMembers(key))
+                    result.Add(member.ToString());
+
+        return result.ToArray();
+    }
+
+    public IReadOnlyList<string> GetConnections(Type hubType, string userId)
+    {
+        ArgumentNullException.ThrowIfNull(hubType);
+        ArgumentException.ThrowIfNullOrEmpty(userId);
+
+        return Database.SetMembers(UserSetKey(hubType, userId))
+            .Select(value => value.ToString())
+            .ToArray();
     }
 }

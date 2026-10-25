@@ -82,7 +82,22 @@ public class OrderPlacedHandler : IIntegrationEventHandler<OrderPlaced>
 
 - **至少一次语义**：投递成功才标记；失败记重试次数，下个轮询周期重试；
 - 单条失败不阻塞后续消息；超过重试上限**搁置**，留待人工处理（监控搁置表即可发现毒消息）；
-- 处理器自动发现、自动注入，与进程内事件（`IEventHandler<T>`）写法一致。
+- 处理器自动发现、自动注入，与进程内事件（`IEventHandler<T>`）写法一致；
+- **认领制投递**：多实例部署时同一条消息只有一个实例会投。每条消息带
+  `LeasedBy`/`LeasedUntil`，调度器先原子认领再投递；租约到期未处理完则由其它实例接手
+  （节点崩溃兜底）。没有这一步，N 个实例会把同一条消息各投一遍（N 倍重复）；
+- 运维快照的"待投递数"走 `CountPendingAsync`（只数不认领），不会把别人正在投的消息抢过来。
+
+### 退避与并发参数
+
+```csharp
+builder.Services.AddLedonOutbox(o =>
+{
+    o.Lease = TimeSpan.FromMinutes(2);   // 认领租约：崩溃后多久有别的实例接手
+});
+```
+
+持久化队列同样支持（`LedonDurableQueueOptions.Lease`）。
 
 ## 消息中间件传输
 
