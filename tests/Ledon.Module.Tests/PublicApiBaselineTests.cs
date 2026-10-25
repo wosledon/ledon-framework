@@ -30,9 +30,17 @@ public class PublicApiBaselineTests
         }
 
         var baseline = File.ReadAllText(BaselinePath);
-        Assert.Equal(
-            baseline.ReplaceLineEndings(),
-            actual.ReplaceLineEndings());
+
+        if (baseline.ReplaceLineEndings() != actual.ReplaceLineEndings())
+        {
+            // 公开面确实变了：把实际内容写成 .actual 供 review，
+            // 避免"自动改基线"把意外的公开面破坏直接放过去
+            File.WriteAllText(BaselinePath + ".actual", actual);
+
+            Assert.Fail(
+                "公开 API 与基线不一致。已生成 PublicApi.baseline.txt.actual，" +
+                "请 review 差异：确认是预期变更就替换 PublicApi.baseline.txt，否则修代码。");
+        }
     }
 
     private static string DescribeAssembly(Assembly assembly)

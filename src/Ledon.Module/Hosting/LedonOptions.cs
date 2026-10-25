@@ -64,4 +64,22 @@ public sealed class LedonOptions
         AutoDiscovery = false;
         return this;
     }
+
+    /// <summary>复制一份（供功能包在不污染共享选项的前提下追加自己的扫描范围）。</summary>
+    internal LedonOptions Clone()
+    {
+        var copy = new LedonOptions
+        {
+            DefaultServiceLifetime = DefaultServiceLifetime,
+            ParallelInitialization = ParallelInitialization,
+        };
+
+        copy.Assemblies.AddRange(Assemblies);
+        copy.ExplicitModules.AddRange(ExplicitModules);
+
+        if (!AutoDiscovery)
+            copy.DisableAutoDiscovery();
+
+        return copy;
+    }
 }

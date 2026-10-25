@@ -143,6 +143,7 @@ class Ledon.Module.LedonAssemblies
   Boolean Equals(System.Object)
   Int32 GetHashCode()
   System.Collections.Generic.IReadOnlyList`1[System.Reflection.Assembly] Scan(System.Action`1[Ledon.Module.Hosting.LedonOptions])
+  System.Collections.Generic.IReadOnlyList`1[System.Reflection.Assembly] Scan(System.IServiceProvider, System.Action`1[Ledon.Module.Hosting.LedonOptions])
   System.String ToString()
   System.Type GetType()
 class Ledon.Module.LedonModuleException

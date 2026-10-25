@@ -21,7 +21,9 @@ namespace Ledon.Web.Tests;
 /// </summary>
 public class RtmpEndToEndTests : IAsyncDisposable
 {
-    private readonly int _rtmpPort = TestPorts.Next();
+    private readonly TestPortBlock _ports = TestPorts.Reserve();
+    private int _rtmpPort => _ports[0];
+    private int _httpPort => _ports[1];
     private WebApplication? _app;
 
     /// <summary>测试用鉴权器：只认 <c>secret-token</c>。</summary>
@@ -225,7 +227,31 @@ public class RtmpEndToEndTests : IAsyncDisposable
         Assert.True(client.Closed, "静默连接未被断开");
     }
 
-    private readonly int _httpPort = TestPorts.Next();
+    [Fact]
+    public async Task Hls_endpoint_resolves_the_segmenter()
+    {
+        // 回归：HlsSegmenter 之前只注册成 IHostedService，HLS 端点
+        // GetRequiredService<HlsSegmenter>() 直接 500（"No service for type ... HlsSegmenter"）
+        StartStreaming();
+
+        using var client = new MiniRtmpClient();
+        await client.ConnectAsync(IPAddress.Loopback, _rtmpPort);
+
+        await client.SendCommandAsync("connect", 1, new Dictionary<string, string> { ["app"] = "live" });
+        await client.SendCommandAsync("createStream", 4);
+        await client.SendCommandAsync("publish", 5, "live/hls");
+        await client.WaitForStatusAsync("NetStream.Publish.Start", TimeSpan.FromSeconds(5));
+
+        await client.SendVideoAsync([0x17, 0, 0, 0, 0, 0x01, 0x64, 0x00, 0x1F], timestampMs: 0);
+
+        using var http = new HttpClient();
+        var response = await http.GetAsync($"http://127.0.0.1:{_httpPort}/live/live/hls.m3u8");
+
+        // 还没有分片时是 404（正确语义）；但不能是 500（服务没注册）
+        Assert.True(
+            response.StatusCode is System.Net.HttpStatusCode.NotFound or System.Net.HttpStatusCode.OK,
+            $"预期 404（无分片）或 200，实际 {(int)response.StatusCode}");
+    }
 
     private void StartStreaming(Action<Ledon.Streaming.Rtmp.RtmpServerOptions>? configure = null)
     {

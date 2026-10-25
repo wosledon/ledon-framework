@@ -78,9 +78,14 @@ public static class LedonStreamingServiceCollectionExtensions
         services.TryAddSingleton<RtmpServerOptions>(provider =>
             provider.GetRequiredService<IOptions<RtmpServerOptions>>().Value);
         services.AddHostedService<RtmpServer>();
+
+        // HlsSegmenter 有两重身份：IHostedService（常驻切片）+ HLS 端点要直接解析的实例。
+        // 只注册 IHostedService 的话 GetRequiredService<HlsSegmenter>() 会抛
+        // "No service for type ... HlsSegmenter"——先注册单例，再让宿主服务复用同一个实例
+        services.TryAddSingleton<HlsSegmenter>();
+        services.AddHostedService<HlsSegmenter>(provider => provider.GetRequiredService<HlsSegmenter>());
         services.TryAddSingleton<HlsOptions>(provider =>
             provider.GetRequiredService<IOptions<HlsOptions>>().Value);
-        services.AddHostedService<HlsSegmenter>();
 
         return services;
     }

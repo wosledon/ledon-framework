@@ -16,17 +16,27 @@ public interface ICacheableQuery
 /// <summary>
 /// 缓存行为：查询实现 <see cref="ICacheableQuery"/> 即自动走缓存（single-flight 防击穿）。
 /// 写命令不进缓存（缓存只对查询生效）。
+/// <para>
+/// 未注册 <see cref="ICacheService"/>（没引 Ledon.Caching）时直通——与
+/// <see cref="TransactionBehavior{TRequest}"/> 对缺失 IUnitOfWork 的处理一致，
+/// 避免"开了 UseCaching 但没引缓存包 → 所有请求 500"。
+/// </para>
 /// </summary>
 public sealed class CachingBehavior<TRequest>(
-    ICacheService cache,
+    ICacheService? cache,
     ILogger<CachingBehavior<TRequest>> logger) : IPipelineBehavior<TRequest>
     where TRequest : notnull
 {
     public async ValueTask<object?> HandleAsync(
         TRequest request, RequestHandlerDelegate next, CancellationToken cancellationToken = default)
     {
-        if (request is not ICacheableQuery cacheable)
+        if (cache is null || request is not ICacheableQuery cacheable)
+        {
+            if (cache is null)
+                logger.LogDebug("未注册 ICacheService，查询 {Query} 不走缓存", typeof(TRequest).Name);
+
             return await next().ConfigureAwait(false);
+        }
 
         var entry = await cache.GetOrCreateAsync(
             cacheable.CacheKey,
@@ -38,7 +48,7 @@ public sealed class CachingBehavior<TRequest>(
             cacheable.CacheDuration,
             cancellationToken).ConfigureAwait(false);
 
-        logger.LogDebug("查询 {Query} 命中缓存键 {Key}", typeof(TRequest).Name, cacheable.CacheKey);
+        logger.LogDebug("查询 {Query} 已按缓存键 {Key} 处理", typeof(TRequest).Name, cacheable.CacheKey);
 
         return entry;
     }

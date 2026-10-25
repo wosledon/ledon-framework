@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Ledon.Protocols\Ledon.Protocols.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Sockets.Client\Ledon.Sockets.Client.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Sockets.Server\Ledon.Sockets.Server.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Sip\Ledon.Sip.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Sip.Server\Ledon.Sip.Server.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Sip.Client\Ledon.Sip.Client.csproj" />
+    </ItemGroup>
+
+</Project>

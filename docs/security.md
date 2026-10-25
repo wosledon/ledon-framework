@@ -20,6 +20,19 @@ builder.Services.AddLedonSecurity(o => o.Jwt.SigningKey = Configuration["Jwt:Key
 
 API Key 默认走 `X-Api-Key` 请求头（`o.ApiKey.HeaderName` 可改）。JWT 的签发者/受众/有效期走 `o.Jwt.Issuer` / `Audience` / `Expiration`。
 
+## 签名密钥：启动即校验
+
+`AddLedonSecurity` 会在注册阶段拒绝两种配置，直接抛 `InvalidOperationException`：
+
+1. **仍是框架默认密钥**——默认值公开写在仓库里，生产忘记覆盖 = 任何人都能伪造登录令牌；
+2. **长度不足 32 字符**——HS256 的安全下限。
+
+早失败比带着隐患启动好。密钥从配置中心/环境变量/密钥管理注入：
+
+```csharp
+builder.Services.AddLedonSecurity(o => o.Jwt.SigningKey = builder.Configuration["Jwt:Key"]!);
+```
+
 ## 签发令牌
 
 ```csharp

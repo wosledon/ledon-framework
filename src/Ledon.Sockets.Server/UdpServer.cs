@@ -146,6 +146,11 @@ public sealed class UdpServer : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Windows 上 UDP 有个著名坑：往一个"已经收到 ICMP 端口不可达"的对端发过包后，
+        // 后续 ReceiveAsync 会持续抛 WSAECONNRESET(10054)，把接收循环打满。
+        // 关掉连接重置即可（其它平台无此选项，忽略失败）。
+        DisableConnectionReset(_client);
+
         _logger.LogInformation("UDP 服务端已绑定 {Address}:{Port}（并发上限 {Max}）",
             _options.Address, BoundPort, _options.MaxConcurrency);
 
@@ -193,6 +198,29 @@ public sealed class UdpServer : BackgroundService
             // 工作线程的 WaitAsync 会被 stoppingToken 取消后自行退出
             await Task.WhenAll(workers).ConfigureAwait(false);
             _client.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// 关闭 UDP 连接重置（Windows 专用，SIO_UDP_CONNRESET）。
+    /// 不关的话：往一个已回 ICMP "端口不可达"的对端发过包后，
+    /// 后续每次 ReceiveAsync 都抛 WSAECONNRESET，日志被刷满且接收循环空转。
+    /// 其它平台没有这个选项，失败直接忽略。
+    /// </summary>
+    private static void DisableConnectionReset(UdpClient client)
+    {
+        const int SioUdpConnreset = -1744830452;
+
+        try
+        {
+            client.Client.IOControl(
+                SioUdpConnreset,
+                new byte[] { 0, 0, 0, 0 },   // false = 不把连接重置当错误
+                null);
+        }
+        catch (Exception)
+        {
+            // 平台不支持 / 已断开：忽略（不影响功能，只是少一层保护）
         }
     }
 

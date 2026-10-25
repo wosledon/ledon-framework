@@ -12,7 +12,8 @@ namespace Ledon.Web.Tests;
 /// <summary>SIP Server/Client 联调：基于 Socket 库的真实 UDP 收发。</summary>
 public class SipServerClientTests : IAsyncDisposable
 {
-    private readonly int _port = TestPorts.Next();
+    private readonly TestPortBlock _ports = TestPorts.Reserve();
+    private int _port => _ports[0];
     private readonly List<IHostedService> _services = [];
     private readonly List<SipClient> _clients = [];
 

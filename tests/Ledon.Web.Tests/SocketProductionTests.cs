@@ -17,7 +17,8 @@ namespace Ledon.Web.Tests;
 /// </summary>
 public class SocketProductionTests : IAsyncLifetime
 {
-    private readonly int _port = TestPorts.Next();
+    private readonly TestPortBlock _ports = TestPorts.Reserve();
+    private int _port => _ports[0];
     private readonly List<IHostedService> _services = [];
     private readonly List<TcpProtocolClient> _clients = [];
     private readonly List<UdpProtocolClient> _udpClients = [];
@@ -201,7 +202,7 @@ public class SocketProductionTests : IAsyncLifetime
     public async Task Udp_client_binds_the_requested_local_port()
     {
         // SIP 要把本地端口写进 Via/Contact：必须能固定端口，不能用随机 ephemeral
-        var localPort = TestPorts.Next();
+        var localPort = _ports[2];
 
         var client = new UdpProtocolClient(
             new ProtocolClientOptions

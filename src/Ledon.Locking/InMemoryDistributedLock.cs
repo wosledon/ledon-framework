@@ -54,6 +54,13 @@ public sealed class InMemoryDistributedLock : IDistributedLock
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// 进程内锁没有"过期"概念（信号量一直持有到释放），续期永远是成功的。
+        /// 保留这个方法是为了与 Redis 实现行为一致——业务代码不必区分部署形态。
+        /// </summary>
+        public ValueTask<bool> RenewAsync(TimeSpan? expiry = null, CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult(Volatile.Read(ref _released) == 0);
+
         public ValueTask DisposeAsync()
         {
             ReleaseAsync().GetAwaiter().GetResult();

@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/samples/">
     <Project Path="samples/Ledon.Sample/Ledon.Sample.csproj" />
+    <Project Path="samples/Ledon.ProtocolSample/Ledon.ProtocolSample.csproj" />
+    <Project Path="samples/Ledon.StreamSample/Ledon.StreamSample.csproj" />
     <Project Path="samples/Ledon.WebSample/Ledon.WebSample.csproj" />
     <Project Path="samples/Ledon.WorkerSample/Ledon.WorkerSample.csproj" />
   </Folder>

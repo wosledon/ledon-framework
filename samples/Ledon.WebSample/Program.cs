@@ -33,8 +33,8 @@ const int restPort = 5180;
 const int grpcPort = 5181;
 
 var builder = WebApplication.CreateBuilder(args);
-// 把应用层校验异常映射为 400（先于框架的 500 处理器注册，链上优先）
-builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+// 应用层的校验异常映射为 400（框架的 IExceptionMapping 扩展点，替代手写 IExceptionHandler）
+builder.Services.AddLedonExceptionMapping<ValidationExceptionMapping>();
 
 builder.AddLedonWeb(o =>
 {
@@ -271,34 +271,30 @@ static async Task WaitUntil(Func<bool> condition, TimeSpan timeout)
         throw new TimeoutException("等待条件超时");
 }
 
-/// <summary>ValidationException → 400 ProblemDetails（校验失败是客户端问题，不是服务器错误）。</summary>
-internal sealed class ValidationExceptionHandler(
-    Microsoft.AspNetCore.Http.IProblemDetailsService problemDetails) : Microsoft.AspNetCore.Diagnostics.IExceptionHandler
+/// <summary>
+/// 把应用层的 <c>ValidationException</c> 映射为 400 + 逐条错误。
+/// 框架只提供 <c>IExceptionMapping</c> 扩展点，具体异常类型由使用方认领——
+/// 这样 Ledon.Web 不必反向依赖 Ledon.Application。
+/// </summary>
+internal sealed class ValidationExceptionMapping : Ledon.Web.ApiConventions.IExceptionMapping
 {
-    public async ValueTask<bool> TryHandleAsync(
-        Microsoft.AspNetCore.Http.HttpContext context,
-        Exception exception,
-        CancellationToken cancellationToken)
+    public bool TryMap(Exception exception, out int statusCode, out string title, out string? detail)
     {
         if (exception is not Ledon.Application.ValidationException validation)
-            return false;   // 不是校验异常：交给链上下一个处理器（框架的 500 处理器）
-
-        var problem = new Microsoft.AspNetCore.Mvc.ProblemDetails
         {
-            Status = Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest,
-            Title = "请求校验失败",
-            Detail = exception.Message,
-            Instance = $"{context.Request.Method} {context.Request.Path}",
-        };
-        problem.Extensions["errors"] = validation.Errors;
+            statusCode = 0;
+            title = "";
+            detail = null;
 
-        context.Response.StatusCode = Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest;
+            return false;
+        }
 
-        return await problemDetails.TryWriteAsync(new Microsoft.AspNetCore.Http.ProblemDetailsContext
-        {
-            HttpContext = context,
-            Exception = exception,
-            ProblemDetails = problem,
-        });
+        statusCode = Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest;
+        title = "请求校验失败";
+        detail = validation.Errors.Count > 0
+            ? string.Join("; ", validation.Errors)
+            : validation.Message;
+
+        return true;
     }
 }

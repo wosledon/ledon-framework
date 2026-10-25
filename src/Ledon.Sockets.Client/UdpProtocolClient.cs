@@ -68,6 +68,9 @@ public sealed class UdpProtocolClient : IProtocolClient
             _options.LocalBindAddress is null ? IPAddress.Any : IPAddress.Parse(_options.LocalBindAddress),
             _options.LocalPort));
 
+        // Windows 的 UDP 连接重置陷阱：见 UdpServer.DisableConnectionReset
+        DisableConnectionReset(_client);
+
         _logger.LogInformation("UDP 客户端已就绪（本地 {Local}，目标 {Remote}）", LocalPort, _remote);
 
         Volatile.Write(ref _connected, 1);
@@ -158,5 +161,24 @@ public sealed class UdpProtocolClient : IProtocolClient
         _sendGate.Dispose();
         _lifetime.Dispose();
         _client.Dispose();
+    }
+
+    /// <summary>
+    /// 关闭 UDP 连接重置（Windows 专用，SIO_UDP_CONNRESET）。不关的话：往一个已回
+    /// ICMP "端口不可达"的对端发过包后，后续 ReceiveAsync 持续抛 WSAECONNRESET。
+    /// 其它平台没有这个选项，失败直接忽略。
+    /// </summary>
+    private static void DisableConnectionReset(UdpClient client)
+    {
+        const int SioUdpConnreset = -1744830452;
+
+        try
+        {
+            client.Client.IOControl(SioUdpConnreset, new byte[] { 0, 0, 0, 0 }, null);
+        }
+        catch (Exception)
+        {
+            // 平台不支持 / 已断开：忽略
+        }
     }
 }

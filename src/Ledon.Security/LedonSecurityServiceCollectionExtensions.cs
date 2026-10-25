@@ -28,6 +28,9 @@ public static class LedonSecurityServiceCollectionExtensions
         "Ledon 的自动发现基于反射（Assembly.GetTypes）。" +
         "NativeAOT 或裁剪发布时，登录校验实现类型必须可在运行时解析（rd.xml / DynamicDependency 保留）。";
 
+    /// <summary>框架默认的开发用签名密钥（公开值，仅用于本地试跑）。</summary>
+    private const string DefaultSigningKey = "ledon-development-signing-key-please-change";
+
     [RequiresDynamicCode(AotBoundary)]
     public static IServiceCollection AddLedonSecurity(
         this IServiceCollection services,
@@ -37,6 +40,18 @@ public static class LedonSecurityServiceCollectionExtensions
 
         var options = new LedonSecurityOptions();
         configure?.Invoke(options);
+
+        // 启动即校验：默认签名密钥是公开写在仓库里的，生产忘记覆盖 = 任何人都能伪造令牌。
+        // 宁可启动失败，也不要静默用一个全网皆知的密钥签发 JWT。
+        if (options.Jwt.SigningKey == DefaultSigningKey)
+            throw new InvalidOperationException(
+                "Jwt.SigningKey 仍是框架默认值。生产环境必须注入自己的密钥" +
+                "（配置中心/环境变量/密钥管理），否则任何人都能用这个公开密钥伪造登录令牌。");
+
+        if (options.Jwt.SigningKey.Length < 32)
+            throw new InvalidOperationException(
+                $"Jwt.SigningKey 长度 {options.Jwt.SigningKey.Length} 不足 32 字符" +
+                "（HS256 的安全下限），请换更长的随机密钥。");
 
         services.AddSingleton(options);
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();

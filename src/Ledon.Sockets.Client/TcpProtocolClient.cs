@@ -78,7 +78,17 @@ public sealed class TcpProtocolClient : IProtocolClient
             }
 
             EnsureSupervisor();
-            _connectRequested.Release();
+
+            // 信号量容量 1：重复释放会抛 SemaphoreFullException（并发 ConnectAsync 时）。
+            // 这里"多按一次铃"没有副作用（监管循环反正要连），吞掉即可
+            try
+            {
+                _connectRequested.Release();
+            }
+            catch (SemaphoreFullException)
+            {
+                // 已经有人在等了
+            }
 
             // 等监管循环连上；本次尝试失败要把异常抛出来（后台仍会继续重试）。
             // 用"连接代号"而不是轮询 IsConnected：被服务端拒绝的连接是连上又立刻踢掉，

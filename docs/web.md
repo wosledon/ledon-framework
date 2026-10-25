@@ -31,7 +31,7 @@ public class TodosController(TodoDbContext db) : ControllerBase { /* ... */ }
 
 | 开关                 | 默认 | 行为                                          |
 | -------------------- | ---- | --------------------------------------------- |
-| `UseProblemDetails`  | ✅    | 未处理异常 → RFC 7807（含关联 ID/TraceId）    |
+| `UseProblemDetails`  | ✅    | 未处理异常 → RFC 7807（含关联 ID/TraceId），状态码按异常类型映射 |
 | 模型验证             | ✅    | 失败统一 400 ValidationProblemDetails         |
 | `UseCorrelationId`   | ✅    | `X-Correlation-Id` 贯穿请求/响应头/日志作用域 |
 | `UseUnifiedResponse` | ❌    | 成功响应包 `{"code":0,"data":...}` 信封       |
@@ -150,3 +150,44 @@ builder.Services.AddLedonObservability(o => o.ServiceName = "my-app");
 builder.Services.AddLedonHealthChecks();
 app.MapLedonLiveness(); app.MapLedonReadiness();
 ```
+
+## 异常 → 状态码映射
+
+未处理异常统一转 RFC 7807 ProblemDetails，**不再一律 500**：
+
+| 异常 | 状态码 | 说明 |
+| --- | --- | --- |
+| `ArgumentException` | 400 | 调用方能改 |
+| `UnauthorizedAccessException` | 403 | |
+| `KeyNotFoundException` / `FileNotFoundException` | 404 | |
+| `OperationCanceledException` | 499 | 客户端已断开，不是服务器错误 |
+| 其余 | 500 | `detail` 只给通用文案，真实原因只进日志 |
+
+5xx 不把 `exception.Message` 返给客户端——它可能含 SQL 片段、连接串、文件路径。
+真实原因按 Error 级别写日志，调用方拿 `correlationId` / `traceId` 来对。
+
+业务包要认领自己的异常类型（例如 `Ledon.Application.ValidationException` → 400），
+实现 `IExceptionMapping` 并登记，**不需要让 `Ledon.Web` 反向依赖业务包**：
+
+```csharp
+public sealed class ValidationExceptionMapping : IExceptionMapping
+{
+    public bool TryMap(Exception exception, out int statusCode, out string title, out string? detail)
+    {
+        if (exception is not ValidationException validation)
+        {
+            statusCode = 0; title = ""; detail = null;
+            return false;
+        }
+
+        statusCode = StatusCodes.Status400BadRequest;
+        title = "请求校验失败";
+        detail = string.Join("; ", validation.Errors);
+        return true;
+    }
+}
+
+builder.Services.AddLedonExceptionMapping<ValidationExceptionMapping>();
+```
+
+带 `Errors` 属性的异常（校验类）会自动把逐条原因写进 ProblemDetails 的 `errors` 扩展。

@@ -38,7 +38,8 @@ app.Run();
 | [gRPC](~/docs/grpc.md)                | 服务间通信：自动发现与约定映射             |
 | [Kafka](~/docs/kafka.md)              | 发件箱 ↔ Kafka 跨服务投递                 |
 | [缓存](~/docs/caching.md)             | 内存 single-flight / 分布式 Redis         |
-| [后台队列](~/docs/queues.md)          | Channel 队列 + 发件箱投递                  || [定时任务](~/docs/scheduling.md)      | cron 驱动（5/6 段）、失败隔离              |
+| [后台队列](~/docs/queues.md)          | Channel 队列 + 发件箱投递                  |
+| [定时任务](~/docs/scheduling.md)      | cron 驱动（5/6 段）、失败隔离              |
 | [认证授权](~/docs/security.md)        | JWT + API Key + 权限策略                   |
 | [可观测性](~/docs/observability.md)   | OTel 链路/指标、框架 span、健康检查        |
 | [弹性策略](~/docs/resilience.md)      | 重试/超时/熔断，接管全部 HttpClient        |

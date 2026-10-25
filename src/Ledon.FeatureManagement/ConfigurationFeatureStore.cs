@@ -101,7 +101,14 @@ public sealed class ConfigurationFeatureStore
         return true;
     }
 
-    /// <summary>百分比灰度：稳定分桶（同一主体永远落在同一桶，开关比例不变则判定不变）。</summary>
+    /// <summary>
+    /// 百分比灰度：稳定分桶（同一主体永远落在同一桶，开关比例不变则判定不变）。
+    /// <para>
+    /// 哈希必须**跨进程稳定**：<see cref="HashCode"/> 每进程用随机种子，
+    /// 同一个用户在 A 实例开、B 实例关（重启后也会变），灰度就失去意义。
+    /// 这里用 FNV-1a 对 <c>开关名:主体键</c> 取模——确定、廉价、无需分配。
+    /// </para>
+    /// </summary>
     public bool InPercentageBucket(FeatureTarget target, FeatureDefinition definition)
     {
         if (definition.Percentage is not { } percentage)
@@ -113,9 +120,27 @@ public sealed class ConfigurationFeatureStore
         if (percentage >= _options.PercentageBase)
             return true;
 
-        var hash = System.HashCode.Combine(definition.Name, target.BucketKey);
-        var bucket = (uint)hash % (uint)_options.PercentageBase;
+        var bucket = StableBucket($"{definition.Name}:{target.BucketKey}", _options.PercentageBase);
 
-        return bucket < (uint)percentage;
+        return bucket < percentage;
+    }
+
+    /// <summary>FNV-1a 32 位：确定性字符串哈希（跨进程/跨重启一致）。</summary>
+    internal static int StableBucket(string key, int modulo)
+    {
+        const uint FnvOffset = 2166136261;
+        const uint FnvPrime = 16777619;
+
+        var hash = FnvOffset;
+
+        foreach (var character in key)
+        {
+            hash ^= (byte)(character & 0xFF);
+            hash *= FnvPrime;
+            hash ^= (byte)(character >> 8);
+            hash *= FnvPrime;
+        }
+
+        return (int)(hash % (uint)modulo);
     }
 }

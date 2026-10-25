@@ -17,6 +17,15 @@ public sealed class RedisDistributedLock : IDistributedLock, IAsyncDisposable
         end
         """;
 
+    // 续期：令牌相符才延命，返回值即"锁还是不是我的"
+    private const string RenewScript = """
+        if redis.call('GET', KEYS[1]) == ARGV[1] then
+            return redis.call('PEXPIRE', KEYS[1], ARGV[2])
+        else
+            return -1
+        end
+        """;
+
     private readonly LedonLockingOptions _options;
     private readonly IConnectionMultiplexer _multiplexer;
 
@@ -38,7 +47,7 @@ public sealed class RedisDistributedLock : IDistributedLock, IAsyncDisposable
             .LockTake(Key(resource), _token, expiry ?? _options.DefaultExpiry);
 
         return ValueTask.FromResult<ILockHandle?>(acquired
-            ? new RedisLockHandle(this, Key(resource))
+            ? new RedisLockHandle(this, Key(resource), expiry ?? _options.DefaultExpiry)
             : null);
     }
 
@@ -71,7 +80,7 @@ public sealed class RedisDistributedLock : IDistributedLock, IAsyncDisposable
     private static TimeSpan RetryInterval(TimeSpan wait) =>
         TimeSpan.FromMilliseconds(Math.Clamp(wait.TotalMilliseconds / 20, 10, 100));
 
-    private sealed class RedisLockHandle(RedisDistributedLock owner, string key) : ILockHandle
+    private sealed class RedisLockHandle(RedisDistributedLock owner, string key, TimeSpan expiry) : ILockHandle
     {
         private int _released;
 
@@ -87,10 +96,24 @@ public sealed class RedisDistributedLock : IDistributedLock, IAsyncDisposable
                 .ConfigureAwait(false);
         }
 
-        public ValueTask DisposeAsync()
+        public async ValueTask<bool> RenewAsync(TimeSpan? extension = null, CancellationToken cancellationToken = default)
         {
-            ReleaseAsync().GetAwaiter().GetResult();
-            return ValueTask.CompletedTask;
+            if (Volatile.Read(ref _released) != 0)
+                return false;
+
+            var window = extension ?? expiry;
+
+            // Lua 保证"还是我的"与"续期"是原子操作：并发释放/到期不会把别人的锁续命
+            var result = await owner._multiplexer.GetDatabase()
+                .ScriptEvaluateAsync(RenewScript, [Resource], [owner._token, (long)window.TotalMilliseconds])
+                .ConfigureAwait(false);
+
+            return Convert.ToString(result) != "-1";
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await ReleaseAsync().ConfigureAwait(false);
         }
     }
 }

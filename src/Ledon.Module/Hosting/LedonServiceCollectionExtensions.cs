@@ -72,6 +72,12 @@ public static class LedonServiceCollectionExtensions
         services.AddSingleton<IModuleManager>(manager);
         services.TryAddSingleton<IEventBus, EventHub>();
         services.TryAddSingleton(options.Events);
+
+        // 把模块系统的最终选项共享给功能包的扫描（LedonAssemblies.Scan）：
+        // 显式模式（DisableAutoDiscovery + AddModule）下模块所在的程序集，
+        // 在各功能包的扫描里不会再被静默丢掉
+        LedonAssemblies.SetCurrent(options);
+        services.TryAddSingleton(options);
         services.AddHostedService<LedonHostedService>();
 
         return services;

@@ -171,7 +171,8 @@ public class FrameCodecTests
 /// <summary>TCP 服务端：真实连接、粘包处理、回显、断开清理。</summary>
 public class TcpServerTests : IAsyncDisposable
 {
-    private readonly int _port = TestPorts.Next();
+    private readonly TestPortBlock _ports = TestPorts.Reserve();
+    private int _port => _ports[0];
     private readonly List<IHostedService> _services = [];
 
     [Fact]

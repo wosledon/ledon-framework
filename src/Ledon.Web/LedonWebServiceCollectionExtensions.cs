@@ -173,7 +173,6 @@ public static class LedonWebServiceCollectionExtensions
             builder.Services.AddProblemDetails();
             builder.Services.AddExceptionHandler<LedonExceptionHandler>();
         }
-
         // API 版本化（URL 段 api/v{version}/...）
         if (options.UseApiVersioning)
         {

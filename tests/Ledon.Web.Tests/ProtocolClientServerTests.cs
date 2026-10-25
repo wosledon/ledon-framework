@@ -13,7 +13,8 @@ namespace Ledon.Web.Tests;
 /// <summary>客户端 ↔ 服务端联调：真实连接、类型化收发、断线重连。</summary>
 public class ProtocolClientServerTests : IAsyncDisposable
 {
-    private readonly int _port = TestPorts.Next();
+    private readonly TestPortBlock _ports = TestPorts.Reserve();
+    private int _port => _ports[0];
     private readonly List<IHostedService> _services = [];
     private readonly List<TcpProtocolClient> _clients = [];
 

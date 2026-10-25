@@ -20,7 +20,13 @@ public class SecurityTests : IDisposable
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.AddLedonWeb();
-        builder.Services.AddLedonSecurity(configureSecurity);
+
+        // 显式指定签名密钥：框架会在启动时拒绝默认密钥（生产不能拿公开密钥签发令牌）
+        builder.Services.AddLedonSecurity(options =>
+        {
+            options.Jwt.SigningKey = TestSigningKey;
+            configureSecurity?.Invoke(options);
+        });
 
         var app = builder.Build();
         app.UseLedonWeb();   // 认证/授权中间件由 UseLedonWeb 自动接线
@@ -29,6 +35,30 @@ public class SecurityTests : IDisposable
         _app = app;
         _client = app.GetTestClient();
         return _client;
+    }
+
+    private const string TestSigningKey = "test-signing-key-at-least-32-characters-long!!";
+
+    [Fact]
+    public void Default_signing_key_is_rejected_at_registration()
+    {
+        var services = new ServiceCollection();
+
+        // 默认密钥是公开写在仓库里的：生产忘记覆盖 = 任何人都能伪造登录令牌，
+        // 必须在注册阶段就失败（早失败比带着隐患启动好）
+        var ex = Assert.Throws<InvalidOperationException>(() => services.AddLedonSecurity());
+        Assert.Contains("SigningKey", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Short_signing_key_is_rejected_at_registration()
+    {
+        var services = new ServiceCollection();
+
+        var ex = Assert.Throws<InvalidOperationException>(() =>
+            services.AddLedonSecurity(o => o.Jwt.SigningKey = "too-short"));
+
+        Assert.Contains("32", ex.Message, StringComparison.Ordinal);
     }
 
     private static HttpRequestMessage WithBearer(string url, string token)
@@ -101,7 +131,7 @@ public class SecurityTests : IDisposable
     public async Task Refresh_token_round_trips_and_rotation_invalidates_old()
     {
         await using var provider = new ServiceCollection()
-            .AddLedonSecurity()
+            .AddLedonSecurity(o => o.Jwt.SigningKey = TestSigningKey)
             .BuildServiceProvider();
 
         var refresh = provider.GetRequiredService<IRefreshTokenService>();
@@ -125,7 +155,11 @@ public class SecurityTests : IDisposable
     public async Task Expired_refresh_token_is_rejected()
     {
         await using var provider = new ServiceCollection()
-            .AddLedonSecurity(o => o.RefreshTokenExpiration = TimeSpan.FromMilliseconds(1))
+            .AddLedonSecurity(o =>
+{
+    o.Jwt.SigningKey = TestSigningKey;
+    o.RefreshTokenExpiration = TimeSpan.FromMilliseconds(1);
+})
             .BuildServiceProvider();
 
         var refresh = provider.GetRequiredService<IRefreshTokenService>();
@@ -141,7 +175,7 @@ public class SecurityTests : IDisposable
     public async Task Replayed_revoked_token_revokes_the_whole_family()
     {
         await using var provider = new ServiceCollection()
-            .AddLedonSecurity()
+            .AddLedonSecurity(o => o.Jwt.SigningKey = TestSigningKey)
             .BuildServiceProvider();
 
         var refresh = provider.GetRequiredService<IRefreshTokenService>();
@@ -163,7 +197,7 @@ public class SecurityTests : IDisposable
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.AddLedonWeb();
-        builder.Services.AddLedonSecurity();   // TestUserValidator 自动发现
+        builder.Services.AddLedonSecurity(o => o.Jwt.SigningKey = TestSigningKey);   // TestUserValidator 自动发现
 
         var app = builder.Build();
         app.UseLedonWeb();

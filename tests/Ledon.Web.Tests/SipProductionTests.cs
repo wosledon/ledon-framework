@@ -17,7 +17,8 @@ namespace Ledon.Web.Tests;
 /// </summary>
 public class SipProductionTests : IAsyncDisposable
 {
-    private readonly int _port = TestPorts.Next();
+    private readonly TestPortBlock _ports = TestPorts.Reserve();
+    private int _port => _ports[0];
     private readonly List<IHostedService> _services = [];
     private readonly List<SipClient> _clients = [];
 

@@ -15,7 +15,7 @@ app.UseLedonWeb();
 app.Run();
 ```
 
-没有 `AddModule`、没有 `AddControllers`、没有 `AddDbContext`、没有 `MapGet`——模块、服务、事件处理器、端点全部按约定自动接线。完整可运行示例：`./run.ps1 web`（多程序集布局）、`./run.ps1 worker`（非 Web 工作进程）。
+没有 `AddModule`、没有 `AddControllers`、没有 `AddDbContext`、没有 `MapGet`——模块、服务、事件处理器、端点全部按约定自动接线。完整可运行示例：`./run.ps1 web`（多程序集布局）、`./run.ps1 worker`（非 Web 工作进程）、`./run.ps1 protocol`（协议栈）、`./run.ps1 stream`（RTMP 媒体面）。
 
 ## 能力矩阵（按需引入）
 
@@ -311,6 +311,8 @@ MyApp.sln
 
 通知模块通过 `IEventHandler<UserRegistered>` 消费用户模块发布的事件，**两个业务程序集之间没有任何引用**——解耦不是约定俗成，而是编译期强制。示范：`./run.ps1 worker`、`./run.ps1 web`。
 
+协议栈与流媒体有独立示例（不依赖 Web，纯控制台即可跑通）：`./run.ps1 protocol`、`./run.ps1 stream`。
+
 ## 项目结构
 
 ```
@@ -357,7 +359,9 @@ src/Ledon.Sip.Client/       SIP 客户端（基于 Socket 库，事务 + 对话 
 src/Ledon.Streaming/       流媒体：RTMP 服务端（保活/鉴权/过期回收）+ HTTP-FLV/HLS + 推拉流鉴权、WHIP/WHEP
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
-tests/                  xunit 测试（模块 26 + Web 395 用例，顺序断言 + 变异验证）
+                        Ledon.ProtocolSample（协议栈：结构体映射→帧→TCP/UDP→SIP）
+                        Ledon.StreamSample（流媒体：RTMP 推流→HTTP-FLV/HLS 播放）
+tests/                  xunit 测试（模块 26 + Web 400 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

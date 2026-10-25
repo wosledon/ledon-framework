@@ -112,12 +112,20 @@ public static class LedonSocketsServerServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// 注册类型化分发（帧前 2 字节 = 类型标识，其余按 <see cref="IPacketCodec{TPacket}"/> 反序列化），
-    /// 并扫描业务程序集里带 <see cref="PacketTypeAttribute"/> 的包与其 <see cref="IPacketHandler{TPacket}"/>。
-    /// </summary>
+    /// <summary>注册类型化分发（帧前 2 字节 = 类型标识，其余按 <see cref="IPacketCodec{TPacket}"/> 反序列化），</summary>
+    /// <param name="services">服务集合。</param>
+    /// <param name="bigEndian">
+    /// 包的全局字节序，默认小端（与 <see cref="PacketSerializer{T}.Read(ReadOnlySpan{byte}, bool)"/> 一致）。
+    /// 字段上标了 <c>[PacketField(BigEndian = true)]</c> 的仍然按字段自己的来。
+    /// </param>
+    /// <remarks>
+    /// 处理器按约定扫描自动注册：带 <see cref="PacketTypeAttribute"/> 的包（类或结构体）
+    /// + 实现 <c>IPacketHandler&lt;该包&gt;</c> 的处理器类。
+    /// </remarks>
     [RequiresDynamicCode("处理器注册基于反射扫描与编译委托；裁剪/AOT 场景请显式注册。")]
-    public static IServiceCollection AddLedonPacketHandlers(this IServiceCollection services)
+    public static IServiceCollection AddLedonPacketHandlers(
+        this IServiceCollection services,
+        bool bigEndian = false)
     {
         ArgumentNullException.ThrowIfNull(services);
 
@@ -126,36 +134,52 @@ public static class LedonSocketsServerServiceCollectionExtensions
         foreach (var assembly in LedonAssemblies.Scan())
         {
             foreach (var type in assembly.GetLoadableTypes()
-                .Where(candidate => candidate is { IsClass: true, IsAbstract: false }
+                // 结构体也是合法的包类型（[PacketType] 的 AttributeUsage 明确允许 Struct），
+                // 只判 IsClass 会让所有 struct 包被静默跳过
+                .Where(candidate => candidate is { IsAbstract: false, IsInterface: false }
+                    && (candidate.IsClass || candidate.IsValueType)
                     && candidate.GetCustomAttribute<PacketTypeAttribute>() is not null))
             {
-                RegisterHandler(services, type);
+                RegisterHandler(services, type, bigEndian);
             }
         }
 
         return services;
     }
 
-    private static void RegisterHandler(IServiceCollection services, Type packetType)
+    private static void RegisterHandler(IServiceCollection services, Type packetType, bool bigEndian)
     {
         var attribute = packetType.GetCustomAttribute<PacketTypeAttribute>()!;
-        var handlerInterface = packetType.GetInterfaces().FirstOrDefault(candidate =>
-            candidate.IsGenericType && candidate.GetGenericTypeDefinition() == typeof(IPacketHandler<>));
 
-        if (handlerInterface is null)
+        // 处理器接口是 IPacketHandler<该包类型>：实现在**处理器类**上，不在包类型上
+        var handlerInterface = typeof(IPacketHandler<>).MakeGenericType(packetType);
+
+        var implementations = LedonAssemblies.Scan()
+            .SelectMany(assembly => assembly.GetLoadableTypes())
+            .Where(candidate => candidate is { IsClass: true, IsAbstract: false }
+                && handlerInterface.IsAssignableFrom(candidate))
+            .ToArray();
+
+        if (implementations.Length == 0)
             return;   // 只有 [PacketType] 没有处理器：等处理器出现时再注册
 
-        var handlerType = handlerInterface.DeclaringType is null ? null : FindImplementation(packetType, handlerInterface);
-        if (handlerType is null)
-            return;
+        // 同名约定优先（LoginRequestHandler），否则取第一个实现
+        var handlerType = implementations.FirstOrDefault(candidate => candidate.Name == $"{packetType.Name}Handler")
+            ?? implementations[0];
 
         services.TryAdd(new ServiceDescriptor(handlerInterface, handlerType, ServiceLifetime.Scoped));
 
-        // 编译解码委托：启动时一次，之后零反射
-        var serializerType = typeof(PacketSerializer<>).MakeGenericType(packetType);
-        var readMethod = serializerType.GetMethod("Read", [typeof(ReadOnlySpan<byte>), typeof(bool)])!;
-        var delegateType = typeof(Func<,,>).MakeGenericType(typeof(ReadOnlySpan<byte>), typeof(bool), packetType);
-        var typed = readMethod.CreateDelegate(delegateType);
+        // 编译解码委托：启动时一次，之后零反射。
+        // 经泛型助手把 ReadOnlyMemory 转成 ReadOnlySpan 再调强类型委托——
+        // 直接 DynamicInvoke(span) 会失败（ref struct 不能装箱）
+        var readMethod = typeof(PacketSerializer<>).MakeGenericType(packetType)
+            .GetMethod("Read", [typeof(ReadOnlySpan<byte>), typeof(bool)])!;
+
+        var decoder = (Func<ReadOnlyMemory<byte>, object?>)typeof(LedonSocketsServerServiceCollectionExtensions)
+            .GetMethod(nameof(CreateDecoder), BindingFlags.NonPublic | BindingFlags.Static)!
+            .MakeGenericMethod(packetType)
+            .Invoke(null, [readMethod, bigEndian])!;
+
         var typeId = attribute.Id;
 
         PacketHandlerRegistry.Register(new PacketHandlerRegistration
@@ -163,7 +187,7 @@ public static class LedonSocketsServerServiceCollectionExtensions
             HandlerType = handlerInterface,
             PacketType = packetType,
             TypeId = typeId,
-            Decode = span => typed.DynamicInvoke(span, false),
+            Decode = decoder,
             InvokeAsync = (handler, connection, packet, ct) =>
             {
                 var method = handlerInterface.GetMethod("HandleAsync")!;
@@ -173,17 +197,12 @@ public static class LedonSocketsServerServiceCollectionExtensions
         });
     }
 
-    private static Type? FindImplementation(Type packetType, Type handlerInterface)
+    /// <summary>把反射拿到的 Read 方法包成"吃 ReadOnlyMemory"的强类型委托。</summary>
+    private static Func<ReadOnlyMemory<byte>, object?> CreateDecoder<TPacket>(MethodInfo readMethod, bool bigEndian)
     {
-        // 处理器与包同名约定：LoginRequestHandler；也接受任意实现类（按容器解析）
-        var implementations = LedonAssemblies.Scan()
-            .SelectMany(assembly => assembly.GetLoadableTypes())
-            .Where(candidate => candidate is { IsClass: true, IsAbstract: false }
-                && handlerInterface.IsAssignableFrom(candidate))
-            .ToArray();
+        var typed = (Func<ReadOnlySpan<byte>, bool, TPacket>)readMethod
+            .CreateDelegate(typeof(Func<ReadOnlySpan<byte>, bool, TPacket>));
 
-        var byName = implementations.FirstOrDefault(candidate => candidate.Name == $"{packetType.Name}Handler");
-
-        return byName ?? implementations.FirstOrDefault();
+        return memory => typed(memory.Span, bigEndian);
     }
 }

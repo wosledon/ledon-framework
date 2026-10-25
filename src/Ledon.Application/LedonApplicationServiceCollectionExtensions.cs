@@ -42,7 +42,12 @@ public static class LedonApplicationServiceCollectionExtensions
         configure(options);
 
         services.TryAddSingleton(options);
-        services.TryAddSingleton<IRequestSender, RequestSender>();
+
+        // 请求发送者必须是 Scoped：它用注入的 IServiceProvider 解析处理器，
+        // 而处理器按 Scoped 注册（可能持有 DbContext/UoW）。注册成 Singleton 时
+        // 开发环境（ValidateScopes）一请求就炸，生产环境则让所有请求共享同一个
+        // Scoped 实例（DbContext 跨请求复用 = 线程安全问题 + 状态泄漏）。
+        services.TryAddScoped<IRequestSender, RequestSender>();
 
         // 处理器自动注册：扫描业务程序集，把 ICommandHandler<,>/IQueryHandler<,> 实现按接口注册
         foreach (var assembly in LedonAssemblies.Scan())
@@ -55,23 +60,25 @@ public static class LedonApplicationServiceCollectionExtensions
                     .Where(candidate => candidate.IsGenericType
                         && (candidate.GetGenericTypeDefinition() == typeof(ICommandHandler<,>)
                             || candidate.GetGenericTypeDefinition() == typeof(IQueryHandler<,>)
-                            || candidate == typeof(ICommandHandler<>))))
+                            || candidate == typeof(ICommandHandler<>)))
+                    .Distinct())
                 {
                     services.TryAdd(new ServiceDescriptor(handlerInterface, type, ServiceLifetime.Scoped));
                 }
             }
         }
 
-        // 内置行为（按需解析；未用到的行为不会被构造）
-        services.TryAddSingleton(typeof(ValidationBehavior<>));
-        services.TryAddSingleton(typeof(LoggingBehavior<>));
-        services.TryAddSingleton(typeof(TransactionBehavior<>));
-        services.TryAddSingleton(typeof(CachingBehavior<>));
+        // 内置行为与请求发送者同生命周期：同样要在请求作用域内解析，
+        // 否则注入的 IServiceProvider 会是根容器（解析不到 Scoped 的 UoW/缓存）
+        services.TryAddScoped(typeof(ValidationBehavior<>));
+        services.TryAddScoped(typeof(LoggingBehavior<>));
+        services.TryAddScoped(typeof(TransactionBehavior<>));
+        services.TryAddScoped(typeof(CachingBehavior<>));
 
         // 登记的行为自动进容器（调用方不必手动注册）
         foreach (var registration in options.Behaviors)
             services.TryAdd(
-                new ServiceDescriptor(registration.BehaviorType, registration.BehaviorType, ServiceLifetime.Singleton));
+                new ServiceDescriptor(registration.BehaviorType, registration.BehaviorType, ServiceLifetime.Scoped));
 
         return services;
     }

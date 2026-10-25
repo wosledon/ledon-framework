@@ -85,4 +85,10 @@ public static class PacketHandlerRegistry
         ArgumentNullException.ThrowIfNull(registration);
         Handlers[registration.TypeId] = registration;
     }
+
+    /// <summary>
+    /// 清空注册表。仅供测试使用：注册表是进程级静态状态，
+    /// 多个用例之间需要隔离（重复 <c>AddLedonPacketHandlers</c> 会叠加注册）。
+    /// </summary>
+    public static void Clear() => Handlers.Clear();
 }

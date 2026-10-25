@@ -14,6 +14,25 @@ builder.Services.AddLedonLocking(o => o.Provider = LedonLockProvider.Redis,
 - 持锁默认 30 秒到期自动释放（持锁进程崩溃不死锁）；
 - Redis 实现 SET NX PX + Lua 校验令牌释放，不会误删他人已到期的锁。
 
+### 长临界区必须续期（看门狗）
+
+锁是**固定 TTL** 的：临界区执行超过 TTL 时锁已过期，别的进程能拿到同一把锁，
+两个进程同时认为持有（脑裂）。`ILockHandle.RenewAsync` + `LockWatchdog` 把这件事变成两行：
+
+```csharp
+await using var lease = await locker.AcquireAsync("job:nightly", expiry: TimeSpan.FromSeconds(30));
+await using var watchdog = lease.WithWatchdog(logger, expiry: TimeSpan.FromSeconds(30));
+
+watchdog.LockLost += () => logger.LogWarning("锁丢了，必须停止工作");
+
+// 长任务用 watchdog.Lifetime：续期失败/锁丢失时它会被取消
+await NightlyJobAsync(watchdog.Lifetime);
+```
+
+- 看门狗按 `expiry / 3` 续期（下限 1 秒），续期是 Lua 原子操作——不会把别人的锁续命；
+- `RenewAsync` 返回 `false` / 续期调用本身失败，都按"锁已丢"处理并取消 `Lifetime`；
+- 进程内实现没有"过期"概念，`RenewAsync` 恒成功（语义一致，业务不必区分部署形态）。
+
 ## Ledon.FeatureManagement —— 功能开关与灰度
 
 ```csharp
@@ -25,7 +44,8 @@ builder.Services.AddLedonFeatureManagement();
 
 - 未登记的开关默认关（fail-closed）；
 - 端点级开关：`.AddEndpointFilter(new FeatureGateFilter("beta-report"))`，未启用返回 404；
-- 百分比分桶稳定：同一主体判定不变。
+- 百分比分桶稳定：同一主体判定不变——用 FNV-1a 对 `开关名:主体键` 取模，
+  **跨进程/跨重启一致**（`HashCode.Combine` 每进程随机种子，会让同一用户在不同实例落到不同桶）。
 
 ## Ledon.BlobStorage —— 文件/对象存储
 

@@ -59,7 +59,7 @@ public static class LedonSipServerServiceCollectionExtensions
                 tcp =>
                 {
                     tcp.Address = options.Address;
-                    tcp.Port = options.TcpPort;
+                    tcp.Port = options.EffectiveTcpPort;
                 },
                 new SipTcpFrameCodec(),
                 provider => provider.GetRequiredService<SipTcpHandler>());

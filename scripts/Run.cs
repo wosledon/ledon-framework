@@ -23,6 +23,8 @@ var tasks = new Dictionary<string, TaskDef>(StringComparer.OrdinalIgnoreCase)
     ["sample"] = new("运行零配置示例（samples/Ledon.Sample）", "dotnet run --project samples/Ledon.Sample"),
     ["web"] = new("运行 Web 示例（samples/Ledon.WebSample）", "dotnet run --project samples/Ledon.WebSample"),
     ["worker"] = new("运行多程序集工作进程示例（samples/Ledon.WorkerSample）", "dotnet run --project samples/Ledon.WorkerSample"),
+    ["protocol"] = new("运行协议栈示例：结构体映射 → 帧切分 → TCP/UDP → SIP", "dotnet run --project samples/Ledon.ProtocolSample"),
+    ["stream"] = new("运行流媒体示例：RTMP 推流 → HTTP-FLV/HLS 播放", "dotnet run --project samples/Ledon.StreamSample"),
     ["check"] = new("流水线：scan → build → test", Deps: ["scan", "build", "test"]),
 };
 
