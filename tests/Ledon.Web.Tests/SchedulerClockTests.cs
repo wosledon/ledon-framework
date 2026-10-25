@@ -64,7 +64,8 @@ public class SchedulerClockTests : IDisposable
 
         Assert.Equal(1, task.Invocations);
 
-        // 再推进一个周期：第二次触发
+        // 再推进一个周期：先等循环注册下一个等待点（否则推进早于注册，该触发点被丢弃）
+        await WaitUntil(() => clock.HasWaiters, WaitTimeout);
         clock.AdvanceTo(new DateTimeOffset(2026, 1, 1, 0, 2, 0, TimeSpan.Zero));
         await WaitUntil(() => task.Invocations >= 2, WaitTimeout);
 
