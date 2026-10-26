@@ -88,6 +88,7 @@
     <ProjectReference Include="..\..\src\Ledon.Security.Accounts\Ledon.Security.Accounts.csproj" />
     <ProjectReference Include="..\..\src\Ledon.ApiClients\Ledon.ApiClients.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Secrets\Ledon.Secrets.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.DataExchange\Ledon.DataExchange.csproj" />
     </ItemGroup>
 
     <ItemGroup>

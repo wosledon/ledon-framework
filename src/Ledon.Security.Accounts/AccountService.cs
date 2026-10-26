@@ -109,7 +109,7 @@ public sealed class AccountService(
         account.LastLoginAtUtc = now;
 
         if (verification.NeedsRehash)
-            account.PasswordHash = passwordHasher.Hash(password);
+            account.PasswordHash = passwordHasher.Hash(password ?? string.Empty);
 
         await store.UpdateAsync(account, cancellationToken).ConfigureAwait(false);
 

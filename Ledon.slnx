@@ -72,6 +72,7 @@
     <Project Path="src/Ledon.Security.Accounts/Ledon.Security.Accounts.csproj" />
     <Project Path="src/Ledon.ApiClients/Ledon.ApiClients.csproj" />
     <Project Path="src/Ledon.Secrets/Ledon.Secrets.csproj" />
+    <Project Path="src/Ledon.DataExchange/Ledon.DataExchange.csproj" />
     <Project Path="src/Ledon.Workflow/Ledon.Workflow.csproj" />
   </Folder>
   <Folder Name="/tests/">

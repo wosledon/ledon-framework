@@ -105,6 +105,8 @@ public class ArchitectureTests
         ["Ledon.ApiClients"] = [],
         // 密钥模块无框架依赖
         ["Ledon.Secrets"] = [],
+        // 数据交换无框架依赖
+        ["Ledon.DataExchange"] = [],
     };
 
     [Fact]
