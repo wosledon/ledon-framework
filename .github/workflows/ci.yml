@@ -27,6 +27,18 @@ jobs:
       - name: 还原
         run: dotnet restore
 
+      - name: 漏洞扫描（NuGet）
+        shell: bash
+        run: |
+          set -euo pipefail
+          json=$(dotnet list Ledon.slnx package --vulnerable --include-transitive --format json 2>&1)
+          if grep -q '"vulnerabilities"' <<< "$json"; then
+            echo "$json"
+            echo "::error::发现易受攻击的 NuGet 包，请升级后重试"
+            exit 1
+          fi
+          echo "未发现已知漏洞的 NuGet 包"
+
       - name: 构建（Release，警告即错误）
         run: dotnet build --configuration Release --no-restore -p:TreatWarningsAsErrors=true
 
@@ -36,21 +48,32 @@ jobs:
           --logger trx --results-directory TestResults
           --collect:"XPlat Code Coverage"
 
-      - name: 覆盖率汇总（行覆盖，低于 50% 告警不阻断）
+      - name: 覆盖率门禁（每个覆盖率文件行覆盖不低于 50%）
         if: always()
         shell: bash
         run: |
-          file=$(ls TestResults/*/coverage.cobertura.xml 2>/dev/null | head -1 || true)
-          if [ -z "$file" ]; then echo "未找到覆盖率报告"; exit 0; fi
-          # 不用 grep|head（pipefail 下 EPIPE 会让步骤失败）；awk 单进程读文件
-          rate=$(awk -F'"' '/line-rate=/ {print $2; exit}' "$file")
-          pct=$(awk -v r="${rate:-0}" 'BEGIN {printf "%.1f", r * 100}')
-          echo "行覆盖率：${pct}%"
-          echo "### 测试覆盖率：行 ${pct}%" >> "$GITHUB_STEP_SUMMARY"
-          if awk -v r="${rate:-0}" 'BEGIN {exit !(r < 0.5)}'; then
-            echo "::warning::行覆盖率 ${pct}% 低于 50%"
+          set -euo pipefail
+          files=$(find TestResults -name coverage.cobertura.xml -type f 2>/dev/null || true)
+          if [ -z "$files" ]; then
+            echo "::error::未找到覆盖率报告"
+            exit 1
           fi
-          exit 0
+
+          failed=0
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            # 不用 grep|head（pipefail 下 EPIPE 会让步骤失败）；awk 单进程读文件
+            rate=$(awk -F'"' '/line-rate=/ {print $2; exit}' "$file")
+            pct=$(awk -v r="${rate:-0}" 'BEGIN {printf "%.1f", r * 100}')
+            echo "$file 行覆盖率：${pct}%"
+            echo "### 测试覆盖率：$file 行 ${pct}%" >> "$GITHUB_STEP_SUMMARY"
+            if awk -v r="${rate:-0}" 'BEGIN {exit !(r < 0.5)}'; then
+              echo "::error::行覆盖率 ${pct}% 低于 50%：$file"
+              failed=1
+            fi
+          done <<< "$files"
+
+          exit $failed
 
       - name: 上传测试结果
         if: always()

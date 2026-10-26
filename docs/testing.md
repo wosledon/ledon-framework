@@ -40,6 +40,7 @@ host.Services.GetRequiredService<IModuleManager>()
 - **集成测试优先**：框架的价值在自动接线，集成测试才能覆盖发现/注入/生命周期全链路；
 - 每用例独立 SQLite 文件（见 `tests/` 夹具的做法），避免文件锁与状态串扰；
 - 端到端验证规范化行为（ProblemDetails、校验 400、关联 ID）——这些是框架契约，回归代价高。
+- CI 对每个覆盖率报告执行 **行覆盖率 ≥ 50%** 门禁，并运行 NuGet 依赖漏洞扫描；覆盖率低于门槛或发现已知漏洞会直接失败。
 
 ## 真实基础设施（Testcontainers）
 
