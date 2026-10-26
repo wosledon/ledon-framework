@@ -77,6 +77,8 @@ public class ArchitectureTests
         ["Ledon.Ids"] = [],
         // 数据播种复用模块扫描
         ["Ledon.Data.Seeding"] = ["Ledon.Module"],
+        // 运行时设置无框架依赖
+        ["Ledon.Settings"] = [],
     };
 
     [Fact]

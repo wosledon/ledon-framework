@@ -65,6 +65,7 @@ app.Run();
 | 推送渠道                               | `Ledon.Notifications.Push`    | `AddLedonPushNotifications()`                      | Webhook / FCM HTTP v1 + 统一通知路由 |
 | 分布式 ID                              | `Ledon.Ids`                   | `AddLedonIds()`                                    | ULID / GUID v7 / Snowflake，多实例 WorkerId 防冲突 |
 | 数据播种                               | `Ledon.Data.Seeding`          | `AddLedonDataSeeding()`                            | IDataSeeder 自动发现 + Order 顺序 + 失败策略 |
+| 运行时设置                             | `Ledon.Settings`             | `AddLedonSettings()`                               | 强类型读写 + Data Protection 加密 + JSON 文件持久化 |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -367,11 +368,12 @@ src/Ledon.Notifications.Sms/  短信渠道：Webhook / Twilio
 src/Ledon.Notifications.Push/ 推送渠道：Webhook / FCM
 src/Ledon.Ids/           分布式 ID：ULID / GUID v7 / Snowflake
 src/Ledon.Data.Seeding/  模块化数据播种（IDataSeeder + Order）
+src/Ledon.Settings/      运行时设置（强类型 + 加密 + JSON 持久化）
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
                         Ledon.ProtocolSample（协议栈：结构体映射→帧→TCP/UDP→SIP）
                         Ledon.StreamSample（流媒体：RTMP 推流→HTTP-FLV/HLS 播放）
-tests/                  xunit 测试（模块 26 + Web 479 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 483 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）
