@@ -101,6 +101,8 @@ public class ArchitectureTests
         ["Ledon.Security.Totp"] = [],
         // 账号模块复用安全与通知
         ["Ledon.Security.Accounts"] = ["Ledon.Security", "Ledon.Notifications", "Ledon.Web"],
+        // 出站客户端无框架依赖
+        ["Ledon.ApiClients"] = [],
     };
 
     [Fact]
