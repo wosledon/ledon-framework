@@ -268,6 +268,9 @@ public static class LedonIdempotencyServiceCollectionExtensions
         if (string.IsNullOrWhiteSpace(options.HeaderName))
             throw new InvalidOperationException("IdempotencyOptions.HeaderName 不能为空");
 
+        if (string.IsNullOrWhiteSpace(options.StoragePrefix))
+            throw new InvalidOperationException("IdempotencyOptions.StoragePrefix 不能为空");
+
         if (options.Ttl <= TimeSpan.Zero || options.LockExpiry <= TimeSpan.Zero)
             throw new InvalidOperationException("IdempotencyOptions 的 Ttl/LockExpiry 必须大于 0");
 

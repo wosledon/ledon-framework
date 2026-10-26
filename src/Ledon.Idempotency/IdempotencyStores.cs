@@ -63,5 +63,5 @@ public sealed class DistributedIdempotencyStore(
             new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = ttl },
             cancellationToken);
 
-    private string CacheKey(string key) => $"ledon:idempotency:{key}";
+    private string CacheKey(string key) => $"{options.StoragePrefix}:{key}";
 }

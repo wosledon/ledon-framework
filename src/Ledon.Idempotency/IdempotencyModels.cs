@@ -11,6 +11,9 @@ public sealed class IdempotencyOptions
     /// <summary>响应缓存时长，默认 24 小时。</summary>
     public TimeSpan Ttl { get; set; } = TimeSpan.FromHours(24);
 
+    /// <summary>存储键前缀，默认 ledon:idempotency。</summary>
+    public string StoragePrefix { get; set; } = "ledon:idempotency";
+
     /// <summary>处理中锁的时长，默认 30 秒；超过仍未完成时应调大。</summary>
     public TimeSpan LockExpiry { get; set; } = TimeSpan.FromSeconds(30);
 
