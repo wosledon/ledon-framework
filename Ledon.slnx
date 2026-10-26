@@ -57,6 +57,7 @@
     <Project Path="src/Ledon.Web/Ledon.Web.csproj" />
     <Project Path="src/Ledon.Webhooks/Ledon.Webhooks.csproj" />
     <Project Path="src/Ledon.Ids/Ledon.Ids.csproj" />
+    <Project Path="src/Ledon.Data.Seeding/Ledon.Data.Seeding.csproj" />
     <Project Path="src/Ledon.Workflow/Ledon.Workflow.csproj" />
   </Folder>
   <Folder Name="/tests/">

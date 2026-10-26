@@ -75,6 +75,8 @@ public class ArchitectureTests
         ["Ledon.Webhooks"] = ["Ledon.Web"],
         // 分布式 ID 无框架依赖
         ["Ledon.Ids"] = [],
+        // 数据播种复用模块扫描
+        ["Ledon.Data.Seeding"] = ["Ledon.Module"],
     };
 
     [Fact]
