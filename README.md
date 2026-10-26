@@ -63,6 +63,7 @@ app.Run();
 | 出站 Webhook                           | `Ledon.Webhooks`              | `AddLedonWebhooks()`                               | 订阅 + HMAC 签名 + 重试/死信/重放 + 管理端点 |
 | 短信渠道                               | `Ledon.Notifications.Sms`     | `AddLedonSmsNotifications()`                       | Webhook / Twilio + 统一通知路由 |
 | 推送渠道                               | `Ledon.Notifications.Push`    | `AddLedonPushNotifications()`                      | Webhook / FCM HTTP v1 + 统一通知路由 |
+| 分布式 ID                              | `Ledon.Ids`                   | `AddLedonIds()`                                    | ULID / GUID v7 / Snowflake，多实例 WorkerId 防冲突 |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -363,11 +364,12 @@ src/Ledon.Streaming/       流媒体：独立 RTMP 服务端（保活/鉴权/过
 src/Ledon.Webhooks/        出站 Webhook：订阅 + HMAC 签名 + 重试/死信/重放
 src/Ledon.Notifications.Sms/  短信渠道：Webhook / Twilio
 src/Ledon.Notifications.Push/ 推送渠道：Webhook / FCM
+src/Ledon.Ids/           分布式 ID：ULID / GUID v7 / Snowflake
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
                         Ledon.ProtocolSample（协议栈：结构体映射→帧→TCP/UDP→SIP）
                         Ledon.StreamSample（流媒体：RTMP 推流→HTTP-FLV/HLS 播放）
-tests/                  xunit 测试（模块 26 + Web 471 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 475 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

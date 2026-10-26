@@ -72,6 +72,7 @@
     <ProjectReference Include="..\..\src\Ledon.Sip.Server\Ledon.Sip.Server.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Streaming\Ledon.Streaming.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Webhooks\Ledon.Webhooks.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Ids\Ledon.Ids.csproj" />
     </ItemGroup>
 
     <ItemGroup>

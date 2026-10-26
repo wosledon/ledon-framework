@@ -73,6 +73,8 @@ public class ArchitectureTests
         ["Ledon.Streaming"] = ["Ledon.Web"],
         // 出站 Webhook 管理端点走 Web
         ["Ledon.Webhooks"] = ["Ledon.Web"],
+        // 分布式 ID 无框架依赖
+        ["Ledon.Ids"] = [],
     };
 
     [Fact]
