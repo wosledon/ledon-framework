@@ -51,6 +51,8 @@ public class ArchitectureTests
         ["Ledon.Notifications"] = [],
         // 短信渠道复用通知路由
         ["Ledon.Notifications.Sms"] = ["Ledon.Notifications"],
+        // 推送渠道复用通知路由
+        ["Ledon.Notifications.Push"] = ["Ledon.Notifications"],
         ["Ledon.Localization"] = [],
         // 复用 EF 拦截器机制与 IDbContextOptionsConfiguration
         ["Ledon.AuditLog"] = ["Ledon.Data"],

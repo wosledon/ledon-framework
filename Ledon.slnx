@@ -18,6 +18,7 @@
     <Project Path="src/Ledon.BlobStorage/Ledon.BlobStorage.csproj" />
     <Project Path="src/Ledon.Notifications/Ledon.Notifications.csproj" />
     <Project Path="src/Ledon.Notifications.Sms/Ledon.Notifications.Sms.csproj" />
+    <Project Path="src/Ledon.Notifications.Push/Ledon.Notifications.Push.csproj" />
     <Project Path="src/Ledon.Localization/Ledon.Localization.csproj" />
     <Project Path="src/Ledon.AuditLog/Ledon.AuditLog.csproj" />
     <Project Path="src/Ledon.Application/Ledon.Application.csproj" />

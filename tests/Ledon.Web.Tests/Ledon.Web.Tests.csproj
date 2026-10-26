@@ -58,6 +58,7 @@
     <ProjectReference Include="..\..\src\Ledon.BlobStorage\Ledon.BlobStorage.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Notifications\Ledon.Notifications.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Notifications.Sms\Ledon.Notifications.Sms.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Notifications.Push\Ledon.Notifications.Push.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Localization\Ledon.Localization.csproj" />
     <ProjectReference Include="..\..\src\Ledon.AuditLog\Ledon.AuditLog.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Application\Ledon.Application.csproj" />
