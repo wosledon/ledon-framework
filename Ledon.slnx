@@ -65,6 +65,7 @@
     <Project Path="src/Ledon.Data.Encryption/Ledon.Data.Encryption.csproj" />
     <Project Path="src/Ledon.Testing.Containers/Ledon.Testing.Containers.csproj" />
     <Project Path="src/Ledon.Security.ApiKeys/Ledon.Security.ApiKeys.csproj" />
+    <Project Path="src/Ledon.Security.TokenStores/Ledon.Security.TokenStores.csproj" />
     <Project Path="src/Ledon.Workflow/Ledon.Workflow.csproj" />
   </Folder>
   <Folder Name="/tests/">

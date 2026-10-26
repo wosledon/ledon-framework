@@ -91,6 +91,8 @@ public class ArchitectureTests
         ["Ledon.Testing.Containers"] = [],
         // 动态 API Key 复用安全与 Web
         ["Ledon.Security.ApiKeys"] = ["Ledon.Security", "Ledon.Web"],
+        // 共享令牌存储复用安全
+        ["Ledon.Security.TokenStores"] = ["Ledon.Security"],
     };
 
     [Fact]
