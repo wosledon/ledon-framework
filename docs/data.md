@@ -70,12 +70,19 @@ builder.Services.AddLedonData(o => o.UseRepositories = true);
 
 public class WidgetService(IRepository<Widget> widgets)
 {
-    public Task<Widget?> GetAsync(int id) => widgets.GetByIdAsync(id);
+    public Task<Widget?> GetAsync(int id) => widgets.GetByIdAsync(id);                 // 默认不跟踪
+    public Task<Widget?> GetForUpdateAsync(int id) => widgets.GetByIdForUpdateAsync(id); // 跟踪，随后可改
     public Task<IReadOnlyList<Widget>> CheapAsync() =>
         widgets.ListAsync(new CheapWidgetsSpec());
     public async Task CreateAsync(Widget w) { await widgets.AddAsync(w); await widgets.SaveChangesAsync(); }
 }
 ```
+
+- 读接口默认 `AsNoTracking`：`GetByIdAsync` / `ListAsync` / `FirstOrDefaultAsync` / `PagedAsync`；
+- 需要修改时用 `GetByIdForUpdateAsync` / `FirstOrDefaultForUpdateAsync`（跟踪查询），或直接 `Query()` 自行组合；
+- 按主键查询同样尊重全局查询过滤器（软删除/多租户），不会因为本地已追踪实体而绕过过滤；
+- 复合主键传数组：`GetByIdAsync(new object?[] { tenantId, id })`，顺序与 `HasKey` 定义一致；
+- 主键类型不受限制（`int` / `long` / `Guid` / `string` / 复合键）。
 
 仓储与 DbContext 可混用（同一作用域、同一变更追踪）——复杂查询直接注入 DbContext 即可。
 

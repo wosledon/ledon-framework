@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Ledon;
 using Ledon.Module;
 using Microsoft.EntityFrameworkCore;
@@ -16,20 +17,40 @@ public interface IRepository<T> where T : class
     /// <summary>当前 DbSet（需要进一步自组查询时用）。</summary>
     IQueryable<T> Query();
 
-    /// <summary>按 ID 取；不存在返回 null。</summary>
-    Task<T?> GetByIdAsync(params object?[] keyValues);
+    /// <summary>
+    /// 按主键取（**不跟踪**，尊重全局查询过滤器，如软删除/多租户）。
+    /// 不存在或被过滤器排除返回 null。只读场景默认走这条路径。
+    /// 复合主键传数组，顺序与主键定义一致。
+    /// </summary>
+    Task<T?> GetByIdAsync(object? key, CancellationToken cancellationToken = default);
 
-    /// <summary>按 ID 取（带取消令牌）。</summary>
+    /// <summary>按主键数组取（复合主键；不跟踪，尊重全局查询过滤器）。</summary>
     Task<T?> GetByIdAsync(object?[] keyValues, CancellationToken cancellationToken = default);
 
-    /// <summary>按规约查列表。</summary>
+    /// <summary>
+    /// 按主键取（**跟踪查询**，用于随后修改并保存）。尊重全局查询过滤器。
+    /// </summary>
+    Task<T?> GetByIdForUpdateAsync(object? key, CancellationToken cancellationToken = default);
+
+    /// <summary>按主键数组取（复合主键；跟踪查询，用于修改）。</summary>
+    Task<T?> GetByIdForUpdateAsync(object?[] keyValues, CancellationToken cancellationToken = default);
+
+    /// <summary>按规约查列表（不跟踪）。</summary>
     Task<IReadOnlyList<T>> ListAsync(ISpecification<T> specification, CancellationToken cancellationToken = default);
 
-    /// <summary>按规约取单条；不存在返回 null。</summary>
+    /// <summary>按规约取单条（不跟踪）；不存在返回 null。</summary>
     Task<T?> FirstOrDefaultAsync(ISpecification<T> specification, CancellationToken cancellationToken = default);
 
-    /// <summary>按条件取单条；不存在返回 null。</summary>
+    /// <summary>按条件取单条（不跟踪）；不存在返回 null。</summary>
     Task<T?> FirstOrDefaultAsync(
+        System.Linq.Expressions.Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>按规约取单条（跟踪，用于修改）；不存在返回 null。</summary>
+    Task<T?> FirstOrDefaultForUpdateAsync(ISpecification<T> specification, CancellationToken cancellationToken = default);
+
+    /// <summary>按条件取单条（跟踪，用于修改）；不存在返回 null。</summary>
+    Task<T?> FirstOrDefaultForUpdateAsync(
         System.Linq.Expressions.Expression<Func<T, bool>> predicate,
         CancellationToken cancellationToken = default);
 
@@ -43,7 +64,7 @@ public interface IRepository<T> where T : class
         System.Linq.Expressions.Expression<Func<T, bool>>? predicate = null,
         CancellationToken cancellationToken = default);
 
-    /// <summary>分页查询。</summary>
+    /// <summary>分页查询（不跟踪）。</summary>
     Task<PagedResult<T>> PagedAsync(
         int page,
         int pageSize,
@@ -73,23 +94,44 @@ internal sealed class EfRepository<T>(DbContext context) : IRepository<T> where 
 
     public IQueryable<T> Query() => Set;
 
-    public Task<T?> GetByIdAsync(params object?[] keyValues) =>
-        Set.FindAsync(keyValues).AsTask();
+    public Task<T?> GetByIdAsync(object? key, CancellationToken cancellationToken = default) =>
+        GetByIdAsync([key], cancellationToken);
 
     public Task<T?> GetByIdAsync(object?[] keyValues, CancellationToken cancellationToken = default) =>
-        Set.FindAsync(keyValues, cancellationToken).AsTask();
+        QueryByKey(keyValues).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+
+    public Task<T?> GetByIdForUpdateAsync(object? key, CancellationToken cancellationToken = default) =>
+        GetByIdForUpdateAsync([key], cancellationToken);
+
+    public Task<T?> GetByIdForUpdateAsync(object?[] keyValues, CancellationToken cancellationToken = default) =>
+        QueryByKey(keyValues).FirstOrDefaultAsync(cancellationToken);
 
     public async Task<IReadOnlyList<T>> ListAsync(
         ISpecification<T> specification,
         CancellationToken cancellationToken = default) =>
-        await Set.ApplySpecification(specification).ToListAsync(cancellationToken).ConfigureAwait(false);
+        await Set.ApplySpecification(specification)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
 
     public async Task<T?> FirstOrDefaultAsync(
         ISpecification<T> specification,
         CancellationToken cancellationToken = default) =>
-        await Set.ApplySpecification(specification).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        await Set.ApplySpecification(specification)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
 
     public Task<T?> FirstOrDefaultAsync(
+        System.Linq.Expressions.Expression<Func<T, bool>> predicate,
+        CancellationToken cancellationToken = default) =>
+        Set.AsNoTracking().FirstOrDefaultAsync(predicate, cancellationToken);
+
+    public async Task<T?> FirstOrDefaultForUpdateAsync(
+        ISpecification<T> specification,
+        CancellationToken cancellationToken = default) =>
+        await Set.ApplySpecification(specification)
+            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+    public Task<T?> FirstOrDefaultForUpdateAsync(
         System.Linq.Expressions.Expression<Func<T, bool>> predicate,
         CancellationToken cancellationToken = default) =>
         Set.FirstOrDefaultAsync(predicate, cancellationToken);
@@ -111,7 +153,7 @@ internal sealed class EfRepository<T>(DbContext context) : IRepository<T> where 
         CancellationToken cancellationToken = default)
     {
         var query = predicate is null ? Set.AsQueryable() : Set.Where(predicate);
-        return await query.ToPagedResultAsync(page, pageSize, cancellationToken).ConfigureAwait(false);
+        return await query.AsNoTracking().ToPagedResultAsync(page, pageSize, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task AddAsync(T entity, CancellationToken cancellationToken = default) =>
@@ -126,6 +168,51 @@ internal sealed class EfRepository<T>(DbContext context) : IRepository<T> where 
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
         context.SaveChangesAsync(cancellationToken);
+
+    /// <summary>
+    /// 按主键构建查询（而不是 <c>FindAsync</c>）：始终走数据库、尊重全局查询过滤器
+    /// （软删除/多租户），也不会把取消令牌误当成主键值。
+    /// </summary>
+    private IQueryable<T> QueryByKey(object?[] keyValues)
+    {
+        ArgumentNullException.ThrowIfNull(keyValues);
+
+        var entityType = context.Model.FindEntityType(typeof(T))
+            ?? throw new InvalidOperationException($"实体 {typeof(T).Name} 未在当前 DbContext 中注册");
+
+        var primaryKey = entityType.FindPrimaryKey()
+            ?? throw new InvalidOperationException($"实体 {typeof(T).Name} 没有主键");
+
+        if (primaryKey.Properties.Count != keyValues.Length)
+        {
+            throw new ArgumentException(
+                $"主键数量不匹配：{typeof(T).Name} 需要 {primaryKey.Properties.Count} 个值，实际 {keyValues.Length} 个",
+                nameof(keyValues));
+        }
+
+        var parameter = Expression.Parameter(typeof(T), "entity");
+        Expression? predicate = null;
+
+        for (var index = 0; index < keyValues.Length; index++)
+        {
+            var property = primaryKey.Properties[index];
+
+            // 用 EF.Property 访问，兼容基类属性与影子主键
+            var propertyAccess = Expression.Call(
+                typeof(EF),
+                nameof(EF.Property),
+                [property.ClrType],
+                parameter,
+                Expression.Constant(property.Name));
+
+            var value = Expression.Constant(keyValues[index], property.ClrType);
+            var equals = Expression.Equal(propertyAccess, value);
+
+            predicate = predicate is null ? equals : Expression.AndAlso(predicate, equals);
+        }
+
+        return Set.Where(Expression.Lambda<Func<T, bool>>(predicate!, parameter));
+    }
 }
 
 /// <summary>仓储注册扩展。</summary>

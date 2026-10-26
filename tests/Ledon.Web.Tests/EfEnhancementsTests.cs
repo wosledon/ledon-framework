@@ -195,6 +195,7 @@ public class EfEnhancementsTests : IDisposable
 
         await using var scope2 = app.Services.CreateAsyncScope();
         var repository = scope2.ServiceProvider.GetRequiredService<IRepository<Widget>>();
+        var context = scope2.ServiceProvider.GetRequiredService<EnhancementDbContext>();
 
         Assert.Equal(1, await repository.CountAsync());
         Assert.True(await repository.AnyAsync(w => w.Name == "repo-1"));
@@ -202,9 +203,94 @@ public class EfEnhancementsTests : IDisposable
         var found = await repository.FirstOrDefaultAsync(w => w.Name == "repo-1");
         Assert.NotNull(found);
         Assert.Equal(5, found.Price);
+        Assert.Equal(EntityState.Detached, context.Entry(found).State);   // 默认不跟踪
+
+        var listed = await repository.ListAsync(new CheapWidgetsSpecification());
+        Assert.Single(listed);
+        Assert.Equal(EntityState.Detached, context.Entry(listed[0]).State);
 
         var paged = await repository.PagedAsync(1, 10);
         Assert.Single(paged.Items);
+        Assert.Equal(EntityState.Detached, context.Entry(paged.Items[0]).State);
+    }
+
+    [Fact]
+    public async Task Repository_get_by_id_queries_database_and_supports_no_tracking()
+    {
+        var app = await StartAsync(withRepositories: true);
+        int id;
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<EnhancementDbContext>();
+            var widget = new Widget { Name = "lookup", Price = 7 };
+            db.Widgets.Add(widget);
+            await db.SaveChangesAsync();
+            id = widget.Id;
+        }
+
+        await using var scope2 = app.Services.CreateAsyncScope();
+        var repository = scope2.ServiceProvider.GetRequiredService<IRepository<Widget>>();
+        var context = scope2.ServiceProvider.GetRequiredService<EnhancementDbContext>();
+
+        // 新作用域：实体没有被追踪；读接口默认 AsNoTracking，直接查库返回 Detached
+        var untracked = await repository.GetByIdAsync(id, CancellationToken.None);
+        Assert.NotNull(untracked);
+        Assert.Equal(EntityState.Detached, context.Entry(untracked).State);
+
+        // 需要修改时显式走跟踪版本
+        var tracked = await repository.GetByIdForUpdateAsync(id, CancellationToken.None);
+        Assert.NotNull(tracked);
+        Assert.Equal(EntityState.Unchanged, context.Entry(tracked).State);
+    }
+
+    [Fact]
+    public async Task Repository_get_by_id_respects_soft_delete_filter()
+    {
+        var app = await StartAsync(withRepositories: true);
+        int id;
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<EnhancementDbContext>();
+            var widget = new SoftWidget { Name = "deleted" };
+            db.SoftWidgets.Add(widget);
+            await db.SaveChangesAsync();
+            id = widget.Id;
+
+            db.SoftWidgets.Remove(widget);   // AutoSoftDelete 转换为 IsDeleted = true
+            await db.SaveChangesAsync();
+        }
+
+        await using var scope2 = app.Services.CreateAsyncScope();
+        var repository = scope2.ServiceProvider.GetRequiredService<IRepository<SoftWidget>>();
+
+        // 查询过滤器生效：软删除记录按主键也查不到（FindAsync 在已追踪时可能绕过过滤器）
+        Assert.Null(await repository.GetByIdAsync(id, CancellationToken.None));
+        Assert.Null(await repository.GetByIdForUpdateAsync(id, CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task Repository_supports_composite_keys()
+    {
+        var app = await StartAsync(withRepositories: true);
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<EnhancementDbContext>();
+            db.WidgetLines.Add(new WidgetLine { WidgetId = 7, LineNo = 2, Name = "second" });
+            await db.SaveChangesAsync();
+        }
+
+        await using var scope2 = app.Services.CreateAsyncScope();
+        var repository = scope2.ServiceProvider.GetRequiredService<IRepository<WidgetLine>>();
+
+        var found = await repository.GetByIdAsync([7, 2], CancellationToken.None);
+        Assert.NotNull(found);
+        Assert.Equal("second", found.Name);
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => repository.GetByIdAsync([7], CancellationToken.None));
     }
 
     public void Dispose()
@@ -260,4 +346,30 @@ public class CheapWidgetsSpecification : Specification<Widget>
 public class EnhancementDbContext(DbContextOptions<EnhancementDbContext> options) : DbContext(options), ILedonDbContext
 {
     public DbSet<Widget> Widgets => Set<Widget>();
+
+    public DbSet<SoftWidget> SoftWidgets => Set<SoftWidget>();
+
+    public DbSet<WidgetLine> WidgetLines => Set<WidgetLine>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<WidgetLine>().HasKey(line => new { line.WidgetId, line.LineNo });
+        modelBuilder.ApplySoftDeleteFilters();
+    }
+}
+
+/// <summary>软删除夹具：验证按主键查询也尊重全局查询过滤器。</summary>
+public class SoftWidget : Entity, ISoftDelete
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public bool IsDeleted { get; set; }
+}
+
+/// <summary>复合主键夹具。</summary>
+public class WidgetLine
+{
+    public int WidgetId { get; set; }
+    public int LineNo { get; set; }
+    public string Name { get; set; } = string.Empty;
 }
