@@ -58,14 +58,14 @@ public sealed class AuthorizationEndpoints(
         group.MapDelete("/roles/{name}", async (string name, CancellationToken ct) =>
             await service.DeleteRoleAsync(name, ct) ? Results.NoContent() : Results.NotFound());
 
-        group.MapGet("/users/{userId}/roles", async (string userId, CancellationToken ct) =>
-            Results.Ok(await service.GetUserRolesAsync(userId, ct)));
+        group.MapGet("/users/{userId}/roles", async (string userId, string? tenantId, CancellationToken ct) =>
+            Results.Ok(await service.GetUserRolesAsync(userId, tenantId, ct)));
 
         group.MapPost("/users/{userId}/roles", async (string userId, AssignRoleRequest request, CancellationToken ct) =>
         {
             try
             {
-                await service.AssignRoleAsync(userId, request.Role, ct);
+                await service.AssignRoleAsync(userId, request.Role, request.TenantId, ct);
                 return Results.NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -78,8 +78,8 @@ public sealed class AuthorizationEndpoints(
             }
         });
 
-        group.MapDelete("/users/{userId}/roles/{role}", async (string userId, string role, CancellationToken ct) =>
-            await service.RemoveRoleAsync(userId, role, ct) ? Results.NoContent() : Results.NotFound());
+        group.MapDelete("/users/{userId}/roles/{role}", async (string userId, string role, string? tenantId, CancellationToken ct) =>
+            await service.RemoveRoleAsync(userId, role, tenantId, ct) ? Results.NoContent() : Results.NotFound());
 
         group.MapGet("/users/{userId}/permissions", async (string userId, string? tenantId, CancellationToken ct) =>
             Results.Ok(await service.GetUserPermissionsAsync(userId, tenantId, ct)));
@@ -90,7 +90,7 @@ public sealed record CreateRoleRequest(string Name, IReadOnlyList<string>? Permi
 
 public sealed record SetPermissionsRequest(IReadOnlyList<string> Permissions);
 
-public sealed record AssignRoleRequest(string Role);
+public sealed record AssignRoleRequest(string Role, string? TenantId = null);
 
 /// <summary>RBAC 注册。</summary>
 public static class LedonAuthorizationServiceCollectionExtensions

@@ -67,6 +67,20 @@ public class AuthorizationTests
     }
 
     [Fact]
+    public async Task Role_assignment_can_be_scoped_to_tenant()
+    {
+        await using var provider = BuildProvider();
+        var service = provider.GetRequiredService<RoleAuthorizationService>();
+
+        await service.CreateRoleAsync("tenant-reader", ["reports.read"]);
+        await service.AssignRoleAsync("user-4", "tenant-reader", "tenant-a");
+
+        Assert.True(await service.HasPermissionAsync("user-4", "reports.read", "tenant-a"));
+        Assert.False(await service.HasPermissionAsync("user-4", "reports.read", "tenant-b"));
+        Assert.False(await service.HasPermissionAsync("user-4", "reports.read"));
+    }
+
+    [Fact]
     public async Task Management_endpoints_can_be_mapped_and_used()
     {
         var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder();

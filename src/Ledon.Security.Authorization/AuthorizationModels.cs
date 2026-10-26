@@ -42,11 +42,22 @@ public interface IRoleStore
 
     Task<bool> RemoveAsync(string name, CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<string>> GetRolesAsync(string userId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<string>> GetRolesAsync(
+        string userId,
+        string? tenantId = null,
+        CancellationToken cancellationToken = default);
 
-    Task AssignAsync(string userId, string roleName, CancellationToken cancellationToken = default);
+    Task AssignAsync(
+        string userId,
+        string roleName,
+        string? tenantId = null,
+        CancellationToken cancellationToken = default);
 
-    Task<bool> RemoveAssignmentAsync(string userId, string roleName, CancellationToken cancellationToken = default);
+    Task<bool> RemoveAssignmentAsync(
+        string userId,
+        string roleName,
+        string? tenantId = null,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>内存角色存储。</summary>
@@ -54,7 +65,7 @@ public sealed class InMemoryRoleStore : IRoleStore
 {
     private readonly ConcurrentDictionary<string, AuthorizationRole> _roles =
         new(StringComparer.OrdinalIgnoreCase);
-    private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _assignments =
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentDictionary<string, byte>>> _assignments =
         new(StringComparer.Ordinal);
 
     public Task<AuthorizationRole?> FindAsync(string name, CancellationToken cancellationToken = default) =>
@@ -75,32 +86,62 @@ public sealed class InMemoryRoleStore : IRoleStore
         if (!_roles.TryRemove(name, out _))
             return Task.FromResult(false);
 
-        foreach (var (_, roles) in _assignments)
-            roles.TryRemove(name, out _);
+        foreach (var (_, tenants) in _assignments)
+        {
+            foreach (var (_, roles) in tenants)
+                roles.TryRemove(name, out _);
+        }
 
         return Task.FromResult(true);
     }
 
-    public Task<IReadOnlyList<string>> GetRolesAsync(string userId, CancellationToken cancellationToken = default) =>
-        Task.FromResult<IReadOnlyList<string>>(_assignments.TryGetValue(userId, out var roles)
-            ? roles.Keys.OrderBy(role => role, StringComparer.OrdinalIgnoreCase).ToArray()
-            : []);
+    public Task<IReadOnlyList<string>> GetRolesAsync(
+        string userId,
+        string? tenantId = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_assignments.TryGetValue(userId, out var tenants))
+            return Task.FromResult<IReadOnlyList<string>>([]);
 
-    public Task AssignAsync(string userId, string roleName, CancellationToken cancellationToken = default)
+        var roles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        if (tenants.TryGetValue(string.Empty, out var global))
+            roles.UnionWith(global.Keys);
+
+        if (!string.IsNullOrWhiteSpace(tenantId) && tenants.TryGetValue(tenantId, out var scoped))
+            roles.UnionWith(scoped.Keys);
+
+        return Task.FromResult<IReadOnlyList<string>>(
+            roles.OrderBy(role => role, StringComparer.OrdinalIgnoreCase).ToArray());
+    }
+
+    public Task AssignAsync(
+        string userId,
+        string roleName,
+        string? tenantId = null,
+        CancellationToken cancellationToken = default)
     {
         if (!_roles.ContainsKey(roleName))
             throw new KeyNotFoundException($"角色不存在：{roleName}");
 
-        var roles = _assignments.GetOrAdd(
-            userId,
+        var tenants = _assignments.GetOrAdd(userId, _ => new ConcurrentDictionary<string, ConcurrentDictionary<string, byte>>(StringComparer.Ordinal));
+        var roles = tenants.GetOrAdd(
+            tenantId ?? string.Empty,
             _ => new ConcurrentDictionary<string, byte>(StringComparer.OrdinalIgnoreCase));
 
         roles.TryAdd(roleName, 0);
         return Task.CompletedTask;
     }
 
-    public Task<bool> RemoveAssignmentAsync(string userId, string roleName, CancellationToken cancellationToken = default) =>
-        Task.FromResult(_assignments.TryGetValue(userId, out var roles) && roles.TryRemove(roleName, out _));
+    public Task<bool> RemoveAssignmentAsync(
+        string userId,
+        string roleName,
+        string? tenantId = null,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(
+            _assignments.TryGetValue(userId, out var tenants)
+            && tenants.TryGetValue(tenantId ?? string.Empty, out var roles)
+            && roles.TryRemove(roleName, out _));
 }
 
 /// <summary>权限求值器。</summary>

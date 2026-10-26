@@ -34,7 +34,7 @@ public sealed class CachingPermissionEvaluator(
         if (cache.TryGetValue<IReadOnlyList<string>>(cacheKey, out var cached) && cached is not null)
             return cached;
 
-        var roles = await store.GetRolesAsync(userId, cancellationToken).ConfigureAwait(false);
+        var roles = await store.GetRolesAsync(userId, tenantId, cancellationToken).ConfigureAwait(false);
         var permissions = new HashSet<string>(StringComparer.Ordinal);
 
         foreach (var roleName in roles)
@@ -165,20 +165,22 @@ public sealed class RoleAuthorizationService(
     public async Task AssignRoleAsync(
         string userId,
         string roleName,
+        string? tenantId = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId);
-        await store.AssignAsync(userId, ValidateRoleName(roleName), cancellationToken).ConfigureAwait(false);
+        await store.AssignAsync(userId, ValidateRoleName(roleName), tenantId, cancellationToken).ConfigureAwait(false);
         evaluator.Invalidate();
     }
 
     public async Task<bool> RemoveRoleAsync(
         string userId,
         string roleName,
+        string? tenantId = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId);
-        var removed = await store.RemoveAssignmentAsync(userId, ValidateRoleName(roleName), cancellationToken).ConfigureAwait(false);
+        var removed = await store.RemoveAssignmentAsync(userId, ValidateRoleName(roleName), tenantId, cancellationToken).ConfigureAwait(false);
 
         if (removed)
             evaluator.Invalidate();
@@ -188,10 +190,11 @@ public sealed class RoleAuthorizationService(
 
     public Task<IReadOnlyList<string>> GetUserRolesAsync(
         string userId,
+        string? tenantId = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId);
-        return store.GetRolesAsync(userId, cancellationToken);
+        return store.GetRolesAsync(userId, tenantId, cancellationToken);
     }
 
     public Task<IReadOnlyList<string>> GetUserPermissionsAsync(
