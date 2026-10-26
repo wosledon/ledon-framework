@@ -68,7 +68,8 @@ public static class LedonSecurityServiceCollectionExtensions
         {
             foreach (var type in assembly.GetLoadableTypes()
                 .Where(type => type is { IsClass: true, IsAbstract: false }
-                    && typeof(ILedonUserValidator).IsAssignableFrom(type)))
+                    && typeof(ILedonUserValidator).IsAssignableFrom(type)
+                    && !type.IsDefined(typeof(Ledon.Module.Abstractions.DisableAutoDiscoveryAttribute), inherit: false)))
             {
                 services.TryAdd(ServiceDescriptor.Scoped(typeof(ILedonUserValidator), type));
             }

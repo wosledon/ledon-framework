@@ -99,6 +99,8 @@ public class ArchitectureTests
         ["Ledon.Data.MultiTenancy"] = ["Ledon.Data", "Ledon.MultiTenancy", "Ledon.MultiTenancy.Management"],
         // TOTP 无框架依赖
         ["Ledon.Security.Totp"] = [],
+        // 账号模块复用安全与通知
+        ["Ledon.Security.Accounts"] = ["Ledon.Security", "Ledon.Notifications", "Ledon.Web"],
     };
 
     [Fact]

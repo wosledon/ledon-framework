@@ -13,7 +13,7 @@ public sealed class TenantDataOptions
     public string? DefaultConnectionString { get; set; }
 
     /// <summary>
-    /// 配置 <typeparamref name="TContext"/> 的提供程序，例如：
+    /// 配置 DbContext 的提供程序，例如：
     /// <code>
     /// o.ConfigureDbContext = (builder, connectionString) =&gt; builder.UseNpgsql(connectionString);
     /// </code>
