@@ -71,6 +71,7 @@ app.Run();
 | 租户管理                               | `Ledon.MultiTenancy.Management` | `AddLedonTenantManagement()`                      | 租户 CRUD + 开通/回收钩子 + 管理端点 |
 | 列级加密                               | `Ledon.Data.Encryption`       | `AddLedonDataEncryption()`                         | `[Encrypted]` + EF ValueConverter + Data Protection |
 | 集成测试容器                           | `Ledon.Testing.Containers`    | `LedonContainers` / `*Fixture`                     | Redis / PostgreSQL / RabbitMQ / Kafka / MinIO |
+| 动态 API Key                           | `Ledon.Security.ApiKeys`      | `AddLedonApiKeys()`                                | SHA-256 哈希 + scopes/租户/过期/吊销 + `LedonApiKey` 方案 |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -379,11 +380,12 @@ src/Ledon.Security.ExternalLogins/ 外部登录（OIDC / GitHub）
 src/Ledon.MultiTenancy.Management/ 租户目录管理
 src/Ledon.Data.Encryption/ 列级透明加密
 src/Ledon.Testing.Containers/ 集成测试容器夹具（Redis/PG/RabbitMQ/Kafka/MinIO）
+src/Ledon.Security.ApiKeys/ 动态 API Key
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
                         Ledon.ProtocolSample（协议栈：结构体映射→帧→TCP/UDP→SIP）
                         Ledon.StreamSample（流媒体：RTMP 推流→HTTP-FLV/HLS 播放）
-tests/                  xunit 测试（模块 26 + Web 494 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 497 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

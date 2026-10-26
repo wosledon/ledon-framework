@@ -89,6 +89,8 @@ public class ArchitectureTests
         ["Ledon.Data.Encryption"] = [],
         // Testcontainers 基建无框架依赖
         ["Ledon.Testing.Containers"] = [],
+        // 动态 API Key 复用安全与 Web
+        ["Ledon.Security.ApiKeys"] = ["Ledon.Security", "Ledon.Web"],
     };
 
     [Fact]

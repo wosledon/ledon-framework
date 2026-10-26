@@ -87,6 +87,18 @@ internal static class AssemblyScanner
         "Ledon.MultiTenancy.Management",
         "Ledon.Data.Encryption",
         "Ledon.Testing.Containers",
+        "Ledon.Security.ApiKeys",
+        "Ledon.Security.TokenStores",
+        "Ledon.Quotas",
+        "Ledon.Data.MultiTenancy",
+        "Ledon.Security.Totp",
+        "Ledon.Security.Accounts",
+        "Ledon.ApiClients",
+        "Ledon.Secrets",
+        "Ledon.DataExchange",
+        "Ledon.Imaging",
+        "Ledon.Search.Sync",
+        "Ledon.Data.Migrations",
     };
 
     /// <summary>
