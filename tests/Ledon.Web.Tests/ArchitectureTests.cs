@@ -85,6 +85,8 @@ public class ArchitectureTests
         ["Ledon.Security.ExternalLogins"] = ["Ledon.Security", "Ledon.Web"],
         // 租户管理复用多租户与 Web 端点
         ["Ledon.MultiTenancy.Management"] = ["Ledon.MultiTenancy", "Ledon.Web"],
+        // 列加密无框架依赖
+        ["Ledon.Data.Encryption"] = [],
     };
 
     [Fact]
