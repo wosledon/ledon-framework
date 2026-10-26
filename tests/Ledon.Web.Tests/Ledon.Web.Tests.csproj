@@ -82,6 +82,7 @@
     <ProjectReference Include="..\..\src\Ledon.Testing.Containers\Ledon.Testing.Containers.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Security.ApiKeys\Ledon.Security.ApiKeys.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Security.TokenStores\Ledon.Security.TokenStores.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Quotas\Ledon.Quotas.csproj" />
     </ItemGroup>
 
     <ItemGroup>

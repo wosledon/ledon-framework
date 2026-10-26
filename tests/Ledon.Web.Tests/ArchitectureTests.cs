@@ -93,6 +93,8 @@ public class ArchitectureTests
         ["Ledon.Security.ApiKeys"] = ["Ledon.Security", "Ledon.Web"],
         // 共享令牌存储复用安全
         ["Ledon.Security.TokenStores"] = ["Ledon.Security"],
+        // 配额无框架依赖
+        ["Ledon.Quotas"] = [],
     };
 
     [Fact]
