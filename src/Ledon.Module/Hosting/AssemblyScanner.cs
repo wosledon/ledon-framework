@@ -76,6 +76,17 @@ internal static class AssemblyScanner
         "Ledon.Sip.Client",
         "Ledon.Sip.Server",
         "Ledon.Streaming",
+        "Ledon.Webhooks",
+        "Ledon.Notifications.Sms",
+        "Ledon.Notifications.Push",
+        "Ledon.Ids",
+        "Ledon.Data.Seeding",
+        "Ledon.Settings",
+        "Ledon.Search",
+        "Ledon.Security.ExternalLogins",
+        "Ledon.MultiTenancy.Management",
+        "Ledon.Data.Encryption",
+        "Ledon.Testing.Containers",
     };
 
     /// <summary>

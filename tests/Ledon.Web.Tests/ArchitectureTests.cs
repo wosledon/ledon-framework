@@ -81,6 +81,8 @@ public class ArchitectureTests
         ["Ledon.Settings"] = [],
         // 搜索无框架依赖
         ["Ledon.Search"] = [],
+        // 外部登录复用安全与 Web 端点
+        ["Ledon.Security.ExternalLogins"] = ["Ledon.Security", "Ledon.Web"],
     };
 
     [Fact]
