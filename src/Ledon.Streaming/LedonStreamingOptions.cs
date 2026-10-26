@@ -10,6 +10,11 @@ public sealed class LedonStreamingOptions
     public TimeSpan TokenLifetime { get; set; } = TimeSpan.FromMinutes(10);
 
     /// <summary>媒体服务器类型，默认 SRS。</summary>
+    /// <remarks>
+    /// <see cref="MediaServerKind.ZlMediaKit"/> 目前是预留值：内置的
+    /// <c>IMediaServerClient</c> 只实现了 SRS OpenAPI。接入 ZLMediaKit 需自行实现
+    /// <c>IMediaServerClient</c> 并替换注册。
+    /// </remarks>
     public MediaServerKind ServerKind { get; set; } = MediaServerKind.Srs;
 
     /// <summary>媒体服务器 API 地址（如 <c>http://127.0.0.1:1985</c>，SRS 的 OpenAPI）。</summary>
@@ -24,7 +29,10 @@ public sealed class LedonStreamingOptions
     /// <summary>WebRTC 播放地址（如 <c>webrtc://media.example.com/live</c>）。</summary>
     public string? PublicWebRtcUrl { get; set; }
 
-    /// <summary>未配置鉴权时的默认策略：拒绝还是放行。默认 <c>false</c>（fail-closed）。</summary>
+    /// <summary>
+    /// 未注册 <c>IStreamAuthorizer</c> 时的默认策略：拒绝还是放行。默认 <c>false</c>（fail-closed）。
+    /// 仅在业务主动移除默认鉴权器（<c>RemoveAll&lt;IStreamAuthorizer&gt;()</c>）时生效。
+    /// </summary>
     public bool AllowWhenNoAuthorizer { get; set; }
 
     /// <summary>媒体服务器回调（webhook）路径，默认 <c>/streaming/hooks</c>。</summary>
@@ -46,6 +54,6 @@ public enum MediaServerKind
     /// <summary>SRS（简单实时服务器，支持 RTMP/WebRTC/WHIP/WHEP/HLS/HTTP-FLV）。</summary>
     Srs = 0,
 
-    /// <summary>ZLMediaKit（支持 RTMP/RTSP/WebRTC/HLS/HTTP-FLV/SRT）。</summary>
+    /// <summary>ZLMediaKit（预留：内置客户端尚未实现该服务的 OpenAPI）。</summary>
     ZlMediaKit = 1,
 }

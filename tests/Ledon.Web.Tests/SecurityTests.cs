@@ -39,6 +39,13 @@ public class SecurityTests : IDisposable
 
     private const string TestSigningKey = "test-signing-key-at-least-32-characters-long!!";
 
+    private sealed class ManualTimeProvider(DateTimeOffset now) : TimeProvider
+    {
+        public DateTimeOffset Now { get; set; } = now;
+
+        public override DateTimeOffset GetUtcNow() => Now;
+    }
+
     [Fact]
     public void Default_signing_key_is_rejected_at_registration()
     {
@@ -66,6 +73,42 @@ public class SecurityTests : IDisposable
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return request;
+    }
+
+    [Fact]
+    public async Task Expired_refresh_tokens_are_evicted_from_store()
+    {
+        var time = new ManualTimeProvider(DateTimeOffset.UtcNow);
+
+        var services = new ServiceCollection();
+        services.AddSingleton<TimeProvider>(time);
+        services.AddLedonSecurity(o => o.Jwt.SigningKey = TestSigningKey);
+
+        await using var provider = services.BuildServiceProvider();
+        var store = provider.GetRequiredService<IRefreshTokenStore>();
+
+        await store.StoreAsync("u1", "expired", time.Now.AddMinutes(5));
+
+        // 时间推进到过期之后，再写入一条触发全量清理（至少每分钟一次）
+        time.Now = time.Now.AddMinutes(10);
+        await store.StoreAsync("u2", "fresh", time.Now.AddMinutes(5));
+
+        Assert.Null(await store.FindAsync("expired"));
+        Assert.NotNull(await store.FindAsync("fresh"));
+    }
+
+    [Fact]
+    public async Task Refresh_service_treats_missing_token_as_invalid()
+    {
+        var services = new ServiceCollection();
+        services.AddLedonSecurity(o => o.Jwt.SigningKey = TestSigningKey);
+
+        await using var provider = services.BuildServiceProvider();
+        var refresh = provider.GetRequiredService<IRefreshTokenService>();
+
+        // JSON 里的 refreshToken: null / "" 不应变成 500
+        Assert.Null(await refresh.ValidateAsync(null!));
+        Assert.Null(await refresh.RotateAsync(""));
     }
 
     [Fact]

@@ -44,6 +44,15 @@ public sealed class LedonOpenIddictOptions
     /// <summary>刷新令牌有效期，默认 14 天。</summary>
     public TimeSpan RefreshTokenLifetime { get; set; } = TimeSpan.FromDays(14);
 
+    /// <summary>
+    /// 签名/加密证书（PFX）路径。多实例部署必须配置同一张证书，否则各实例签发的令牌互不认。
+    /// 为空时使用进程内临时密钥（单实例/开发）。
+    /// </summary>
+    public string? SigningCertificatePath { get; set; }
+
+    /// <summary>PFX 证书密码（无密码留空）。</summary>
+    public string? SigningCertificatePassword { get; set; }
+
     /// <summary>是否映射 /connect/userinfo（默认开；用 [Authorize] 保护，按 access token 返回声明）。</summary>
     public bool UseUserInfoEndpoint { get; set; } = true;
 

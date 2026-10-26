@@ -11,9 +11,11 @@ public sealed class LocalFileStorage : IFileStorage
     private readonly LedonBlobStorageOptions _options;
     private readonly ILogger<LocalFileStorage> _logger;
 
-    // 路径段 → 该文件的异步锁。键含完整路径，锁粒度到文件
-    private readonly Dictionary<string, SemaphoreSlim> _fileLocks = new(StringComparer.Ordinal);
-    private readonly Lock _gate = new();
+    // 固定数量的文件锁（按路径哈希取模）：既串行化同文件写入，也不会因文件数增长而无限累积
+    private const int LockStripes = 64;
+    private readonly SemaphoreSlim[] _fileLocks = Enumerable.Range(0, LockStripes)
+        .Select(_ => new SemaphoreSlim(1, 1))
+        .ToArray();
 
     public LocalFileStorage(LedonBlobStorageOptions options, ILogger<LocalFileStorage> logger)
     {
@@ -27,10 +29,10 @@ public sealed class LocalFileStorage : IFileStorage
     public async Task SaveAsync(
         string path, Stream content, BlobUploadOptions? options = null, CancellationToken cancellationToken = default)
     {
-        BlobPath.Validate(path);
+        path = BlobPath.Validate(path);
         BlobPath.ValidateExtension(path, _options);
 
-        var full = FullPath(path);
+        var full = FullPath(path, createDirectory: true);
         var gate = GateFor(full);
 
         await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -39,9 +41,23 @@ public sealed class LocalFileStorage : IFileStorage
             if (!(options?.Overwrite ?? false) && File.Exists(full))
                 throw new IOException($"文件已存在：{path}（需要覆盖请传 Overwrite = true）");
 
-            var length = await CopyWithLimitAsync(content, full, _options.MaxFileSize, cancellationToken).ConfigureAwait(false);
+            // 先写临时文件再原子替换：失败（如超大小上限）不会留下半截文件，也不会破坏旧内容
+            var temp = $"{full}.tmp-{Guid.NewGuid():N}";
 
-            _logger.LogDebug("已写入 {Path}（{Length} 字节）", path, length);
+            try
+            {
+                var length = await CopyWithLimitAsync(
+                    content, temp, _options.MaxFileSize, cancellationToken).ConfigureAwait(false);
+
+                File.Move(temp, full, overwrite: options?.Overwrite ?? false);
+
+                _logger.LogDebug("已写入 {Path}（{Length} 字节）", path, length);
+            }
+            catch
+            {
+                TryDelete(temp);
+                throw;
+            }
         }
         finally
         {
@@ -51,7 +67,7 @@ public sealed class LocalFileStorage : IFileStorage
 
     public Task<Stream> OpenReadAsync(string path, CancellationToken cancellationToken = default)
     {
-        BlobPath.Validate(path);
+        path = BlobPath.Validate(path);
 
         var full = FullPath(path);
         if (!File.Exists(full))
@@ -71,26 +87,27 @@ public sealed class LocalFileStorage : IFileStorage
 
     public Task<bool> ExistsAsync(string path, CancellationToken cancellationToken = default)
     {
-        BlobPath.Validate(path);
+        path = BlobPath.Validate(path);
         return Task.FromResult(File.Exists(FullPath(path)));
     }
 
     public Task<bool> DeleteAsync(string path, CancellationToken cancellationToken = default)
     {
-        BlobPath.Validate(path);
+        path = BlobPath.Validate(path);
 
+        var root = ResolveRoot(_options.RootPath);
         var full = FullPath(path);
         if (!File.Exists(full))
             return Task.FromResult(false);
 
         File.Delete(full);
-        PruneEmptyDirectories(Path.GetDirectoryName(full)!);
+        PruneEmptyDirectories(Path.GetDirectoryName(full)!, root);
         return Task.FromResult(true);
     }
 
     public Task<BlobInfo?> GetInfoAsync(string path, CancellationToken cancellationToken = default)
     {
-        BlobPath.Validate(path);
+        path = BlobPath.Validate(path);
 
         var full = FullPath(path);
         if (!File.Exists(full))
@@ -108,14 +125,17 @@ public sealed class LocalFileStorage : IFileStorage
         string? prefix = null, int pageSize = 100, string? continuationToken = null, CancellationToken cancellationToken = default)
     {
         var root = ResolveRoot(_options.RootPath);
-        var searchRoot = string.IsNullOrEmpty(prefix) ? root : FullPath(prefix);
+
+        // prefix 是"键前缀"而不是目录：从根枚举后按相对路径过滤（"logs" 也能命中 "logs-2024/a.txt"）
+        var normalizedPrefix = (prefix ?? string.Empty).Replace('\\', '/').Trim('/');
+        var searchRoot = root;
 
         if (!Directory.Exists(searchRoot))
             return Task.FromResult<IReadOnlyList<BlobInfo>>([]);
 
         var files = Directory.EnumerateFiles(searchRoot, "*", SearchOption.AllDirectories)
-            .Select(full => new { Full = full, Relative = Path.GetRelativePath(root, full) })
-            .Where(item => item.Relative.StartsWith(prefix ?? "", StringComparison.OrdinalIgnoreCase))
+            .Select(full => new { Full = full, Relative = Path.GetRelativePath(root, full).Replace('\\', '/') })
+            .Where(item => item.Relative.StartsWith(normalizedPrefix, StringComparison.OrdinalIgnoreCase))
             .OrderBy(item => item.Relative, StringComparer.Ordinal)
             .Skip(ParseSkip(continuationToken))
             .Take(Math.Max(1, pageSize))
@@ -123,7 +143,7 @@ public sealed class LocalFileStorage : IFileStorage
             {
                 var info = new FileInfo(item.Full);
                 return new BlobInfo(
-                    item.Relative.Replace('\\', '/'),
+                    item.Relative,
                     info.Length,
                     ContentTypes.Guess(item.Relative),
                     new DateTimeOffset(info.LastWriteTimeUtc, TimeSpan.Zero));
@@ -133,19 +153,26 @@ public sealed class LocalFileStorage : IFileStorage
         return Task.FromResult<IReadOnlyList<BlobInfo>>(files);
     }
 
-    private string FullPath(string path)
+    private string FullPath(string path, bool createDirectory = false)
     {
         var root = ResolveRoot(_options.RootPath);
         var combined = Path.GetFullPath(Path.Combine(root, BlobPath.Normalize(path)));
 
         // 防目录穿越：规范化后的路径必须仍在根目录内
-        if (!combined.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+        var rootWithSeparator = root.EndsWith(Path.DirectorySeparatorChar)
+            ? root
+            : root + Path.DirectorySeparatorChar;
+
+        if (!combined.StartsWith(rootWithSeparator, StringComparison.OrdinalIgnoreCase)
             && !string.Equals(combined, root, StringComparison.OrdinalIgnoreCase))
             throw new ArgumentException($"路径越出存储根目录：{path}", nameof(path));
 
-        var directory = Path.GetDirectoryName(combined);
-        if (!string.IsNullOrEmpty(directory))
-            Directory.CreateDirectory(directory);
+        if (createDirectory)
+        {
+            var directory = Path.GetDirectoryName(combined);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
+        }
 
         return combined;
     }
@@ -153,27 +180,35 @@ public sealed class LocalFileStorage : IFileStorage
     private static string ResolveRoot(string root) =>
         Path.GetFullPath(Path.IsPathRooted(root) ? root : Path.Combine(AppContext.BaseDirectory, root));
 
-    private SemaphoreSlim GateFor(string fullPath)
-    {
-        lock (_gate)
-        {
-            if (!_fileLocks.TryGetValue(fullPath, out var gate))
-            {
-                gate = new SemaphoreSlim(1, 1);
-                _fileLocks[fullPath] = gate;
-            }
-
-            return gate;
-        }
-    }
+    private SemaphoreSlim GateFor(string fullPath) =>
+        _fileLocks[(uint)fullPath.GetHashCode(StringComparison.OrdinalIgnoreCase) % LockStripes];
 
     private static int ParseSkip(string? continuationToken) =>
         int.TryParse(continuationToken, out var skip) ? Math.Max(0, skip) : 0;
 
-    private static void PruneEmptyDirectories(string directory)
+    private static void TryDelete(string path)
     {
-        // 只清理空目录，避免删文件后留一层层空壳
-        while (Directory.Exists(directory) && !Directory.EnumerateFileSystemEntries(directory).Any())
+        try
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+        catch (IOException)
+        {
+            // 临时文件清理失败不影响主流程（下次覆盖写会生成新的临时名）
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // 同上：权限问题留给调用方从原始异常定位
+        }
+    }
+
+    private static void PruneEmptyDirectories(string directory, string root)
+    {
+        // 只清理空目录；到存储根目录即停，绝不越界删除根之外的目录
+        while (Directory.Exists(directory)
+            && !string.Equals(directory, root, StringComparison.OrdinalIgnoreCase)
+            && !Directory.EnumerateFileSystemEntries(directory).Any())
         {
             var parent = Path.GetDirectoryName(directory);
             Directory.Delete(directory);

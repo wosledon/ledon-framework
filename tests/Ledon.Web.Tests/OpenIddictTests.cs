@@ -173,6 +173,107 @@ public class OpenIddictTests : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    [Fact]
+    public void Duplicate_client_ids_fail_fast()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.AddLedonWeb();
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            builder.AddLedonOpenIddict(options =>
+            {
+                options.Clients.Add(new OpenIddictClientDefinition { ClientId = "dup" });
+                options.Clients.Add(new OpenIddictClientDefinition { ClientId = "dup" });
+            }));
+
+        Assert.Contains("ClientId", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Relative_issuer_fails_fast()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.AddLedonWeb();
+
+        Assert.Throws<InvalidOperationException>(() =>
+            builder.AddLedonOpenIddict(options =>
+            {
+                options.Issuer = "not-an-absolute-uri";
+                options.Clients.Add(new OpenIddictClientDefinition { ClientId = "webapp" });
+            }));
+    }
+
+    [Fact]
+    public void Missing_signing_certificate_fails_fast()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.AddLedonWeb();
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            builder.AddLedonOpenIddict(options =>
+            {
+                options.SigningCertificatePath = Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}.pfx");
+                options.Clients.Add(new OpenIddictClientDefinition { ClientId = "webapp" });
+            }));
+
+        Assert.Contains("证书不存在", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Signing_certificate_is_loaded_when_configured()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"ledon-oidc-{Guid.NewGuid():N}.pfx");
+
+        try
+        {
+            using (var rsa = System.Security.Cryptography.RSA.Create(2048))
+            {
+                var request = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                    "CN=ledon-test",
+                    rsa,
+                    System.Security.Cryptography.HashAlgorithmName.SHA256,
+                    System.Security.Cryptography.RSASignaturePadding.Pkcs1);
+
+                using var certificate = request.CreateSelfSigned(
+                    DateTimeOffset.UtcNow.AddDays(-1),
+                    DateTimeOffset.UtcNow.AddDays(1));
+
+                File.WriteAllBytes(
+                    path,
+                    certificate.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Pfx, "pwd"));
+            }
+
+            var builder = WebApplication.CreateBuilder();
+            builder.WebHost.UseTestServer();
+            builder.AddLedonWeb();
+
+            builder.AddLedonOpenIddict(options =>
+            {
+                options.SigningCertificatePath = path;
+                options.SigningCertificatePassword = "pwd";
+                options.Clients.Add(new OpenIddictClientDefinition
+                {
+                    ClientId = "webapp",
+                    GrantTypes = ["password"],
+                });
+            });
+
+            var app = builder.Build();
+            app.UseLedonWeb();
+
+            // 证书能加载并完成装配（启动细节由其余端到端用例覆盖）
+            Assert.NotNull(app);
+        }
+        finally
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+    }
+
     private sealed record TokenResponse(
         [property: JsonPropertyName("access_token")] string AccessToken,
         [property: JsonPropertyName("refresh_token")] string? RefreshToken,

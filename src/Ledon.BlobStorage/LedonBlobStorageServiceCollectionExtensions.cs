@@ -6,7 +6,8 @@ using Microsoft.Extensions.Logging;
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// 文件存储入口（本地 / S3(MinIO) / 内存，业务只依赖 <see cref="IFileStorage"/>）：
+/// 文件存储入口（内置本地 / 内存，业务只依赖 <see cref="IFileStorage"/>）；
+/// S3/MinIO 等对象存储需自行实现 <see cref="IFileStorage"/> 后替换注册。
 /// <code>
 /// builder.Services.AddLedonBlobStorage(o =&gt;
 /// {
@@ -32,6 +33,12 @@ public static class LedonBlobStorageServiceCollectionExtensions
         var options = new LedonBlobStorageOptions();
         configure(options);
 
+        if (!Enum.IsDefined(options.Provider))
+            throw new InvalidOperationException($"未定义的存储提供程序：{options.Provider}");
+
+        if (options.MaxFileSize < 0)
+            throw new InvalidOperationException("LedonBlobStorageOptions.MaxFileSize 不能为负数（0 = 不限）");
+
         switch (options.Provider)
         {
             case LedonBlobProvider.Local when string.IsNullOrWhiteSpace(options.RootPath):
@@ -40,7 +47,7 @@ public static class LedonBlobStorageServiceCollectionExtensions
 
         services.TryAddSingleton(options);
 
-        // 具体存储（本地/内存）。S3 兼容存储见 Ledon.BlobStorage.S3（按需引入，同样实现 IFileStorage）
+        // 内置提供程序只有本地/内存。S3 兼容存储需自行实现 IFileStorage 并替换本注册
         services.TryAddSingleton<IFileStorage>(provider =>
         {
             var resolved = provider.GetRequiredService<LedonBlobStorageOptions>();

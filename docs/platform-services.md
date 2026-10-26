@@ -146,7 +146,8 @@ app.UseLedonAuditContext();
 - 零改动：EF SaveChanges 拦截器自动记录新增/修改/删除，修改只记**真实变化**的属性；
 - 审计写在业务事务提交**之后**：业务回滚不留假记录；审计自身失败只记日志；
 - 操作人来自登录声明；后台任务用 `AuditContext.BeginScope(userId, name)` 声明；
-- 查询 `IAuditStore.QueryAsync(entityType, entityId)`；保留策略 `PurgeOlderThanAsync`。
+- 查询 `IAuditStore.QueryAsync(entityType, entityId)`；保留策略 `PurgeOlderThanAsync` 也由后台自动执行：
+  `RetentionDays`（默认 90，0 = 关闭）按 `RetentionSweepInterval`（默认 1 小时）清理过期流水。
 
 ## Ledon.Application —— 应用层管线（CQRS）
 
@@ -174,16 +175,22 @@ var id = await sender.SendAsync(new CreateOrder("SKU-1", 2), ct);
 ## Ledon.Admin —— 统一运维端点
 
 ```csharp
-builder.Services.AddLedonAdmin();   // 前缀 /admin/ops
+builder.Services.AddLedonAdmin(o =>
+{
+    o.RoutePrefix = "/ops";            // 默认 /admin/ops（首尾斜杠自动规范化）
+    o.RequireAuthorization = true;     // 生产建议开启；需同时注册认证方案，否则启动失败
+});
 ```
 
-| 端点 | 内容 |
+| 端点（`{前缀}` = `RoutePrefix`） | 内容 |
 | --- | --- |
-| `GET /admin/ops/summary` | 待投递/死信、队列累计指标、运行中工作流、定时任务与近期失败 |
-| `GET /admin/ops/outbox/dead-letters` | 搁置消息清单 |
-| `POST /admin/ops/outbox/dead-letters/{id}/replay` | 重放单条死信 |
-| `GET /admin/ops/scheduler` | 任务清单 + 最近执行历史 |
+| `GET {前缀}/summary` | 待投递/死信、队列累计指标、运行中工作流、定时任务与近期失败 |
+| `GET {前缀}/outbox/dead-letters` | 搁置消息清单 |
+| `POST {前缀}/outbox/dead-letters/{id}/replay` | 重放单条死信 |
+| `GET {前缀}/scheduler` | 任务清单 + 最近执行历史 |
 
-只有死信重放一个写操作；未接入的能力返回空数据而不是报错。生产环境请加认证授权。
+只有死信重放一个写操作；未接入的能力返回空数据而不是报错。运维端点会暴露内部运行信息：
+生产环境请开启 `RequireAuthorization` 或在外层网关做访问控制；只声明授权而未注册认证方案时，
+框架会在启动阶段直接报错，避免静默裸奔。
 
 完整文档：<https://github.com/wosledon/ledon-framework>

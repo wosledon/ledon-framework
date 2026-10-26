@@ -143,4 +143,65 @@ public class ApolloConfigurationTests
 
         Assert.NotNull(exception);
     }
+
+    [Fact]
+    public void Polling_interval_must_be_positive()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            new ConfigurationBuilder()
+                .AddLedonApollo(options =>
+                {
+                    options.ConfigServer = "http://apollo.test";
+                    options.AppId = "myapp";
+                    options.PollingInterval = TimeSpan.Zero;
+                })
+                .Build());
+    }
+
+    [Fact]
+    public void Blank_namespace_fails_fast()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            new ConfigurationBuilder()
+                .AddLedonApollo(options =>
+                {
+                    options.ConfigServer = "http://apollo.test";
+                    options.AppId = "myapp";
+                    options.Namespaces = ["application", " "];
+                })
+                .Build());
+    }
+
+    [Fact]
+    public async Task Removed_keys_disappear_after_reload()
+    {
+        var handler = new FakeApolloHandler(new()
+        {
+            ["application"] = ("r1", new Dictionary<string, string>
+            {
+                ["A"] = "1",
+                ["B"] = "2",
+            }),
+        });
+
+        var configuration = Build(handler, ["application"]);
+        Assert.Equal("2", configuration["B"]);
+
+        handler.Update("application", "r2", new Dictionary<string, string> { ["A"] = "1" });
+
+        string? value = "2";
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (DateTime.UtcNow < deadline)
+        {
+            value = configuration["B"];
+            if (value is null)
+                break;
+
+            await Task.Delay(50);
+        }
+
+        // 快照整体重建：旧键必须消失，不能残留上一轮的内容
+        Assert.Null(value);
+        Assert.Equal("1", configuration["A"]);
+    }
 }

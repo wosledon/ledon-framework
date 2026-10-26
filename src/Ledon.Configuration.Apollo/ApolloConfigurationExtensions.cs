@@ -28,8 +28,18 @@ public static class ApolloConfigurationExtensions
         if (string.IsNullOrWhiteSpace(options.AppId))
             throw new InvalidOperationException("AddLedonApollo: 必须配置 AppId");
 
+        if (string.IsNullOrWhiteSpace(options.ConfigServer)
+            || !Uri.TryCreate(options.ConfigServer, UriKind.Absolute, out _))
+            throw new InvalidOperationException("AddLedonApollo: ConfigServer 必须是绝对地址（如 http://localhost:8080）");
+
         if (options.Namespaces.Length == 0)
             throw new InvalidOperationException("AddLedonApollo: 至少配置一个 Namespace");
+
+        if (options.Namespaces.Any(string.IsNullOrWhiteSpace))
+            throw new InvalidOperationException("AddLedonApollo: Namespace 不能为空");
+
+        if (options.PollingInterval <= TimeSpan.Zero)
+            throw new InvalidOperationException("AddLedonApollo: PollingInterval 必须大于 0");
 
         configuration.Add(new ApolloConfigurationSource(options));
         return configuration;

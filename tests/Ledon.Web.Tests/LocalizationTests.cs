@@ -133,4 +133,108 @@ public class LocalizationTests
         Assert.Null(store.Get("zh-CN", "Missing"));
         Assert.Equal(["en-US", "zh-CN"], store.Cultures.Order());
     }
+
+    [Fact]
+    public void Json_store_reads_and_hot_reloads()
+    {
+        var directory = CreateTempDirectory();
+
+        try
+        {
+            var file = Path.Combine(directory, "zh-CN.json");
+            File.WriteAllText(file, """{ "Hi": "你好" }""");
+
+            var store = new JsonFileLocalizationStore(directory, ["zh-CN"]);
+
+            Assert.Equal("你好", store.Get("zh-CN", "Hi"));
+
+            File.WriteAllText(file, """{ "Hi": "哈喽", "Bye": "再见" }""");
+            File.SetLastWriteTimeUtc(file, DateTime.UtcNow.AddSeconds(2));
+
+            // 文件变更即时生效（按修改时间 + 长度检测，不缓存旧内容）
+            Assert.Equal("哈喽", store.Get("zh-CN", "Hi"));
+            Assert.Equal("再见", store.GetAll("zh-CN")["Bye"]);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Json_store_keeps_last_good_snapshot_for_malformed_file()
+    {
+        var directory = CreateTempDirectory();
+
+        try
+        {
+            var file = Path.Combine(directory, "zh-CN.json");
+            File.WriteAllText(file, """{ "Hi": "你好" }""");
+
+            var store = new JsonFileLocalizationStore(directory, ["zh-CN"]);
+            Assert.Equal("你好", store.Get("zh-CN", "Hi"));
+
+            File.WriteAllText(file, "{ 这不是 JSON");
+            File.SetLastWriteTimeUtc(file, DateTime.UtcNow.AddSeconds(2));
+
+            // 坏文件不把异常冒到请求管线，也不丢掉上一份可用文案
+            Assert.Equal("你好", store.Get("zh-CN", "Hi"));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Json_store_handles_duplicate_keys_and_deleted_file()
+    {
+        var directory = CreateTempDirectory();
+
+        try
+        {
+            var file = Path.Combine(directory, "zh-CN.json");
+            File.WriteAllText(file, """{ "Hi": "1", "Hi": "2" }""");
+
+            var store = new JsonFileLocalizationStore(directory, ["zh-CN"]);
+
+            // JSON 允许重复属性名：后者覆盖前者，不抛异常
+            Assert.Equal("2", store.Get("zh-CN", "Hi"));
+
+            File.Delete(file);
+            Assert.Null(store.Get("zh-CN", "Hi"));
+            Assert.Empty(store.GetAll("zh-CN"));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Json_store_rejects_path_traversal_in_culture()
+    {
+        var directory = CreateTempDirectory();
+
+        try
+        {
+            Assert.Throws<ArgumentException>(() =>
+                new JsonFileLocalizationStore(directory, ["../outside"]));
+
+            var store = new JsonFileLocalizationStore(directory, ["zh-CN"]);
+
+            Assert.Throws<ArgumentException>(() => store.Get("../../secret", "Key"));
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    private static string CreateTempDirectory()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"ledon-loc-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        return directory;
+    }
 }

@@ -28,8 +28,24 @@ public static class NacosConfigurationExtensions
         if (options.ServerAddresses.Length == 0)
             throw new InvalidOperationException("AddLedonNacos: 至少配置一个 ServerAddresses");
 
+        if (options.ServerAddresses.Any(string.IsNullOrWhiteSpace))
+            throw new InvalidOperationException("AddLedonNacos: ServerAddresses 不能为空");
+
         if (options.DataIds.Length == 0)
             throw new InvalidOperationException("AddLedonNacos: 至少配置一个 DataIds");
+
+        if (options.DataIds.Any(string.IsNullOrWhiteSpace))
+            throw new InvalidOperationException("AddLedonNacos: DataIds 不能为空");
+
+        if (string.IsNullOrWhiteSpace(options.Group))
+            throw new InvalidOperationException("AddLedonNacos: Group 不能为空");
+
+        if (options.PollingInterval <= TimeSpan.Zero)
+            throw new InvalidOperationException("AddLedonNacos: PollingInterval 必须大于 0");
+
+        // 用户名/密码必须成对出现（只配一个会在登录时发空凭据）
+        if (string.IsNullOrEmpty(options.UserName) != string.IsNullOrEmpty(options.Password))
+            throw new InvalidOperationException("AddLedonNacos: UserName 与 Password 必须同时配置");
 
         configuration.Add(new NacosConfigurationSource(options));
         return configuration;

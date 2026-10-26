@@ -59,6 +59,7 @@ public static class LedonSecurityServiceCollectionExtensions
         services.AddSingleton<ICurrentUser, CurrentUser>();
 
         // 刷新令牌（TryAdd：多实例部署可替换为共享存储实现后自行注册）
+        services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<IRefreshTokenStore, InMemoryRefreshTokenStore>();
         services.TryAddSingleton<IRefreshTokenService, RefreshTokenService>();
 

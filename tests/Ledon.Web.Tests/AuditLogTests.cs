@@ -174,6 +174,64 @@ public class AuditLogTests : IDisposable
         Assert.NotNull(services.GetRequiredService<IAuditStore>());
     }
 
+    [Fact]
+    public async Task Retention_service_purges_entries_older_than_retention()
+    {
+        var store = new RecordingAuditStore();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<IAuditStore>(store);
+        services.AddLedonAudit(o =>
+        {
+            o.RetentionDays = 30;
+            o.RetentionSweepInterval = TimeSpan.FromHours(1);   // 启动后立即清理一次，不必等巡检
+        });
+
+        await using var provider = services.BuildServiceProvider();
+        var hosted = provider.GetServices<Microsoft.Extensions.Hosting.IHostedService>().ToArray();
+
+        foreach (var service in hosted)
+            await service.StartAsync(CancellationToken.None);
+
+        var deadline = DateTime.UtcNow.AddSeconds(2);
+        while (store.PurgeCalls == 0 && DateTime.UtcNow < deadline)
+            await Task.Delay(20);
+
+        foreach (var service in hosted)
+            await service.StopAsync(CancellationToken.None);
+
+        Assert.True(store.PurgeCalls >= 1, "保留策略未执行清理");
+        Assert.NotNull(store.LastCutoff);
+
+        var days = (DateTimeOffset.UtcNow - store.LastCutoff!.Value).TotalDays;
+        Assert.InRange(days, 29.9, 30.1);
+    }
+
+    [Fact]
+    public async Task Retention_service_does_nothing_when_disabled()
+    {
+        var store = new RecordingAuditStore();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<IAuditStore>(store);
+        services.AddLedonAudit(o => o.RetentionDays = 0);
+
+        await using var provider = services.BuildServiceProvider();
+        var hosted = provider.GetServices<Microsoft.Extensions.Hosting.IHostedService>().ToArray();
+
+        foreach (var service in hosted)
+            await service.StartAsync(CancellationToken.None);
+
+        await Task.Delay(100);
+
+        foreach (var service in hosted)
+            await service.StopAsync(CancellationToken.None);
+
+        Assert.Equal(0, store.PurgeCalls);
+    }
+
     private sealed class LedonWebDbContext(DbContextOptions<LedonWebDbContext> options) : DbContext(options)
     {
         public DbSet<AuditNote> Notes => Set<AuditNote>();
@@ -183,5 +241,29 @@ public class AuditLogTests : IDisposable
     {
         public int Id { get; set; }
         public string Text { get; set; } = "";
+    }
+
+    private sealed class RecordingAuditStore : IAuditStore
+    {
+        public int PurgeCalls { get; private set; }
+
+        public DateTimeOffset? LastCutoff { get; private set; }
+
+        public Task RecordAsync(AuditEntry entry, CancellationToken cancellationToken = default) =>
+            Task.CompletedTask;
+
+        public Task<IReadOnlyList<AuditEntry>> QueryAsync(
+            string? entityType = null,
+            string? entityId = null,
+            int count = 50,
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<AuditEntry>>([]);
+
+        public Task<int> PurgeOlderThanAsync(DateTimeOffset cutoffUtc, CancellationToken cancellationToken = default)
+        {
+            PurgeCalls++;
+            LastCutoff = cutoffUtc;
+            return Task.FromResult(0);
+        }
     }
 }

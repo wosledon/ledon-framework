@@ -16,7 +16,7 @@ public sealed class InMemoryFileStorage : IFileStorage
     public Task SaveAsync(
         string path, Stream content, BlobUploadOptions? options = null, CancellationToken cancellationToken = default)
     {
-        BlobPath.Validate(path);
+        path = BlobPath.Validate(path);
         BlobPath.ValidateExtension(path, _options);
 
         if (!(options?.Overwrite ?? false) && _blobs.ContainsKey(path))
@@ -39,7 +39,7 @@ public sealed class InMemoryFileStorage : IFileStorage
 
     public Task<Stream> OpenReadAsync(string path, CancellationToken cancellationToken = default)
     {
-        BlobPath.Validate(path);
+        path = BlobPath.Validate(path);
 
         if (!_blobs.TryGetValue(path, out var entry))
             throw new FileNotFoundException($"文件不存在：{path}", path);
@@ -49,7 +49,7 @@ public sealed class InMemoryFileStorage : IFileStorage
 
     public Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken = default)
     {
-        BlobPath.Validate(path);
+        path = BlobPath.Validate(path);
 
         if (!_blobs.TryGetValue(path, out var entry))
             throw new FileNotFoundException($"文件不存在：{path}", path);
@@ -59,19 +59,19 @@ public sealed class InMemoryFileStorage : IFileStorage
 
     public Task<bool> ExistsAsync(string path, CancellationToken cancellationToken = default)
     {
-        BlobPath.Validate(path);
+        path = BlobPath.Validate(path);
         return Task.FromResult(_blobs.ContainsKey(path));
     }
 
     public Task<bool> DeleteAsync(string path, CancellationToken cancellationToken = default)
     {
-        BlobPath.Validate(path);
+        path = BlobPath.Validate(path);
         return Task.FromResult(_blobs.TryRemove(path, out _));
     }
 
     public Task<BlobInfo?> GetInfoAsync(string path, CancellationToken cancellationToken = default)
     {
-        BlobPath.Validate(path);
+        path = BlobPath.Validate(path);
 
         if (!_blobs.TryGetValue(path, out var entry))
             return Task.FromResult<BlobInfo?>(null);
@@ -83,9 +83,10 @@ public sealed class InMemoryFileStorage : IFileStorage
         string? prefix = null, int pageSize = 100, string? continuationToken = null, CancellationToken cancellationToken = default)
     {
         var skip = int.TryParse(continuationToken, out var parsed) ? Math.Max(0, parsed) : 0;
+        var normalizedPrefix = (prefix ?? string.Empty).Replace('\\', '/').Trim('/');
 
         var items = _blobs
-            .Where(pair => prefix is null || pair.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            .Where(pair => pair.Key.StartsWith(normalizedPrefix, StringComparison.OrdinalIgnoreCase))
             .OrderBy(pair => pair.Key, StringComparer.Ordinal)
             .Skip(skip)
             .Take(Math.Max(1, pageSize))

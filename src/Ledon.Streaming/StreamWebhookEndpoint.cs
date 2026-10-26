@@ -93,26 +93,36 @@ public sealed class StreamWebhookEndpoint(LedonStreamingOptions options) : IEndp
 /// <summary>事件分发与鉴权编排。</summary>
 public sealed class StreamEventDispatcher
 {
-    private readonly IStreamAuthorizer _authorizer;
+    private readonly IStreamAuthorizer? _authorizer;
     private readonly IStreamRegistry _registry;
     private readonly IServiceProvider _services;
     private readonly ILogger<StreamEventDispatcher> _logger;
+    private readonly LedonStreamingOptions _options;
 
     public StreamEventDispatcher(
-        IStreamAuthorizer authorizer,
         IStreamRegistry registry,
         IServiceProvider services,
-        ILogger<StreamEventDispatcher> logger)
+        ILogger<StreamEventDispatcher> logger,
+        LedonStreamingOptions options,
+        IStreamAuthorizer? authorizer = null)
     {
         _authorizer = authorizer;
         _registry = registry;
         _services = services;
         _logger = logger;
+        _options = options;
     }
 
-    /// <summary>鉴权（供端点/中间件调用）。</summary>
-    public ValueTask<StreamAuthResult> AuthorizeAsync(StreamAuthContext context, CancellationToken cancellationToken = default) =>
-        _authorizer.AuthorizeAsync(context, cancellationToken);
+    /// <summary>鉴权（供端点/中间件调用）。未注册鉴权器时按 <see cref="LedonStreamingOptions.AllowWhenNoAuthorizer"/> 决定。</summary>
+    public ValueTask<StreamAuthResult> AuthorizeAsync(StreamAuthContext context, CancellationToken cancellationToken = default)
+    {
+        if (_authorizer is not null)
+            return _authorizer.AuthorizeAsync(context, cancellationToken);
+
+        return ValueTask.FromResult(_options.AllowWhenNoAuthorizer
+            ? StreamAuthResult.Allow()
+            : StreamAuthResult.Deny("未配置流鉴权器（AllowWhenNoAuthorizer = false）"));
+    }
 
     /// <summary>更新注册表并分发事件。</summary>
     public async Task DispatchAsync(

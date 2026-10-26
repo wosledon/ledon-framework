@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Ledon;
 using Ledon.Module;
 using Ledon.OpenIddict;
@@ -18,7 +20,9 @@ namespace Microsoft.Extensions.Hosting;
 /// <code>
 /// builder.AddLedonOpenIddict(o =&gt;
 /// {
-///     o.SigningKey = Configuration["Jwt:Key"]!;
+///     // 多实例：所有实例配同一张 PFX（单实例可省略，使用进程内临时密钥）
+///     o.SigningCertificatePath = Configuration["OpenIddict:CertificatePath"];
+///     o.SigningCertificatePassword = Configuration["OpenIddict:CertificatePassword"];
 ///     o.Clients.Add(new OpenIddictClientDefinition
 ///     {
 ///         ClientId = "webapp",
@@ -27,8 +31,8 @@ namespace Microsoft.Extensions.Hosting;
 /// });
 /// app.UseAuthentication();
 /// </code>
-/// 多实例部署：把四个内存存储换成 OpenIddict 官方的 EF/Redis 存储（本包的
-/// AddLedonOpenIddictServices 只注册默认实现，可先行替换）。
+/// 多实例部署：除共享签名证书外，把四个内存存储换成 OpenIddict 官方的 EF/Redis 存储
+/// （本包的 AddLedonOpenIddictServices 只注册默认实现，可先行替换）。
 /// </summary>
 public static class LedonOpenIddictHostBuilderExtensions
 {
@@ -49,6 +53,22 @@ public static class LedonOpenIddictHostBuilderExtensions
 
         if (options.Clients.Count == 0)
             throw new InvalidOperationException("AddLedonOpenIddict: 至少配置一个客户端（o.Clients）");
+
+        if (!Uri.TryCreate(options.Issuer, UriKind.Absolute, out _))
+            throw new InvalidOperationException($"AddLedonOpenIddict: Issuer 必须是绝对地址（当前：{options.Issuer}）");
+
+        if (options.AccessTokenLifetime <= TimeSpan.Zero || options.RefreshTokenLifetime <= TimeSpan.Zero)
+            throw new InvalidOperationException("AddLedonOpenIddict: 令牌有效期必须大于 0");
+
+        if (options.Clients.Any(client => string.IsNullOrWhiteSpace(client.ClientId)))
+            throw new InvalidOperationException("AddLedonOpenIddict: 每个客户端都必须配置 ClientId");
+
+        var duplicateClient = options.Clients
+            .GroupBy(client => client.ClientId, StringComparer.Ordinal)
+            .FirstOrDefault(group => group.Count() > 1);
+
+        if (duplicateClient is not null)
+            throw new InvalidOperationException($"AddLedonOpenIddict: ClientId 重复：{duplicateClient.Key}");
 
         builder.Services.AddLedonOpenIddictServices(options);
 
@@ -84,6 +104,8 @@ public static class LedonOpenIddictHostBuilderExtensions
         core.SetDefaultTokenEntity<OpenIddictTokenDescriptor>();
 
         // 服务端：token 端点 + 三个流程 + JWT 访问令牌
+        var certificate = LoadSigningCertificate(options);
+
         var server = openIddict.AddServer();
         server
             .SetTokenEndpointUris("/connect/token")
@@ -94,13 +116,18 @@ public static class LedonOpenIddictHostBuilderExtensions
             .SetAccessTokenLifetime(options.AccessTokenLifetime)
             .SetRefreshTokenLifetime(options.RefreshTokenLifetime)
 
-            // Data Protection 令牌格式要求非对称密钥：默认进程内临时 RSA（单实例开箱即用）。
-            // 多实例部署换成共享密钥（证书/导出的 RSA 参数，OpenIddict 的 AddSigningKey 重载）——见 README。
-            .AddEphemeralSigningKey()
-            .AddEphemeralEncryptionKey()
-
             // 访问令牌用纯 JWS（不加密）：校验端只需签名密钥，避免 JWE 解密依赖
             .DisableAccessTokenEncryption();
+
+        // 签名密钥：多实例配同一张证书；单实例用进程内临时 RSA（开箱即用但重启后旧令牌失效）
+        if (certificate is null)
+            server.AddEphemeralSigningKey();
+        else
+            server.AddSigningCertificate(certificate);
+
+        // 加密密钥只保护授权码等短生命周期产物（本包只用 password/refresh/client_credentials），
+        // 保持进程内临时密钥即可；刷新令牌的保护走 Data Protection（配 Redis 密钥环可多实例共享）。
+        server.AddEphemeralEncryptionKey();
 
         // 令牌保护用宿主的 Data Protection（配了 Redis 码环则多实例共享）；
         // 访问令牌优先标准 JWT 格式（JWS）——校验端/第三方库无需 DP 即可验
@@ -169,5 +196,30 @@ public static class LedonOpenIddictHostBuilderExtensions
         services.AddHostedService<OpenIddictClientInitializer>();
 
         return services;
+    }
+
+    private static X509Certificate2? LoadSigningCertificate(LedonOpenIddictOptions options)
+    {
+        if (string.IsNullOrWhiteSpace(options.SigningCertificatePath))
+            return null;
+
+        var path = options.SigningCertificatePath;
+
+        if (!File.Exists(path))
+            throw new InvalidOperationException($"AddLedonOpenIddict: 签名证书不存在：{path}");
+
+        try
+        {
+            // EphemeralKeySet：私钥只留在内存，不落盘（容器/只读文件系统友好）
+            return X509CertificateLoader.LoadPkcs12FromFile(
+                path,
+                options.SigningCertificatePassword,
+                X509KeyStorageFlags.EphemeralKeySet);
+        }
+        catch (Exception ex) when (ex is CryptographicException or IOException)
+        {
+            throw new InvalidOperationException(
+                $"AddLedonOpenIddict: 无法加载签名证书 {path}（密码是否正确？PFX 是否包含私钥？）", ex);
+        }
     }
 }

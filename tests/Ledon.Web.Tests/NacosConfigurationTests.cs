@@ -211,4 +211,80 @@ public class NacosConfigurationTests
                 .AddLedonNacos(options => options.ServerAddresses = ["http://nacos.test"])
                 .Build());
     }
+
+    [Fact]
+    public void Polling_interval_must_be_positive()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            new ConfigurationBuilder()
+                .AddLedonNacos(options =>
+                {
+                    options.ServerAddresses = ["http://nacos.test"];
+                    options.DataIds = ["app"];
+                    options.PollingInterval = TimeSpan.Zero;
+                })
+                .Build());
+    }
+
+    [Fact]
+    public void User_name_requires_password()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            new ConfigurationBuilder()
+                .AddLedonNacos(options =>
+                {
+                    options.ServerAddresses = ["http://nacos.test"];
+                    options.DataIds = ["app"];
+                    options.UserName = "nacos";
+                })
+                .Build());
+    }
+
+    [Fact]
+    public void Access_token_option_skips_login()
+    {
+        var handler = new FakeNacosHandler(new Dictionary<string, string> { ["app"] = "Value=v" })
+        {
+            RequireToken = true,
+        };
+
+        var configuration = new ConfigurationBuilder()
+            .AddLedonNacos(options =>
+            {
+                options.ServerAddresses = ["http://nacos.test"];
+                options.DataIds = ["app"];
+                options.AccessToken = "tok";   // 直接指定 token：不应再走登录
+                options.HttpMessageHandler = handler;
+            })
+            .Build();
+
+        Assert.Equal("v", configuration["Value"]);
+        Assert.Equal(0, handler.LoginRequests);
+    }
+
+    [Fact]
+    public async Task Removed_keys_disappear_after_reload()
+    {
+        var configs = new Dictionary<string, string> { ["app"] = "A=1\nB=2" };
+        var configuration = Build(configs, ["app"]);
+
+        Assert.Equal("2", configuration["B"]);
+
+        configs["app"] = "A=1";
+
+        string? value = "2";
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (DateTime.UtcNow < deadline)
+        {
+            value = configuration["B"];
+            if (value is null)
+                break;
+
+            await Task.Delay(50);
+        }
+
+        // 快照整体重建：旧键必须消失，不能残留上一轮的内容
+        Assert.Null(value);
+        Assert.Equal("1", configuration["A"]);
+    }
 }

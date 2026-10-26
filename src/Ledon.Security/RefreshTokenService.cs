@@ -30,6 +30,8 @@ internal sealed class RefreshTokenService(
 {
     public async Task<string> IssueAsync(string userId, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
+
         var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
         await store.StoreAsync(
             userId,
@@ -41,6 +43,10 @@ internal sealed class RefreshTokenService(
 
     public async Task<string?> ValidateAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
+        // 客户端可能传 null/空串（JSON 里 refreshToken: null）：按无效令牌处理，不抛异常
+        if (string.IsNullOrWhiteSpace(refreshToken))
+            return null;
+
         var entry = await store.FindAsync(Hash(refreshToken), cancellationToken).ConfigureAwait(false);
 
         // 重放检测：已吊销令牌被再次使用 → 该用户全部令牌作废（防止窃取的旧令牌继续换新）

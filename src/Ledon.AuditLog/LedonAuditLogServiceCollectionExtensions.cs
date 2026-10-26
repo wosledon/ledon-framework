@@ -31,9 +31,16 @@ public static class LedonAuditLogServiceCollectionExtensions
         var options = new LedonAuditOptions();
         configure(options);
 
+        if (options.RetentionDays < 0)
+            throw new InvalidOperationException("LedonAuditOptions.RetentionDays 不能为负数（0 = 不自动清理）");
+
+        if (options.RetentionSweepInterval <= TimeSpan.Zero)
+            throw new InvalidOperationException("LedonAuditOptions.RetentionSweepInterval 必须大于 0");
+
         services.TryAddSingleton(options);
         services.TryAddSingleton<IAuditStore, InMemoryAuditStore>();
         services.TryAddSingleton<AuditSaveChangesInterceptor>();
+        services.AddHostedService<AuditRetentionService>();
 
         // 经 IDbContextOptionsConfiguration 接入全部已注册的 DbContext
         services.TryAdd(ServiceDescriptor.Singleton(

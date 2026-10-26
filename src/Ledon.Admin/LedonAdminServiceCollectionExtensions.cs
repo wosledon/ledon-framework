@@ -34,6 +34,8 @@ public static class LedonAdminServiceCollectionExtensions
         var options = new LedonAdminOptions();
         configure(options);
 
+        options.RoutePrefix = NormalizeRoutePrefix(options.RoutePrefix);
+
         services.TryAddSingleton(options);
         services.TryAddSingleton(_ => new QueueMetricsReader().Start());
         services.TryAddSingleton<OpsSnapshotService>();
@@ -43,21 +45,52 @@ public static class LedonAdminServiceCollectionExtensions
 
         return services;
     }
+
+    /// <summary>规范化路由前缀：必须以 <c>/</c> 开头、不能以 <c>/</c> 结尾（根路径除外）。</summary>
+    private static string NormalizeRoutePrefix(string? prefix)
+    {
+        if (string.IsNullOrWhiteSpace(prefix))
+            throw new InvalidOperationException("LedonAdminOptions.RoutePrefix 不能为空");
+
+        var normalized = "/" + prefix.Trim().Trim('/');
+
+        return normalized.Length == 1 ? "/" : normalized;
+    }
 }
 
 /// <summary>运维端点选项。</summary>
 public sealed class LedonAdminOptions
 {
-    /// <summary>路由前缀，默认 <c>/admin/ops</c>。</summary>
+    /// <summary>路由前缀，默认 <c>/admin/ops</c>（首尾斜杠会自动规范化）。</summary>
     public string RoutePrefix { get; set; } = "/admin/ops";
+
+    /// <summary>
+    /// 是否要求运维端点通过授权，默认 <c>false</c>（保持零配置可用）。
+    /// <para>
+    /// 生产环境建议开启，并配合 <c>AddLedonSecurity()</c> 或自定义认证方案：
+    /// 快照与死信清单会暴露内部运行信息。开启但未注册任何认证方案时，启动会直接失败，
+    /// 而不是静默放行。
+    /// </para>
+    /// </summary>
+    public bool RequireAuthorization { get; set; }
 }
 
 /// <summary>运维端点（<see cref="IEndpoint"/> 实现会被自动发现并映射）。</summary>
-public sealed class AdminOpsEndpoints : IEndpoint
+public sealed class AdminOpsEndpoints(LedonAdminOptions options) : IEndpoint
 {
     public void Map(IEndpointRouteBuilder builder)
     {
-        var group = builder.MapGroup("/admin/ops");
+        if (options.RequireAuthorization && !HasAuthenticationScheme(builder.ServiceProvider))
+        {
+            throw new InvalidOperationException(
+                "LedonAdminOptions.RequireAuthorization = true，但未注册任何认证方案。" +
+                "请先调用 AddLedonSecurity()/AddAuthentication()，否则运维端点会处于无保护状态。");
+        }
+
+        var group = builder.MapGroup(options.RoutePrefix);
+
+        if (options.RequireAuthorization)
+            group.RequireAuthorization();
 
         // 一页总览：发件箱/队列指标/工作流/定时任务
         group.MapGet("/summary", async (OpsSnapshotService ops, CancellationToken ct) =>
@@ -67,21 +100,26 @@ public sealed class AdminOpsEndpoints : IEndpoint
         });
 
         // 死信清单：需要人工介入的搁置消息（未接入发件箱时返回空清单）
-        group.MapGet("/outbox/dead-letters", (HttpContext context) =>
+        group.MapGet("/outbox/dead-letters", async (HttpContext context, CancellationToken ct) =>
         {
             var store = context.RequestServices.GetService<IOutboxStore>();
+            IReadOnlyList<OutboxMessage> items = store is null
+                ? []
+                : await store.GetDeadLettersAsync(100, ct).ConfigureAwait(false);
 
-            return Results.Ok(new { enabled = store is not null, items = store is null ? [] : store.GetDeadLettersAsync(100, CancellationToken.None).GetAwaiter().GetResult() });
+            return Results.Ok(new { enabled = store is not null, items });
         });
 
         // 重放单条死信（唯一写操作：把消息放回投递队列）
-        group.MapPost("/outbox/dead-letters/{id:guid}/replay", (Guid id, HttpContext context) =>
+        group.MapPost("/outbox/dead-letters/{id:guid}/replay", async (Guid id, HttpContext context, CancellationToken ct) =>
         {
             var store = context.RequestServices.GetService<IOutboxStore>();
             if (store is null)
                 return Results.NotFound();
 
-            return store.ReviveAsync(id, CancellationToken.None).GetAwaiter().GetResult()
+            var replayed = await store.ReviveAsync(id, ct).ConfigureAwait(false);
+
+            return replayed
                 ? Results.Ok(new { replayed = id })
                 : Results.NotFound();
         });
@@ -98,5 +136,16 @@ public sealed class AdminOpsEndpoints : IEndpoint
                 recent = history?.Snapshot().Take(20) ?? [],
             });
         });
+    }
+
+    private static bool HasAuthenticationScheme(IServiceProvider services)
+    {
+        var authentication = services
+            .GetService<Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.Authentication.AuthenticationOptions>>();
+
+        if (authentication is null)
+            return false;
+
+        return authentication.Value.Schemes.Any();
     }
 }

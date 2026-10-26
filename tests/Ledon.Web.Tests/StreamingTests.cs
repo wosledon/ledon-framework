@@ -350,6 +350,32 @@ public class StreamingTests
     private static Microsoft.Extensions.Logging.ILogger<T> NullLogger<T>() =>
         Microsoft.Extensions.Logging.Abstractions.NullLogger<T>.Instance;
 
+    [Fact]
+    public async Task Missing_authorizer_follows_allow_when_no_authorizer()
+    {
+        var options = Options();
+        var registry = new InMemoryStreamRegistry(options, NullLogger<InMemoryStreamRegistry>());
+        var services = new ServiceCollection().BuildServiceProvider();
+
+        var dispatcher = new StreamEventDispatcher(
+            registry,
+            services,
+            NullLogger<StreamEventDispatcher>(),
+            options);
+
+        var context = new StreamAuthContext
+        {
+            Identity = StreamIdentity.Parse("live/cam-01"),
+            Action = StreamAction.Publish,
+        };
+
+        // 没注册鉴权器：默认 fail-closed
+        Assert.False((await dispatcher.AuthorizeAsync(context)).Allowed);
+
+        options.AllowWhenNoAuthorizer = true;
+        Assert.True((await dispatcher.AuthorizeAsync(context)).Allowed);
+    }
+
     private sealed class StreamRecorder : IStreamEventHandler
     {
         public string? LastStream { get; private set; }

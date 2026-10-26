@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
+using System.Net;
 
 namespace Ledon.Web.Tests;
 
@@ -97,6 +98,46 @@ public class AdminOpsTests
         Assert.Contains("\"tasks\":[]", await response.Content.ReadAsStringAsync());
 
         await app.StopAsync();
+    }
+
+    [Fact]
+    public async Task Custom_route_prefix_is_honored()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.AddLedonWeb();
+        builder.Services.AddLedonAdmin(o => o.RoutePrefix = "ops/");
+        builder.Services.AddSingleton<IOutboxStore, FakeOutboxStore>();
+
+        var app = builder.Build();
+        app.UseLedonWeb();
+        await app.StartAsync();
+
+        var client = app.GetTestClient();
+
+        var response = await client.GetAsync("/ops/summary");
+        response.EnsureSuccessStatusCode();
+
+        // 旧默认路径不再映射
+        var defaultPath = await client.GetAsync("/admin/ops/summary");
+        Assert.Equal(HttpStatusCode.NotFound, defaultPath.StatusCode);
+
+        await app.StopAsync();
+    }
+
+    [Fact]
+    public void Require_authorization_without_authentication_fails_fast()
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.WebHost.UseTestServer();
+        builder.AddLedonWeb();
+        builder.Services.AddLedonAdmin(o => o.RequireAuthorization = true);
+
+        var app = builder.Build();
+
+        // 开启授权但没注册认证方案：必须启动失败，不能静默暴露运维端点
+        var exception = Assert.Throws<InvalidOperationException>(() => app.UseLedonWeb());
+        Assert.Contains("RequireAuthorization", exception.Message);
     }
 
     private static OutboxMessage NewMessage() => new()

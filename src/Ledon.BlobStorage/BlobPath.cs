@@ -36,15 +36,15 @@ internal static class BlobPath
             throw new InvalidOperationException($"不允许的文件类型 {extension}（允许：{string.Join(", ", options.AllowedExtensions)}）");
     }
 
-    /// <summary>基础校验（长度 + 非法段）。</summary>
-    public static void Validate(string path)
+    /// <summary>基础校验（长度 + 非法段），返回规范化后的路径（正斜杠、无首尾斜杠）。</summary>
+    public static string Validate(string path)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
 
         if (path.Length > 512)
             throw new ArgumentException("路径过长（>512 字符）", nameof(path));
 
-        Normalize(path);
+        return Normalize(path);
     }
 
     /// <summary>加租户前缀（未启用多租户或无租户上下文时原样返回）。</summary>

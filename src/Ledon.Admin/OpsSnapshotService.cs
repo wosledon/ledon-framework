@@ -79,9 +79,7 @@ public sealed class OpsSnapshotService(
             scheduler = new SchedulerStats(invoker.TaskNames.Count, recent.Count(entry => !entry.Success));
         }
 
-        var snapshot = metrics.Snapshot();
-
-        return new OpsSnapshot
+        var snapshot = new OpsSnapshot
         {
             Outbox = outbox,
             Queues = new QueueStats(
@@ -94,5 +92,7 @@ public sealed class OpsSnapshotService(
             Workflows = workflows,
             Scheduler = scheduler,
         };
+
+        return snapshot;
     }
 }

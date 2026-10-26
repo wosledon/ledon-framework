@@ -9,19 +9,22 @@ public sealed class LedonBlobStorageOptions
     /// <summary>本地存储根目录（<see cref="LedonBlobProvider.Local"/> 必填），默认 <c>App_Data/blobs</c>。</summary>
     public string RootPath { get; set; } = Path.Combine("App_Data", "blobs");
 
-    /// <summary>S3 兼容服务地址（MinIO 填 <c>http://localhost:9000</c>）。</summary>
+    /// <summary>
+    /// S3 兼容服务地址（MinIO 填 <c>http://localhost:9000</c>）。
+    /// <para>预留：内置提供程序不含 S3；自定义 <c>IFileStorage</c> 可直接读取这些配置。</para>
+    /// </summary>
     public string? ServiceUrl { get; set; }
 
-    /// <summary>S3 区域（MinIO 可填任意值，如 <c>us-east-1</c>）。</summary>
+    /// <summary>S3 区域（MinIO 可填任意值，如 <c>us-east-1</c>）。预留，供自定义实现读取。</summary>
     public string? Region { get; set; }
 
-    /// <summary>S3 桶名。</summary>
+    /// <summary>S3 桶名。预留，供自定义实现读取。</summary>
     public string? BucketName { get; set; }
 
-    /// <summary>访问密钥。</summary>
+    /// <summary>访问密钥。预留，供自定义实现读取。</summary>
     public string? AccessKey { get; set; }
 
-    /// <summary>密钥。</summary>
+    /// <summary>密钥。预留，供自定义实现读取。</summary>
     public string SecretKey { get; set; } = "";
 
     /// <summary>

@@ -14,4 +14,7 @@ public sealed class LedonAuditOptions
 
     /// <summary>保留天数（0 = 不自动清理），默认 90。</summary>
     public int RetentionDays { get; set; } = 90;
+
+    /// <summary>清理巡检间隔，默认 1 小时（仅 <see cref="RetentionDays"/> &gt; 0 时生效）。</summary>
+    public TimeSpan RetentionSweepInterval { get; set; } = TimeSpan.FromHours(1);
 }
