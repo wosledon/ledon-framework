@@ -87,6 +87,8 @@ public class ArchitectureTests
         ["Ledon.MultiTenancy.Management"] = ["Ledon.MultiTenancy", "Ledon.Web"],
         // 列加密无框架依赖
         ["Ledon.Data.Encryption"] = [],
+        // Testcontainers 基建无框架依赖
+        ["Ledon.Testing.Containers"] = [],
     };
 
     [Fact]
