@@ -97,6 +97,8 @@ public class ArchitectureTests
         ["Ledon.Quotas"] = [],
         // 租户数据库路由复用租户上下文、目录与数据层
         ["Ledon.Data.MultiTenancy"] = ["Ledon.Data", "Ledon.MultiTenancy", "Ledon.MultiTenancy.Management"],
+        // TOTP 无框架依赖
+        ["Ledon.Security.Totp"] = [],
     };
 
     [Fact]

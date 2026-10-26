@@ -36,7 +36,8 @@ public class TenantDataTests
     public async Task Factory_creates_context_per_tenant_database()
     {
         var directory = CreateTempDirectory();
-        await using var provider = BuildProvider(directory, out var store);
+        await using var provider = BuildProvider(out var store);
+        await SeedTenantsAsync(store, directory);
 
         using var scope = provider.CreateScope();
         var factory = scope.ServiceProvider.GetRequiredService<ITenantDbContextFactory<TenantRowContext>>();
@@ -57,17 +58,16 @@ public class TenantDataTests
         await using (var tenantA = await factory.CreateAsync("tenant-a"))
             Assert.Equal(1, await tenantA.Rows.CountAsync());
 
-        Assert.True(File.Exists(store.FindAsync("tenant-a").GetAwaiter().GetResult()!.ConnectionString!
-            .Replace("Data Source=", string.Empty, StringComparison.Ordinal)));
-        Assert.True(File.Exists(store.FindAsync("tenant-b").GetAwaiter().GetResult()!.ConnectionString!
-            .Replace("Data Source=", string.Empty, StringComparison.Ordinal)));
+        Assert.True(File.Exists(Path.Combine(directory, "a.db")));
+        Assert.True(File.Exists(Path.Combine(directory, "b.db")));
     }
 
     [Fact]
     public async Task Migration_orchestrator_creates_all_active_tenant_databases()
     {
         var directory = CreateTempDirectory();
-        await using var provider = BuildProvider(directory, out _);
+        await using var provider = BuildProvider(out var store);
+        await SeedTenantsAsync(store, directory);
 
         using var scope = provider.CreateScope();
         var orchestrator = scope.ServiceProvider.GetRequiredService<ITenantMigrationOrchestrator<TenantRowContext>>();
@@ -81,7 +81,7 @@ public class TenantDataTests
         Assert.All(second, result => Assert.Equal(TenantMigrationOutcome.UpToDate, result.Outcome));
     }
 
-    private static ServiceProvider BuildProvider(string directory, out InMemoryTenantStore store)
+    private static ServiceProvider BuildProvider(out InMemoryTenantStore store)
     {
         var services = new ServiceCollection();
         services.AddLogging();
@@ -91,24 +91,27 @@ public class TenantDataTests
         var provider = services.BuildServiceProvider();
         store = (InMemoryTenantStore)provider.GetRequiredService<ITenantStore>();
 
-        store.AddAsync(new TenantInfo
+        return provider;
+    }
+
+    private static async Task SeedTenantsAsync(InMemoryTenantStore store, string directory)
+    {
+        await store.AddAsync(new TenantInfo
         {
             Id = "tenant-a",
             ConnectionString = $"Data Source={Path.Combine(directory, "a.db")}",
-        }).GetAwaiter().GetResult();
-        store.AddAsync(new TenantInfo
+        });
+        await store.AddAsync(new TenantInfo
         {
             Id = "tenant-b",
             ConnectionString = $"Data Source={Path.Combine(directory, "b.db")}",
-        }).GetAwaiter().GetResult();
-        store.AddAsync(new TenantInfo
+        });
+        await store.AddAsync(new TenantInfo
         {
             Id = "tenant-inactive",
             ConnectionString = $"Data Source={Path.Combine(directory, "inactive.db")}",
             Active = false,
-        }).GetAwaiter().GetResult();
-
-        return provider;
+        });
     }
 
     private static string CreateTempDirectory()

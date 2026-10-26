@@ -387,7 +387,7 @@ samples/Modules/        示例业务模块（Contracts / Users / Notifications /
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
                         Ledon.ProtocolSample（协议栈：结构体映射→帧→TCP/UDP→SIP）
                         Ledon.StreamSample（流媒体：RTMP 推流→HTTP-FLV/HLS 播放）
-tests/                  xunit 测试（模块 26 + Web 505 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 510 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

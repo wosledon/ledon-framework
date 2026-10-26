@@ -84,6 +84,7 @@
     <ProjectReference Include="..\..\src\Ledon.Security.TokenStores\Ledon.Security.TokenStores.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Quotas\Ledon.Quotas.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Data.MultiTenancy\Ledon.Data.MultiTenancy.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Security.Totp\Ledon.Security.Totp.csproj" />
     </ItemGroup>
 
     <ItemGroup>
