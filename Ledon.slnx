@@ -61,6 +61,7 @@
     <Project Path="src/Ledon.Settings/Ledon.Settings.csproj" />
     <Project Path="src/Ledon.Search/Ledon.Search.csproj" />
     <Project Path="src/Ledon.Security.ExternalLogins/Ledon.Security.ExternalLogins.csproj" />
+    <Project Path="src/Ledon.MultiTenancy.Management/Ledon.MultiTenancy.Management.csproj" />
     <Project Path="src/Ledon.Workflow/Ledon.Workflow.csproj" />
   </Folder>
   <Folder Name="/tests/">

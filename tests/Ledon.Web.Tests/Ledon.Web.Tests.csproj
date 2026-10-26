@@ -77,6 +77,7 @@
     <ProjectReference Include="..\..\src\Ledon.Settings\Ledon.Settings.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Search\Ledon.Search.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Security.ExternalLogins\Ledon.Security.ExternalLogins.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.MultiTenancy.Management\Ledon.MultiTenancy.Management.csproj" />
     </ItemGroup>
 
     <ItemGroup>
