@@ -79,6 +79,8 @@ public class ArchitectureTests
         ["Ledon.Data.Seeding"] = ["Ledon.Module"],
         // 运行时设置无框架依赖
         ["Ledon.Settings"] = [],
+        // 搜索无框架依赖
+        ["Ledon.Search"] = [],
     };
 
     [Fact]

@@ -75,6 +75,7 @@
     <ProjectReference Include="..\..\src\Ledon.Ids\Ledon.Ids.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Data.Seeding\Ledon.Data.Seeding.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Settings\Ledon.Settings.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Search\Ledon.Search.csproj" />
     </ItemGroup>
 
     <ItemGroup>

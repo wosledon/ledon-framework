@@ -59,6 +59,7 @@
     <Project Path="src/Ledon.Ids/Ledon.Ids.csproj" />
     <Project Path="src/Ledon.Data.Seeding/Ledon.Data.Seeding.csproj" />
     <Project Path="src/Ledon.Settings/Ledon.Settings.csproj" />
+    <Project Path="src/Ledon.Search/Ledon.Search.csproj" />
     <Project Path="src/Ledon.Workflow/Ledon.Workflow.csproj" />
   </Folder>
   <Folder Name="/tests/">
