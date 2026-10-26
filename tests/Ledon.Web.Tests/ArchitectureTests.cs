@@ -103,6 +103,8 @@ public class ArchitectureTests
         ["Ledon.Security.Accounts"] = ["Ledon.Security", "Ledon.Notifications", "Ledon.Web"],
         // 出站客户端无框架依赖
         ["Ledon.ApiClients"] = [],
+        // 密钥模块无框架依赖
+        ["Ledon.Secrets"] = [],
     };
 
     [Fact]
