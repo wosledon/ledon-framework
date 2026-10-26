@@ -92,6 +92,7 @@
     <ProjectReference Include="..\..\src\Ledon.DataExchange\Ledon.DataExchange.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Imaging\Ledon.Imaging.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Search.Sync\Ledon.Search.Sync.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Data.Migrations\Ledon.Data.Migrations.csproj" />
     </ItemGroup>
 
     <ItemGroup>

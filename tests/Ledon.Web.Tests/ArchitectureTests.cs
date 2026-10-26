@@ -111,6 +111,8 @@ public class ArchitectureTests
         ["Ledon.Imaging"] = ["Ledon.BlobStorage"],
         // 搜索同步复用搜索抽象
         ["Ledon.Search.Sync"] = ["Ledon.Search"],
+        // 模块迁移复用数据层
+        ["Ledon.Data.Migrations"] = ["Ledon.Data"],
     };
 
     [Fact]
