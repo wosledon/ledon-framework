@@ -49,6 +49,8 @@ public class ArchitectureTests
         // 租户路径前缀隔离
         ["Ledon.BlobStorage"] = ["Ledon.MultiTenancy"],
         ["Ledon.Notifications"] = [],
+        // 短信渠道复用通知路由
+        ["Ledon.Notifications.Sms"] = ["Ledon.Notifications"],
         ["Ledon.Localization"] = [],
         // 复用 EF 拦截器机制与 IDbContextOptionsConfiguration
         ["Ledon.AuditLog"] = ["Ledon.Data"],
