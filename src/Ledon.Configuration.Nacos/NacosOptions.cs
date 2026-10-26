@@ -24,8 +24,14 @@ public sealed class NacosOptions
     /// <summary>直接指定 accessToken（跳过登录）；与 UserName/Password 二选一。</summary>
     public string? AccessToken { get; set; }
 
-    /// <summary>配置变更轮询间隔，默认 30 秒（Nacos 长轮询的简化替代，配置变更不频繁场景足够）。</summary>
+    /// <summary>配置变更轮询间隔，默认 30 秒（长轮询不可用时的回退间隔）。</summary>
     public TimeSpan PollingInterval { get; set; } = TimeSpan.FromSeconds(30);
+
+    /// <summary>是否使用 Nacos 原生长轮询（<c>/v1/cs/configs/listener</c>），默认 <c>true</c>。</summary>
+    public bool UseLongPolling { get; set; } = true;
+
+    /// <summary>长轮询挂起时长，默认 30 秒（Nacos 服务端上限通常也是 30 秒）。</summary>
+    public TimeSpan LongPollingTimeout { get; set; } = TimeSpan.FromSeconds(30);
 
     /// <summary>
     /// 自定义 HTTP 消息处理器（测试注入假服务器用）；生产无需设置。

@@ -21,13 +21,76 @@ public class NacosConfigurationTests
 
         public int LoginRequests { get; private set; }
 
+        public int ListenerRequests { get; private set; }
+
+        public bool ListenerUnsupported { get; init; }
+
+        public string? LastListeningConfigs { get; private set; }
+
         public void Update(string dataId, string content) => _configs[dataId] = content;
 
-        protected override Task<HttpResponseMessage> SendAsync(
+        protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             var path = request.RequestUri!.AbsolutePath;
+
+            if (path == "/nacos/v1/cs/configs/listener")
+            {
+                ListenerRequests++;
+
+                if (ListenerUnsupported)
+                    return new HttpResponseMessage(HttpStatusCode.NotFound);
+
+                if (RequireToken)
+                {
+                    var header = request.Headers.TryGetValues("accessToken", out var values)
+                        ? values.FirstOrDefault()
+                        : null;
+
+                    if (header != "tok")
+                        return new HttpResponseMessage(HttpStatusCode.Unauthorized);
+                }
+
+                var form = await request.Content!.ReadAsStringAsync(cancellationToken);
+                var encoded = form.Split('&')
+                    .FirstOrDefault(pair => pair.StartsWith("Listening-Configs=", StringComparison.Ordinal))?
+                    ["Listening-Configs=".Length..];
+
+                // 表单解码一次后还原 Nacos 的 \u0001（行）/ \u0002（字段）分隔符
+                var listening = Uri.UnescapeDataString(encoded ?? string.Empty)
+                    .Replace("%01", "\u0001")
+                    .Replace("%02", "\u0002");
+
+                LastListeningConfigs = listening;
+
+                var changed = new List<string>();
+
+                foreach (var entry in listening.Split('\u0001', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var parts = entry.Split('\u0002');
+                    var dataId = parts[0];
+                    var group = parts.ElementAtOrDefault(1) ?? "DEFAULT_GROUP";
+                    var expectedMd5 = parts.ElementAtOrDefault(2) ?? string.Empty;
+                    var tenant = parts.ElementAtOrDefault(3);
+                    var content = _configs.TryGetValue(dataId, out var value) ? value : string.Empty;
+
+                    if (!string.Equals(expectedMd5, Md5(content), StringComparison.Ordinal))
+                    {
+                        changed.Add(string.IsNullOrEmpty(tenant)
+                            ? $"{dataId}\u0002{group}"
+                            : $"{dataId}\u0002{group}\u0002{tenant}");
+                    }
+                }
+
+                if (changed.Count == 0)
+                    await Task.Delay(50, cancellationToken);
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(string.Join("\u0001", changed)),
+                };
+            }
 
             if (path == "/nacos/v1/cs/configs")
             {
@@ -36,31 +99,35 @@ public class NacosConfigurationTests
                 // 模拟鉴权：没有有效 accessToken 一律 401
                 var token = GetQueryValue(request.RequestUri, "accessToken");
                 if (RequireToken && token != "tok")
-                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.Unauthorized));
+                    return new HttpResponseMessage(HttpStatusCode.Unauthorized);
 
                 var dataId = Uri.UnescapeDataString(GetQueryValue(request.RequestUri, "dataId"));
                 var content = _configs.TryGetValue(dataId, out var value) ? value : string.Empty;
 
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(content),
-                });
+                };
             }
 
             if (path == "/nacos/v1/auth/login")
             {
                 LoginRequests++;
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent("{\"accessToken\":\"tok\"}"),
-                });
+                };
             }
 
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
+            return new HttpResponseMessage(HttpStatusCode.NotFound);
         }
 
         /// <summary>为 true 时配置接口要求 accessToken=tok（模拟开启鉴权的 Nacos）。</summary>
         public bool RequireToken { get; init; }
+
+        private static string Md5(string content) =>
+            Convert.ToHexString(System.Security.Cryptography.MD5.HashData(
+                System.Text.Encoding.UTF8.GetBytes(content))).ToLowerInvariant();
 
         private static string GetQueryValue(Uri uri, string name) =>
             uri.Query.TrimStart('?')
@@ -84,6 +151,7 @@ public class NacosConfigurationTests
                 options.ServerAddresses = ["http://nacos.test"];
                 options.DataIds = dataIds;
                 options.PollingInterval = TimeSpan.FromMilliseconds(100);
+                options.UseLongPolling = false;   // 该组用例验证定时回退路径
                 options.HttpMessageHandler = handler;
                 configure?.Invoke(options);
             })
@@ -286,5 +354,82 @@ public class NacosConfigurationTests
         // 快照整体重建：旧键必须消失，不能残留上一轮的内容
         Assert.Null(value);
         Assert.Equal("1", configuration["A"]);
+    }
+
+    [Fact]
+    public async Task Long_polling_detects_config_change()
+    {
+        var handler = new FakeNacosHandler(new Dictionary<string, string> { ["app"] = "Value=first" });
+
+        var configuration = new ConfigurationBuilder()
+            .AddLedonNacos(options =>
+            {
+                options.ServerAddresses = ["http://nacos.test"];
+                options.DataIds = ["app"];
+                options.UseLongPolling = true;
+                options.LongPollingTimeout = TimeSpan.FromSeconds(2);
+                options.PollingInterval = TimeSpan.FromMilliseconds(100);
+                options.HttpMessageHandler = handler;
+            })
+            .Build();
+
+        Assert.Equal("first", configuration["Value"]);
+
+        handler.Update("app", "Value=second");
+
+        string? value = null;
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (DateTime.UtcNow < deadline)
+        {
+            value = configuration["Value"];
+            if (value == "second")
+                break;
+
+            await Task.Delay(50);
+        }
+
+        Assert.Equal("second", value);
+        Assert.True(handler.ListenerRequests > 0, "未走 Nacos listener 长轮询");
+        Assert.Contains("\u0002DEFAULT_GROUP\u0002", handler.LastListeningConfigs);
+        Assert.EndsWith("\u0001", handler.LastListeningConfigs);
+    }
+
+    [Fact]
+    public async Task Long_polling_falls_back_when_listener_is_unsupported()
+    {
+        var handler = new FakeNacosHandler(new Dictionary<string, string> { ["app"] = "Value=first" })
+        {
+            ListenerUnsupported = true,
+        };
+
+        var configuration = new ConfigurationBuilder()
+            .AddLedonNacos(options =>
+            {
+                options.ServerAddresses = ["http://nacos.test"];
+                options.DataIds = ["app"];
+                options.UseLongPolling = true;
+                options.LongPollingTimeout = TimeSpan.FromMilliseconds(100);
+                options.PollingInterval = TimeSpan.FromMilliseconds(100);
+                options.HttpMessageHandler = handler;
+            })
+            .Build();
+
+        Assert.Equal("first", configuration["Value"]);
+
+        handler.Update("app", "Value=second");
+
+        string? value = null;
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (DateTime.UtcNow < deadline)
+        {
+            value = configuration["Value"];
+            if (value == "second")
+                break;
+
+            await Task.Delay(50);
+        }
+
+        Assert.Equal("second", value);
+        Assert.True(handler.ListenerRequests > 0, "未尝试 listener 后回退");
     }
 }

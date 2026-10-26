@@ -111,7 +111,7 @@ internal sealed class InMemoryApplicationStore : IOpenIddictApplicationStore<Ope
         ValueTask.FromResult(application.JsonWebKeySet);
 
     private static T Bag<T>(OpenIddictApplicationDescriptor application, string name) =>
-        StoreBag.Get(application).TryGetValue(name, out var value) && value is T typed ? typed : default!;
+        StoreBag.Get(application).TryGetValue(name, out var value) && value is T typed ? typed : StoreBag.Empty<T>();
 
     // ---------- 写路径：配置驱动，不支持 ----------
 

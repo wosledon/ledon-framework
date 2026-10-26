@@ -1,15 +1,11 @@
-using System.Text;
 using Ledon.Streaming;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
-using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ledon.Web.Tests;
 
-/// <summary>流媒体：令牌鉴权、webhook 放行/拒绝、注册表、地址构建。</summary>
+/// <summary>流媒体：令牌鉴权、注册表、地址构建、事件分发。</summary>
 public class StreamingTests
 {
     private static LedonStreamingOptions Options() => new()
@@ -17,7 +13,6 @@ public class StreamingTests
         Secret = "test-secret",
         PublicRtmpUrl = "rtmp://media.example.com",
         PublicHttpUrl = "http://media.example.com",
-        PublicWebRtcUrl = "webrtc://media.example.com/live",
     };
 
     private static IStreamTokenService Tokens(LedonStreamingOptions? options = null) =>
@@ -122,15 +117,16 @@ public class StreamingTests
 
         var flv = builder.BuildFlvPlayUrl(identity);
         var rtmp = builder.BuildPublishUrl(identity);
-        var whep = builder.BuildWhepUrl(identity);
+        var hls = builder.BuildHlsPlayUrl(identity);
 
         Assert.StartsWith("http://media.example.com/live/cam-01.flv?token=", flv);
         Assert.StartsWith("rtmp://media.example.com/live/cam-01?token=", rtmp);
-        Assert.StartsWith("http://media.example.com/streaming/whep/live/cam-01?token=", whep);
+        Assert.StartsWith("http://media.example.com/live/cam-01.m3u8?token=", hls);
 
         // 每个地址带的令牌都能验过
         Assert.True(Tokens(options).Validate(identity, StreamAction.Play, TokenFrom(flv)));
         Assert.True(Tokens(options).Validate(identity, StreamAction.Publish, TokenFrom(rtmp)));
+        Assert.True(Tokens(options).Validate(identity, StreamAction.Play, TokenFrom(hls)));
     }
 
     [Fact]
@@ -175,76 +171,6 @@ public class StreamingTests
     }
 
     [Fact]
-    public async Task Webhook_allows_valid_token_and_dispatches_event()
-    {
-        var recorder = new StreamRecorder();
-        var app = BuildApp(recorder);
-        await app.StartAsync();
-
-        var tokens = app.Services.GetRequiredService<IStreamTokenService>();
-        var identity = StreamIdentity.Parse("live/cam-01");
-        var token = tokens.CreateToken(identity, StreamAction.Publish);
-
-        var client = app.GetTestClient();
-        var response = await client.PostAsJsonAsync("/streaming/hooks", new
-        {
-            action = "on_publish",
-            stream = "live/cam-01",
-            client_id = "pub-1",
-            ip = "10.0.0.1",
-            param = new Dictionary<string, string> { ["token"] = token.Value },
-        });
-
-        response.EnsureSuccessStatusCode();
-        Assert.Contains("\"code\":0", await response.Content.ReadAsStringAsync());
-        Assert.Equal("live/cam-01", recorder.LastStream);
-        Assert.Equal(StreamEventType.Publish, recorder.LastType);
-        Assert.True(app.Services.GetRequiredService<IStreamRegistry>().Find(identity)!.Online);
-
-        await app.StopAsync();
-    }
-
-    [Fact]
-    public async Task Webhook_denies_invalid_token()
-    {
-        var recorder = new StreamRecorder();
-        var app = BuildApp(recorder);
-        await app.StartAsync();
-
-        var client = app.GetTestClient();
-        var response = await client.PostAsJsonAsync("/streaming/hooks", new
-        {
-            action = "on_publish",
-            stream = "live/cam-01",
-            client_id = "pub-1",
-            param = new Dictionary<string, string> { ["token"] = "forged" },
-        });
-
-        Assert.Contains("\"code\":1", await response.Content.ReadAsStringAsync());
-        Assert.Null(recorder.LastStream);   // 拒绝的事件不分发
-
-        await app.StopAsync();
-    }
-
-    [Fact]
-    public async Task Webhook_ignores_unknown_actions()
-    {
-        var app = BuildApp(new StreamRecorder());
-        await app.StartAsync();
-
-        var client = app.GetTestClient();
-        var response = await client.PostAsJsonAsync("/streaming/hooks", new
-        {
-            action = "on_dvr",
-            stream = "live/cam-01",
-        });
-
-        Assert.Contains("\"code\":0", await response.Content.ReadAsStringAsync());
-
-        await app.StopAsync();
-    }
-
-    [Fact]
     public async Task Playback_endpoint_reports_protocols_and_status()
     {
         var app = BuildApp(new StreamRecorder());
@@ -263,7 +189,7 @@ public class StreamingTests
         Assert.Contains("\"online\":true", json);
         Assert.Contains("\"players\":1", json);
         Assert.Contains("flv", json);
-        Assert.Contains("whep", json);
+        Assert.Contains("hls", json);
 
         await app.StopAsync();
     }
@@ -286,54 +212,17 @@ public class StreamingTests
         await app.StopAsync();
     }
 
-    [Fact]
-    public async Task Whip_rejects_without_token()
-    {
-        var app = BuildApp(new StreamRecorder());
-        await app.StartAsync();
-
-        var client = app.GetTestClient();
-        var response = await client.PostAsync(
-            "/streaming/whip/live/cam-01",
-            new StringContent("v=0", Encoding.UTF8, "application/sdp"));
-
-        Assert.Equal(StatusCodes.Status401Unauthorized, (int)response.StatusCode);
-
-        await app.StopAsync();
-    }
-
-    [Fact]
-    public async Task Whip_with_valid_token_but_no_media_server_returns_502()
-    {
-        var app = BuildApp(new StreamRecorder());
-        await app.StartAsync();
-
-        var tokens = app.Services.GetRequiredService<IStreamTokenService>();
-        var token = tokens.CreateToken(StreamIdentity.Parse("live/cam-01"), StreamAction.Publish);
-
-        var client = app.GetTestClient();
-        var response = await client.PostAsync(
-            $"/streaming/whip/live/cam-01?token={token.Value}",
-            new StringContent("v=0", Encoding.UTF8, "application/sdp"));
-
-        // 媒体服务器客户端未实现 SDP 交换：明确 502，而不是假装成功
-        Assert.Equal(StatusCodes.Status502BadGateway, (int)response.StatusCode);
-
-        await app.StopAsync();
-    }
-
     private static WebApplication BuildApp(params IStreamEventHandler[] handlers)
     {
         var builder = WebApplication.CreateBuilder();
         builder.WebHost.UseTestServer();
         builder.AddLedonWeb();
         builder.Services.AddLedonStreaming(o =>
-{
-    o.Secret = "test-secret";
-    o.PublicRtmpUrl = "rtmp://media.example.com";
-    o.PublicHttpUrl = "http://media.example.com";
-    o.PublicWebRtcUrl = "webrtc://media.example.com/live";
-});
+        {
+            o.Secret = "test-secret";
+            o.PublicRtmpUrl = "rtmp://media.example.com";
+            o.PublicHttpUrl = "http://media.example.com";
+        });
 
         foreach (var handler in handlers)
             builder.Services.AddSingleton(handler);

@@ -163,7 +163,7 @@ internal sealed class InMemoryTokenStore : IOpenIddictTokenStore<OpenIddictToken
         _tokens.FirstOrDefault(pair => ReferenceEquals(pair.Value, token)).Key;
 
     private static T Bag<T>(OpenIddictTokenDescriptor token, string name) =>
-        StoreBag.Get(token).TryGetValue(name, out var value) && value is T typed ? typed : default!;
+        StoreBag.Get(token).TryGetValue(name, out var value) && value is T typed ? typed : StoreBag.Empty<T>();
 
     public ValueTask SetReferenceIdAsync(OpenIddictTokenDescriptor token, string? identifier, CancellationToken cancellationToken = default)
     {

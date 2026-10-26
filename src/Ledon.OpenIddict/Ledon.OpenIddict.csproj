@@ -16,6 +16,7 @@
 
     <ItemGroup>
         <PackageReference Include="OpenIddict.AspNetCore" />
+        <PackageReference Include="OpenIddict.EntityFrameworkCore" />
         <PackageReference Include="OpenIddict.Server.DataProtection" />
         <PackageReference Include="OpenIddict.Validation.AspNetCore" />
     </ItemGroup>

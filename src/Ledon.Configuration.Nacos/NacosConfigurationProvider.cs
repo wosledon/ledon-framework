@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 
@@ -27,6 +29,7 @@ internal sealed class NacosConfigurationProvider : ConfigurationProvider, IDispo
 
     private string? _accessToken;
     private Task? _polling;
+    private bool _longPollingEnabled;
 
     public NacosConfigurationProvider(NacosOptions options)
     {
@@ -40,6 +43,7 @@ internal sealed class NacosConfigurationProvider : ConfigurationProvider, IDispo
 
         // 直接指定 token 时跳过登录（NacosOptions.AccessToken 文档承诺的行为）
         _accessToken = options.AccessToken;
+        _longPollingEnabled = options.UseLongPolling;
     }
 
     public override void Load()
@@ -67,6 +71,14 @@ internal sealed class NacosConfigurationProvider : ConfigurationProvider, IDispo
 
     private async Task PollAsync()
     {
+        if (_longPollingEnabled)
+            await LongPollLoopAsync().ConfigureAwait(false);
+        else
+            await IntervalLoopAsync().ConfigureAwait(false);
+    }
+
+    private async Task IntervalLoopAsync()
+    {
         using var timer = new PeriodicTimer(_options.PollingInterval);
 
         try
@@ -79,6 +91,192 @@ internal sealed class NacosConfigurationProvider : ConfigurationProvider, IDispo
             // 正常停机
         }
     }
+
+    private async Task LongPollLoopAsync()
+    {
+        while (!_stopping.IsCancellationRequested && _longPollingEnabled)
+        {
+            try
+            {
+                var changed = await ListenAsync(_stopping.Token).ConfigureAwait(false);
+
+                if (changed is null)
+                {
+                    // 服务端不支持 listener（旧版/代理）：永久回退到定时轮询
+                    _longPollingEnabled = false;
+                    break;
+                }
+
+                if (changed.Count == 0)
+                {
+                    // 服务端立即返回空响应时避免热循环
+                    await Task.Delay(TimeSpan.FromMilliseconds(200), _stopping.Token).ConfigureAwait(false);
+                    continue;
+                }
+
+                await ApplyChangesAsync(changed, _stopping.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (_stopping.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception)
+            {
+                // 长轮询失败：短暂退避后重试，旧配置继续生效
+                try
+                {
+                    await Task.Delay(
+                        _options.PollingInterval < TimeSpan.FromSeconds(5)
+                            ? _options.PollingInterval
+                            : TimeSpan.FromSeconds(5),
+                        _stopping.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+            }
+        }
+
+        // 回退路径
+        await IntervalLoopAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>向 Nacos listener 发起一次长轮询；返回变更的 dataId 集合，服务端不支持时返回 null。</summary>
+    private async Task<IReadOnlyCollection<string>?> ListenAsync(CancellationToken cancellationToken)
+    {
+        var listening = BuildListeningConfigs();
+        var serverErrors = new List<Exception>();
+
+        foreach (var server in _options.ServerAddresses)
+        {
+            using var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                $"{server.TrimEnd('/')}/nacos/v1/cs/configs/listener" +
+                (string.IsNullOrEmpty(_accessToken)
+                    ? string.Empty
+                    : $"?accessToken={Uri.EscapeDataString(_accessToken)}"))
+            {
+                Content = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["Listening-Configs"] = listening,
+                }),
+            };
+
+            request.Headers.TryAddWithoutValidation(
+                "Long-Pulling-Timeout",
+                ((long)_options.LongPollingTimeout.TotalMilliseconds).ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+            if (!string.IsNullOrEmpty(_accessToken))
+                request.Headers.TryAddWithoutValidation("accessToken", _accessToken);
+
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(_options.LongPollingTimeout + TimeSpan.FromSeconds(5));
+
+            try
+            {
+                using var response = await _http.SendAsync(request, timeout.Token).ConfigureAwait(false);
+
+                if (response.StatusCode is HttpStatusCode.NotFound
+                    or HttpStatusCode.MethodNotAllowed
+                    or HttpStatusCode.NotImplemented)
+                {
+                    return null;   // listener 端点不存在 → 回退定时轮询
+                }
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized
+                    && !string.IsNullOrEmpty(_options.UserName))
+                {
+                    await LoginAsync(server, cancellationToken).ConfigureAwait(false);
+                    continue;   // 换 token 后重试
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    serverErrors.Add(new HttpRequestException($"Nacos listener 返回 {(int)response.StatusCode}"));
+                    continue;
+                }
+
+                var body = await response.Content.ReadAsStringAsync(timeout.Token).ConfigureAwait(false);
+
+                if (string.IsNullOrWhiteSpace(body))
+                    return [];
+
+                var known = _options.DataIds.ToHashSet(StringComparer.Ordinal);
+                var normalized = body
+                    .Replace("%01", "\u0001")
+                    .Replace("%02", "\u0002");
+
+                var changed = normalized
+                    .Split('\u0001', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(entry => entry.Split('\u0002', 2)[0])
+                    .Where(known.Contains)
+                    .Distinct(StringComparer.Ordinal)
+                    .ToArray();
+
+                return changed;
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                // 长轮询超时属于正常语义：没有变更
+                return [];
+            }
+            catch (HttpRequestException ex)
+            {
+                serverErrors.Add(ex);
+            }
+        }
+
+        throw new InvalidOperationException("无法连接 Nacos listener", serverErrors.FirstOrDefault());
+    }
+
+    private async Task ApplyChangesAsync(IReadOnlyCollection<string> changed, CancellationToken cancellationToken)
+    {
+        await _reloadGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            foreach (var dataId in changed)
+            {
+                var content = await GetConfigAsync(dataId, cancellationToken).ConfigureAwait(false);
+
+                if (_contents.TryGetValue(dataId, out var current)
+                    && string.Equals(current, content, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                _contents[dataId] = content;
+            }
+
+            ApplySnapshot();
+            OnReload();
+        }
+        finally
+        {
+            _reloadGate.Release();
+        }
+    }
+
+    private string BuildListeningConfigs()
+    {
+        var entries = _options.DataIds.Select(dataId =>
+        {
+            var content = _contents.TryGetValue(dataId, out var value) ? value : string.Empty;
+            var entry = $"{dataId}\u0002{_options.Group}\u0002{ComputeMd5(content)}";
+
+            // Nacos 协议：tenant 非空时追加，最后用 LINE_SEPARATOR（\u0001）分隔
+            if (!string.IsNullOrEmpty(_options.Namespace))
+                entry += $"\u0002{_options.Namespace}";
+
+            return entry;
+        });
+
+        return string.Join('\u0001', entries) + '\u0001';
+    }
+
+    private static string ComputeMd5(string content) =>
+        Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(content))).ToLowerInvariant();
 
     private async Task ReloadSafelyAsync()
     {
@@ -167,6 +365,9 @@ internal sealed class NacosConfigurationProvider : ConfigurationProvider, IDispo
 
                 if (finalResponse.IsSuccessStatusCode)
                     return await finalResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                if (finalResponse.StatusCode == HttpStatusCode.NotFound)
+                    return string.Empty;   // dataId 尚不存在：按空内容参与 MD5/变更检测
 
                 lastError = new HttpRequestException($"Nacos 返回 {(int)finalResponse.StatusCode}");
             }

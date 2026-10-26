@@ -33,7 +33,7 @@ app.Run();
 | [工作流引擎](~/docs/workflow.md)      | 多步骤编排、重试、Saga 补偿、重启恢复      |
 | [平台服务](~/docs/platform-services.md) | 分布式锁/功能开关/文件存储/通知/多语言/操作审计/CQRS 管线/运维端点 |
 | [飞书/Socket/SIP](~/docs/realtime-protocols.md) | 飞书通知与事件回调、TCP/UDP 与帧/包编解码、SIP 解析 |
-| [流媒体](~/docs/streaming.md)        | RTMP 推拉流 + HTTP-FLV/HLS 播放、推拉流鉴权、转流转码、WHIP/WHEP 双工 |
+| [流媒体](~/docs/streaming.md)        | 独立媒体面：RTMP 推拉流 + HTTP-FLV/HLS、令牌鉴权、在线状态、事件与踢人 |
 | [可靠投递](~/docs/reliability.md)     | 发件箱清理/死信、收件箱去重                |
 | [gRPC](~/docs/grpc.md)                | 服务间通信：自动发现与约定映射             |
 | [Kafka](~/docs/kafka.md)              | 发件箱 ↔ Kafka 跨服务投递                 |

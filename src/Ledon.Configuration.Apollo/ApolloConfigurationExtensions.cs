@@ -41,6 +41,9 @@ public static class ApolloConfigurationExtensions
         if (options.PollingInterval <= TimeSpan.Zero)
             throw new InvalidOperationException("AddLedonApollo: PollingInterval 必须大于 0");
 
+        if (options.LongPollingTimeout <= TimeSpan.Zero)
+            throw new InvalidOperationException("AddLedonApollo: LongPollingTimeout 必须大于 0");
+
         configuration.Add(new ApolloConfigurationSource(options));
         return configuration;
     }

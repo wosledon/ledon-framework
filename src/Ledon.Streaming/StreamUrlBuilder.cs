@@ -10,13 +10,11 @@ namespace Ledon.Streaming;
 public sealed record StreamUrls(
     string? RtmpPublish,
     string? HttpFlvPlay,
-    string? HlsPlay,
-    string? WebRtcPlay,
-    string? WhipPublish,
-    string? WhepPlay);
+    string? HlsPlay);
 
-/// <summary>推拉流地址构建器：统一拼媒体服务器的对外地址并附上鉴权令牌。</summary>
-public sealed class StreamUrlBuilder(IStreamTokenService tokens, LedonStreamingOptions options){
+/// <summary>推拉流地址构建器：统一拼对外地址并附上鉴权令牌。</summary>
+public sealed class StreamUrlBuilder(IStreamTokenService tokens, LedonStreamingOptions options)
+{
     /// <summary>生成推流地址（RTMP）。</summary>
     public string BuildPublishUrl(StreamIdentity identity, TimeSpan? lifetime = null, string? extra = null)
     {
@@ -41,39 +39,12 @@ public sealed class StreamUrlBuilder(IStreamTokenService tokens, LedonStreamingO
         return $"{options.PublicHttpUrl?.TrimEnd('/')}/{identity.Path}.m3u8?token={token.Value}";
     }
 
-    /// <summary>生成 WebRTC 播放地址。</summary>
-    public string BuildWebRtcPlayUrl(StreamIdentity identity, TimeSpan? lifetime = null, string? extra = null)
-    {
-        var token = tokens.CreateToken(identity, StreamAction.Play, lifetime, extra);
-
-        return $"{options.PublicWebRtcUrl?.TrimEnd('/')}/{identity.Path}?token={token.Value}";
-    }
-
     /// <summary>一次性拿到全部地址（播放页用）。</summary>
     public StreamUrls BuildAll(StreamIdentity identity, TimeSpan? lifetime = null, string? extra = null) =>
         new(
             BuildPublishUrl(identity, lifetime, extra),
             BuildFlvPlayUrl(identity, lifetime, extra),
-            BuildHlsPlayUrl(identity, lifetime, extra),
-            BuildWebRtcPlayUrl(identity, lifetime, extra),
-            BuildWhipUrl(identity, lifetime, extra),
-            BuildWhepUrl(identity, lifetime, extra));
-
-    /// <summary>WHIP 推流地址（WebRTC 推流，浏览器直接发布）。</summary>
-    public string BuildWhipUrl(StreamIdentity identity, TimeSpan? lifetime = null, string? extra = null)
-    {
-        var token = tokens.CreateToken(identity, StreamAction.Publish, lifetime, extra);
-
-        return $"{options.PublicHttpUrl?.TrimEnd('/')}{options.WhipRoute}/{identity.Path}?token={token.Value}";
-    }
-
-    /// <summary>WHEP 拉流地址（WebRTC 播放，浏览器原生播放）。</summary>
-    public string BuildWhepUrl(StreamIdentity identity, TimeSpan? lifetime = null, string? extra = null)
-    {
-        var token = tokens.CreateToken(identity, StreamAction.Play, lifetime, extra);
-
-        return $"{options.PublicHttpUrl?.TrimEnd('/')}{options.WhepRoute}/{identity.Path}?token={token.Value}";
-    }
+            BuildHlsPlayUrl(identity, lifetime, extra));
 }
 
 /// <summary>
@@ -107,8 +78,6 @@ public sealed class StreamPlaybackEndpoints : IEndpoint
                 {
                     flv = urls.BuildFlvPlayUrl(identity, extra: extra),
                     hls = urls.BuildHlsPlayUrl(identity, extra: extra),
-                    webrtc = urls.BuildWebRtcPlayUrl(identity, extra: extra),
-                    whep = urls.BuildWhepUrl(identity, extra: extra),
                 },
             });
         });

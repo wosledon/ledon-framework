@@ -32,11 +32,30 @@ public sealed class OpenIddictScopeDefinition
     public string DisplayName { get; set; } = string.Empty;
 }
 
+/// <summary>OpenIddict 存储类型。</summary>
+public enum OpenIddictStorage
+{
+    /// <summary>进程内存储（单实例/开发）。</summary>
+    InMemory = 0,
+
+    /// <summary>EF Core 共享数据库（多实例；需注册 <see cref="LedonOpenIddictDbContext"/>）。</summary>
+    EntityFrameworkCore = 1,
+}
+
 /// <summary>OpenIddict 服务器参数。</summary>
 public sealed class LedonOpenIddictOptions
 {
     /// <summary>签发者（Issuer，写进令牌与发现文档），默认 https://localhost。</summary>
     public string Issuer { get; set; } = "https://localhost";
+
+    /// <summary>存储类型，默认进程内；多实例改用 <see cref="OpenIddictStorage.EntityFrameworkCore"/>。</summary>
+    public OpenIddictStorage Storage { get; set; } = OpenIddictStorage.InMemory;
+
+    /// <summary>
+    /// EF 存储时是否在启动阶段 <c>EnsureCreated</c>（默认 <c>false</c>）。
+    /// 开发/测试可开；生产建议用 EF 迁移管理表结构。
+    /// </summary>
+    public bool EnsureDatabaseCreated { get; set; }
 
     /// <summary>访问令牌有效期，默认 1 小时。</summary>
     public TimeSpan AccessTokenLifetime { get; set; } = TimeSpan.FromHours(1);

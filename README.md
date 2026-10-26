@@ -29,14 +29,14 @@ app.Run();
 | 后台任务                               | `Ledon.Queues`                | `AddLedonQueues()` / `AddLedonDurableQueue()`         | 进程内队列（有界+多 worker+停机 drain）/ 持久化队列（重启不丢） || 消息中间件传输                         | `Ledon.Queues.RabbitMQ` / `Ledon.Queues.Kafka` | `AddLedonRabbitMqTransport()` / `AddLedonKafkaTransport()` | 发件箱 ↔ broker，跨服务投递；Kafka 消费侧带死信主题 |
 | 定时任务                               | `Ledon.Scheduling`            | `AddLedonScheduling()`                               | cron 驱动（5/6 段）+ 执行历史 + 手动触发          |
 | 认证授权                               | `Ledon.Security`              | `AddLedonSecurity()`                                 | JWT + API Key + 权限策略                          |
-| OIDC 服务器                            | `Ledon.OpenIddict`            | `builder.AddLedonOpenIddict()`                       | 标准 /connect/token + 发现文档                    |
+| OIDC 服务器                            | `Ledon.OpenIddict`            | `builder.AddLedonOpenIddict()`                       | 标准 /connect/token + 内存/EF 共享存储（多实例） |
 | 可观测性                               | `Ledon.Observability`         | `AddLedonObservability()`                            | OTel 链路/指标/日志 + 健康检查（含启动探针）+ Prometheus |
 | 结构化日志                             | `Ledon.Serilog`               | `builder.AddLedonSerilog()`                          | Serilog + TraceId/SpanId 富化              |
 | 实时推送                               | `Ledon.SignalR`               | `AddLedonSignalR()`                                  | Hub 自动发现 + 约定路径映射 + Redis backplane    |
 | 弹性策略                               | `Ledon.Resilience`            | `AddLedonResilience()`                               | 重试/超时/熔断，接管全部 HttpClient              |
 | 强类型配置                             | `Ledon.Configuration`         | `AddLedonOptions<T>(config)`                         | 绑定 + 启动校验                                  |
-| Nacos 配置中心                         | `Ledon.Configuration.Nacos`   | `Configuration.AddLedonNacos()`                      | 远程配置 + 热更新                                |
-| Apollo 配置中心                        | `Ledon.Configuration.Apollo`  | `Configuration.AddLedonApollo()`                     | 远程配置 + 热更新                                |
+| Nacos 配置中心                         | `Ledon.Configuration.Nacos`   | `Configuration.AddLedonNacos()`                      | 真实长轮询 + 热更新 + 鉴权/故障转移               |
+| Apollo 配置中心                        | `Ledon.Configuration.Apollo`  | `Configuration.AddLedonApollo()`                     | notifications/v2 长轮询 + 热更新                  |
 | FluentValidation                      | `Ledon.FluentValidation`      | `AddLedonFluentValidation()`                         | 验证器自动发现 + 统一 400                        |
 | 多租户                                 | `Ledon.MultiTenancy`          | `AddLedonMultiTenancy()`                             | 租户解析 + 后台穿透 + 查询过滤助手                |
 | 测试基建                               | `Ledon.Testing`               | `LedonWebTestHost`                                   | 一行搭 TestServer + 生命周期断言                 |
@@ -46,7 +46,7 @@ app.Run();
 | 统一事务入口                         | `Ledon.Transactions`          | `AddLedonTransactions()`                             | IUnitOfWork（本地事务）+ Saga（分布式补偿），同一种写法 |
 | 分布式锁                             | `Ledon.Locking`               | `AddLedonLocking()`                                  | 进程内 / Redis 互斥（防重、资源独占），到期自动释放 |
 | 功能开关 / 灰度                      | `Ledon.FeatureManagement`     | `AddLedonFeatureManagement()`                        | 开关 + 租户/用户白名单 + 百分比灰度 + 配置热更新 |
-| 文件 / 对象存储                      | `Ledon.BlobStorage`           | `AddLedonBlobStorage()`                              | IFileStorage（本地/内存）+ 租户目录隔离 + 类型/大小校验 |
+| 文件 / 对象存储                      | `Ledon.BlobStorage`           | `AddLedonBlobStorage()`                              | IFileStorage（本地/内存/S3 兼容 MinIO）+ 租户目录隔离 + 类型/大小校验 |
 | 通知发送                             | `Ledon.Notifications`         | `AddLedonNotifications()`                            | 邮件/短信/推送统一入口 + 模板 + 重试 + 发送记录 |
 | 多语言 / 请求文化                    | `Ledon.Localization`          | `AddLedonLocalization()`                             | 查询串/Cookie/Accept-Language 解析 + JSON 文案 |
 | 操作审计                             | `Ledon.AuditLog`              | `AddLedonAudit()` / `AddLedonAudit<TContext>()`      | 谁何时改了什么（属性级 before/after）+ 保留策略 |
@@ -59,7 +59,7 @@ app.Run();
 | SIP 协议解析                           | `Ledon.Sip`                   | `SipParser` / `SdpParser`                         | RFC 3261 消息（obs-fold/多值保序）+ SDP + 类型化头 |
 | SIP 服务端                             | `Ledon.Sip.Server`            | `AddLedonSipServer()`                             | 基于 Socket 库：UDP/TCP + 事务层（响应重传/ACK/定时器） |
 | SIP 客户端                             | `Ledon.Sip.Client`            | `AddLedonSipClient()`                             | 基于 Socket 库：事务 + 对话 + ACK/CANCEL + 重传超时 |
-| 流媒体（推/拉流、鉴权、转流、双工）      | `Ledon.Streaming`             | `AddLedonStreaming()`                              | RTMP 服务端（保活/鉴权/过期回收）+ HTTP-FLV/HLS + 令牌鉴权 + WHIP/WHEP |
+| 流媒体（独立媒体面）                    | `Ledon.Streaming`             | `AddLedonStreaming()`                              | 进程内 RTMP 服务端（保活/鉴权/过期回收）+ HTTP-FLV/HLS + 在线状态/事件/踢人 |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -343,7 +343,7 @@ src/Ledon.Workflow/        工作流引擎（步骤编排 + 重试 + Saga 补偿
 src/Ledon.Transactions/    统一事务入口（IUnitOfWork + Saga，本地/分布式同一种写法）
 src/Ledon.Locking/         分布式锁（进程内 / Redis 互斥）
 src/Ledon.FeatureManagement/ 功能开关与灰度（白名单 + 百分比 + 配置热更新）
-src/Ledon.BlobStorage/     文件/对象存储抽象（本地/内存，租户目录隔离）
+src/Ledon.BlobStorage/     文件/对象存储抽象（本地/内存/S3 兼容，租户目录隔离）
 src/Ledon.Notifications/   通知发送（邮件/短信/推送统一入口 + 重试 + 记录）
 src/Ledon.Localization/    多语言与请求文化解析
 src/Ledon.AuditLog/        操作审计流水（属性级 before/after）
@@ -356,12 +356,12 @@ src/Ledon.Sockets.Server/   Socket 服务端：监听/发送串行/空闲超时/
 src/Ledon.Sip/              SIP/SDP 协议解析（纯解析，obs-fold + 多值头 + 类型化头）
 src/Ledon.Sip.Server/       SIP 服务端（基于 Socket 库，UDP/TCP + 事务层）
 src/Ledon.Sip.Client/       SIP 客户端（基于 Socket 库，事务 + 对话 + ACK/CANCEL）
-src/Ledon.Streaming/       流媒体：RTMP 服务端（保活/鉴权/过期回收）+ HTTP-FLV/HLS + 推拉流鉴权、WHIP/WHEP
+src/Ledon.Streaming/       流媒体：独立 RTMP 服务端（保活/鉴权/过期回收）+ HTTP-FLV/HLS + 推拉流鉴权/事件/踢人
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
                         Ledon.ProtocolSample（协议栈：结构体映射→帧→TCP/UDP→SIP）
                         Ledon.StreamSample（流媒体：RTMP 推流→HTTP-FLV/HLS 播放）
-tests/                  xunit 测试（模块 26 + Web 458 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 460 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

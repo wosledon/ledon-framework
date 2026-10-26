@@ -137,7 +137,7 @@ internal sealed class InMemoryAuthorizationStore : IOpenIddictAuthorizationStore
         _authorizations.FirstOrDefault(pair => ReferenceEquals(pair.Value, authorization)).Key;
 
     private static T Bag<T>(OpenIddictAuthorizationDescriptor authorization, string name) =>
-        StoreBag.Get(authorization).TryGetValue(name, out var value) && value is T typed ? typed : default!;
+        StoreBag.Get(authorization).TryGetValue(name, out var value) && value is T typed ? typed : StoreBag.Empty<T>();
 
     public ValueTask SetApplicationIdAsync(OpenIddictAuthorizationDescriptor authorization, string? identifier, CancellationToken cancellationToken = default)
     {

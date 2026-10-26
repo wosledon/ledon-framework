@@ -108,6 +108,34 @@ app.MapLedonAuthEndpoints();
 
 登录成功返回双令牌；`/auth/refresh` 轮换刷新令牌并重新签发访问令牌。需要完整 OIDC/授权服务器（第三方客户端、授权码流）时接 OpenIddict——框架的 `IJwtTokenGenerator`/`IRefreshTokenService` 可作为其令牌签发积木。
 
+## OIDC 服务器多实例（Ledon.OpenIddict）
+
+默认使用进程内存储（单实例开箱即用）。多实例部署时把客户端/授权/scope/令牌放进共享数据库，
+并共享签名证书与 Data Protection 密钥环：
+
+```csharp
+builder.Services.AddDbContext<LedonOpenIddictDbContext>(o =>
+    o.UseSqlServer(builder.Configuration.GetConnectionString("OpenIddict")));
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/var/ledon/keys"))
+    .SetApplicationName("my-app");   // 所有实例必须一致
+
+builder.AddLedonOpenIddict(o =>
+{
+    o.Storage = OpenIddictStorage.EntityFrameworkCore;
+    o.EnsureDatabaseCreated = true;                 // 开发/测试；生产用 EF 迁移
+    o.SigningCertificatePath = "/var/ledon/signing.pfx";
+    o.SigningCertificatePassword = "<从密钥管理注入>";
+    o.Clients.Add(new OpenIddictClientDefinition { ClientId = "webapp", ClientSecret = "..." });
+});
+```
+
+- 共享数据库：客户端、授权、scope、令牌（刷新令牌/吊销状态）多实例可见；
+- 共享签名证书：一个实例签发的访问令牌另一个实例能验过（未配置时使用进程内临时密钥，仅适合单实例）；
+- 共享 Data Protection 密钥环：刷新令牌在实例间可解密；
+- `LedonOpenIddictDbContext` 的表结构由 `builder.UseOpenIddict()` 生成；生产建议用 EF 迁移而不是 `EnsureDatabaseCreated`。
+
 ## 边界
 
 - 访问令牌本身无吊销列表（JWT 无状态特性）——需要踢人下线时缩短 `o.Jwt.Expiration` + 轮换刷新令牌（吊销刷新令牌即切断续期）；

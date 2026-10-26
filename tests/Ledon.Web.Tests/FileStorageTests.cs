@@ -1,4 +1,5 @@
 using Ledon.BlobStorage;
+using Ledon.MultiTenancy;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Ledon.Web.Tests;
@@ -167,6 +168,42 @@ public abstract class FileStorageContract
         Assert.NotNull(info);
         Assert.Equal(2, info!.Length);
         Assert.Equal("application/json", info.ContentType);
+    }
+
+    [Fact]
+    public async Task Tenant_wrapper_lists_only_current_tenant_and_hides_prefix()
+    {
+        var options = new LedonBlobStorageOptions
+        {
+            Provider = LedonBlobProvider.InMemory,
+            TenantPathPrefix = true,
+        };
+
+        var tenant = new MutableTenantContext { TenantId = "a" };
+        var services = new ServiceCollection().AddSingleton<ITenantContext>(tenant).BuildServiceProvider();
+        var storage = new TenantPrefixedFileStorage(new InMemoryFileStorage(options), services);
+
+        await storage.SaveAsync("docs/a.txt", new MemoryStream("a"u8.ToArray()));
+
+        tenant.TenantId = "b";
+        await storage.SaveAsync("docs/b.txt", new MemoryStream("b"u8.ToArray()));
+
+        var listedB = await storage.ListAsync();
+        Assert.Single(listedB);
+        Assert.Equal("docs/b.txt", listedB[0].Path);
+
+        tenant.TenantId = "a";
+        var listedA = await storage.ListAsync();
+        Assert.Single(listedA);
+        Assert.Equal("docs/a.txt", listedA[0].Path);
+
+        // 路径穿越仍在租户前缀之前被拒绝
+        await Assert.ThrowsAsync<ArgumentException>(() => storage.ExistsAsync("../b/docs/b.txt"));
+    }
+
+    private sealed class MutableTenantContext : ITenantContext
+    {
+        public string? TenantId { get; set; }
     }
 
     private static async Task<string> ReadTextAsync(IFileStorage storage, string path)

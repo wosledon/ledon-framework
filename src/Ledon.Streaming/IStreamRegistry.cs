@@ -14,6 +14,11 @@ public interface IStreamRegistry
     /// <summary>开始播放。</summary>
     void OnPlay(StreamIdentity identity, string? clientId);
 
+    /// <summary>心跳：媒体面仍在产出数据时调用（默认空实现，兼容自定义注册表）。</summary>
+    void OnHeartbeat(StreamIdentity identity)
+    {
+    }
+
     /// <summary>停止（<paramref name="isPublisher"/> = true 表示推流方断开）。</summary>
     void OnStop(StreamIdentity identity, string? clientId, bool isPublisher);
 

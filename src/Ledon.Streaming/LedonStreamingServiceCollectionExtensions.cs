@@ -10,19 +10,17 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// 流媒体入口（控制面：鉴权、事件、转流、录制、WHIP/WHEP 信令）：
+/// 流媒体入口（独立媒体面，不依赖 SRS/ZLMediaKit 等外部服务器）：
 /// <code>
 /// builder.Services.AddLedonStreaming(o =&gt;
 /// {
 ///     o.Secret = "&lt;从配置中心注入&gt;";
-///     o.ServerApiUrl = "http://127.0.0.1:1985";        // SRS OpenAPI
 ///     o.PublicRtmpUrl = "rtmp://media.example.com";
 ///     o.PublicHttpUrl = "http://media.example.com";
-///     o.PublicWebRtcUrl = "webrtc://media.example.com/live";
 /// });
 /// </code>
-/// 媒体面（转发/转码/录制）由媒体服务器（SRS/ZLMediaKit）承担，框架负责鉴权、
-/// 事件、在线状态与控制 API——不重复造媒体内核。
+/// 媒体面（RTMP 推拉流、HTTP-FLV、HLS 切片、TS/FLV 封装）全部在进程内跑；
+/// 框架负责鉴权、在线状态、事件与控制面（踢人/查询），不转发给外部媒体服务器。
 /// </summary>
 public static class LedonStreamingServiceCollectionExtensions
 {
@@ -44,24 +42,28 @@ public static class LedonStreamingServiceCollectionExtensions
         if (string.IsNullOrWhiteSpace(options.Secret))
             throw new InvalidOperationException("流媒体需要配置 Secret（推拉流令牌签名用）");
 
+        if (options.TokenLifetime <= TimeSpan.Zero)
+            throw new InvalidOperationException("LedonStreamingOptions.TokenLifetime 必须大于 0");
+
+        if (options.OfflineThreshold <= TimeSpan.Zero)
+            throw new InvalidOperationException("LedonStreamingOptions.OfflineThreshold 必须大于 0");
+
         services.TryAddSingleton(options);
 
         // 鉴权：默认令牌鉴权；业务可实现 IStreamAuthorizer 覆盖（TryAdd 不覆盖手动注册）
         services.TryAddSingleton<IStreamTokenService, HmacStreamTokenService>();
         services.TryAddSingleton<IStreamAuthorizer, TokenStreamAuthorizer>();
 
-        // 在线状态与事件分发
+        // 在线状态与事件分发（由进程内 RTMP 媒体面驱动）
         services.TryAddSingleton<IStreamRegistry, InMemoryStreamRegistry>();
         services.TryAddSingleton<StreamEventDispatcher>();
         services.TryAddSingleton<StreamUrlBuilder>();
-        services.TryAddSingleton<IMediaServerClient, SrsMediaServerClient>();
+        services.TryAddSingleton<IStreamControl, StreamControlService>();
 
-        // 掉线扫描：媒体服务器不推"掉线"事件，靠心跳阈值兜底
+        // 掉线扫描：媒体面不推"掉线"事件，靠心跳阈值兜底
         services.AddHostedService<StreamOfflineSweeper>();
 
         // 端点（框架包自身不进约定扫描，显式注册）
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IEndpoint, StreamWebhookEndpoint>());
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<IEndpoint, WhipWhepEndpoints>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IEndpoint, StreamPlaybackEndpoints>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IEndpoint, HttpFlvEndpoints>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IEndpoint, HlsEndpoints>());
@@ -77,7 +79,10 @@ public static class LedonStreamingServiceCollectionExtensions
         // 选项经 IOptions 解析：调用方的 Configure<T> / 配置文件都能覆盖默认值
         services.TryAddSingleton<RtmpServerOptions>(provider =>
             provider.GetRequiredService<IOptions<RtmpServerOptions>>().Value);
-        services.AddHostedService<RtmpServer>();
+
+        // RtmpServer 同时是控制面依赖：先注册具体类型，再让宿主服务复用同一实例
+        services.TryAddSingleton<RtmpServer>();
+        services.AddHostedService(provider => provider.GetRequiredService<RtmpServer>());
 
         // HlsSegmenter 有两重身份：IHostedService（常驻切片）+ HLS 端点要直接解析的实例。
         // 只注册 IHostedService 的话 GetRequiredService<HlsSegmenter>() 会抛
@@ -136,7 +141,12 @@ internal sealed class StreamOfflineSweeper(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var timer = new PeriodicTimer(options.OfflineThreshold / 2);
+        // 至少 1 秒，避免 OfflineThreshold 很小时创建 0 间隔计时器
+        var interval = TimeSpan.FromTicks(Math.Max(
+            options.OfflineThreshold.Ticks / 2,
+            TimeSpan.FromSeconds(1).Ticks));
+
+        using var timer = new PeriodicTimer(interval);
 
         while (!stoppingToken.IsCancellationRequested)
         {

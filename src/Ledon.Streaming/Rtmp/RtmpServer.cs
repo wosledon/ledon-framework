@@ -43,7 +43,7 @@ public sealed class RtmpServerOptions
     public int MaxConnections { get; set; } = 1000;
 
     /// <summary>
-    /// 是否要求推流令牌，默认 <c>false</c>（与 SRS/ZLMediaKit 的默认行为一致，
+    /// 是否要求推流令牌，默认 <c>false</c>（与常见流媒体服务器的默认行为一致，
     /// 开箱即可用）。**生产环境必须显式打开**，否则任何人都能往你的流上推。
     /// 令牌从推流 URL 的查询串或 connect 命令对象里取，交给
     /// <see cref="IRtmpAuthenticator"/> 校验；校验不过回 NetStream.Failed 并断开。
@@ -113,6 +113,8 @@ public sealed class RtmpServer : BackgroundService
 {
     private readonly RtmpServerOptions _options;
     private readonly StreamHub _hub;
+    private readonly IStreamRegistry _registry;
+    private readonly StreamEventDispatcher _dispatcher;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<RtmpServer> _logger;
     private readonly TcpListener _listener;
@@ -123,11 +125,15 @@ public sealed class RtmpServer : BackgroundService
     public RtmpServer(
         RtmpServerOptions options,
         StreamHub hub,
+        IStreamRegistry registry,
+        StreamEventDispatcher dispatcher,
         IServiceScopeFactory scopeFactory,
         ILogger<RtmpServer> logger)
     {
         _options = options;
         _hub = hub;
+        _registry = registry;
+        _dispatcher = dispatcher;
         _scopeFactory = scopeFactory;
         _logger = logger;
 
@@ -139,6 +145,23 @@ public sealed class RtmpServer : BackgroundService
 
     /// <summary>累计拒绝的连接数（超过 <see cref="RtmpServerOptions.MaxConnections"/>）。</summary>
     public long RejectedConnections { get; private set; }
+
+    /// <summary>断开推/拉指定流的连接；返回被断开的连接数。</summary>
+    public int Kickoff(StreamIdentity identity, string? clientId = null)
+    {
+        var kicked = 0;
+
+        foreach (var connection in _connections.Values)
+        {
+            if (!connection.Matches(identity, clientId))
+                continue;
+
+            connection.Close();
+            kicked++;
+        }
+
+        return kicked;
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -186,11 +209,26 @@ public sealed class RtmpServer : BackgroundService
                 var authenticator = scope.ServiceProvider.GetService<IRtmpAuthenticator>()
                     ?? new AllowAllRtmpAuthenticator();
 
-                var connection = new RtmpConnection(id, client, _options, _hub, scope, authenticator, _logger);
+                var connection = new RtmpConnection(id, client, _options, _hub, _registry, _dispatcher, scope, authenticator, _logger);
 
                 if (_connections.TryAdd(id, connection))
                 {
-                    _ = Task.Run(() => connection.ServeAsync(stoppingToken), CancellationToken.None);
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await connection.ServeAsync(stoppingToken).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "RTMP 连接 {Id} 异常结束", id);
+                        }
+                        finally
+                        {
+                            // 连接结束必须从字典移除：否则 ConnectionCount 只增不减，最终触顶拒绝新连接
+                            _connections.TryRemove(id, out _);
+                        }
+                    }, CancellationToken.None);
                 }
                 else
                 {
@@ -223,10 +261,13 @@ internal sealed class RtmpConnection
     private readonly TcpClient _client;
     private readonly RtmpServerOptions _options;
     private readonly StreamHub _hub;
+    private readonly IStreamRegistry _registry;
+    private readonly StreamEventDispatcher _dispatcher;
     private readonly AsyncServiceScope _scope;
     private readonly IRtmpAuthenticator _authenticator;
     private readonly ILogger _logger;
     private readonly string _remote;
+    private readonly string _remoteAddress;
 
     private readonly RtmpChunkDecoder _decoder = new();
     private readonly Lock _sendGate = new();
@@ -238,12 +279,57 @@ internal sealed class RtmpConnection
     private StreamIdentity? _playing;
     private Guid _playingSubscription;
     private IReadOnlyDictionary<string, string> _connectionProperties = new Dictionary<string, string>();
+    private long _lastHeartbeatTicks;
+
+    /// <summary>连接标识（控制面踢人/查询用）。</summary>
+    public string ClientId => _id.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    public bool Matches(StreamIdentity identity, string? clientId)
+    {
+        if (!string.IsNullOrEmpty(clientId))
+            return string.Equals(ClientId, clientId, StringComparison.Ordinal);
+
+        return string.Equals(_publishing?.Path, identity.Path, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(_playing?.Path, identity.Path, StringComparison.OrdinalIgnoreCase);
+    }
 
     /// <summary>去掉流名上的查询串（live/cam?token=x → live/cam）。</summary>
     private static string StripQuery(string streamName)
     {
         var query = streamName.IndexOf('?');
         return query < 0 ? streamName : streamName[..query];
+    }
+
+    private static Dictionary<string, string> ParseQuery(string streamName)
+    {
+        var queryIndex = streamName.IndexOf('?');
+
+        if (queryIndex < 0 || queryIndex == streamName.Length - 1)
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        return streamName[(queryIndex + 1)..]
+            .Split('&', StringSplitOptions.RemoveEmptyEntries)
+            .Select(pair => pair.Split('=', 2))
+            .Where(parts => parts.Length == 2)
+            .ToDictionary(
+                parts => Uri.UnescapeDataString(parts[0]),
+                parts => Uri.UnescapeDataString(parts[1]),
+                StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static IReadOnlyDictionary<string, string> MergeParameters(
+        IReadOnlyDictionary<string, string> properties,
+        Dictionary<string, string> query)
+    {
+        if (properties.Count == 0)
+            return query;
+
+        var merged = new Dictionary<string, string>(properties, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (key, value) in query)
+            merged[key] = value;
+
+        return merged;
     }
 
     private RtmpAuthContext NewContext(StreamIdentity identity, string token) => new()
@@ -255,11 +341,31 @@ internal sealed class RtmpConnection
         ConnectionProperties = _connectionProperties,
     };
 
+    /// <summary>有数据流动就顺带刷新注册表心跳（节流到 5 秒一次），避免活跃流被离线扫描误杀。</summary>
+    private void TouchIfDue()
+    {
+        if (_publishing is null)
+            return;
+
+        var now = Environment.TickCount64;
+        var last = Interlocked.Read(ref _lastHeartbeatTicks);
+
+        if (now - last < 5_000)
+            return;
+
+        if (Interlocked.CompareExchange(ref _lastHeartbeatTicks, now, last) != last)
+            return;
+
+        _registry.OnHeartbeat(_publishing);
+    }
+
     public RtmpConnection(
         int id,
         TcpClient client,
         RtmpServerOptions options,
         StreamHub hub,
+        IStreamRegistry registry,
+        StreamEventDispatcher dispatcher,
         AsyncServiceScope scope,
         IRtmpAuthenticator authenticator,
         ILogger logger)
@@ -268,10 +374,13 @@ internal sealed class RtmpConnection
         _client = client;
         _options = options;
         _hub = hub;
+        _registry = registry;
+        _dispatcher = dispatcher;
         _scope = scope;
         _authenticator = authenticator;
         _logger = logger;
         _remote = client.Client.RemoteEndPoint?.ToString() ?? "unknown";
+        _remoteAddress = (client.Client.RemoteEndPoint as IPEndPoint)?.Address.ToString() ?? "unknown";
     }
 
     public async Task ServeAsync(CancellationToken cancellationToken)
@@ -324,6 +433,8 @@ internal sealed class RtmpConnection
                 if (read == 0)
                     break;
 
+                TouchIfDue();
+
                 if (pendingLength + read > pending.Length)
                     throw new InvalidOperationException("RTMP 缓冲溢出");
 
@@ -345,7 +456,7 @@ internal sealed class RtmpConnection
         }
         finally
         {
-            Cleanup();
+            await CleanupAsync(CancellationToken.None).ConfigureAwait(false);
             _client.Dispose();
             _ = _scope.DisposeAsync();
         }
@@ -384,16 +495,47 @@ internal sealed class RtmpConnection
         }
     }
 
-    private void Cleanup()
+    private async Task CleanupAsync(CancellationToken cancellationToken)
     {
         if (_publishing is not null)
-            _hub.Unpublish(_publishing);
+        {
+            var identity = _publishing;
 
-        if (_playing is not null && _playingSubscription != Guid.Empty)
-            _hub.Unsubscribe(_playing, _playingSubscription);
+            _hub.Unpublish(identity);
+            _registry.OnStop(identity, ClientId, isPublisher: true);
+
+            await _dispatcher.DispatchEventAsync(
+                StreamEventType.Unpublish,
+                identity,
+                ClientId,
+                _remoteAddress,
+                "rtmp",
+                _connectionProperties,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        if (_playing is not null)
+        {
+            var identity = _playing;
+
+            if (_playingSubscription != Guid.Empty)
+                _hub.Unsubscribe(identity, _playingSubscription);
+
+            _registry.OnStop(identity, ClientId, isPublisher: false);
+
+            await _dispatcher.DispatchEventAsync(
+                StreamEventType.Stop,
+                identity,
+                ClientId,
+                _remoteAddress,
+                "rtmp",
+                _connectionProperties,
+                cancellationToken).ConfigureAwait(false);
+        }
 
         _publishing = null;
         _playing = null;
+        _playingSubscription = Guid.Empty;
     }
 
     public void Close()
@@ -539,7 +681,7 @@ internal sealed class RtmpConnection
             case "FCUnpublish":
             case "closeStream":
             case "deleteStream":
-                Cleanup();
+                await CleanupAsync(cancellationToken).ConfigureAwait(false);
                 SendResult(message.StreamId, transactionId);
                 break;
 
@@ -614,6 +756,7 @@ internal sealed class RtmpConnection
     {
         // 发布名形如 {app}/{name} 或 {app}/{name}?token=x（令牌也可以是 connect 对象里的字段）
         var identity = StreamIdentity.Parse(StripQuery(streamName));
+        var parameters = MergeParameters(_connectionProperties, ParseQuery(streamName));
 
         if (_options.RequirePublishToken)
         {
@@ -631,6 +774,17 @@ internal sealed class RtmpConnection
 
         _publishing = identity;
         _hub.Publish(_publishing, $"rtmp:{_id}");
+
+        // 媒体面自己维护在线状态与事件：不依赖外部媒体服务器的 webhook
+        _registry.OnPublish(identity, ClientId, _remoteAddress, StreamProtocol.Rtmp, parameters);
+        await _dispatcher.DispatchEventAsync(
+            StreamEventType.Publish,
+            identity,
+            ClientId,
+            _remoteAddress,
+            "rtmp",
+            parameters,
+            cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation("RTMP 连接 {Id} 发布 {Stream}", _id, streamName);
         SendStatus(streamId, "NetStream.Publish.Start", "Publishing");
@@ -696,6 +850,16 @@ internal sealed class RtmpConnection
             // 订阅：GOP 缓存会自动补发，播放器立刻出画面
             var subscription = stream.Subscribe();
             _playingSubscription = subscription.Id;
+
+            _registry.OnPlay(_playing, ClientId);
+            await _dispatcher.DispatchEventAsync(
+                StreamEventType.Play,
+                _playing,
+                ClientId,
+                _remoteAddress,
+                "rtmp",
+                ParseQuery(streamName),
+                cancellationToken).ConfigureAwait(false);
 
             _logger.LogInformation("RTMP 连接 {Id} 播放 {Stream}", _id, streamName);
 

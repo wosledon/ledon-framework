@@ -43,9 +43,9 @@ public class Mailer(IOptionsMonitor<SmtpOptions> options)
 }
 ```
 
-- 轮询检测变更（默认 30s）→ `IConfiguration` 重载 → `IOptionsMonitor` 联动；
-- Apollo（`AddLedonApollo`）同一套语义；多命名空间/多 DataId 合并规则见各包文档；
-- 启动时拉不到配置直接失败（不带病启动）；轮询失败不抛，旧配置继续生效。
+- **Nacos listener 长轮询**检测变更（`UseLongPolling = true`，默认 30s 挂起；服务端不支持时自动回退定时轮询）→ `IConfiguration` 重载 → `IOptionsMonitor` 联动；
+- Apollo（`AddLedonApollo`）走 `notifications/v2` 长轮询，不支持时同样回退；多命名空间/多 DataId 合并规则见各包文档；
+- 启动时拉不到配置直接失败（不带病启动）；长轮询/轮询失败不抛，旧配置继续生效。
 要把配置托管到 Nacos（多环境集中管理 + 变更热更新）时装 `Ledon.Configuration.Nacos`：
 
 ```csharp
@@ -57,8 +57,8 @@ builder.Configuration.AddLedonNacos(o =>
 ```
 
 - properties（`key=value`）与 JSON（嵌套拍平为 `a:b:c`）均可解析；
-- 默认 30s 轮询检测变更并热重载；`AddLedonOptions<T>` 照常绑定（含启动校验）；
-- 开启鉴权时配 `o.UserName`/`o.Password`（401 自动重登）。
+- 默认走 Nacos listener 长轮询（`/v1/cs/configs/listener`），变更秒级热重载；服务端不支持时回退到 `PollingInterval`（默认 30s）定时轮询；
+- 开启鉴权时配 `o.UserName`/`o.Password`（401 自动重登）；也可直接配 `o.AccessToken` 跳过登录。
 
 Apollo 用户装 `Ledon.Configuration.Apollo`（用法一致）：
 
@@ -70,6 +70,9 @@ builder.Configuration.AddLedonApollo(o =>
     o.Namespaces = ["application", "database"];   // 多命名空间合并
 });
 ```
+
+Apollo 默认使用 `notifications/v2` 长轮询（`LongPollingTimeout`，默认 60s），不支持时回退
+`PollingInterval`（默认 60s）定时轮询。
 
 ## 密钥
 

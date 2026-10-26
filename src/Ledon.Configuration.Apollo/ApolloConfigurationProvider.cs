@@ -25,11 +25,16 @@ internal sealed class ApolloConfigurationProvider : ConfigurationProvider, IDisp
     // 命名空间 → 最近一次响应（releaseKey 用于变更检测）
     private readonly Dictionary<string, ApolloConfigResponse> _configs = new(StringComparer.Ordinal);
 
+    // 命名空间 → 最近一次 notificationId（长轮询用）
+    private readonly Dictionary<string, long> _notificationIds = new(StringComparer.Ordinal);
+
     private Task? _polling;
+    private bool _longPollingEnabled;
 
     public ApolloConfigurationProvider(ApolloOptions options)
     {
         _options = options;
+        _longPollingEnabled = options.UseLongPolling;
         _http = new HttpClient(
             options.HttpMessageHandler ?? new SocketsHttpHandler(),
             disposeHandler: options.HttpMessageHandler is null)
@@ -45,10 +50,14 @@ internal sealed class ApolloConfigurationProvider : ConfigurationProvider, IDisp
         try
         {
             _configs.Clear();
+            _notificationIds.Clear();
 
             // 同步加载首个快照；失败让宿主启动失败（配置中心不可达不应该带病启动）
             foreach (var @namespace in _options.Namespaces)
+            {
                 _configs[@namespace] = FetchAsync(@namespace, CancellationToken.None).GetAwaiter().GetResult();
+                _notificationIds[@namespace] = -1;
+            }
 
             ApplySnapshot();
         }
@@ -63,6 +72,14 @@ internal sealed class ApolloConfigurationProvider : ConfigurationProvider, IDisp
 
     private async Task PollAsync()
     {
+        if (_longPollingEnabled)
+            await LongPollLoopAsync().ConfigureAwait(false);
+        else
+            await IntervalLoopAsync().ConfigureAwait(false);
+    }
+
+    private async Task IntervalLoopAsync()
+    {
         using var timer = new PeriodicTimer(_options.PollingInterval);
 
         try
@@ -74,6 +91,151 @@ internal sealed class ApolloConfigurationProvider : ConfigurationProvider, IDisp
         {
             // 正常停机
         }
+    }
+
+    private async Task LongPollLoopAsync()
+    {
+        while (!_stopping.IsCancellationRequested && _longPollingEnabled)
+        {
+            try
+            {
+                var changed = await ListenAsync(_stopping.Token).ConfigureAwait(false);
+
+                if (changed is null)
+                {
+                    _longPollingEnabled = false;
+                    break;
+                }
+
+                if (changed.Count == 0)
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(200), _stopping.Token).ConfigureAwait(false);
+                    continue;
+                }
+
+                await ApplyLongPollChangesAsync(changed, _stopping.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (_stopping.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception)
+            {
+                try
+                {
+                    await Task.Delay(
+                        _options.PollingInterval < TimeSpan.FromSeconds(5)
+                            ? _options.PollingInterval
+                            : TimeSpan.FromSeconds(5),
+                        _stopping.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+            }
+        }
+
+        await IntervalLoopAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>Apollo notifications/v2 长轮询；返回变更的命名空间，服务端不支持时返回 null。</summary>
+    private async Task<IReadOnlyCollection<string>?> ListenAsync(CancellationToken cancellationToken)
+    {
+        var notifications = _options.Namespaces
+            .Select(@namespace => new
+            {
+                namespaceName = @namespace,
+                notificationId = _notificationIds.TryGetValue(@namespace, out var id) ? id : -1,
+            })
+            .ToArray();
+
+        var payload = JsonSerializer.Serialize(notifications);
+        var url = $"{_options.ConfigServer.TrimEnd('/')}/notifications/v2" +
+                  $"?appId={Uri.EscapeDataString(_options.AppId)}" +
+                  $"&cluster={Uri.EscapeDataString(_options.Cluster)}" +
+                  $"&notifications={Uri.EscapeDataString(payload)}";
+
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(_options.LongPollingTimeout + TimeSpan.FromSeconds(5));
+
+        using var response = await _http.GetAsync(url, timeout.Token).ConfigureAwait(false);
+
+        if (response.StatusCode is HttpStatusCode.NotFound
+            or HttpStatusCode.MethodNotAllowed
+            or HttpStatusCode.NotImplemented)
+        {
+            return null;
+        }
+
+        // 304：长轮询超时且无变更
+        if (response.StatusCode == HttpStatusCode.NotModified)
+            return [];
+
+        response.EnsureSuccessStatusCode();
+
+        var body = await response.Content.ReadAsStringAsync(timeout.Token).ConfigureAwait(false);
+
+        if (string.IsNullOrWhiteSpace(body) || body == "[]")
+            return [];
+
+        var received = JsonSerializer.Deserialize<ApolloNotification[]>(
+            body,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+
+        var originals = _options.Namespaces.ToHashSet(StringComparer.Ordinal);
+        var changed = new List<string>();
+
+        foreach (var notification in received)
+        {
+            if (notification.NamespaceName is null || !originals.Contains(notification.NamespaceName))
+                continue;
+
+            if (_notificationIds.TryGetValue(notification.NamespaceName, out var previous)
+                && previous == notification.NotificationId)
+            {
+                continue;
+            }
+
+            _notificationIds[notification.NamespaceName] = notification.NotificationId;
+            changed.Add(notification.NamespaceName);
+        }
+
+        return changed;
+    }
+
+    private async Task ApplyLongPollChangesAsync(IReadOnlyCollection<string> changed, CancellationToken cancellationToken)
+    {
+        await _reloadGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            var applied = false;
+
+            foreach (var @namespace in changed)
+            {
+                var config = await FetchAsync(@namespace, cancellationToken).ConfigureAwait(false);
+                _configs[@namespace] = config;
+                applied = true;
+            }
+
+            if (!applied)
+                return;
+
+            ApplySnapshot();
+            OnReload();
+        }
+        finally
+        {
+            _reloadGate.Release();
+        }
+    }
+
+    private sealed class ApolloNotification
+    {
+        public string? NamespaceName { get; set; }
+
+        public long NotificationId { get; set; }
     }
 
     private async Task ReloadSafelyAsync()

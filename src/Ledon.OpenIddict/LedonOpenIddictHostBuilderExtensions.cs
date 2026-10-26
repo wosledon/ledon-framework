@@ -81,6 +81,10 @@ public static class LedonOpenIddictHostBuilderExtensions
         LedonOpenIddictOptions options)
     {
         ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(options);
+
+        if (!Enum.IsDefined(options.Storage))
+            throw new InvalidOperationException($"未定义的 OpenIddict 存储类型：{options.Storage}");
 
         services.AddSingleton(options);
 
@@ -94,14 +98,31 @@ public static class LedonOpenIddictHostBuilderExtensions
             options.Scopes.Add(new OpenIddictScopeDefinition { Name = "profile", DisplayName = "用户资料" });
         }
 
+        // 客户端声明可申请的 scope 自动补登记（否则 EF 模式下 scope 表为空，token 请求会被判 invalid_scope）
+        foreach (var scope in options.Clients.SelectMany(client => client.Scopes).Distinct(StringComparer.Ordinal))
+        {
+            if (!options.Scopes.Any(existing => string.Equals(existing.Name, scope, StringComparison.Ordinal)))
+                options.Scopes.Add(new OpenIddictScopeDefinition { Name = scope, DisplayName = scope });
+        }
+
         var openIddict = services.AddOpenIddict();
 
-        // 核心：管理器/存储基础设施（服务端与校验端都依赖）；默认实体绑定到内存存储用的 Descriptor
+        // 核心：管理器/存储基础设施（服务端与校验端都依赖）。
+        // 内存模式把默认实体绑到 Descriptor；EF 模式使用 OpenIddict 的默认实体表。
         var core = openIddict.AddCore();
-        core.SetDefaultApplicationEntity<OpenIddictApplicationDescriptor>();
-        core.SetDefaultAuthorizationEntity<OpenIddictAuthorizationDescriptor>();
-        core.SetDefaultScopeEntity<OpenIddictScopeDescriptor>();
-        core.SetDefaultTokenEntity<OpenIddictTokenDescriptor>();
+
+        if (options.Storage == OpenIddictStorage.EntityFrameworkCore)
+        {
+            // 走 EF Core 共享库：客户端/授权/scope/令牌全部落库，多实例可见
+            core.UseEntityFrameworkCore().UseDbContext<LedonOpenIddictDbContext>();
+        }
+        else
+        {
+            core.SetDefaultApplicationEntity<OpenIddictApplicationDescriptor>();
+            core.SetDefaultAuthorizationEntity<OpenIddictAuthorizationDescriptor>();
+            core.SetDefaultScopeEntity<OpenIddictScopeDescriptor>();
+            core.SetDefaultTokenEntity<OpenIddictTokenDescriptor>();
+        }
 
         // 服务端：token 端点 + 三个流程 + JWT 访问令牌
         var certificate = LoadSigningCertificate(options);
@@ -165,21 +186,23 @@ public static class LedonOpenIddictHostBuilderExtensions
             authentication.DefaultForbidScheme ??= authentication.DefaultScheme;
         });
 
-        // 四个默认存储（可替换：先注册自己的实现即生效——TryAdd 语义，手动优先。
-        // 多实例部署换 OpenIddict 官方的 EF/Redis 存储时在此前注册即可：
-        //   services.AddSingleton<IOpenIddictTokenStore<OpenIddictTokenDescriptor>, MyRedisTokenStore>();）
-        services.TryAdd(ServiceDescriptor.Singleton(
-            typeof(IOpenIddictApplicationStore<OpenIddictApplicationDescriptor>),
-            new InMemoryApplicationStore(options)));
-        services.TryAdd(ServiceDescriptor.Singleton(
-            typeof(IOpenIddictScopeStore<OpenIddictScopeDescriptor>),
-            new InMemoryScopeStore(options)));
-        services.TryAdd(ServiceDescriptor.Singleton(
-            typeof(IOpenIddictAuthorizationStore<OpenIddictAuthorizationDescriptor>),
-            new InMemoryAuthorizationStore()));
-        services.TryAdd(ServiceDescriptor.Singleton(
-            typeof(IOpenIddictTokenStore<OpenIddictTokenDescriptor>),
-            new InMemoryTokenStore()));
+        // 内存模式注册四个默认存储；EF 模式由 UseEntityFrameworkCore 注册共享存储。
+        // 可替换：先注册自己的实现即生效——TryAdd 语义，手动优先。
+        if (options.Storage == OpenIddictStorage.InMemory)
+        {
+            services.TryAdd(ServiceDescriptor.Singleton(
+                typeof(IOpenIddictApplicationStore<OpenIddictApplicationDescriptor>),
+                new InMemoryApplicationStore(options)));
+            services.TryAdd(ServiceDescriptor.Singleton(
+                typeof(IOpenIddictScopeStore<OpenIddictScopeDescriptor>),
+                new InMemoryScopeStore(options)));
+            services.TryAdd(ServiceDescriptor.Singleton(
+                typeof(IOpenIddictAuthorizationStore<OpenIddictAuthorizationDescriptor>),
+                new InMemoryAuthorizationStore()));
+            services.TryAdd(ServiceDescriptor.Singleton(
+                typeof(IOpenIddictTokenStore<OpenIddictTokenDescriptor>),
+                new InMemoryTokenStore()));
+        }
 
         // 登录校验实现自动发现（password 授权的凭证校验；与 AddLedonSecurity 同一约定，手动注册优先）
         foreach (var assembly in LedonAssemblies.Scan())
@@ -192,7 +215,11 @@ public static class LedonOpenIddictHostBuilderExtensions
             }
         }
 
-        // 客户端初始化（宿主启动时经管理器创建，密钥走 OpenIddict 哈希约定）
+        // 客户端初始化（宿主启动时经管理器创建，密钥走 OpenIddict 哈希约定）。
+        // EF 模式先确保数据库结构就绪，再创建客户端；两个 hosted service 按注册顺序执行。
+        if (options.Storage == OpenIddictStorage.EntityFrameworkCore && options.EnsureDatabaseCreated)
+            services.AddHostedService<OpenIddictDatabaseInitializer>();
+
         services.AddHostedService<OpenIddictClientInitializer>();
 
         return services;

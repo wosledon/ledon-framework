@@ -6,13 +6,15 @@ using Microsoft.Extensions.Logging;
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// 文件存储入口（内置本地 / 内存，业务只依赖 <see cref="IFileStorage"/>）；
-/// S3/MinIO 等对象存储需自行实现 <see cref="IFileStorage"/> 后替换注册。
+/// 文件存储入口（内置本地 / 内存 / S3 兼容，业务只依赖 <see cref="IFileStorage"/>）：
 /// <code>
 /// builder.Services.AddLedonBlobStorage(o =&gt;
 /// {
-///     o.Provider = LedonBlobProvider.Local;
-///     o.RootPath = "App_Data/blobs";
+///     o.Provider = LedonBlobProvider.S3;
+///     o.ServiceUrl = "http://localhost:9000";   // MinIO；AWS S3 留空
+///     o.BucketName = "uploads";
+///     o.AccessKey = "...";
+///     o.SecretKey = "...";
 /// });
 /// </code>
 /// </summary>
@@ -43,11 +45,20 @@ public static class LedonBlobStorageServiceCollectionExtensions
         {
             case LedonBlobProvider.Local when string.IsNullOrWhiteSpace(options.RootPath):
                 throw new InvalidOperationException("使用本地存储需要配置 RootPath");
+
+            case LedonBlobProvider.S3 when string.IsNullOrWhiteSpace(options.BucketName):
+                throw new InvalidOperationException("使用 S3 存储需要配置 BucketName");
+
+            case LedonBlobProvider.S3 when string.IsNullOrEmpty(options.AccessKey) != string.IsNullOrEmpty(options.SecretKey):
+                throw new InvalidOperationException("S3 的 AccessKey 与 SecretKey 必须同时配置（或同时留空走默认凭证链）");
+
+            case LedonBlobProvider.S3 when string.IsNullOrWhiteSpace(options.Region):
+                throw new InvalidOperationException("S3 需要配置 Region（MinIO 可填 us-east-1）");
         }
 
         services.TryAddSingleton(options);
 
-        // 内置提供程序只有本地/内存。S3 兼容存储需自行实现 IFileStorage 并替换本注册
+        // 内置提供程序：本地 / 内存 / S3 兼容
         services.TryAddSingleton<IFileStorage>(provider =>
         {
             var resolved = provider.GetRequiredService<LedonBlobStorageOptions>();
@@ -56,6 +67,7 @@ public static class LedonBlobStorageServiceCollectionExtensions
             IFileStorage storage = resolved.Provider switch
             {
                 LedonBlobProvider.InMemory => new InMemoryFileStorage(resolved),
+                LedonBlobProvider.S3 => new S3FileStorage(resolved, logger.CreateLogger<S3FileStorage>()),
                 _ => new LocalFileStorage(resolved, logger.CreateLogger<LocalFileStorage>()),
             };
 

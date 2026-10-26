@@ -7,7 +7,7 @@ namespace Ledon.Streaming;
 /// 流令牌服务：推流/拉流地址的防篡改鉴权（HMAC-SHA256 签名 + 过期时间）。
 /// <para>
 /// 签名字符串 = <c>{action}:{app}/{name}:{expireUnixSeconds}[:{extra}]</c>，
-/// 与 SRS/ZLMediaKit 的 token 鉴权思路一致：地址过期即失效，改一个字符就验不过。
+/// 与常见流媒体服务器的 token 鉴权思路一致：地址过期即失效，改一个字符就验不过。
 /// </para>
 /// </summary>
 public interface IStreamTokenService

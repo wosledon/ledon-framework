@@ -43,6 +43,9 @@ public static class NacosConfigurationExtensions
         if (options.PollingInterval <= TimeSpan.Zero)
             throw new InvalidOperationException("AddLedonNacos: PollingInterval 必须大于 0");
 
+        if (options.LongPollingTimeout <= TimeSpan.Zero)
+            throw new InvalidOperationException("AddLedonNacos: LongPollingTimeout 必须大于 0");
+
         // 用户名/密码必须成对出现（只配一个会在登录时发空凭据）
         if (string.IsNullOrEmpty(options.UserName) != string.IsNullOrEmpty(options.Password))
             throw new InvalidOperationException("AddLedonNacos: UserName 与 Password 必须同时配置");

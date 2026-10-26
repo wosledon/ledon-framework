@@ -86,10 +86,23 @@ public class ChatHub : OnlineAwareHub
 ## Ledon.BlobStorage —— 文件/对象存储
 
 ```csharp
+// 本地磁盘
 builder.Services.AddLedonBlobStorage(o =>
 {
+    o.Provider = LedonBlobProvider.Local;
     o.RootPath = "App_Data/blobs";
     o.AllowedExtensions.Add(".png");
+});
+
+// S3 / MinIO（路径风格，自动建桶；AWS 官方 S3 可省略 ServiceUrl）
+builder.Services.AddLedonBlobStorage(o =>
+{
+    o.Provider = LedonBlobProvider.S3;
+    o.ServiceUrl = "http://localhost:9000";
+    o.BucketName = "uploads";
+    o.AccessKey = "<从密钥管理注入>";
+    o.SecretKey = "<从密钥管理注入>";
+    o.Region = "us-east-1";
 });
 
 public class AvatarService(IFileStorage storage)
@@ -103,8 +116,10 @@ public class AvatarService(IFileStorage storage)
 }
 ```
 
-- 路径即主键；防目录穿越；默认拒绝覆盖；大小上限默认 100MB；
-- 多租户默认按 `tenants/{tenantId}/` 加前缀，租户间文件互不可见。
+- 路径即主键；防目录穿越；默认拒绝覆盖（S3 用 `If-None-Match: *`）；大小上限默认 100MB；
+- 本地写入先落临时文件再原子替换：超限/失败不会留下半截文件；
+- 多租户默认按 `tenants/{tenantId}/` 加前缀，租户间文件互不可见；`ListAsync` 同样限定在当前租户；
+- S3 兼容 MinIO（`ForcePathStyle = true`）；未配置访问密钥时走 AWS 默认凭证链。
 
 ## Ledon.Notifications —— 通知发送
 

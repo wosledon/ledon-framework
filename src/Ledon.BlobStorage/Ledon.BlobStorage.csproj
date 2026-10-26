@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AWSSDK.S3" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\Ledon.MultiTenancy\Ledon.MultiTenancy.csproj" />
     </ItemGroup>
 

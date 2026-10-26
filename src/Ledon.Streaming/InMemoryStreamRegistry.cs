@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 namespace Ledon.Streaming;
 
 /// <summary>
-/// 在线流注册表：媒体服务器回调驱动，内存维护"谁在推、几个人在看"。
+/// 在线流注册表：由进程内 RTMP 媒体面驱动，内存维护"谁在推、几个人在看"。
 /// 单实例部署直接用；多实例部署可换 Redis 实现（同一接口）。
 /// </summary>
 public sealed class InMemoryStreamRegistry : IStreamRegistry
@@ -46,6 +46,15 @@ public sealed class InMemoryStreamRegistry : IStreamRegistry
         }
 
         _logger.LogInformation("流 {Stream} 新增观众（{ClientId}，当前 {Count} 人）", identity, clientId, PlayersOf(identity));
+    }
+
+    public void OnHeartbeat(StreamIdentity identity)
+    {
+        lock (_gate)
+        {
+            if (_streams.TryGetValue(identity.Path, out var status))
+                status.LastSeenUtc = DateTimeOffset.UtcNow;
+        }
     }
 
     public void OnStop(StreamIdentity identity, string? clientId, bool isPublisher)

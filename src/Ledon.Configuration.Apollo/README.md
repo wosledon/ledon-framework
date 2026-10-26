@@ -1,6 +1,6 @@
 # Ledon.Configuration.Apollo
 
-Ledon Framework 的 Apollo 配置中心接入：Apollo 作为配置源，支持多命名空间合并、变更热更新。
+Ledon Framework 的 Apollo 配置中心接入：Apollo 作为配置源，支持多命名空间合并、`notifications/v2` 长轮询热更新。
 
 ```csharp
 builder.Configuration.AddLedonApollo(o =>
@@ -11,8 +11,8 @@ builder.Configuration.AddLedonApollo(o =>
 });
 ```
 
-- **解析**：`application` 命名空间的键直接进配置树；其它命名空间以 `{命名空间}:content` 暴露原始文件内容（properties 之外的 yaml/json 自行解析）；
-- **热更新**：默认每 60s 轮询检测变更（releaseKey 比对），变更即触发热重载（`o.PollingInterval` 可调）；
+- **解析**：`application` 命名空间的键直接进配置树；其它命名空间以 `{命名空间}:{键}` 暴露；
+- **长轮询**：默认走 `/notifications/v2`（挂起 60s），变更秒级热重载；服务端不支持时自动回退 `PollingInterval` 定时轮询；
 - **与强类型配置配合**：`AddLedonOptions<T>` 照常绑定 Apollo 里的节（含启动校验）；
 - **集群/命名空间**：`o.Cluster`（默认 default）与 `o.Namespaces` 可配。
 

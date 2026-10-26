@@ -15,8 +15,14 @@ public sealed class ApolloOptions
     /// <summary>命名空间列表，默认 ["application"]（多命名空间按序合并，后者覆盖同键）。</summary>
     public string[] Namespaces { get; set; } = ["application"];
 
-    /// <summary>配置变更轮询间隔，默认 60 秒（Apollo 长轮询的简化替代，配置变更不频繁场景足够）。</summary>
+    /// <summary>配置变更轮询间隔，默认 60 秒（长轮询不可用时的回退间隔）。</summary>
     public TimeSpan PollingInterval { get; set; } = TimeSpan.FromSeconds(60);
+
+    /// <summary>是否使用 Apollo 原生通知长轮询（<c>/notifications/v2</c>），默认 <c>true</c>。</summary>
+    public bool UseLongPolling { get; set; } = true;
+
+    /// <summary>长轮询挂起时长，默认 60 秒（Apollo 服务端默认上限）。</summary>
+    public TimeSpan LongPollingTimeout { get; set; } = TimeSpan.FromSeconds(60);
 
     /// <summary>自定义 HTTP 消息处理器（测试注入假服务端用）；生产无需设置。</summary>
     public HttpMessageHandler? HttpMessageHandler { get; set; }

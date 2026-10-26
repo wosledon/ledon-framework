@@ -25,6 +25,7 @@ public class RtmpEndToEndTests : IAsyncDisposable
     private int _rtmpPort => _ports[0];
     private int _httpPort => _ports[1];
     private WebApplication? _app;
+    private readonly List<StreamEventType> _events = [];
 
     /// <summary>测试用鉴权器：只认 <c>secret-token</c>。</summary>
     private sealed class TokenAuthenticator : Ledon.Streaming.Rtmp.IRtmpAuthenticator
@@ -253,6 +254,32 @@ public class RtmpEndToEndTests : IAsyncDisposable
             $"预期 404（无分片）或 200，实际 {(int)response.StatusCode}");
     }
 
+    [Fact]
+    public async Task Publish_updates_registry_and_kickoff_disconnects()
+    {
+        StartStreaming();
+        using var client = new MiniRtmpClient();
+        await client.ConnectAsync(IPAddress.Loopback, _rtmpPort);
+
+        await client.SendCommandAsync("connect", 1, new Dictionary<string, string> { ["app"] = "live" });
+        await client.SendCommandAsync("createStream", 4);
+        await client.SendCommandAsync("publish", 5, "live/kick");
+        await client.WaitForStatusAsync("NetStream.Publish.Start", TimeSpan.FromSeconds(5));
+
+        var identity = StreamIdentity.Parse("live/kick");
+        var registry = _app!.Services.GetRequiredService<IStreamRegistry>();
+
+        await WaitUntilAsync(() => registry.Find(identity)?.Online == true, TimeSpan.FromSeconds(5));
+        Assert.Contains(StreamEventType.Publish, _events);
+
+        var control = _app.Services.GetRequiredService<IStreamControl>();
+        Assert.Single(control.GetStreams());
+        Assert.Equal(1, control.Kickoff(identity));
+
+        await WaitUntilAsync(() => registry.Find(identity)?.Online == false, TimeSpan.FromSeconds(5));
+        Assert.Contains(StreamEventType.Unpublish, _events);
+    }
+
     private void StartStreaming(Action<Ledon.Streaming.Rtmp.RtmpServerOptions>? configure = null)
     {
         var builder = WebApplication.CreateBuilder();
@@ -269,6 +296,7 @@ public class RtmpEndToEndTests : IAsyncDisposable
             configure?.Invoke(options);
         });
         builder.Services.AddSingleton<Ledon.Streaming.Rtmp.IRtmpAuthenticator, TokenAuthenticator>();
+        builder.Services.AddSingleton<IStreamEventHandler>(new EventRecorder(_events));
 
         builder.AddLedonWeb();
         _app = builder.Build();
@@ -283,6 +311,17 @@ public class RtmpEndToEndTests : IAsyncDisposable
         var deadline = DateTime.UtcNow + timeout;
         while (!condition() && DateTime.UtcNow < deadline)
             await Task.Delay(20);
+    }
+
+    private sealed class EventRecorder(List<StreamEventType> events) : IStreamEventHandler
+    {
+        public Task HandleAsync(StreamEvent @event, CancellationToken cancellationToken = default)
+        {
+            lock (events)
+                events.Add(@event.Type);
+
+            return Task.CompletedTask;
+        }
     }
 
     public async ValueTask DisposeAsync()

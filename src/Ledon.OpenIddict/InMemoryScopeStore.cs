@@ -75,7 +75,7 @@ internal sealed class InMemoryScopeStore : IOpenIddictScopeStore<OpenIddictScope
         ValueTask.FromResult(Bag<ImmutableDictionary<string, JsonElement>>(scope, "Properties"));
 
     private static T Bag<T>(OpenIddictScopeDescriptor scope, string name) =>
-        StoreBag.Get(scope).TryGetValue(name, out var value) && value is T typed ? typed : default!;
+        StoreBag.Get(scope).TryGetValue(name, out var value) && value is T typed ? typed : StoreBag.Empty<T>();
 
     // ---------- 写路径：配置驱动，不支持 ----------
 

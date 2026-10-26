@@ -53,7 +53,15 @@ internal static class BlobPath
         var normalized = Normalize(path);
         var tenant = tenantAccessor();
 
-        return string.IsNullOrEmpty(tenant) ? normalized : $"tenants/{tenant}/{normalized}";
+        if (string.IsNullOrWhiteSpace(tenant))
+            return normalized;
+
+        var segment = Normalize(tenant);
+
+        if (segment.Contains('/'))
+            throw new ArgumentException($"租户标识不能包含路径分隔符：{tenant}");
+
+        return $"tenants/{segment}/{normalized}";
     }
 }
 
