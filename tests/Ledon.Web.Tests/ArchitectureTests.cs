@@ -109,6 +109,8 @@ public class ArchitectureTests
         ["Ledon.DataExchange"] = [],
         // 图像处理复用文件存储
         ["Ledon.Imaging"] = ["Ledon.BlobStorage"],
+        // 搜索同步复用搜索抽象
+        ["Ledon.Search.Sync"] = ["Ledon.Search"],
     };
 
     [Fact]
