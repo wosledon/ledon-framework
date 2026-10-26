@@ -32,8 +32,8 @@ if (login.Status == AccountLoginStatus.Success) { /* login.User */ }
 ```
 
 - 密码使用 PBKDF2-SHA256（10 万次迭代、随机盐）哈希，常量时间校验；
-- 确认/重置令牌只存 SHA-256 哈希、一次性、带过期时间，默认内存存储；
-- 生产多实例请替换 `IAccountStore` 与 `IAccountTokenStore`（数据库/Redis）；
+- 确认/重置令牌只存 SHA-256 哈希、一次性、带过期时间，重发同用途令牌会使旧令牌失效；
+- 默认内存存储；生产多实例请替换 `IAccountStore` 与 `IAccountTokenStore`（数据库/Redis）；
 - `ExposeTokensInResponses` 仅用于本地开发；生产请配置通知渠道；
 - `AccountsUserValidator` 默认不自动注册（`[DisableAutoDiscovery]`），需要时打开 `RegisterUserValidator`。
 
