@@ -113,6 +113,8 @@ public class ArchitectureTests
         ["Ledon.Search.Sync"] = ["Ledon.Search"],
         // 模块迁移复用数据层
         ["Ledon.Data.Migrations"] = ["Ledon.Data"],
+        // 幂等模块复用分布式锁
+        ["Ledon.Idempotency"] = ["Ledon.Locking"],
     };
 
     [Fact]
