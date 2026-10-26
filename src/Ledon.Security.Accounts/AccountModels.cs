@@ -218,6 +218,12 @@ public interface IAccountTokenStore
         AccountTokenPurpose purpose,
         string? accountId = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>移除某账号某用途的全部令牌（重发确认/重置时使旧令牌失效）。</summary>
+    Task RemoveAllAsync(
+        string accountId,
+        AccountTokenPurpose purpose,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>默认内存令牌存储。</summary>
@@ -255,6 +261,20 @@ public sealed class InMemoryAccountTokenStore(TimeProvider timeProvider) : IAcco
         }
 
         return Task.FromResult(true);
+    }
+
+    public Task RemoveAllAsync(
+        string accountId,
+        AccountTokenPurpose purpose,
+        CancellationToken cancellationToken = default)
+    {
+        foreach (var (hash, entry) in _tokens)
+        {
+            if (string.Equals(entry.AccountId, accountId, StringComparison.Ordinal) && entry.Purpose == purpose)
+                _tokens.TryRemove(hash, out _);
+        }
+
+        return Task.CompletedTask;
     }
 
     private void CleanupExpired()

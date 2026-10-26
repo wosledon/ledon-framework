@@ -265,6 +265,8 @@ public sealed class AccountService(
             ? options.EmailVerificationTokenLifetime
             : options.PasswordResetTokenLifetime;
 
+        await tokenStore.RemoveAllAsync(account.Id, purpose, cancellationToken).ConfigureAwait(false);
+
         await tokenStore.CreateAsync(
             AccountTokenHashing.Hash(token),
             account.Id,
