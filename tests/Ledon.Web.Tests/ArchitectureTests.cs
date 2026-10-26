@@ -107,6 +107,8 @@ public class ArchitectureTests
         ["Ledon.Secrets"] = [],
         // 数据交换无框架依赖
         ["Ledon.DataExchange"] = [],
+        // 图像处理复用文件存储
+        ["Ledon.Imaging"] = ["Ledon.BlobStorage"],
     };
 
     [Fact]

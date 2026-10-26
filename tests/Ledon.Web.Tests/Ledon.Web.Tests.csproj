@@ -18,6 +18,7 @@
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+        <PackageReference Include="SkiaSharp.NativeAssets.Win32" />
         <!-- gRPC 测试夹具：用真实 protoc 生成代码验证服务发现与映射 -->
         <PackageReference Include="Grpc.Tools" />
         <!-- OpenIddict.Validation.SystemNetHttp 传递引入 Polly v7（与 Ledon.Resilience 的 Polly.Core v8 同名类型冲突）：
@@ -89,6 +90,7 @@
     <ProjectReference Include="..\..\src\Ledon.ApiClients\Ledon.ApiClients.csproj" />
     <ProjectReference Include="..\..\src\Ledon.Secrets\Ledon.Secrets.csproj" />
     <ProjectReference Include="..\..\src\Ledon.DataExchange\Ledon.DataExchange.csproj" />
+    <ProjectReference Include="..\..\src\Ledon.Imaging\Ledon.Imaging.csproj" />
     </ItemGroup>
 
     <ItemGroup>
