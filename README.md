@@ -60,6 +60,7 @@ app.Run();
 | SIP 服务端                             | `Ledon.Sip.Server`            | `AddLedonSipServer()`                             | 基于 Socket 库：UDP/TCP + 事务层（响应重传/ACK/定时器） |
 | SIP 客户端                             | `Ledon.Sip.Client`            | `AddLedonSipClient()`                             | 基于 Socket 库：事务 + 对话 + ACK/CANCEL + 重传超时 |
 | 流媒体（独立媒体面）                    | `Ledon.Streaming`             | `AddLedonStreaming()`                              | 进程内 RTMP 服务端（保活/鉴权/过期回收）+ HTTP-FLV/HLS + 在线状态/事件/踢人 |
+| 出站 Webhook                           | `Ledon.Webhooks`              | `AddLedonWebhooks()`                               | 订阅 + HMAC 签名 + 重试/死信/重放 + 管理端点 |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -357,11 +358,12 @@ src/Ledon.Sip/              SIP/SDP 协议解析（纯解析，obs-fold + 多值
 src/Ledon.Sip.Server/       SIP 服务端（基于 Socket 库，UDP/TCP + 事务层）
 src/Ledon.Sip.Client/       SIP 客户端（基于 Socket 库，事务 + 对话 + ACK/CANCEL）
 src/Ledon.Streaming/       流媒体：独立 RTMP 服务端（保活/鉴权/过期回收）+ HTTP-FLV/HLS + 推拉流鉴权/事件/踢人
+src/Ledon.Webhooks/        出站 Webhook：订阅 + HMAC 签名 + 重试/死信/重放
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
                         Ledon.ProtocolSample（协议栈：结构体映射→帧→TCP/UDP→SIP）
                         Ledon.StreamSample（流媒体：RTMP 推流→HTTP-FLV/HLS 播放）
-tests/                  xunit 测试（模块 26 + Web 463 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 467 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

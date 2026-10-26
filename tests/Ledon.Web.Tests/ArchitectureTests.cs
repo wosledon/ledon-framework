@@ -67,6 +67,8 @@ public class ArchitectureTests
         ["Ledon.Sip.Server"] = ["Ledon.Sip", "Ledon.Sockets.Server", "Ledon.Protocols"],
         // 流媒体控制面：端点走 Web
         ["Ledon.Streaming"] = ["Ledon.Web"],
+        // 出站 Webhook 管理端点走 Web
+        ["Ledon.Webhooks"] = ["Ledon.Web"],
     };
 
     [Fact]
