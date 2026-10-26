@@ -1,6 +1,6 @@
 # 扩展能力包
 
-本轮补齐的 11 个跨模块能力，全部按需引入。
+跨模块能力包，全部按需引入。第一批覆盖集成/通知/基础设施/安全/测试，第二批补齐配额、租户数据库、账号安全、出站客户端、密钥、数据交换、图像、搜索同步与迁移编排。
 
 ## 集成与通知
 
@@ -117,3 +117,137 @@ await using var redis = await RedisFixture.StartAsync();
 ```
 
 Redis / PostgreSQL / RabbitMQ / Kafka / MinIO 夹具；无 Docker 环境显式跳过。
+
+## 配额、安全与账号
+
+### Ledon.Quotas —— 固定窗口配额/限流
+
+```csharp
+builder.Services.AddLedonQuotas(o =>
+{
+    o.DefaultLimit = 100;
+    o.Window = TimeSpan.FromMinutes(1);
+    o.UseDistributedCache = true;                 // 多实例共享（需先注册 IDistributedCache）
+    o.KeySelector = ctx => ctx.User.FindFirst("tenant")?.Value ?? "anonymous";
+});
+app.UseLedonQuotas();
+```
+
+超限返回 429 + `Retry-After`，响应头带剩余配额；默认按客户端 IP，可按租户/API Key/用户自定义。
+
+### Ledon.Security.ApiKeys / Ledon.Security.TokenStores
+
+动态 API Key（SHA-256 哈希、scopes/租户/过期/吊销、`LedonApiKey` 认证方案）与基于 `IDistributedCache` 的共享刷新令牌存储（单条/按用户吊销）。
+
+### Ledon.Security.Totp —— TOTP 双因素
+
+```csharp
+builder.Services.AddLedonTotp(o => o.Issuer = "MyApp");
+
+var secret = totp.GenerateSecret();
+var valid = totp.Validate(secret, userCode);
+var codes = recoveryCodes.Generate();             // 一次性恢复码，SHA-256 哈希存储
+```
+
+RFC 6238（SHA-1/256/512、6-8 位、时间窗口）；`BuildUri` 可直接生成二维码内容。
+
+### Ledon.Security.Accounts —— 注册登录与密码生命周期
+
+```csharp
+builder.Services.AddLedonAccounts(o =>
+{
+    o.RequireConfirmedEmail = true;
+    o.RegisterUserValidator = true;               // 接入 /auth/login
+});
+```
+
+PBKDF2 密码、邮箱确认、失败锁定、一次性密码重置令牌；端点 `/auth/accounts/*`，可接入 `Ledon.Notifications` 发送邮件。
+
+### Ledon.Secrets —— Vault 密钥
+
+```csharp
+builder.Configuration.AddLedonVault(o =>
+{
+    o.Address = "https://vault:8200";
+    o.Token = Environment.GetEnvironmentVariable("VAULT_TOKEN");
+    o.Paths.Add("myapp");
+});
+
+builder.Services.AddLedonSecrets();
+var password = await secrets.GetRequiredSecretAsync("myapp/db#password");
+```
+
+HashiCorp Vault KV v1/v2、Token/TokenFile、Namespace、TTL 缓存与启动配置源；生产可替换为 KMS 实现。
+
+## 数据与集成
+
+### Ledon.Data.MultiTenancy —— 租户数据库路由
+
+```csharp
+builder.Services.AddLedonTenantData<AppDbContext>(o =>
+{
+    o.DefaultConnectionString = configuration.GetConnectionString("Default");
+    o.ConfigureDbContext = (db, cs) => db.UseNpgsql(cs);
+});
+```
+
+按租户目录解析连接串（共享库回退）、按租户创建 DbContext、默认库 + 全部启用租户迁移编排。
+
+### Ledon.Data.Migrations —— 模块迁移编排
+
+```csharp
+builder.Services.AddLedonMigration<AppDbContext>("app", order: 1);
+
+var status = await runner.GetStatusAsync();
+var report = await runner.MigrateAllAsync();
+```
+
+EF Core Migrate / EnsureCreated、执行顺序、状态查询、失败隔离；与 `Ledon.Data.MultiTenancy` 的按租户迁移互补。
+
+### Ledon.DataExchange —— CSV/Excel
+
+```csharp
+[DataColumn("订单号", 1)] public Guid Id { get; set; }
+[DataColumn("金额", 2)] public decimal Amount { get; set; }
+
+await exchange.ExportCsvAsync(stream, rows);
+var result = await exchange.ImportExcelAsync<OrderRow>(stream);
+```
+
+RFC 4180 CSV、OpenXML 流式 Excel、属性映射、逐行错误行号/列名报告。
+
+### Ledon.Imaging —— 图像处理
+
+```csharp
+builder.Services.AddLedonImaging();
+
+var bytes = await images.ProcessAsync(stream, new ImageTransform(
+    Width: 320, Height: 320, Mode: ResizeMode.Fit, Format: ImageFormat.Webp));
+```
+
+SkiaSharp（MIT）PNG/JPEG/WebP、Fit/Fill/Stretch、缩略图与 `IFileStorage` 集成；按平台添加 NativeAssets。
+
+### Ledon.ApiClients —— 出站 HTTP 客户端
+
+```csharp
+builder.Services.AddLedonApiClient("orders", o =>
+{
+    o.BaseAddress = "https://orders.internal/";
+    o.TokenEndpoint = "https://identity/connect/token";
+    o.ClientId = "...";
+    o.ClientSecret = "...";
+});
+```
+
+OAuth2 client_credentials 令牌缓存/刷新、Bearer、`X-Correlation-ID`、`traceparent` 自动传播；支持命名与类型化客户端。
+
+### Ledon.Search.Sync —— 索引增量同步
+
+```csharp
+builder.Services.AddLedonSearchSync(o => o.MaxRetries = 5);
+
+await sync.EnqueueUpsertAsync("products", id, product, tenantId);
+await sync.EnqueueDeleteAsync("products", id, tenantId);
+```
+
+可替换同步队列 + 后台 Worker + 指数退避重试；生产可把 `ISearchSyncQueue` 换成数据库发件箱/持久队列。

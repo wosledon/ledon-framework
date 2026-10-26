@@ -73,6 +73,16 @@ app.Run();
 | 集成测试容器                           | `Ledon.Testing.Containers`    | `LedonContainers` / `*Fixture`                     | Redis / PostgreSQL / RabbitMQ / Kafka / MinIO |
 | 动态 API Key                           | `Ledon.Security.ApiKeys`      | `AddLedonApiKeys()`                                | SHA-256 哈希 + scopes/租户/过期/吊销 + `LedonApiKey` 方案 |
 | 共享令牌存储                           | `Ledon.Security.TokenStores`  | `AddLedonDistributedTokenStores()`                 | IDistributedCache 刷新令牌存储 + 单条/按用户吊销 |
+| 固定窗口配额/限流                      | `Ledon.Quotas`                | `AddLedonQuotas()`                                 | 多实例缓存存储 + 429/Retry-After + 自定义配额键 |
+| 租户数据库路由                         | `Ledon.Data.MultiTenancy`     | `AddLedonTenantData<TContext>()`                   | 租户连接串解析 + 按租户 DbContext + 迁移编排 |
+| TOTP 双因素                            | `Ledon.Security.Totp`         | `AddLedonTotp()`                                   | RFC 6238 + Base32 + otpauth URI + 一次性恢复码 |
+| 账号生命周期                           | `Ledon.Security.Accounts`     | `AddLedonAccounts()`                               | PBKDF2 + 邮箱确认 + 失败锁定 + 密码重置端点 |
+| 出站 API 客户端                        | `Ledon.ApiClients`            | `AddLedonApiClient()` / `AddLedonApiClient<T>()`   | client_credentials 令牌缓存 + 关联 ID/traceparent |
+| Vault 密钥                             | `Ledon.Secrets`               | `AddLedonSecrets()` / `Configuration.AddLedonVault()` | KV v1/v2 + Token/TokenFile + 配置源 + TTL 缓存 |
+| CSV/Excel 数据交换                     | `Ledon.DataExchange`          | `AddLedonDataExchange()`                           | RFC 4180 CSV + OpenXML 流式 Excel + 错误行报告 |
+| 图像处理                               | `Ledon.Imaging`               | `AddLedonImaging()`                                | PNG/JPEG/WebP + Fit/Fill + 缩略图 + 文件存储集成 |
+| 搜索索引同步                           | `Ledon.Search.Sync`           | `AddLedonSearchSync()`                             | 队列 + 后台 Worker + 指数退避 + 超限丢弃 |
+| 模块迁移编排                           | `Ledon.Data.Migrations`       | `AddLedonMigration<TContext>()`                    | 模块状态查询 + 顺序执行 + 失败隔离 |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -383,6 +393,16 @@ src/Ledon.Data.Encryption/ 列级透明加密
 src/Ledon.Testing.Containers/ 集成测试容器夹具（Redis/PG/RabbitMQ/Kafka/MinIO）
 src/Ledon.Security.ApiKeys/ 动态 API Key
 src/Ledon.Security.TokenStores/ 共享刷新令牌存储
+src/Ledon.Quotas/        固定窗口配额/限流（多实例缓存）
+src/Ledon.Data.MultiTenancy/ 租户数据库路由与迁移
+src/Ledon.Security.Totp/ TOTP 双因素与恢复码
+src/Ledon.Security.Accounts/ 账号注册登录与密码生命周期
+src/Ledon.ApiClients/    出站 HTTP 客户端（令牌缓存/关联 ID）
+src/Ledon.Secrets/       Vault 密钥与配置源
+src/Ledon.DataExchange/  CSV/Excel 导入导出
+src/Ledon.Imaging/       图像处理（缩放/缩略图/格式转换）
+src/Ledon.Search.Sync/   搜索索引增量同步与重试
+src/Ledon.Data.Migrations/ 模块迁移编排与状态
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
                         Ledon.ProtocolSample（协议栈：结构体映射→帧→TCP/UDP→SIP）

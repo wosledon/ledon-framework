@@ -34,7 +34,7 @@ app.Run();
 | [平台服务](~/docs/platform-services.md) | 分布式锁/功能开关/文件存储/通知/多语言/操作审计/CQRS 管线/运维端点 |
 | [飞书/Socket/SIP](~/docs/realtime-protocols.md) | 飞书通知与事件回调、TCP/UDP 与帧/包编解码、SIP 解析 |
 | [流媒体](~/docs/streaming.md)        | 独立媒体面：RTMP 推拉流 + HTTP-FLV/HLS、令牌鉴权、在线状态、事件与踢人 |
-| [扩展能力包](~/docs/extensions.md)    | 出站 Webhook、短信/推送、分布式 ID、数据播种、运行时设置、搜索、外部登录、租户管理、列加密、Testcontainers |
+| [扩展能力包](~/docs/extensions.md)    | Webhook、通知渠道、ID、播种、设置、搜索、外部登录、租户管理、列加密、Testcontainers、配额、账号/TOTP、出站客户端、Vault、CSV/Excel、图像、搜索同步、迁移 |
 | [可靠投递](~/docs/reliability.md)     | 发件箱清理/死信、收件箱去重                |
 | [gRPC](~/docs/grpc.md)                | 服务间通信：自动发现与约定映射             |
 | [Kafka](~/docs/kafka.md)              | 发件箱 ↔ Kafka 跨服务投递                 |

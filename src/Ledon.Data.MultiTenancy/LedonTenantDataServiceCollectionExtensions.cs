@@ -1,5 +1,6 @@
 using Ledon.Data;
 using Ledon.Data.MultiTenancy;
+using Ledon.MultiTenancy.Management;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -28,7 +29,9 @@ public static class LedonTenantDataServiceCollectionExtensions
         configure?.Invoke(options);
 
         services.AddLedonMultiTenancy();
-        services.AddLedonTenantManagement();
+
+        // 只注册租户目录，不注册管理端点：避免仅接入数据库路由时意外暴露 /tenants CRUD
+        services.TryAddSingleton<ITenantStore, InMemoryTenantStore>();
 
         services.TryAddSingleton(options);
         services.TryAddSingleton<ITenantConnectionResolver, TenantStoreConnectionResolver>();
