@@ -115,6 +115,10 @@ public class ArchitectureTests
         ["Ledon.Data.Migrations"] = ["Ledon.Data"],
         // 幂等模块复用分布式锁
         ["Ledon.Idempotency"] = ["Ledon.Locking"],
+        // RBAC 授权复用安全与 Web 端点
+        ["Ledon.Security.Authorization"] = ["Ledon.Security", "Ledon.Web"],
+        // API 版本化无框架模块依赖
+        ["Ledon.ApiVersioning"] = [],
     };
 
     [Fact]

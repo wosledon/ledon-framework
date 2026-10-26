@@ -99,6 +99,9 @@ internal static class AssemblyScanner
         "Ledon.Imaging",
         "Ledon.Search.Sync",
         "Ledon.Data.Migrations",
+        "Ledon.Idempotency",
+        "Ledon.Security.Authorization",
+        "Ledon.ApiVersioning",
     };
 
     /// <summary>

@@ -83,6 +83,9 @@ app.Run();
 | 图像处理                               | `Ledon.Imaging`               | `AddLedonImaging()`                                | PNG/JPEG/WebP + Fit/Fill + 缩略图 + 文件存储集成 |
 | 搜索索引同步                           | `Ledon.Search.Sync`           | `AddLedonSearchSync()`                             | 队列 + 后台 Worker + 指数退避 + 超限丢弃 |
 | 模块迁移编排                           | `Ledon.Data.Migrations`       | `AddLedonMigration<TContext>()`                    | 模块状态查询 + 顺序执行 + 失败隔离 |
+| 幂等/防重复提交                        | `Ledon.Idempotency`           | `AddLedonIdempotency()`                            | 请求指纹 + 响应重放 + 409 冲突 + 并发/多实例去重 |
+| RBAC 授权                              | `Ledon.Security.Authorization` | `AddLedonAuthorization()`                         | 角色/权限/用户分配 + 通配符 + 权限缓存 |
+| API 版本治理                           | `Ledon.ApiVersioning`         | `AddLedonApiVersioning()`                          | 多来源版本读取 + 默认版本 + Deprecation/Sunset |
 不用的包不引用，零负担。所有包共享同一套自动发现（`LedonAssemblies.Scan`）与模块生命周期。
 
 ## 写一个模块
@@ -403,11 +406,14 @@ src/Ledon.DataExchange/  CSV/Excel 导入导出
 src/Ledon.Imaging/       图像处理（缩放/缩略图/格式转换）
 src/Ledon.Search.Sync/   搜索索引增量同步与重试
 src/Ledon.Data.Migrations/ 模块迁移编排与状态
+src/Ledon.Idempotency/   幂等/防重复提交（指纹 + 重放 + 冲突）
+src/Ledon.Security.Authorization/ RBAC 角色与权限
+src/Ledon.ApiVersioning/ API 版本治理与弃用头
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
                         Ledon.ProtocolSample（协议栈：结构体映射→帧→TCP/UDP→SIP）
                         Ledon.StreamSample（流媒体：RTMP 推流→HTTP-FLV/HLS 播放）
-tests/                  xunit 测试（模块 26 + Web 541 用例，顺序断言 + 变异验证）
+tests/                  xunit 测试（模块 26 + Web 548 用例，顺序断言 + 变异验证）
 tests/Ledon.Benchmarks/ 基准测试（BenchmarkDotNet：扫描/约定注入/事件/模块生命周期）
 scripts/                任务编排：./run.ps1 [scan|build|test|sample|web|worker|check|bench|docs]
 docs/                   文档站（docfx）

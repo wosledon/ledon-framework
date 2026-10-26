@@ -251,3 +251,38 @@ await sync.EnqueueDeleteAsync("products", id, tenantId);
 ```
 
 可替换同步队列 + 后台 Worker + 指数退避重试；生产可把 `ISearchSyncQueue` 换成数据库发件箱/持久队列。
+
+## API 治理
+
+### Ledon.Idempotency —— 幂等与防重复提交
+
+```csharp
+builder.Services.AddLedonIdempotency(o => o.Ttl = TimeSpan.FromHours(24));
+app.UseRouting();
+app.UseLedonIdempotency();
+```
+
+`Idempotency-Key` + 请求指纹 + 响应重放 + 同键冲突 409 + 并发单飞去重；注册分布式锁/缓存后支持多实例。默认按租户 + 用户分区，避免撞键。
+
+### Ledon.Security.Authorization —— RBAC
+
+```csharp
+builder.Services.AddLedonAuthorization(o => o.MapEndpoints = true);
+
+await roles.CreateRoleAsync("support", ["orders.*", "users.read"]);
+await roles.AssignRoleAsync(userId, "support");
+```
+
+角色/权限/用户分配、通配符匹配、权限缓存失效，并接入 `PermissionRequirement` 动态策略。
+
+### Ledon.ApiVersioning —— API 版本治理
+
+```csharp
+builder.Services.AddLedonApiVersioning(o => o.DefaultVersion = "1.0");
+app.UseRouting();
+app.UseLedonApiVersioning();
+```
+
+URL 段 / `X-Api-Version` / `api-version` / 媒体类型多来源版本；`[ApiDeprecated]` 输出 `Deprecation`/`Sunset`/`Link`。基于 Apache-2.0 的 `Asp.Versioning`。
+
+> 许可证说明：本仓库扩展模块只选用 MIT / Apache-2.0 等宽松开源组件（如 SkiaSharp、OpenXML、Asp.Versioning），不引入付费或需商业授权的组件。

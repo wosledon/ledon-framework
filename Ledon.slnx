@@ -77,6 +77,8 @@
     <Project Path="src/Ledon.Search.Sync/Ledon.Search.Sync.csproj" />
     <Project Path="src/Ledon.Data.Migrations/Ledon.Data.Migrations.csproj" />
     <Project Path="src/Ledon.Idempotency/Ledon.Idempotency.csproj" />
+    <Project Path="src/Ledon.Security.Authorization/Ledon.Security.Authorization.csproj" />
+    <Project Path="src/Ledon.ApiVersioning/Ledon.ApiVersioning.csproj" />
     <Project Path="src/Ledon.Workflow/Ledon.Workflow.csproj" />
   </Folder>
   <Folder Name="/tests/">
