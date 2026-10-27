@@ -84,6 +84,19 @@ jobs:
             TestResults/**/*.trx
             TestResults/**/coverage.cobertura.xml
 
+      - name: 模板冒烟测试（React / Blazor）
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          hive=$(mktemp -d)
+          out=$(mktemp -d)
+          dotnet new install templates --debug:custom-hive "$hive" >/dev/null
+          dotnet new ledon-react -n Ci.React -o "$out/react" --debug:custom-hive "$hive" >/dev/null
+          dotnet new ledon-blazor -n Ci.Blazor -o "$out/blazor" --debug:custom-hive "$hive" >/dev/null
+          dotnet build "$out/react/Ci.React.csproj" -c Release -p:LedonSourcePath="$PWD/src"
+          dotnet build "$out/blazor/Ci.Blazor.csproj" -c Release -p:LedonSourcePath="$PWD/src"
+
       - name: 构建文档站（docfx 验证）
         run: |
           dotnet tool restore
