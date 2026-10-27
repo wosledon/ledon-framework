@@ -34,3 +34,5 @@ curl http://localhost:5120/api/effective
 数据文件：`samples/Ledon.ConfigCenterDemo/App_Data/config-center.json`。
 
 > 这是单实例开发示例；多实例配置中心应把 `ISettingsStore` 换成数据库/Redis，并保留相同的 `IConfigurationProvider` 热更新模式。
+>
+> 示例的 `/api/config` 写接口未加认证，仅用于本地演示；生产请用 `AddLedonSecurity` + `AddLedonAuthorization` 保护配置管理端点。
