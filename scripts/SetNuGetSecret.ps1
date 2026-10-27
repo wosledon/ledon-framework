@@ -10,7 +10,8 @@ if ([string]::IsNullOrWhiteSpace($env:NUGET_API_KEY)) {
 未发现环境变量 NUGET_API_KEY。
 
 请先在当前终端设置（不要把 Key 写进脚本/仓库）：
-  `$env:NUGET_API_KEY = Read-Host -AsSecureString 'NuGet API Key' | ConvertFrom-SecureString -AsPlainText
+  `$secure = Read-Host -AsSecureString 'NuGet API Key'
+  `$env:NUGET_API_KEY = ConvertFrom-SecureString -SecureString `$secure -AsPlainText
 然后运行：
   ./scripts/SetNuGetSecret.ps1
 "@

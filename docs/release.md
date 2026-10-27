@@ -21,10 +21,11 @@
 
 ```powershell
 gh auth login
-$env:NUGET_API_KEY = Read-Host -AsSecureString "NuGet API Key" |
-    ConvertFrom-SecureString -AsPlainText
+$secure = Read-Host -AsSecureString "NuGet API Key"
+$env:NUGET_API_KEY = ConvertFrom-SecureString -SecureString $secure -AsPlainText
 ./scripts/SetNuGetSecret.ps1
 Remove-Item Env:NUGET_API_KEY
+Remove-Variable secure
 ```
 
 `SetNuGetSecret.ps1` 通过标准输入把值交给 `gh secret set`，不会把 Key 放进命令行参数。
