@@ -28,7 +28,8 @@ var tasks = new Dictionary<string, TaskDef>(StringComparer.OrdinalIgnoreCase)
     ["capabilities"] = new("运行零依赖能力演示：ID/TOTP/密钥/配额/RBAC/CSV", "dotnet run --project samples/Ledon.CapabilitiesDemo"),
     ["rbac"] = new("运行 RBAC API 示例：JWT + 内置 RBAC + 幂等 + 配额", "dotnet run --project samples/Ledon.RbacApiDemo"),
     ["data"] = new("运行数据示例：SQLite + 多租户 + 播种 + CSV", "dotnet run --project samples/Ledon.DataDemo"),
-    ["config"] = new("运行配置中心示例：设置存储 + IConfiguration 热更新", "dotnet run --project samples/Ledon.ConfigCenterDemo"),
+    ["config"] = new("运行配置中心示例：项目/环境/版本/权限/成员管理", "dotnet run --project samples/Ledon.ConfigCenterDemo"),
+    ["pack"] = new("打包 NuGet（artifacts/packages）", "dotnet pack Ledon.slnx -c Release -o artifacts/packages"),
     ["check"] = new("流水线：scan → build → test", Deps: ["scan", "build", "test"]),
 };
 

@@ -44,3 +44,5 @@
   href: streaming.md
 - name: 扩展能力包（Webhook/短信/推送/ID/搜索等）
   href: extensions.md
+- name: 发布与 NuGet
+  href: release.md

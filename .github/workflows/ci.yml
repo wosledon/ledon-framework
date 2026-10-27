@@ -114,10 +114,26 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: 检查 NUGET_API_KEY
+        shell: bash
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "::error::缺少仓库 Secret NUGET_API_KEY，无法发布 NuGet 包"
+            exit 1
+          fi
+
       - name: 打包（版本取自 tag，如 v0.2.0 → 0.2.0）
         run: |
           version="${GITHUB_REF_NAME#v}"
-          dotnet pack --configuration Release -p:Version="$version" -o out
+          dotnet pack Ledon.slnx --configuration Release -p:Version="$version" -o out
 
       - name: 推送到 NuGet.org
-        run: dotnet nuget push out/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push out/*.nupkg \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate

@@ -443,7 +443,9 @@ docs/                   文档站（docfx）
 
 ## 发布
 
-CI（`.github/workflows/ci.yml`）在 push/PR 时 build+test；打 `v*` tag 时按版本打包并推 NuGet.org（需仓库 secret `NUGET_API_KEY`）。本地打包：`dotnet pack -c Release`。
+CI（`.github/workflows/ci.yml`）在 push/PR 时 build+test；打 `v*` tag 时按版本打包并推 NuGet.org（需仓库 secret `NUGET_API_KEY`）。本地打包：`dotnet pack Ledon.slnx -c Release -o artifacts/packages`。
+
+NuGet Key 的安全配置、tag 发布和 Key 权限建议见 [发布与 NuGet](docs/release.md)。
 
 每次推送到 main 还会跑 `Preview Packages` 工作流：产出 `{VersionPrefix}-preview.{run_number}` 的预览包并作为构件保留 14 天（不推 NuGet.org，不污染正式源）。
 
