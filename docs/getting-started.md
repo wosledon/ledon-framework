@@ -42,6 +42,7 @@ dotnet run    # 打开 /hello 与 /openapi/v1.json
 ./run.ps1 capabilities  # 零依赖能力演示（ID/TOTP/密钥/配额/RBAC/CSV）
 ./run.ps1 rbac     # RBAC API 示例（JWT + RBAC + 幂等 + 配额）
 ./run.ps1 data     # 数据示例（SQLite + 多租户 + 播种 + CSV）
+./run.ps1 config   # 配置中心示例（设置存储 + IConfiguration 热更新）
 ./run.ps1 check    # scan → build → test
 ```
 

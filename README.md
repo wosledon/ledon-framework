@@ -412,6 +412,7 @@ src/Ledon.ApiVersioning/ API 版本治理与弃用头
 samples/Modules/        示例业务模块（Contracts / Users / Notifications / Api）
 samples/                Ledon.Sample（控制台）/ Ledon.WebSample（Web）/ Ledon.WorkerSample（工作进程）
                         Ledon.CapabilitiesDemo（零依赖能力演示）/ Ledon.RbacApiDemo（RBAC API）/ Ledon.DataDemo（SQLite 多租户）
+                        Ledon.ConfigCenterDemo（配置中心 + IConfiguration 热更新）
                         Ledon.ProtocolSample（协议栈：结构体映射→帧→TCP/UDP→SIP）
                         Ledon.StreamSample（流媒体：RTMP 推流→HTTP-FLV/HLS 播放）
 tests/                  xunit 测试（模块 26 + Web 590 用例，顺序断言 + 变异验证）
@@ -432,6 +433,7 @@ docs/                   文档站（docfx）
 ./run.ps1 capabilities  # 零依赖能力演示（ID/TOTP/密钥/配额/RBAC/CSV）
 ./run.ps1 rbac     # RBAC API 示例（JWT + RBAC + 幂等 + 配额）
 ./run.ps1 data     # 数据示例（SQLite + 多租户 + 播种 + CSV）
+./run.ps1 config   # 配置中心示例（设置存储 + IConfiguration 热更新）
 ./run.ps1          # 列出所有任务
 ```
 

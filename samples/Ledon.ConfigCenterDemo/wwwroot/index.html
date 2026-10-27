@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ledon Config Center</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Ledon Config Center</h1>
+    <span class="badge">Ledon.Settings + IConfiguration 热更新</span>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="toolbar">
+        <h2>配置项</h2>
+        <button id="refresh">刷新</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Key</th><th>Value</th><th></th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>编辑配置</h2>
+      <label>Key <input id="key" value="Feature:WelcomeMessage" /></label>
+      <label>Value（JSON）<textarea id="value" rows="4">"Hello from config center"</textarea></label>
+      <div class="actions">
+        <button id="save">保存并热更新</button>
+        <button id="delete" class="danger">删除</button>
+      </div>
+      <p class="hint">字符串值需要 JSON 引号；数字/布尔/对象直接写 JSON。</p>
+    </section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <h2>应用读取（IConfiguration / IOptionsMonitor）</h2>
+        <button id="effective-refresh">刷新</button>
+      </div>
+      <pre id="effective"></pre>
+    </section>
+
+    <p id="message" class="message"></p>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
