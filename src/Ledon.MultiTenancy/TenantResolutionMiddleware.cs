@@ -61,7 +61,7 @@ internal sealed class TenantResolutionMiddleware
                 && !await _options.TenantValidator.IsValidAsync(tenantId, context.RequestAborted)
                     .ConfigureAwait(false))
             {
-                _logger.LogWarning("租户 {Tenant} 未通过目录校验，已拒绝", tenantId);
+                _logger.LogWarning("租户未通过目录校验，已拒绝");
 
                 context.Response.StatusCode = _options.MissingTenantStatusCode;
                 await context.Response.WriteAsJsonAsync(

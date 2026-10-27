@@ -49,11 +49,11 @@ public sealed class PushNotificationChannel : INotificationChannel, IDisposable
 
             if (!result.Success)
             {
-                _logger.LogWarning("推送失败：{Device} / {Error}", notification.Recipient, result.Error);
+                _logger.LogWarning("推送失败");
                 return NotificationResult.Fail(result.Error ?? "推送网关返回失败");
             }
 
-            _logger.LogInformation("推送已提交：{Device}", notification.Recipient);
+            _logger.LogInformation("推送已提交");
             return NotificationResult.Ok(result.MessageId);
         }
         catch (OperationCanceledException)
@@ -62,7 +62,7 @@ public sealed class PushNotificationChannel : INotificationChannel, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "推送发送异常：{Device}", notification.Recipient);
+            _logger.LogError(ex, "推送发送异常");
             return NotificationResult.Fail(ex.Message);
         }
     }

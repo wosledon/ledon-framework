@@ -45,6 +45,7 @@ public sealed class RequestCultureMiddleware
             context.Response.Cookies.Append(_options.CookieName, resolution.Culture, new CookieOptions
             {
                 IsEssential = true,
+                Secure = true,
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddYears(1),
             });

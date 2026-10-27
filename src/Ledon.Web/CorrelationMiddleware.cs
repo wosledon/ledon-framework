@@ -23,9 +23,9 @@ internal sealed class CorrelationMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var correlationId = context.Request.Headers[HeaderName].FirstOrDefault();
+        var correlationId = NormalizeCorrelationId(context.Request.Headers[HeaderName].FirstOrDefault());
 
-        if (string.IsNullOrWhiteSpace(correlationId))
+        if (correlationId is null)
         {
             // 有链路时直接用 TraceId：日志关联 ID 与 OTel 链路 ID 一致，排查不用二次映射
             correlationId = System.Diagnostics.Activity.Current?.TraceId.ToString()
@@ -43,5 +43,21 @@ internal sealed class CorrelationMiddleware
         System.Diagnostics.Activity.Current?.SetTag("correlation.id", correlationId);
 
         await _next(context).ConfigureAwait(false);
+    }
+
+    private static string? NormalizeCorrelationId(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length > 128)
+            return null;
+
+        // 只允许安全字符，避免客户端把 CR/LF/控制字符注入日志与响应头。
+        var sanitized = value
+            .Replace("\r", string.Empty, StringComparison.Ordinal)
+            .Replace("\n", string.Empty, StringComparison.Ordinal);
+
+        return sanitized.All(character =>
+            char.IsAsciiLetterOrDigit(character) || character is '-' or '_' or '.' or ':')
+            ? sanitized
+            : null;
     }
 }

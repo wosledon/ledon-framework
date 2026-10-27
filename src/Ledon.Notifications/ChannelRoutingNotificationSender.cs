@@ -38,8 +38,7 @@ public sealed class ChannelRoutingNotificationSender : INotificationSender
         // 去重：同一业务键只发一次（兜住"渠道已送达但返回失败"造成的重复）
         if (_options.DeduplicationKey is { } keyOf && IsDuplicate(keyOf(notification)))
         {
-            _logger.LogDebug("通知去重命中（{Channel} → {Recipient}），跳过重复发送",
-                notification.Channel, notification.Recipient);
+            _logger.LogDebug("通知去重命中，跳过重复发送");
 
             return NotificationResult.Ok();
         }
@@ -67,8 +66,7 @@ public sealed class ChannelRoutingNotificationSender : INotificationSender
             if (attempt < _options.MaxRetries)
             {
                 _logger.LogWarning(
-                    "通知发送失败（{Channel} → {Recipient}，第 {Attempt} 次）：{Error}",
-                    notification.Channel, notification.Recipient, attempt, result.Error);
+                    "通知发送失败（第 {Attempt} 次）", attempt);
 
                 await Task.Delay(Backoff(attempt), cancellationToken).ConfigureAwait(false);
             }

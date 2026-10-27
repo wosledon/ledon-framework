@@ -45,11 +45,11 @@ public sealed class SmsNotificationChannel : INotificationChannel, IDisposable
 
             if (!result.Success)
             {
-                _logger.LogWarning("短信发送失败：{Recipient} / {Error}", notification.Recipient, result.Error);
+                _logger.LogWarning("短信发送失败");
                 return NotificationResult.Fail(result.Error ?? "短信网关返回失败");
             }
 
-            _logger.LogInformation("短信已提交：{Recipient}", notification.Recipient);
+            _logger.LogInformation("短信已提交");
             return NotificationResult.Ok(result.MessageId);
         }
         catch (OperationCanceledException)
@@ -58,7 +58,7 @@ public sealed class SmsNotificationChannel : INotificationChannel, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "短信发送异常：{Recipient}", notification.Recipient);
+            _logger.LogError(ex, "短信发送异常");
             return NotificationResult.Fail(ex.Message);
         }
     }

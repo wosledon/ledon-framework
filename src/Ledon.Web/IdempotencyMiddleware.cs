@@ -56,7 +56,7 @@ internal sealed class IdempotencyMiddleware
         var cached = await ReadAsync(cache, cacheKey, context.RequestAborted).ConfigureAwait(false);
         if (cached is not null)
         {
-            _logger.LogDebug("幂等重放（缓存命中）：{Method} {Path}", context.Request.Method, context.Request.Path);
+            _logger.LogDebug("幂等重放（缓存命中）");
             await WriteAsync(context, cached).ConfigureAwait(false);
             return;
         }
@@ -71,7 +71,7 @@ internal sealed class IdempotencyMiddleware
             cached = await ReadAsync(cache, cacheKey, context.RequestAborted).ConfigureAwait(false);
             if (cached is not null)
             {
-                _logger.LogDebug("幂等重放（等待并发执行方后命中）：{Method} {Path}", context.Request.Method, context.Request.Path);
+                _logger.LogDebug("幂等重放（等待并发执行方后命中）");
                 await WriteAsync(context, cached).ConfigureAwait(false);
                 return;
             }

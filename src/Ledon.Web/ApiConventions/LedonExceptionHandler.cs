@@ -45,7 +45,7 @@ internal sealed class LedonExceptionHandler(
         // 客户端主动断开：不是错误，也没有人能收到响应体
         if (exception is OperationCanceledException && httpContext.RequestAborted.IsCancellationRequested)
         {
-            logger.LogDebug("请求被客户端中止：{Path}", httpContext.Request.Path);
+            logger.LogDebug("请求被客户端中止");
 
             return true;
         }

@@ -56,13 +56,13 @@ public sealed class SmtpNotificationSender : INotificationSender, INotificationC
 
             await client.SendMailAsync(message, cancellationToken).ConfigureAwait(false);
 
-            _logger.LogInformation("邮件已发送到 {Recipient}（主题：{Subject}）", notification.Recipient, notification.Subject);
+            _logger.LogInformation("邮件已发送");
             return NotificationResult.Ok();
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             // 渠道错误不当异常抛给业务：记日志 + 返回失败结果（由重试策略决定下一步）
-            _logger.LogError(ex, "邮件发送失败：{Recipient}", notification.Recipient);
+            _logger.LogError(ex, "邮件发送失败");
             return NotificationResult.Fail(ex.Message);
         }
     }

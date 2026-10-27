@@ -46,13 +46,13 @@ public sealed class FeishuNotificationSender : INotificationSender, INotificatio
                 idType,
                 cancellationToken).ConfigureAwait(false);
 
-            _logger.LogInformation("飞书消息已发送到 {Recipient}（messageId={MessageId}）", notification.Recipient, messageId);
+            _logger.LogInformation("飞书消息已发送（messageId={MessageId}）", messageId);
 
             return NotificationResult.Ok(messageId);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            _logger.LogError(ex, "飞书消息发送失败：{Recipient}", notification.Recipient);
+            _logger.LogError(ex, "飞书消息发送失败");
             return NotificationResult.Fail(ex.Message);
         }
     }

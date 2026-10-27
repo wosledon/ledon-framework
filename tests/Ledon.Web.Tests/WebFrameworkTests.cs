@@ -127,6 +127,22 @@ public class WebFrameworkTests : IDisposable
         Assert.Equal("upstream-trace-123", echoed.Headers.GetValues("X-Correlation-Id").First());
     }
 
+    [Fact]
+    public async Task Correlation_id_strips_crlf_from_untrusted_header()
+    {
+        var client = await StartServerAsync();
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "/hello");
+        request.Headers.TryAddWithoutValidation("X-Correlation-Id", "evil\r\nInjected: true");
+
+        var response = await client.SendAsync(request);
+        var echoed = response.Headers.GetValues("X-Correlation-Id").First();
+
+        Assert.DoesNotContain('\r', echoed);
+        Assert.DoesNotContain('\n', echoed);
+        Assert.NotEqual("evil\r\nInjected: true", echoed);
+    }
+
     // ---------- API 规范化 ----------
 
     [Fact]
