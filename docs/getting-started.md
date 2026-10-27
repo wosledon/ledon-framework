@@ -39,6 +39,9 @@ dotnet run    # 打开 /hello 与 /openapi/v1.json
 ./run.ps1 web      # Web 示例（多程序集 + 全功能链路）
 ./run.ps1 worker   # 工作进程示例（跨程序集事件解耦）
 ./run.ps1 sample   # 控制台零配置示例
+./run.ps1 capabilities  # 零依赖能力演示（ID/TOTP/密钥/配额/RBAC/CSV）
+./run.ps1 rbac     # RBAC API 示例（JWT + RBAC + 幂等 + 配额）
+./run.ps1 data     # 数据示例（SQLite + 多租户 + 播种 + CSV）
 ./run.ps1 check    # scan → build → test
 ```
 

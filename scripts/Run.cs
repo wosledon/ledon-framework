@@ -25,6 +25,9 @@ var tasks = new Dictionary<string, TaskDef>(StringComparer.OrdinalIgnoreCase)
     ["worker"] = new("运行多程序集工作进程示例（samples/Ledon.WorkerSample）", "dotnet run --project samples/Ledon.WorkerSample"),
     ["protocol"] = new("运行协议栈示例：结构体映射 → 帧切分 → TCP/UDP → SIP", "dotnet run --project samples/Ledon.ProtocolSample"),
     ["stream"] = new("运行流媒体示例：RTMP 推流 → HTTP-FLV/HLS 播放", "dotnet run --project samples/Ledon.StreamSample"),
+    ["capabilities"] = new("运行零依赖能力演示：ID/TOTP/密钥/配额/RBAC/CSV", "dotnet run --project samples/Ledon.CapabilitiesDemo"),
+    ["rbac"] = new("运行 RBAC API 示例：JWT + 内置 RBAC + 幂等 + 配额", "dotnet run --project samples/Ledon.RbacApiDemo"),
+    ["data"] = new("运行数据示例：SQLite + 多租户 + 播种 + CSV", "dotnet run --project samples/Ledon.DataDemo"),
     ["check"] = new("流水线：scan → build → test", Deps: ["scan", "build", "test"]),
 };
 

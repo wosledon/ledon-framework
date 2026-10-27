@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Ledon.Web\Ledon.Web.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Data\Ledon.Data.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Data.Seeding\Ledon.Data.Seeding.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.MultiTenancy\Ledon.MultiTenancy.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.DataExchange\Ledon.DataExchange.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    </ItemGroup>
+
+</Project>
