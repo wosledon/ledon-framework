@@ -65,6 +65,39 @@ public class AuthorizationEdgeTests
     }
 
     [Fact]
+    public async Task Default_admin_role_and_bootstrap_user_are_ready_to_use()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddLedonAuthorization(o => o.BootstrapAdminUserIds.Add("admin-1"));
+
+        await using var provider = services.BuildServiceProvider();
+        var service = provider.GetRequiredService<RoleAuthorizationService>();
+
+        Assert.True(await service.HasPermissionAsync("admin-1", "authorization.manage"));
+        Assert.Contains("admin", await service.GetUserRolesAsync("admin-1"));
+    }
+
+    [Fact]
+    public async Task Missing_authentication_scheme_fails_fast_for_management_endpoints()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddLedonAuthorization();
+
+        await using var provider = services.BuildServiceProvider();
+        var hosted = provider.GetServices<Microsoft.Extensions.Hosting.IHostedService>();
+
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            foreach (var service in hosted)
+                await service.StartAsync(CancellationToken.None);
+        });
+
+        Assert.Contains("认证方案", error.Message);
+    }
+
+    [Fact]
     public async Task Invalid_and_duplicate_roles_are_rejected()
     {
         await using var provider = BuildProvider();

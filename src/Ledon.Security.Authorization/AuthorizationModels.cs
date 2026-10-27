@@ -18,11 +18,26 @@ public sealed class LedonAuthorizationOptions
     /// <summary>权限查询缓存时长，默认 1 分钟。</summary>
     public TimeSpan CacheDuration { get; set; } = TimeSpan.FromMinutes(1);
 
-    /// <summary>是否映射 /auth/authorization/* 管理端点，默认 <c>false</c>（安全起见需显式开启）。</summary>
-    public bool MapEndpoints { get; set; }
+    /// <summary>是否映射 /auth/authorization/* 管理端点，默认 <c>true</c>。</summary>
+    public bool MapEndpoints { get; set; } = true;
 
     /// <summary>管理端点是否要求授权，默认 <c>true</c>。</summary>
     public bool RequireAuthorization { get; set; } = true;
+
+    /// <summary>管理端点所需的权限策略名，默认 authorization.manage。</summary>
+    public string ManagementPolicy { get; set; } = "authorization.manage";
+
+    /// <summary>是否内置 admin 角色（权限 *），默认 <c>true</c>。</summary>
+    public bool SeedDefaultAdminRole { get; set; } = true;
+
+    /// <summary>内置管理员角色名，默认 admin。</summary>
+    public string AdminRoleName { get; set; } = "admin";
+
+    /// <summary>内置管理员权限，默认 *。</summary>
+    public IReadOnlyCollection<string> AdminPermissions { get; set; } = ["*"];
+
+    /// <summary>启动时直接授予管理员角色的用户 ID（用于首个管理员引导）。</summary>
+    public HashSet<string> BootstrapAdminUserIds { get; } = new(StringComparer.Ordinal);
 }
 
 /// <summary>角色。</summary>
@@ -67,6 +82,25 @@ public sealed class InMemoryRoleStore : IRoleStore
         new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, ConcurrentDictionary<string, byte>>> _assignments =
         new(StringComparer.Ordinal);
+
+    public InMemoryRoleStore(LedonAuthorizationOptions options, TimeProvider timeProvider)
+    {
+        if (!options.SeedDefaultAdminRole)
+            return;
+
+        var admin = new AuthorizationRole(
+            options.AdminRoleName,
+            options.AdminPermissions.ToArray(),
+            timeProvider.GetUtcNow());
+
+        _roles[admin.Name] = admin;
+
+        foreach (var userId in options.BootstrapAdminUserIds)
+        {
+            if (!string.IsNullOrWhiteSpace(userId))
+                AssignAsync(userId, admin.Name).GetAwaiter().GetResult();
+        }
+    }
 
     public Task<AuthorizationRole?> FindAsync(string name, CancellationToken cancellationToken = default) =>
         Task.FromResult(_roles.TryGetValue(name, out var role) ? role : null);

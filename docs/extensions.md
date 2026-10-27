@@ -267,13 +267,18 @@ app.UseLedonIdempotency();
 ### Ledon.Security.Authorization —— RBAC
 
 ```csharp
-builder.Services.AddLedonAuthorization(o => o.MapEndpoints = true);
-
-await roles.CreateRoleAsync("support", ["orders.*", "users.read"]);
-await roles.AssignRoleAsync(userId, "support");
+builder.Services.AddLedonAuthorization(o =>
+{
+    o.BootstrapAdminUserIds.Add("admin");   // 首个管理员用户 ID
+    o.MapEndpoints = true;                  // 默认已开启
+});
 ```
 
-角色/权限/用户分配、通配符匹配、权限缓存失效，并接入 `PermissionRequirement` 动态策略。
+- 内置 `admin` 角色（权限 `*`），`BootstrapAdminUserIds` 中的用户启动即拥有管理员权限；
+- 管理端点 `/auth/authorization/*` 默认映射，并要求 `authorization.manage` 权限；
+- `GET /auth/authorization/me` 返回当前用户角色/权限/是否管理员；
+- 角色权限支持通配符，分配可按租户隔离；
+- 直接可用不代表零配置安全：必须配置认证（如 `AddLedonSecurity`）并设置管理员引导用户；生产环境替换 `IRoleStore`。
 
 ### Ledon.ApiVersioning —— API 版本治理
 

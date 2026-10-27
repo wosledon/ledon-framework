@@ -14,10 +14,39 @@ public sealed class AuthorizationEndpoints(
 {
     public void Map(IEndpointRouteBuilder builder)
     {
+        var me = builder.MapGet("/auth/authorization/me", async (HttpContext context, CancellationToken ct) =>
+        {
+            var userId = context.User.FindFirst(options.UserIdClaimType)?.Value
+                ?? context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Results.Unauthorized();
+
+            var tenantId = context.User.FindFirst(options.TenantClaimType)?.Value;
+
+            return Results.Ok(new
+            {
+                userId,
+                roles = await service.GetUserRolesAsync(userId, tenantId, ct),
+                permissions = await service.GetUserPermissionsAsync(userId, tenantId, ct),
+                isAdmin = await service.HasPermissionAsync(userId, options.ManagementPolicy, tenantId, ct),
+            });
+        });
+
+        if (options.RequireAuthorization)
+            me.RequireAuthorization();
+
         var group = builder.MapGroup("/auth/authorization");
 
         if (options.RequireAuthorization)
-            group.RequireAuthorization();
+        {
+            if (string.IsNullOrWhiteSpace(options.ManagementPolicy))
+                group.RequireAuthorization();
+            else
+                group.RequireAuthorization(options.ManagementPolicy);
+        }
+
+        group.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
         group.MapGet("/roles", async (CancellationToken ct) =>
             Results.Ok(await service.ListRolesAsync(ct)));
@@ -107,6 +136,9 @@ public static class LedonAuthorizationServiceCollectionExtensions
         if (options.CacheDuration < TimeSpan.Zero)
             throw new InvalidOperationException("LedonAuthorizationOptions.CacheDuration 不能为负数");
 
+        if (options.SeedDefaultAdminRole && string.IsNullOrWhiteSpace(options.AdminRoleName))
+            throw new InvalidOperationException("LedonAuthorizationOptions.AdminRoleName 不能为空");
+
         services.AddAuthorization();
         services.AddMemoryCache();
         services.TryAddSingleton(options);
@@ -127,7 +159,12 @@ public static class LedonAuthorizationServiceCollectionExtensions
         }
 
         if (options.MapEndpoints)
+        {
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IEndpoint, AuthorizationEndpoints>());
+
+            if (options.RequireAuthorization)
+                services.AddHostedService<AuthorizationStartupValidator>();
+        }
 
         return services;
     }

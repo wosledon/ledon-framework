@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
@@ -47,4 +50,27 @@ public sealed class RolePermissionPolicyProvider(IOptions<AuthorizationOptions> 
             .AddRequirements(new PermissionRequirement(policyName))
             .Build();
     }
+}
+
+/// <summary>管理端点安全启动检查：开启授权端点却没有认证方案时直接失败，避免裸奔。</summary>
+internal sealed class AuthorizationStartupValidator(
+    IServiceProvider services,
+    LedonAuthorizationOptions options) : IHostedService
+{
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        if (!options.MapEndpoints || !options.RequireAuthorization)
+            return;
+
+        var schemes = services.GetService<IAuthenticationSchemeProvider>();
+
+        if (schemes is null || !(await schemes.GetAllSchemesAsync()).Any())
+        {
+            throw new InvalidOperationException(
+                "Ledon.Security.Authorization 已开启管理端点并要求授权，但宿主没有注册任何认证方案。" +
+                "请先调用 AddLedonAuthentication/AddLedonSecurity，或设置 RequireAuthorization = false。");
+        }
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }
