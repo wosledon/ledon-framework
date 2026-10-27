@@ -1,17 +1,19 @@
-using System.Text.Json;
+using System.Text.Json.Serialization;
 using Ledon.ConfigCenterDemo;
-using Ledon.Settings;
+using Ledon.Module.Abstractions;
+using Ledon.Security;
+using Ledon.Security.Authorization;
 using Ledon.Web;
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
-var settingsPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "config-center.json");
-Directory.CreateDirectory(Path.GetDirectoryName(settingsPath)!);
+var database = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "config-center.db");
+Directory.CreateDirectory(Path.GetDirectoryName(database)!);
 
-var bridge = new SettingsConfigurationBridge();
-((IConfigurationBuilder)builder.Configuration).Add(new SettingsConfigurationSource(bridge));
+builder.Services.AddDbContext<ConfigCenterDbContext>(options => options.UseSqlite($"Data Source={database}"));
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.AddLedonWeb(options =>
 {
@@ -19,127 +21,59 @@ builder.AddLedonWeb(options =>
     options.UseScalarUi = true;
 });
 
-builder.Services.AddSingleton(bridge);
-builder.Services.AddLedonSettings(options => options.StorePath = settingsPath);
-builder.Services.Configure<FeatureOptions>(builder.Configuration.GetSection("Feature"));
+builder.Services.AddScoped<ILedonUserValidator, DemoUserValidator>();
+builder.Services.AddLedonSecurity(options =>
+{
+    options.Jwt.SigningKey = "ledon-config-center-demo-signing-key-0123456789";
+});
+builder.Services.AddLedonAuthorization(options =>
+{
+    options.BootstrapAdminUserIds.Add("admin");
+});
+builder.Services.AddScoped<ProjectAuthorizationService>();
 
 var app = builder.Build();
-bridge.Settings = app.Services.GetRequiredService<ISettingsService>();
-await SeedAsync(bridge.Settings, app.Logger);
-bridge.Reload();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ConfigCenterDbContext>();
+    await db.Database.EnsureCreatedAsync();
+    await ConfigCenterSeeder.SeedAsync(db, app.Logger);
+}
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseLedonWeb();
-
-var configGroup = app.MapGroup("/api/config");
-
-configGroup.MapGet("/", async (ISettingsService settings, CancellationToken ct) =>
-{
-    var all = await settings.GetAllAsync<JsonElement>(SettingsConfigurationProvider.Prefix, ct);
-
-    return Results.Ok(all.Select(item => new
-    {
-        key = item.Key[SettingsConfigurationProvider.Prefix.Length..],
-        value = item.Value,
-    }));
-});
-
-configGroup.MapGet("/{**key}", async (string key, ISettingsService settings, CancellationToken ct) =>
-{
-    var value = await settings.GetAsync<JsonElement>(SettingsConfigurationProvider.Prefix + key, ct);
-
-    return value.ValueKind == JsonValueKind.Undefined
-        ? Results.NotFound()
-        : Results.Ok(new { key, value });
-});
-
-configGroup.MapPut("/{**key}", async (
-    string key,
-    JsonElement body,
-    ISettingsService settings,
-    SettingsConfigurationBridge bridge,
-    CancellationToken ct) =>
-{
-    if (string.IsNullOrWhiteSpace(key) || !key.Contains(':', StringComparison.Ordinal))
-        return Results.BadRequest(new { error = "key 建议使用 模块:键 形式" });
-
-    await settings.SetAsync(
-        SettingsConfigurationProvider.Prefix + key,
-        JsonDocument.Parse(body.GetRawText()).RootElement,
-        updatedBy: "config-center-demo",
-        cancellationToken: ct);
-
-    bridge.Reload();
-    return Results.Ok(new { key, value = body });
-});
-
-configGroup.MapDelete("/{**key}", async (string key, ISettingsService settings, SettingsConfigurationBridge bridge, CancellationToken ct) =>
-{
-    var removed = await settings.RemoveAsync(SettingsConfigurationProvider.Prefix + key, ct);
-
-    if (removed)
-        bridge.Reload();
-
-    return removed ? Results.NoContent() : Results.NotFound();
-});
-
-app.MapGet("/api/effective", (IConfiguration configuration, IOptionsMonitor<FeatureOptions> feature) => Results.Ok(new
-{
-    source = "IConfiguration + IOptionsMonitor",
-    greeting = configuration["Feature:WelcomeMessage"],
-    maxItems = configuration["Feature:MaxItems"],
-    options = feature.CurrentValue,
-    note = "PUT /api/config/Feature:WelcomeMessage 后再次请求，值会立即变化",
-}));
-
-app.MapGet("/api/info", () => new
-{
-    message = "Ledon Config Center Demo",
-    store = "Ledon.Settings JSON file + custom IConfigurationProvider",
-    endpoints = new[]
-    {
-        "GET /api/config",
-        "GET /api/config/Feature:WelcomeMessage",
-        "PUT /api/config/Feature:WelcomeMessage（body 为 JSON 值，如 \"hello\"）",
-        "DELETE /api/config/Feature:WelcomeMessage",
-        "GET /api/effective",
-    },
-});
-
+app.MapLedonAuthEndpoints();
+ConfigCenterEndpoints.Map(app);
 app.MapFallbackToFile("index.html");
+
 app.Run();
 
-static async Task SeedAsync(ISettingsService settings, ILogger logger)
+public sealed class DemoModule : IModule
 {
-    var defaults = new Dictionary<string, string>
-    {
-        ["Feature:WelcomeMessage"] = "\"Hello from config center\"",
-        ["Feature:MaxItems"] = "20",
-        ["App:Name"] = "\"Ledon Config Center\"",
-    };
-
-    foreach (var (key, json) in defaults)
-    {
-        var fullKey = SettingsConfigurationProvider.Prefix + key;
-        var current = await settings.GetAsync<JsonElement>(fullKey);
-
-        if (current.ValueKind != JsonValueKind.Undefined)
-            continue;
-
-        await settings.SetAsync(fullKey, JsonDocument.Parse(json).RootElement);
-        logger.LogInformation("已播种默认配置：{Key} = {Value}", key, json);
-    }
-}
-
-public sealed class FeatureOptions
-{
-    public string WelcomeMessage { get; set; } = "default";
-    public int MaxItems { get; set; } = 10;
-}
-
-public sealed class DemoModule : global::Ledon.Module.Abstractions.IModule
-{
-    public Task OnInitializedAsync(global::Ledon.Module.Abstractions.ModuleContext context, CancellationToken cancellationToken = default) =>
+    public Task OnInitializedAsync(ModuleContext context, CancellationToken cancellationToken = default) =>
         Task.CompletedTask;
+}
+
+/// <summary>开发演示账号；生产替换为真实用户存储。</summary>
+public sealed class DemoUserValidator : ILedonUserValidator
+{
+    public Task<LedonUser?> ValidateAsync(string userName, string password, CancellationToken cancellationToken = default) =>
+        Task.FromResult<LedonUser?>(userName.Trim().ToLowerInvariant() switch
+        {
+            "admin" when password == "admin123" => new LedonUser("admin", "admin", []),
+            "user" when password == "user123" => new LedonUser("user", "user", []),
+            "viewer" when password == "viewer123" => new LedonUser("viewer", "viewer", []),
+            _ => null,
+        });
+
+    public Task<LedonUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default) =>
+        Task.FromResult<LedonUser?>(userId switch
+        {
+            "admin" => new LedonUser("admin", "admin", []),
+            "user" => new LedonUser("user", "user", []),
+            "viewer" => new LedonUser("viewer", "viewer", []),
+            _ => null,
+        });
 }

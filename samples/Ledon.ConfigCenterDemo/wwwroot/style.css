@@ -6,9 +6,11 @@
 }
 
 body { margin: 0; }
+.hidden { display: none !important; }
 
-header {
+.topbar {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 1rem;
   padding: .9rem 1.25rem;
@@ -16,16 +18,17 @@ header {
   border-bottom: 1px solid #334155;
 }
 
-h1 { font-size: 1.2rem; margin: 0; }
-h2 { font-size: 1rem; margin: 0 0 .75rem; }
-.badge { color: #7dd3fc; font-size: .85rem; }
+.subtitle { color: #94a3b8; margin-left: .75rem; font-size: .85rem; }
+#user-area { display: flex; align-items: center; gap: .75rem; }
 
-main {
+main { padding: 1rem; }
+.login { max-width: 480px; margin: 10vh auto; }
+.layout {
   display: grid;
   gap: 1rem;
-  max-width: 1050px;
-  margin: 1.25rem auto;
-  padding: 0 1rem;
+  grid-template-columns: 300px minmax(0, 1fr);
+  max-width: 1300px;
+  margin: 0 auto;
 }
 
 .panel {
@@ -34,52 +37,80 @@ main {
   border-radius: 12px;
   padding: 1rem;
 }
+.sidebar { height: fit-content; position: sticky; top: 1rem; }
+.content { display: grid; gap: 1rem; min-width: 0; }
+.section-title { margin-top: 1.5rem; }
 
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: .5rem;
+h1 { font-size: 1.35rem; margin: 0 0 .25rem; }
+h2 { font-size: 1rem; margin: 0 0 .5rem; }
+.hint { color: #94a3b8; font-size: .85rem; }
+.badge-line { color: #7dd3fc; font-size: .85rem; margin: .5rem 0 0; }
+
+.toolbar { display: flex; justify-content: space-between; align-items: center; gap: .75rem; margin-bottom: .75rem; }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+
+.project-list { display: grid; gap: .5rem; }
+.project {
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: .6rem .7rem;
+  cursor: pointer;
+  background: #0f172a;
 }
+.project.active { border-color: #38bdf8; }
+.project small { color: #94a3b8; display: block; margin-top: .2rem; }
 
-table { width: 100%; border-collapse: collapse; }
-th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #334155; vertical-align: top; }
-td code { color: #7dd3fc; }
-td pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
-
-label { display: block; margin: .75rem 0; }
-input, textarea {
-  display: block;
+label { display: block; margin: .65rem 0; }
+input, textarea, select {
   width: 100%;
   box-sizing: border-box;
-  margin-top: .35rem;
-  padding: .55rem .7rem;
+  margin-top: .3rem;
+  padding: .5rem .65rem;
   border-radius: 8px;
   border: 1px solid #475569;
   background: #0f172a;
   color: inherit;
   font: inherit;
 }
-
 textarea { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
-.actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+
 button {
   border: 0;
   border-radius: 8px;
-  padding: .5rem .8rem;
+  padding: .5rem .75rem;
   background: #38bdf8;
   color: #082f49;
   font-weight: 600;
   cursor: pointer;
 }
+button.ghost { background: #334155; color: #e2e8f0; }
 button.danger { background: #fca5a5; }
-button.small { padding: .25rem .5rem; }
-.hint { color: #94a3b8; font-size: .85rem; }
-.message { min-height: 1.2rem; color: #fbbf24; }
-pre {
-  background: #020617;
+button.small { padding: .3rem .5rem; font-size: .8rem; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #334155; vertical-align: top; }
+td code { color: #7dd3fc; }
+td pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
+
+.inline-form { display: flex; gap: .5rem; align-items: end; margin-top: .75rem; }
+.inline-form input, .inline-form select { margin-top: 0; }
+.inline-form button { white-space: nowrap; }
+
+.error { color: #fca5a5; }
+.message { color: #fbbf24; min-height: 1.2rem; }
+.output {
+  margin: .75rem 0 0;
+  padding: .75rem;
   border: 1px solid #334155;
-  border-radius: 10px;
-  padding: .85rem;
+  border-radius: 8px;
+  background: #020617;
+  white-space: pre-wrap;
+  max-height: 260px;
   overflow: auto;
+}
+
+@media (max-width: 800px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; }
 }

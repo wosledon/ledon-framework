@@ -9,7 +9,12 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Ledon.Web\Ledon.Web.csproj" />
-        <ProjectReference Include="..\..\src\Ledon.Settings\Ledon.Settings.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Security\Ledon.Security.csproj" />
+        <ProjectReference Include="..\..\src\Ledon.Security.Authorization\Ledon.Security.Authorization.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     </ItemGroup>
 
 </Project>
