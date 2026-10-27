@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(LedonSourcePath)' == ''">
+        <PackageReference Include="Ledon.Web" Version="0.1.0" />
+        <PackageReference Include="Ledon.Security" Version="0.1.0" />
+        <PackageReference Include="Ledon.Security.Authorization" Version="0.1.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(LedonSourcePath)' != ''">
+        <ProjectReference Include="$(LedonSourcePath)/Ledon.Web/Ledon.Web.csproj" />
+        <ProjectReference Include="$(LedonSourcePath)/Ledon.Security/Ledon.Security.csproj" />
+        <ProjectReference Include="$(LedonSourcePath)/Ledon.Security.Authorization/Ledon.Security.Authorization.csproj" />
+    </ItemGroup>
+
+</Project>

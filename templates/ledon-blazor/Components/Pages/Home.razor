@@ -1,0 +1,24 @@
+@page "/"
+
+<PageTitle>Ledon Blazor + RBAC</PageTitle>
+
+<h1>Ledon Blazor + 内置 RBAC</h1>
+<p>这个模板包含：Ledon 模块系统、JWT 登录、内置 admin 角色、权限策略与 Blazor Interactive Server。</p>
+
+<section class="card">
+    <h2>演示账号</h2>
+    <ul>
+        <li><strong>admin / admin123</strong>：内置 admin 角色（权限 <code>*</code>）</li>
+        <li><strong>user / user123</strong>：启动时分配到 reader 角色（<code>weather.read</code>）</li>
+    </ul>
+    <p><a class="button" href="/login">去登录</a></p>
+</section>
+
+<section class="card">
+    <h2>可直接调用的接口</h2>
+    <ul>
+        <li><code>GET /api/weather</code>：需要 <code>weather.read</code></li>
+        <li><code>GET /api/admin</code>：需要 <code>authorization.manage</code></li>
+        <li><code>GET /auth/authorization/me</code>：返回当前用户角色/权限</li>
+    </ul>
+</section>

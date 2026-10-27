@@ -11,6 +11,19 @@ dotnet new install <仓库>/templates     # 安装模板（一次性）
 dotnet new ledon-web -o MyApp           # Web 应用
 dotnet new ledon-worker -o MyWorker     # 工作进程
 dotnet new ledon-module -o MyApp.Module # 业务模块（独立程序集）
+dotnet new ledon-react -o MyApp.React   # Ledon + React（Vite）+ 内置 RBAC
+dotnet new ledon-blazor -o MyApp.Blazor # Ledon + Blazor Web App + 内置 RBAC
+```
+
+React 模板首次运行：
+
+```powershell
+cd MyApp.React/ClientApp && npm install && npm run dev   # 终端 1
+cd .. && dotnet run                                       # 终端 2（http://localhost:5000）
+```
+
+Blazor 模板直接 `dotnet run`，打开 <http://localhost:5000>；两个模板都内置演示账号
+`admin/admin123`（管理员）与 `user/user123`（reader）。
 ```
 
 ## 跑起来看

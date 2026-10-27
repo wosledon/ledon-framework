@@ -1,0 +1,61 @@
+@page "/rbac"
+@rendermode InteractiveServer
+@inject AuthApi Api
+@inject AuthState State
+
+<PageTitle>我的权限</PageTitle>
+
+<h1>我的角色与权限</h1>
+
+@if (!State.IsAuthenticated)
+{
+    <p>尚未登录。<a href="/login">去登录</a></p>
+}
+else
+{
+    <div class="actions">
+        <button @onclick="LoadAsync" disabled="@busy">刷新</button>
+        <button @onclick="CallWeatherAsync" disabled="@busy">读取天气接口</button>
+    </div>
+
+    @if (me is not null)
+    {
+        <section class="card">
+            <h2>@me.UserId</h2>
+            <p>角色：@(me.Roles.Length == 0 ? "（无）" : string.Join(", ", me.Roles))</p>
+            <p>权限：@(me.Permissions.Length == 0 ? "（无）" : string.Join(", ", me.Permissions))</p>
+            <p>管理员：@(me.IsAdmin ? "是" : "否")</p>
+        </section>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <pre class="message">@message</pre>
+    }
+}
+
+@code {
+    private AuthApi.MeResponse? me;
+    private string? message;
+    private bool busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (State.IsAuthenticated)
+            await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        busy = true;
+        me = await Api.GetMeAsync();
+        busy = false;
+    }
+
+    private async Task CallWeatherAsync()
+    {
+        busy = true;
+        message = await Api.CallWeatherAsync();
+        busy = false;
+    }
+}

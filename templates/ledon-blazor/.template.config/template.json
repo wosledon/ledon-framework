@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "wosledon",
+  "classifications": ["Web", "Blazor", "Ledon"],
+  "identity": "Ledon.Templates.Blazor",
+  "name": "Ledon Blazor App",
+  "description": "Ledon Framework + Blazor Web App 模板：JWT 登录、内置 RBAC、天气/管理员示例页面",
+  "shortName": "ledon-blazor",
+  "tags": { "language": "C#", "type": "project" },
+  "sourceName": "Ledon.BlazorApp",
+  "preferNameDirectory": true
+}

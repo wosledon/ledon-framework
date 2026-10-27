@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "wosledon",
+  "classifications": ["Web", "React", "SPA", "Ledon"],
+  "identity": "Ledon.Templates.React",
+  "name": "Ledon React App",
+  "description": "Ledon Framework + React (Vite) 全栈模板：JWT 登录、内置 RBAC、天气/管理员示例接口",
+  "shortName": "ledon-react",
+  "tags": { "language": "C#", "type": "project" },
+  "sourceName": "Ledon.ReactApp",
+  "preferNameDirectory": true
+}
