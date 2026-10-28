@@ -5,6 +5,7 @@ using Ledon.Module;
 using Ledon.Queues;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 
 namespace Ledon.Queues.Kafka;
@@ -15,6 +16,7 @@ namespace Ledon.Queues.Kafka;
 /// 同消费组多实例 = 竞争消费；单条处理失败不提交偏移量，由 broker 重新投递（至少一次）——
 /// 配合 <c>AddLedonInbox</c> 的收件箱去重即为"恰好一次处理"。
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "需要真实 broker；由设置 LEDON_TEST_KAFKA_BOOTSTRAP 的集成测试覆盖。")]
 internal sealed class KafkaConsumerService : BackgroundService
 {
     private readonly IServiceProvider _services;
@@ -188,3 +190,6 @@ internal sealed class KafkaConsumerService : BackgroundService
         ?? System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name
         ?? "ledon-app";
 }
+
+
+

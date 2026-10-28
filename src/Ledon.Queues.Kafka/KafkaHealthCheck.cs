@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Confluent.Kafka;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -7,6 +8,7 @@ namespace Ledon.Queues.Kafka;
 /// Kafka 连通性健康检查（配了传输入口时由 <c>AddLedonKafkaTransport</c> 自动登记）。
 /// 用 AdminClient 取集群元数据验证 broker 可服务；连接惰性建立，broker 短暂不在线不阻塞启动。
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "需要真实 broker；由健康检查集成环境覆盖。")]
 internal sealed class KafkaHealthCheck : IHealthCheck
 {
     private readonly KafkaOptions _options;
@@ -37,3 +39,6 @@ internal sealed class KafkaHealthCheck : IHealthCheck
         }
     }
 }
+
+
+

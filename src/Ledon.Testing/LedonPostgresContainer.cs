@@ -13,6 +13,7 @@ namespace Ledon.Testing;
 /// options.UseNpgsql(connectionString);
 /// </code>
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "Testcontainers 夹具需要 Docker；由 CI 集成测试覆盖。")]
 public sealed class LedonPostgresContainer : IAsyncDisposable
 {
     private const int Port = 5432;
@@ -48,3 +49,4 @@ public sealed class LedonPostgresContainer : IAsyncDisposable
             await _container.DisposeAsync().ConfigureAwait(false);
     }
 }
+

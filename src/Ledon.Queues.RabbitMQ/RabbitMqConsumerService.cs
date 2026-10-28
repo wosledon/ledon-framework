@@ -5,6 +5,7 @@ using global::RabbitMQ.Client;
 using global::RabbitMQ.Client.Events;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 
 namespace Ledon.Queues.RabbitMQ;
@@ -14,6 +15,7 @@ namespace Ledon.Queues.RabbitMQ;
 /// <see cref="IIntegrationEventHandler{TEvent}"/>（与发件箱进程内投递同一套分发逻辑）。
 /// 同队列多实例 = 竞争消费；单条处理失败只记日志（不 confirm），由 broker 重新投递（至少一次）。
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "需要真实 broker；由设置 LEDON_TEST_RABBITMQ_URL 的集成测试覆盖。")]
 internal sealed class RabbitMqConsumerService : BackgroundService
 {
     private static readonly JsonSerializerOptions SerializerOptions = new();
@@ -132,3 +134,6 @@ internal sealed class RabbitMqConsumerService : BackgroundService
         ?? System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name
         ?? "ledon-app";
 }
+
+
+

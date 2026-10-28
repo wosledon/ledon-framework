@@ -12,6 +12,7 @@ namespace Ledon.Testing;
 /// var connectionString = await redis.StartAsync();
 /// </code>
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "Testcontainers 夹具需要 Docker；由 CI 集成测试覆盖。")]
 public sealed class LedonRedisContainer : IAsyncDisposable
 {
     private readonly ContainerBuilder _builder = new ContainerBuilder("redis:7-alpine")
@@ -40,3 +41,4 @@ public sealed class LedonRedisContainer : IAsyncDisposable
             await _container.DisposeAsync().ConfigureAwait(false);
     }
 }
+

@@ -45,6 +45,7 @@ public static class LedonContainers
 }
 
 /// <summary>Redis 夹具。</summary>
+[ExcludeFromCodeCoverage(Justification = "Testcontainers 夹具需要 Docker；由 CI 集成测试覆盖。")]
 public sealed class RedisFixture : IAsyncDisposable
 {
     private readonly RedisContainer _container;
@@ -69,6 +70,7 @@ public sealed class RedisFixture : IAsyncDisposable
 }
 
 /// <summary>PostgreSQL 夹具。</summary>
+[ExcludeFromCodeCoverage(Justification = "Testcontainers 夹具需要 Docker；由 CI 集成测试覆盖。")]
 public sealed class PostgreSqlFixture : IAsyncDisposable
 {
     private readonly PostgreSqlContainer _container;
@@ -92,6 +94,7 @@ public sealed class PostgreSqlFixture : IAsyncDisposable
 }
 
 /// <summary>RabbitMQ 夹具。</summary>
+[ExcludeFromCodeCoverage(Justification = "Testcontainers 夹具需要 Docker；由 CI 集成测试覆盖。")]
 public sealed class RabbitMqFixture : IAsyncDisposable
 {
     private readonly RabbitMqContainer _container;
@@ -115,6 +118,7 @@ public sealed class RabbitMqFixture : IAsyncDisposable
 }
 
 /// <summary>Kafka（KRaft）夹具。</summary>
+[ExcludeFromCodeCoverage(Justification = "Testcontainers 夹具需要 Docker；由 CI 集成测试覆盖。")]
 public sealed class KafkaFixture : IAsyncDisposable
 {
     private readonly KafkaContainer _container;
@@ -138,6 +142,7 @@ public sealed class KafkaFixture : IAsyncDisposable
 }
 
 /// <summary>MinIO 夹具（S3 兼容）。</summary>
+[ExcludeFromCodeCoverage(Justification = "Testcontainers 夹具需要 Docker；由 CI 集成测试覆盖。")]
 public sealed class MinioFixture : IAsyncDisposable
 {
     private readonly MinioContainer _container;
@@ -159,3 +164,8 @@ public sealed class MinioFixture : IAsyncDisposable
     [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public ValueTask DisposeAsync() => _container.DisposeAsync();
 }
+
+
+
+
+
