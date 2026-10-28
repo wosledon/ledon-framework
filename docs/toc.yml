@@ -36,6 +36,8 @@
   href: multitenancy.md
 - name: 测试基建
   href: testing.md
+- name: 模块质量评分（90+）
+  href: quality.md
 - name: 平台服务（锁/开关/存储/通知/本地化/审计/应用层/运维）
   href: platform-services.md
 - name: 飞书/Socket/SIP
