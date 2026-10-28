@@ -33,9 +33,15 @@ public sealed class RedisDistributedLock : IDistributedLock, IAsyncDisposable
     private readonly RedisValue _token = $"{Environment.MachineName}:{Guid.NewGuid():N}";
 
     public RedisDistributedLock(LedonLockingOptions options)
+        : this(options, ConnectionMultiplexer.Connect(options.RedisConnectionString!))
+    {
+    }
+
+    /// <summary>注入多路复用器（测试/自定义连接生命周期时使用）。</summary>
+    public RedisDistributedLock(LedonLockingOptions options, IConnectionMultiplexer multiplexer)
     {
         _options = options;
-        _multiplexer = ConnectionMultiplexer.Connect(options.RedisConnectionString!);
+        _multiplexer = multiplexer;
     }
 
     public ValueTask<ILockHandle?> TryAcquireAsync(

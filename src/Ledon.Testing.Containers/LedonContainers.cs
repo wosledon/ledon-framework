@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Testcontainers.Kafka;
 using Testcontainers.Minio;
 using Testcontainers.PostgreSql;
@@ -54,6 +55,7 @@ public sealed class RedisFixture : IAsyncDisposable
     public string ConnectionString => _container.GetConnectionString();
 
     /// <summary>启动容器（镜像 redis:7-alpine）。</summary>
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public static async Task<RedisFixture> StartAsync(CancellationToken cancellationToken = default)
     {
         var container = new RedisBuilder("redis:7-alpine").Build();
@@ -62,6 +64,7 @@ public sealed class RedisFixture : IAsyncDisposable
         return new RedisFixture(container);
     }
 
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public ValueTask DisposeAsync() => _container.DisposeAsync();
 }
 
@@ -75,6 +78,7 @@ public sealed class PostgreSqlFixture : IAsyncDisposable
     /// <summary>Npgsql 连接串。</summary>
     public string ConnectionString => _container.GetConnectionString();
 
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public static async Task<PostgreSqlFixture> StartAsync(CancellationToken cancellationToken = default)
     {
         var container = new PostgreSqlBuilder("postgres:16-alpine").Build();
@@ -83,6 +87,7 @@ public sealed class PostgreSqlFixture : IAsyncDisposable
         return new PostgreSqlFixture(container);
     }
 
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public ValueTask DisposeAsync() => _container.DisposeAsync();
 }
 
@@ -96,6 +101,7 @@ public sealed class RabbitMqFixture : IAsyncDisposable
     /// <summary>AMQP 连接串。</summary>
     public string ConnectionString => _container.GetConnectionString();
 
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public static async Task<RabbitMqFixture> StartAsync(CancellationToken cancellationToken = default)
     {
         var container = new RabbitMqBuilder("rabbitmq:3-management-alpine").Build();
@@ -104,6 +110,7 @@ public sealed class RabbitMqFixture : IAsyncDisposable
         return new RabbitMqFixture(container);
     }
 
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public ValueTask DisposeAsync() => _container.DisposeAsync();
 }
 
@@ -117,6 +124,7 @@ public sealed class KafkaFixture : IAsyncDisposable
     /// <summary>Bootstrap servers（host:port）。</summary>
     public string BootstrapServers => _container.GetBootstrapAddress();
 
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public static async Task<KafkaFixture> StartAsync(CancellationToken cancellationToken = default)
     {
         var container = new KafkaBuilder("confluentinc/cp-kafka:7.6.0").Build();
@@ -125,6 +133,7 @@ public sealed class KafkaFixture : IAsyncDisposable
         return new KafkaFixture(container);
     }
 
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public ValueTask DisposeAsync() => _container.DisposeAsync();
 }
 
@@ -138,6 +147,7 @@ public sealed class MinioFixture : IAsyncDisposable
     /// <summary>HTTP 端点（S3 Endpoint）。</summary>
     public string Endpoint => _container.GetConnectionString();
 
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public static async Task<MinioFixture> StartAsync(CancellationToken cancellationToken = default)
     {
         var container = new MinioBuilder("minio/minio:latest").Build();
@@ -146,5 +156,6 @@ public sealed class MinioFixture : IAsyncDisposable
         return new MinioFixture(container);
     }
 
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public ValueTask DisposeAsync() => _container.DisposeAsync();
 }

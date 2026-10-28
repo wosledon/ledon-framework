@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 
@@ -26,6 +27,7 @@ public sealed class LedonPostgresContainer : IAsyncDisposable
     private DotNet.Testcontainers.Containers.IContainer? _container;
 
     /// <summary>启动容器并返回连接串（host:port, user=ledon, password=ledon, db=ledon）。</summary>
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public async Task<string> StartAsync(CancellationToken cancellationToken = default)
     {
         _container = _builder.Build();
@@ -39,6 +41,7 @@ public sealed class LedonPostgresContainer : IAsyncDisposable
     /// <summary>连接串，<see cref="StartAsync"/> 之后可用。</summary>
     public string ConnectionString { get; private set; } = string.Empty;
 
+    [ExcludeFromCodeCoverage(Justification = "需要 Docker；由 CI 集成测试覆盖，单元测试环境不计入覆盖率。")]
     public async ValueTask DisposeAsync()
     {
         if (_container is not null)
