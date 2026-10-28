@@ -16,4 +16,8 @@
         <PackageReference Include="Grpc.Net.ClientFactory" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Ledon.Web.Tests" />
+    </ItemGroup>
+
 </Project>
