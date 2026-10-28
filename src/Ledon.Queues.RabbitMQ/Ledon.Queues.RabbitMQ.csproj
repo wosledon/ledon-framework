@@ -11,6 +11,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="Ledon.Web.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="RabbitMQ.Client" />
         <!-- broker 连通性健康检查（AddLedonRabbitMqTransport 自动登记） -->
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
