@@ -45,5 +45,31 @@ public class FluentValidationEdgeTests
         Assert.NotSame(left, right);
     }
 
+    [Fact]
+    public void Discovery_ignores_abstract_validators()
+    {
+        var services = new ServiceCollection();
+        services.AddLedonFluentValidation();
+
+        using var provider = services.BuildServiceProvider();
+        Assert.Empty(provider.GetServices<IValidator<AbstractRequest>>());
+    }
+
+    [Fact]
+    public void Framework_does_not_replace_manual_registration()
+    {
+        var services = new ServiceCollection();
+        var manual = new InlineValidator<ManualRequest>();
+        services.AddSingleton<IValidator<ManualRequest>>(manual);
+        services.AddLedonFluentValidation();
+
+        using var provider = services.BuildServiceProvider();
+        Assert.Same(manual, provider.GetRequiredService<IValidator<ManualRequest>>());
+    }
+
     private sealed record ManualRequest(string Name);
+
+    private sealed record AbstractRequest(string Name);
+
+    private abstract class AbstractRequestValidator : AbstractValidator<AbstractRequest>;
 }
