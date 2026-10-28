@@ -18,4 +18,8 @@
       <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" />
     </ItemGroup>
 
+    <ItemGroup>
+      <InternalsVisibleTo Include="Ledon.Web.Tests" />
+    </ItemGroup>
+
 </Project>
