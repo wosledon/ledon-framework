@@ -23,6 +23,32 @@ public class TestingContainersEdgeTests
     }
 
     [Fact]
+    public async Task Docker_availability_probe_returns_false_for_failed_command()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        var directory = Path.Combine(Path.GetTempPath(), $"ledon-docker-fail-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        File.Copy(
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "where.exe"),
+            Path.Combine(directory, "docker.exe"));
+
+        var originalPath = Environment.GetEnvironmentVariable("PATH");
+        Environment.SetEnvironmentVariable("PATH", directory + Path.PathSeparator + originalPath);
+
+        try
+        {
+            Assert.False(await LedonContainers.DockerAvailableAsync());
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("PATH", originalPath);
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
     public async Task Docker_availability_probe_returns_true_for_successful_command()
     {
         if (!OperatingSystem.IsWindows())
