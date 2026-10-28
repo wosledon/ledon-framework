@@ -26,6 +26,16 @@ public class ImagingEdgeTests
             processor.GetInfoAsync(new MemoryStream(source)));
     }
 
+    [Fact]
+    public async Task Zero_target_dimension_is_rejected()
+    {
+        var processor = new SkiaImageProcessor(new ImagingOptions());
+        var source = CreatePng(20, 20);
+
+        await Assert.ThrowsAsync<ImageProcessingException>(() =>
+            processor.ProcessAsync(new MemoryStream(source), new ImageTransform(0, 0)));
+    }
+
     private static byte[] CreatePng(int width, int height)
     {
         using var bitmap = new SKBitmap(width, height);

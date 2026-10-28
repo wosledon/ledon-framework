@@ -67,6 +67,21 @@ public class TenantDataEdgeTests
         Assert.False(File.Exists(Path.Combine(directory, "tenant.db")));
     }
 
+    [Fact]
+    public async Task Orchestrator_rejects_invalid_tenant_id()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddLedonTenantData<TenantRowContext>(options =>
+            options.ConfigureDbContext = (builder, connectionString) => builder.UseSqlite(connectionString));
+
+        await using var provider = services.BuildServiceProvider();
+        await using var scope = provider.CreateAsyncScope();
+        var orchestrator = scope.ServiceProvider.GetRequiredService<ITenantMigrationOrchestrator<TenantRowContext>>();
+
+        await Assert.ThrowsAsync<ArgumentException>(() => orchestrator.MigrateAsync("   "));
+    }
+
     private static string CreateDirectory()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"ledon-tenant-edge-{Guid.NewGuid():N}");
