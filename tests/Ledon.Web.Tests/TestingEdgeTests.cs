@@ -1,3 +1,5 @@
+using Ledon.Module;
+using Ledon.Module.Abstractions;
 using Ledon.Testing;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +34,34 @@ public class TestingEdgeTests
 
         Assert.NotSame(first, second);
     }
+
+    [Fact]
+    public void Module_assertions_reject_unknown_module()
+    {
+        using var provider = new ServiceCollection().AddLedon().BuildServiceProvider();
+        var manager = provider.GetRequiredService<IModuleManager>();
+
+        Assert.Throws<InvalidOperationException>(() => manager.ShouldBeInitialized("missing"));
+    }
+
+    [Fact]
+    public void Module_assertions_reject_wrong_state_and_order()
+    {
+        using var provider = new ServiceCollection()
+            .AddLedon(options => options
+                .DisableAutoDiscovery()
+                .AddModule<ModuleA>()
+                .AddModule<ModuleB>())
+            .BuildServiceProvider();
+        var manager = provider.GetRequiredService<IModuleManager>();
+
+        Assert.Throws<InvalidOperationException>(() => manager.ShouldBeInitialized("ModuleA"));
+        Assert.Throws<InvalidOperationException>(() => manager.ShouldBeInitializedInOrder("ModuleB", "ModuleA"));
+    }
+
+    private sealed class ModuleA : IModule;
+
+    private sealed class ModuleB : IModule;
 
     private sealed class ScopedProbe;
 }

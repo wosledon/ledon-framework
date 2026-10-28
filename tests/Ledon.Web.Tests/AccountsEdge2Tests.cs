@@ -79,6 +79,27 @@ public class AccountsEdge2Tests
         Assert.False(await service.UnlockAsync("missing"));
     }
 
+    [Fact]
+    public async Task Permissions_update_is_reflected_on_next_login()
+    {
+        var (service, _) = CreateService(options => options.RequireConfirmedEmail = false);
+        var registration = await service.RegisterAsync("erin", "erin@example.com", "S3cret-pass");
+
+        Assert.True(await service.SetPermissionsAsync(registration.Account.Id, ["orders.read", "users.read"]));
+        var login = await service.AuthenticateAsync("erin", "S3cret-pass");
+
+        Assert.Equal(AccountLoginStatus.Success, login.Status);
+        Assert.Contains("orders.read", login.User!.Permissions);
+    }
+
+    [Fact]
+    public async Task Permissions_update_for_missing_account_returns_false()
+    {
+        var (service, _) = CreateService();
+
+        Assert.False(await service.SetPermissionsAsync("missing", ["orders.read"]));
+    }
+
     private sealed class ManualTimeProvider(DateTimeOffset now) : TimeProvider
     {
         public DateTimeOffset Now { get; set; } = now;
