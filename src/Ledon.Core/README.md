@@ -17,4 +17,8 @@ await ctx.Events.PublishAsync(new UserCreated("alice"), ct);
 
 跨进程/要求可靠投递时用 `Ledon.Queues` 的发件箱（至少一次语义）。
 
+- 处理器按容器注册顺序执行；默认"失败即停"并向上传播，可切换为隔离模式（单个失败记录后继续）；
+- 编译期不知道事件类型时用 `PublishDynamicAsync`（如领域事件拦截器），按运行时类型分发；
+- 只依赖 `Microsoft.Extensions.*` 抽象，不绑定 Web/数据层，可被任意宿主复用。
+
 完整文档：<https://github.com/wosledon/ledon-framework>
