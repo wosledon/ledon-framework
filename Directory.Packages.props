@@ -15,7 +15,7 @@
     <PackageVersion Include="StackExchange.Redis" Version="2.7.27" />
     <!-- 消息中间件（按需引入） -->
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
-    <PackageVersion Include="Confluent.Kafka" Version="2.8.0" />
+    <PackageVersion Include="Confluent.Kafka" Version="2.16.0" />
     <!-- 混合两级缓存（L1 内存 + L2 分布式） -->
     <!-- 混合两级缓存（L1 内存 + L2 分布式） -->
     <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.11.0" />
