@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- 打包（仅 src/ 项目引用） -->
-    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.6" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.104.8" />
     <PackageVersion Include="Grpc.HealthCheck" Version="2.84.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.402" />
     <!-- 调度领导权选举（Redis 锁） -->
