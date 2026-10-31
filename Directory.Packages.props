@@ -6,7 +6,7 @@
   <ItemGroup>
     <!-- 打包（仅 src/ 项目引用） -->
     <PackageVersion Include="AWSSDK.S3" Version="4.0.104.6" />
-    <PackageVersion Include="Grpc.HealthCheck" Version="2.84.0" />
+    <PackageVersion Include="Grpc.HealthCheck" Version="2.85.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.402" />
     <!-- 调度领导权选举（Redis 锁） -->
     <PackageVersion Include="OpenIddict.AspNetCore" Version="7.7.2" />
