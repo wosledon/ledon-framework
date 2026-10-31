@@ -28,7 +28,7 @@
     <!-- gRPC 代码生成（测试夹具用真实生成代码） -->
     <PackageVersion Include="Grpc.Tools" Version="2.84.0" />
     <!-- 基准测试 -->
-    <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <!-- Prometheus 抓取端点（OTel 官方该包长期 beta，生产广泛使用） -->
     <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.20.1-beta.1" />
     <!-- 结构化日志（按需引入） -->
